@@ -4,6 +4,7 @@ import numpy as np
 
 from uav_mec.algorithms import (
     ProxyObjectiveEvaluator,
+    ScreenedProxyObjectiveEvaluator,
     UavMecALNSConfig,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
@@ -16,7 +17,11 @@ from uav_mec.algorithms.alns import (
     make_destroy_operators,
     random_task_removal,
 )
-from uav_mec.evaluation import validate_solution
+from uav_mec.evaluation import build_event_info, validate_solution
+from uav_mec.optimization.resource import (
+    ResourceSolveResult,
+    fast_feasibility_precheck,
+)
 from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
@@ -117,3 +122,56 @@ def test_destroy_operator_factories_preserve_function_names() -> None:
         assert hasattr(operator, "__name__")
         assert operator.__name__
         assert registered_name
+
+
+class _FakeFeasibleResourceSolver:
+    def __init__(self, energy_j: float = 123.0) -> None:
+        self.energy_j = energy_j
+        self.calls = 0
+
+    def solve(self, instance, solution, info=None):
+        self.calls += 1
+        return ResourceSolveResult(
+            status="optimal",
+            solver="FAKE",
+            is_dcp=True,
+            energy_stage1_j=self.energy_j,
+            energy_final_j=self.energy_j,
+            stage1_values={"fake": {"x": 1.0}},
+            final_values={"fake": {"x": 1.0}},
+        )
+
+
+def test_screened_proxy_refines_precheck_feasible_proxy_gray_zone() -> None:
+    cfg = load_paper_scale_config()
+    instance = build_paper_scale_instance(
+        cfg,
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=42,
+    )
+    route_seed = build_greedy_initial_solution(instance)
+    solution = build_mec_assisted_initial_solution(
+        instance,
+        base_solution=route_seed,
+    )
+
+    proxy = ProxyObjectiveEvaluator()
+    proxy_value = proxy(instance, solution)
+    assert proxy_value > 1e9
+
+    info = build_event_info(instance, solution)
+    precheck = fast_feasibility_precheck(instance, solution, info)
+    assert precheck.feasible
+
+    fake = _FakeFeasibleResourceSolver(energy_j=321.0)
+    evaluator = ScreenedProxyObjectiveEvaluator(cvx_solver=fake)
+    value = evaluator(instance, solution)
+
+    assert value == 321.0
+    assert fake.calls == 1
+    assert evaluator.stats.ambiguous_proxy_calls == 1
+    assert evaluator.stats.cvx_refinements == 1
+    assert evaluator.stats.feasible_calls == 1
+    assert evaluator.stats.precheck_rejects == 0
