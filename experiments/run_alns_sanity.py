@@ -9,6 +9,7 @@ from typing import Any
 from uav_mec.algorithms import (
     KKTObjectiveEvaluator,
     ProxyObjectiveEvaluator,
+    ScreenedProxyObjectiveEvaluator,
     UavMecALNSConfig,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
@@ -54,9 +55,13 @@ def main() -> None:
     parser.add_argument("--mecs", type=int, default=None)
     parser.add_argument(
         "--objective",
-        choices=("proxy", "kkt"),
+        choices=("proxy", "screened", "kkt"),
         default="proxy",
-        help="proxy is faster for structural validation; kkt uses exact P1-R recourse",
+        help=(
+            "proxy is the fastest constructive score; screened uses optimistic "
+            "precheck plus Stage-1 CVX only in the proxy-infeasible gray zone; "
+            "kkt runs the analytical resource solver"
+        ),
     )
     args = parser.parse_args()
 
@@ -86,11 +91,12 @@ def main() -> None:
         )
         initial_summary = _solution_summary(instance, initial)
 
-        evaluator = (
-            KKTObjectiveEvaluator()
-            if args.objective == "kkt"
-            else ProxyObjectiveEvaluator()
-        )
+        if args.objective == "kkt":
+            evaluator = KKTObjectiveEvaluator()
+        elif args.objective == "screened":
+            evaluator = ScreenedProxyObjectiveEvaluator()
+        else:
+            evaluator = ProxyObjectiveEvaluator()
         config = UavMecALNSConfig(
             iterations=args.iterations,
             seed=cfg.algorithm_seed,
@@ -146,6 +152,11 @@ def main() -> None:
             "evaluator_calls": calls,
             "evaluator_cache_hits": hits,
             "runtime_s": runtime,
+            "precheck_rejects": getattr(stats, "precheck_rejects", None),
+            "ambiguous_proxy_calls": getattr(
+                stats, "ambiguous_proxy_calls", None
+            ),
+            "cvx_refinements": getattr(stats, "cvx_refinements", None),
         }
         rows.append(row)
 
