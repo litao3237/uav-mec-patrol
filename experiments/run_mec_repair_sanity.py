@@ -76,9 +76,10 @@ def main() -> None:
 
     print(
         "K    before-vio   after-vio    contacts   offload   "
-        "after-max-vio   kkt-status              kkt-iters   cvx-status"
+        "after-max-vio   kkt-status              kkt-iters   "
+        "cvx-status   kkt-E-J       cvx-E-J       gap-%"
     )
-    print("-" * 124)
+    print("-" * 166)
 
     for k in _parse_int_list(args.tasks):
         instance = build_paper_scale_instance(
@@ -125,6 +126,8 @@ def main() -> None:
         }
 
         cvx_status = "not-run"
+        cvx_energy = None
+        gap_pct = None
         if args.cvx_check:
             t0 = perf_counter()
             cvx = CVXResourceSolver().solve(instance, repaired, info)
@@ -133,11 +136,14 @@ def main() -> None:
             row["cvx_feasible"] = cvx.feasible
             row["cvx_energy_stage1_j"] = cvx.energy_stage1_j
             cvx_status = cvx.status
+            cvx_energy = cvx.energy_stage1_j
             if cvx.feasible and kkt.feasible:
-                row["kkt_cvx_relative_gap"] = (
+                relative_gap = (
                     abs(kkt.energy_stage1_j - cvx.energy_stage1_j)
                     / max(1.0, abs(cvx.energy_stage1_j))
                 )
+                row["kkt_cvx_relative_gap"] = relative_gap
+                gap_pct = 100.0 * relative_gap
         if kkt.feasible:
             row.update(
                 {
@@ -157,6 +163,14 @@ def main() -> None:
             row["kkt_diagnostics"] = kkt.diagnostics
         rows.append(row)
 
+        kkt_energy_text = (
+            f"{kkt.energy_stage1_j:.3f}" if kkt.feasible else "-"
+        )
+        cvx_energy_text = (
+            f"{cvx_energy:.3f}" if cvx_energy is not None else "-"
+        )
+        gap_text = f"{gap_pct:.3f}" if gap_pct is not None else "-"
+
         print(
             f"{k:<4} "
             f"{before['proxy_violated_constraints']:<12} "
@@ -166,7 +180,10 @@ def main() -> None:
             f"{after['proxy_max_normalized_violation']:<15.3e} "
             f"{kkt.status:<23} "
             f"{str(kkt.diagnostics.get('iterations')):<11} "
-            f"{cvx_status}"
+            f"{cvx_status:<12} "
+            f"{kkt_energy_text:<13} "
+            f"{cvx_energy_text:<13} "
+            f"{gap_text}"
         )
 
     out = Path("outputs/results/mec_repair_sanity.json")
