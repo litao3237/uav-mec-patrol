@@ -1,6 +1,7 @@
 from .evaluator import (
     KKTObjectiveEvaluator,
     ProxyObjectiveEvaluator,
+    ScreenedProxyObjectiveEvaluator,
     solution_signature,
 )
 from .operators import (
@@ -24,6 +25,7 @@ __all__ = [
     "DestroyConfig",
     "KKTObjectiveEvaluator",
     "ProxyObjectiveEvaluator",
+    "ScreenedProxyObjectiveEvaluator",
     "UavMecALNSConfig",
     "UavMecALNSResult",
     "UavMecState",
