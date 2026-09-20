@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import partial
+from functools import partial, update_wrapper
 from typing import Iterable
 
 import numpy as np
@@ -416,29 +416,42 @@ def regret2_insertion_repair(
     return _finish_repair(repaired)
 
 
+def _configured_destroy_operator(func, config: DestroyConfig):
+    """Bind destroy configuration while preserving operator metadata.
+
+    ALNS v7 accesses the operator's __name__ during registration even when an
+    explicit registration name is supplied. functools.partial has no __name__
+    by default, so update_wrapper copies the wrapped function metadata.
+    """
+
+    operator = partial(func, config=config)
+    update_wrapper(operator, func)
+    return operator
+
+
 def make_destroy_operators(
     config: DestroyConfig,
 ):
     return [
         (
             "random_task_removal",
-            partial(
+            _configured_destroy_operator(
                 random_task_removal,
-                config=config,
+                config,
             ),
         ),
         (
             "critical_task_removal",
-            partial(
+            _configured_destroy_operator(
                 critical_task_removal,
-                config=config,
+                config,
             ),
         ),
         (
             "route_segment_removal",
-            partial(
+            _configured_destroy_operator(
                 route_segment_removal,
-                config=config,
+                config,
             ),
         ),
     ]
