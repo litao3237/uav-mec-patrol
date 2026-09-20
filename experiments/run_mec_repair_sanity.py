@@ -41,6 +41,7 @@ def _solution_stats(instance, solution) -> dict[str, Any]:
         "proxy_violated_constraints": proxy.score.violated_constraints,
         "proxy_max_normalized_violation": proxy.score.max_normalized_violation,
         "proxy_sum_normalized_violation": proxy.score.sum_normalized_violation,
+        "proxy_energy_j": proxy.score.total_energy_j,
         "proxy_avg_delay_s": proxy.reduced.avg_delay_s,
         "proxy_max_deadline_violation_s": max(
             0.0,
