@@ -25,6 +25,7 @@ class ResourceSolver(Protocol):
 class CVXResourceSolver:
     verbose: bool = False
     energy_tol_rel: float = 1e-6
+    run_stage2: bool = True
 
     def solve(
         self,
@@ -40,6 +41,7 @@ class CVXResourceSolver:
             info,
             verbose=self.verbose,
             energy_tol_rel=self.energy_tol_rel,
+            run_stage2=self.run_stage2,
         )
 
 
