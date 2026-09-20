@@ -870,3 +870,50 @@ uv run python experiments\run_alns_sanity.py --tasks 80 --mecs 2 --seed 42 --ite
 - best solution 最终可行性
 
 若该 smoke test 通过，resource/evaluator 阶段即可冻结，项目正式进入 M6 Problem-Specific ALNS Operators。
+
+
+## Proxy vs screened evaluator trade-off
+
+K=80, E=2, scenario seed=42, 100 ALNS iterations 已完成同场景对照：
+
+### Screened evaluator
+
+- initial objective = 255297.483 J；
+- best search objective = 196267.040 J；
+- final Stage-1 CVX energy = 196035.484 J；
+- evaluator calls = 101；
+- cache hits = 23；
+- unique evaluated states = 78；
+- precheck hard rejects = 30；
+- gray-zone CVX refinements = 17；
+- runtime = 63.93 s。
+
+因此 unique states 的 evaluator 分流约为：
+
+- precheck hard reject: 30/78 = 38.5%；
+- fast proxy path: 31/78 = 39.7%；
+- gray-zone Stage-1 CVX refinement: 17/78 = 21.8%。
+
+最终 best search objective 与 Stage-1 CVX 的相对差约 0.118%。
+
+### Pure proxy evaluator
+
+同一场景、同一 100 iterations：
+
+- initial objective = 2.0459e9，说明初始状态因 proxy violation 被大惩罚；
+- best proxy objective = 215215.929 J；
+- final best state Stage-1 CVX status = optimal；
+- evaluator calls = 101；
+- cache hits = 28；
+- runtime = 51.55 s。
+
+因此：
+
+1. pure proxy 在高负载 gray-zone 状态上确实会产生 false negative，并使初始“improvement %”被 penalty 主导，不能作为论文能耗改善率；
+2. screened evaluator 相比 pure proxy 只增加约 12.4 s（约 24% 相对 runtime），说明当前 paper-scale 运行时间并不主要由 gray-zone CVX refinement 决定，repair/operator candidate evaluation 本身也占较大成本；
+3. pure proxy 当前 best proxy objective 明显高于 screened 最终 CVX energy；需用保存的 `best_cvx_energy_j` 做最终 apples-to-apples 对比，但 pure proxy 不再适合作为高负载默认 evaluator；
+4. 当前默认方向调整为：`ScreenedProxyObjectiveEvaluator` 作为 robust paper-scale evaluator，`ProxyObjectiveEvaluator` 保留用于快速 smoke test / ablation；最终 elite/best state 统一做 Stage-1 CVX verification。
+
+`run_alns_sanity.py` 已进一步修正：
+- 若 initial objective 明显包含 infeasibility penalty，则 `improve-%` 输出 `n/a`，避免出现 99.989% 这类无物理意义的“改善率”；
+- 控制台直接打印 `best-cvx-E-J` 与 `best-vs-cvx gap-%`。
