@@ -17,7 +17,10 @@ from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
-from uav_mec.optimization.resource import solve_kkt_resource_problem
+from uav_mec.optimization.resource import (
+    CVXResourceSolver,
+    solve_kkt_resource_problem,
+)
 
 
 def _parse_int_list(text: str) -> list[int]:
@@ -59,6 +62,11 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--uavs", type=int, default=None)
     parser.add_argument("--mecs", type=int, default=None)
+    parser.add_argument(
+        "--cvx-check",
+        action="store_true",
+        help="also solve the repaired P1-R with the CVXPY correctness oracle",
+    )
     args = parser.parse_args()
 
     cfg = load_paper_scale_config(args.config)
@@ -67,9 +75,9 @@ def main() -> None:
 
     print(
         "K    before-vio   after-vio    contacts   offload   "
-        "after-max-vio   kkt-status              kkt-iters"
+        "after-max-vio   kkt-status              kkt-iters   cvx-status"
     )
-    print("-" * 105)
+    print("-" * 124)
 
     for k in _parse_int_list(args.tasks):
         instance = build_paper_scale_instance(
@@ -108,8 +116,27 @@ def main() -> None:
             "kkt_termination_reason": kkt.diagnostics.get(
                 "termination_reason"
             ),
+            "kkt_converged": kkt.diagnostics.get("converged"),
+            "kkt_initial_seed_feasible": kkt.diagnostics.get(
+                "initial_seed_feasible"
+            ),
             "metadata": repaired.metadata,
         }
+
+        cvx_status = "not-run"
+        if args.cvx_check:
+            t0 = perf_counter()
+            cvx = CVXResourceSolver().solve(instance, repaired, info)
+            row["cvx_runtime_s"] = perf_counter() - t0
+            row["cvx_status"] = cvx.status
+            row["cvx_feasible"] = cvx.feasible
+            row["cvx_energy_stage1_j"] = cvx.energy_stage1_j
+            cvx_status = cvx.status
+            if cvx.feasible and kkt.feasible:
+                row["kkt_cvx_relative_gap"] = (
+                    abs(kkt.energy_stage1_j - cvx.energy_stage1_j)
+                    / max(1.0, abs(cvx.energy_stage1_j))
+                )
         if kkt.feasible:
             row.update(
                 {
@@ -137,7 +164,8 @@ def main() -> None:
             f"{after['offloaded']:<9} "
             f"{after['proxy_max_normalized_violation']:<15.3e} "
             f"{kkt.status:<23} "
-            f"{str(kkt.diagnostics.get('iterations')):<10}"
+            f"{str(kkt.diagnostics.get('iterations')):<11} "
+            f"{cvx_status}"
         )
 
     out = Path("outputs/results/mec_repair_sanity.json")
