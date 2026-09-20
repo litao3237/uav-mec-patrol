@@ -36,6 +36,7 @@ class EvaluatorStats:
     cache_hits: int = 0
     feasible_calls: int = 0
     infeasible_calls: int = 0
+    resource_status_counts: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -81,11 +82,13 @@ class ProxyObjectiveEvaluator:
 
 @dataclass
 class KKTObjectiveEvaluator:
-    """Exact P1-R recourse objective with a finite infeasible penalty.
+    """Analytical P1-R evaluator with a finite infeasible penalty.
 
-    Feasible discrete states are scored by the validated analytical KKT resource
-    solver. Infeasible states receive a finite proxy-based penalty so ALNS can
-    move through infeasible regions instead of being trapped behind infinity.
+    The KKT resource solver may return a converged/approximate KKT point or a
+    verified constructive feasible_seed fallback. Therefore this evaluator is
+    not an exact oracle: CVXPY remains the correctness oracle for resource
+    optimality checks. Infeasible states receive a finite proxy-based penalty
+    so ALNS can move through infeasible regions.
     """
 
     solver: ResourceSolver = field(default_factory=KKTResourceSolver)
@@ -105,6 +108,10 @@ class KKTObjectiveEvaluator:
             return self._cache[key]
 
         result = self.solver.solve(instance, solution)
+        self.stats.resource_status_counts[result.status] = (
+            self.stats.resource_status_counts.get(result.status, 0) + 1
+        )
+
         if result.feasible:
             value = float(result.energy_stage1_j)
             self.stats.feasible_calls += 1
