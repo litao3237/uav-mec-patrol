@@ -120,6 +120,7 @@ def _resource_utilization(instance, info, cvx) -> dict[str, Any]:
 
     bw_util: dict[str, float] = {}
     cpu_util: dict[str, float] = {}
+    pairs_per_mec: dict[str, int] = {}
     for mec_id, mec in instance.mecs.items():
         pairs = [
             pair
@@ -128,6 +129,7 @@ def _resource_utilization(instance, info, cvx) -> dict[str, Any]:
         ]
         if not pairs:
             continue
+        pairs_per_mec[mec_id] = len(pairs)
         used_b = sum(
             bandwidth_values.get(str(pair), 0.0)
             for pair in pairs
@@ -142,6 +144,12 @@ def _resource_utilization(instance, info, cvx) -> dict[str, Any]:
     return {
         "bandwidth_utilization": bw_util,
         "mec_cpu_utilization": cpu_util,
+        "pairs_per_mec": pairs_per_mec,
+        "active_uav_mec_pairs": len(info.active_uav_mec_pairs),
+        "shared_mec_count": sum(
+            count >= 2 for count in pairs_per_mec.values()
+        ),
+        "max_pairs_per_mec": max(pairs_per_mec.values(), default=0),
         "max_bandwidth_utilization": max(bw_util.values(), default=0.0),
         "max_mec_cpu_utilization": max(cpu_util.values(), default=0.0),
     }
@@ -238,9 +246,9 @@ def main() -> None:
     print(
         "K    seed   source     offload   contacts   fixed-%   "
         "proxy-var-J   cvx-var-J   var-gain-%   "
-        "deadline-u   avg-u   cycle-u   bw-u   cpu-u"
+        "deadline-u   avg-u   cycle-u   bw-u   cpu-u   pairs   shared"
     )
-    print("-" * 145)
+    print("-" * 164)
 
     for k in task_counts:
         for seed_idx, scenario_seed in enumerate(seeds):
@@ -366,7 +374,9 @@ def main() -> None:
                     f"{qos['avg_delay_utilization']:<7.3f} "
                     f"{qos['max_cycle_utilization']:<9.3f} "
                     f"{resources['max_bandwidth_utilization']:<6.3f} "
-                    f"{resources['max_mec_cpu_utilization']:.3f}"
+                    f"{resources['max_mec_cpu_utilization']:<7.3f} "
+                    f"{resources['active_uav_mec_pairs']:<7} "
+                    f"{resources['shared_mec_count']}"
                 )
 
     valid = [row for row in rows if "cvx_energy" in row]
@@ -406,6 +416,18 @@ def main() -> None:
                 row["resources"]["max_mec_cpu_utilization"]
                 for row in valid
             ),
+            "mean_active_uav_mec_pairs": mean(
+                row["resources"]["active_uav_mec_pairs"]
+                for row in valid
+            ),
+            "states_with_shared_mec": sum(
+                row["resources"]["shared_mec_count"] > 0
+                for row in valid
+            ),
+            "max_pairs_per_mec": max(
+                row["resources"]["max_pairs_per_mec"]
+                for row in valid
+            ),
         }
         print(
             "\nAggregate: "
@@ -416,7 +438,10 @@ def main() -> None:
             f"avg-u={aggregate['mean_avg_delay_utilization']:.3f}  "
             f"cycle-u={aggregate['mean_max_cycle_utilization']:.3f}  "
             f"bw-u={aggregate['mean_max_bandwidth_utilization']:.3f}  "
-            f"cpu-u={aggregate['mean_max_mec_cpu_utilization']:.3f}"
+            f"cpu-u={aggregate['mean_max_mec_cpu_utilization']:.3f}  "
+            f"pairs={aggregate['mean_active_uav_mec_pairs']:.2f}  "
+            f"shared={aggregate['states_with_shared_mec']}/{len(valid)}  "
+            f"max-pairs/mec={aggregate['max_pairs_per_mec']}"
         )
 
     out = Path("outputs/results/nondegeneracy_scan.json")
