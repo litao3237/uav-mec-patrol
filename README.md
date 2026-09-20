@@ -663,13 +663,16 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 8. [x] 首轮 non-degeneracy scan 已完成：fixed-route energy 平均占比 99.72%，资源层主要影响 variable energy 与 QoS；
 9. [x] deadline / avg-delay / cycle / bandwidth / MEC CPU utilization 已完成首轮检查；
 10. [x] K=30 新版 non-degeneracy scan：shared MEC = 0/6，max pairs/MEC = 1；
-11. [ ] **[VERIFY]** 运行 shared-MEC scale sweep，扫描 K=30/50/80 与 E=2/3/4；
-12. [ ] **[VERIFY]** 对出现 shared MEC 的代表性 K/E 状态再运行 CVX non-degeneracy；
-13. [ ] **[TODO]** 若 K=50/80 或 E=2 自然形成资源竞争，则保留 baseline，并把 K=30 解释为轻载场景；
-14. [ ] **[TODO]** 若整个 scale sweep 仍无 shared MEC，再根据结果调整 E/B/F/deadline 等实验参数；
-15. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
-16. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
-17. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
+11. [x] shared-MEC scale sweep 已覆盖 K=30/50/80 与 E=2/3；
+12. [x] K=30：shared-state rate = 0%，属于轻载/无跨 UAV MEC 竞争；
+13. [x] K=50：shared-state rate = 16.7%，属于过渡负载；
+14. [x] K=80：E=2 与 E=3 均为 shared-state rate = 100%，max pairs/MEC = 4，资源竞争自然出现；
+15. [x] 当前 baseline 无需为了制造 shared MEC 而修改 deadline/B/F 等参数；
+16. [ ] **[VERIFY]** 对 K=80, E=2/3 的代表性 shared-MEC 状态运行 CVX non-degeneracy；
+17. [ ] **[VERIFY]** 检查 shared-MEC 状态下 bandwidth/CPU capacity dual 是否真正活跃；
+18. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
+19. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
+20. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -741,6 +744,27 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 这说明总 UAV 能耗确实被飞行/采集项强烈支配，因此 0.2% 左右的总能耗 gap 不能单独作为“资源 proxy 很精确”的充分证据；但资源优化对 variable energy 的影响很大，而且 deadline 处于活跃边界，资源层仍然对 QoS 可行性具有实际作用。
 
-K=30 的新版扫描进一步确认：6 个 repaired/ALNS-best 状态中 shared MEC = 0/6，max pairs/MEC = 1。因此当前 K=30 属于**轻载/无跨 UAV MEC 竞争**状态：MEC bandwidth 在 offloading 状态中虽达到 100% 利用，但主要因为单个 active pair 会自然拿满带宽，并不代表多 UAV 资源分配已经被激活。
+K/E scale sweep 已确认资源竞争会随任务规模自然出现：
 
-这并不意味着整个模型必须立即改参数。下一步先做 K/E scale sweep：如果 K=50/80 或 E=2 时自然出现 shared MEC，则可以把 K=30 保留为轻载对照，把更高负载/更稀疏 MEC 场景作为资源竞争主实验；只有在整个规模范围内都不出现 shared MEC 时，才需要校准 E/B/F/deadline 等参数。
+| K | E | shared-state rate | mean offload | mean active pairs | max pairs/MEC |
+|---:|---:|---:|---:|---:|---:|
+| 30 | 2 | 0.0% | 0.83 | 0.67 | 1 |
+| 30 | 3 | 0.0% | 1.17 | 0.83 | 1 |
+| 50 | 2 | 16.7% | 2.50 | 1.83 | 2 |
+| 50 | 3 | 16.7% | 2.67 | 2.00 | 2 |
+| 80 | 2 | 100.0% | 9.50 | 4.00 | 4 |
+| 80 | 3 | 100.0% | 11.00 | 5.17 | 4 |
+
+因此当前 baseline 不需要人为收紧 deadline 或降低 B/F 来“制造”资源竞争。更自然的负载分层已经形成：
+
+[
+oxed{
+K=30	ext{：轻载}
+;ightarrow;
+K=50	ext{：过渡负载}
+;ightarrow;
+K=80	ext{：高负载/共享 MEC 竞争}
+}
+]
+
+下一步只需要对 K=80 的 shared-MEC 状态做精确 CVX non-degeneracy，验证 bandwidth/CPU capacity 是否不仅结构上共享，而且对应 dual/shadow price 也真正活跃。
