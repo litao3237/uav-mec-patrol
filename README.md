@@ -631,6 +631,14 @@ uv run python experiments\run_nondegeneracy_scan.py --tasks 30 --seeds 42,43,44 
 
 新版 non-degeneracy scan 还会输出 active UAV-MEC pair 数、shared-MEC 数和 max pairs/MEC，用于判断 bandwidth/CPU allocation 是否真正存在多 UAV 竞争。
 
+Cheap shared-MEC competition sweep：
+
+~~~powershell
+uv run python experiments\run_shared_mec_scan.py --tasks 30,50,80 --mecs 2,3,4 --seeds 42,43,44 --candidate both --alns-iterations 20
+~~~
+
+该脚本不调用 CVXPY，只扫描不同 K/E 组合下 active pair、shared MEC 与 max pairs/MEC，用于先判断“资源竞争是否自然出现”，再选择少量代表性状态做精确 CVX non-degeneracy 分析。
+
 ALNS proxy：
 
 ~~~powershell
@@ -654,12 +662,14 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 7. [x] proxy ranking scan：18 个候选，mean gap = 0.192%，max gap = 0.274%，mean Spearman = 1.0，mean pairwise order = 1.0；
 8. [x] 首轮 non-degeneracy scan 已完成：fixed-route energy 平均占比 99.72%，资源层主要影响 variable energy 与 QoS；
 9. [x] deadline / avg-delay / cycle / bandwidth / MEC CPU utilization 已完成首轮检查；
-10. [ ] **[VERIFY]** 重跑新版 non-degeneracy scan，确认 active pairs / shared MEC / max pairs per MEC；
-11. [ ] **[VERIFY]** 扩展到 K=50，并优先检查是否形成多 UAV 共享同一 MEC 的资源竞争；
-12. [ ] **[TODO]** 根据 shared-resource 结果决定是否需要调整 E/B/F/deadline 等实验参数；
-13. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
-14. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
-15. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
+10. [x] K=30 新版 non-degeneracy scan：shared MEC = 0/6，max pairs/MEC = 1；
+11. [ ] **[VERIFY]** 运行 shared-MEC scale sweep，扫描 K=30/50/80 与 E=2/3/4；
+12. [ ] **[VERIFY]** 对出现 shared MEC 的代表性 K/E 状态再运行 CVX non-degeneracy；
+13. [ ] **[TODO]** 若 K=50/80 或 E=2 自然形成资源竞争，则保留 baseline，并把 K=30 解释为轻载场景；
+14. [ ] **[TODO]** 若整个 scale sweep 仍无 shared MEC，再根据结果调整 E/B/F/deadline 等实验参数；
+15. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
+16. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
+17. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -731,4 +741,6 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 这说明总 UAV 能耗确实被飞行/采集项强烈支配，因此 0.2% 左右的总能耗 gap 不能单独作为“资源 proxy 很精确”的充分证据；但资源优化对 variable energy 的影响很大，而且 deadline 处于活跃边界，资源层仍然对 QoS 可行性具有实际作用。
 
-下一步需要进一步确认 MEC 资源竞争是否真实存在，即同一 MEC 是否同时存在多个 active (UAV,MEC) pair。若长期每个 MEC 只服务一个 UAV，则 bandwidth/CPU allocation 会退化成近似单用户问题，需要通过规模/参数扫描校准，而不是通过人为放大能耗项制造效果。
+K=30 的新版扫描进一步确认：6 个 repaired/ALNS-best 状态中 shared MEC = 0/6，max pairs/MEC = 1。因此当前 K=30 属于**轻载/无跨 UAV MEC 竞争**状态：MEC bandwidth 在 offloading 状态中虽达到 100% 利用，但主要因为单个 active pair 会自然拿满带宽，并不代表多 UAV 资源分配已经被激活。
+
+这并不意味着整个模型必须立即改参数。下一步先做 K/E scale sweep：如果 K=50/80 或 E=2 时自然出现 shared MEC，则可以把 K=30 保留为轻载对照，把更高负载/更稀疏 MEC 场景作为资源竞争主实验；只有在整个规模范围内都不出现 shared MEC 时，才需要校准 E/B/F/deadline 等参数。
