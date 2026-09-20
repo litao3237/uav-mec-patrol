@@ -32,6 +32,7 @@ class GreedyMECRepairConfig:
     max_steps: int = 24
     critical_task_limit: int = 8
     new_contact_candidate_limit: int = 8
+    new_contact_candidates_per_mec: int = 2
     improvement_tolerance: float = 1e-12
 
 
@@ -281,6 +282,7 @@ def _best_new_contact_locations(
     task_id: str,
     *,
     limit: int,
+    per_mec: int,
 ) -> list[tuple[float, str, int]]:
     owner = _task_owner(solution, task_id)
     route = solution.routes[owner]
@@ -308,8 +310,21 @@ def _best_new_contact_locations(
         if best is not None:
             candidates.append((best[0], point_id, best[1]))
 
-    candidates.sort(key=lambda item: (item[0], item[1], item[2]))
-    return candidates[:limit]
+    # Keep a small geometric neighborhood from every MEC before applying the
+    # global cap. This prevents the restricted candidate list from collapsing to
+    # the nearest MEC only and preserves heterogeneous-MEC choice.
+    by_mec: dict[str, list[tuple[float, str, int]]] = {}
+    for item in candidates:
+        mec_id = instance.contact_points[item[1]].mec_id
+        by_mec.setdefault(mec_id, []).append(item)
+
+    diverse: list[tuple[float, str, int]] = []
+    for mec_id in sorted(by_mec):
+        group = sorted(by_mec[mec_id], key=lambda item: (item[0], item[1], item[2]))
+        diverse.extend(group[:per_mec])
+
+    diverse.sort(key=lambda item: (item[0], item[1], item[2]))
+    return diverse[:limit]
 
 
 def _existing_contacts_after_task(
@@ -418,6 +433,7 @@ def build_mec_assisted_initial_solution(
                 current,
                 task_id,
                 limit=cfg.new_contact_candidate_limit,
+                per_mec=cfg.new_contact_candidates_per_mec,
             ):
                 candidate = _insert_contact_candidate(
                     instance,
