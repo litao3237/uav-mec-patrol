@@ -1,0 +1,12 @@
+scenario:
+  name: small_validation
+  cycle_s: 130.0
+  avg_delay_budget_s: 72.0
+  max_contacts_per_uav: 3
+channel:
+  reference_gain_db: -50.0
+  pathloss_exp: 2.3
+  noise_psd_dbm_per_hz: -164.0
+solver:
+  energy_tol_rel: 1.0e-6
+  verbose: false
