@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from uav_mec.evaluation import build_event_info
 from uav_mec.instances import build_resource_stress_cases
-from uav_mec.optimization.resource import solve_kkt_resource_problem, solve_resource_problem
+from uav_mec.optimization.resource import (
+    solve_kkt_resource_problem,
+    solve_resource_problem,
+    verify_kkt,
+)
 from uav_mec.optimization.resource.problem import build_resource_model
 
 
@@ -44,6 +48,21 @@ def test_impossible_stress_case_is_rejected_without_crash() -> None:
     result = solve_kkt_resource_problem(instance, solution, build_event_info(instance, solution))
     assert not result.feasible
     assert result.status in {"infeasible_precheck", "kkt_no_feasible_iterate"}
+
+
+def test_full_kkt_report_contains_all_four_condition_blocks() -> None:
+    instance, solution = _case_map()["two_mec"]
+    info = build_event_info(instance, solution)
+    result = solve_kkt_resource_problem(instance, solution, info)
+    assert result.feasible, result.diagnostics
+
+    report = verify_kkt(instance, solution, info, result)
+    assert report["status"] == "ok"
+    assert "max_primal_violation" in report
+    assert "max_dual_violation" in report
+    assert "max_abs_complementarity" in report
+    assert "max_abs_stationarity_residual" in report
+    assert report["top_complementarity"]
 
 
 def test_cvx_stress_models_register_only_cvx_constraints() -> None:
