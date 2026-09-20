@@ -19,12 +19,14 @@ from .result import ResourceSolveResult
 
 @dataclass(frozen=True)
 class KKTResourceSolverConfig:
-    max_iterations: int = 2000
+    max_iterations: int = 3000
     min_iterations: int = 10
     convergence_patience: int = 10
     feasibility_tol_s: float = 2e-3
     avg_delay_tol_s: float = 2e-3
     energy_tol_j: float = 2e-2
+    normalized_complementarity_tol: float = 1e-4
+    normalized_subgradient_clip: float = 1.0
     min_bandwidth_mhz: float = 1e-3
     min_cpu_ghz: float = 1e-4
     initial_task_price: float = 1e-3
@@ -69,7 +71,10 @@ def _temporal_prices(
     mu_battery: dict[str, float],
     tie_tol_s: float,
 ) -> _TemporalPrices:
-    task_weight = {task_id: alpha[task_id] + beta / len(instance.tasks) for task_id in instance.tasks}
+    task_weight = {
+        task_id: alpha[task_id] + beta / len(instance.tasks)
+        for task_id in instance.tasks
+    }
 
     local_gamma: dict[str, float] = {}
     local_release: dict[str, float] = {}
@@ -113,7 +118,11 @@ def _temporal_prices(
     # Process one virtual FIFO queue per (UAV, MEC).
     for pair in info.active_uav_mec_pairs:
         uav_id, mec_id = pair
-        visits = [v for v in info.contact_order[uav_id] if visit_mec_id(instance, solution, v) == mec_id]
+        visits = [
+            v
+            for v in info.contact_order[uav_id]
+            if visit_mec_id(instance, solution, v) == mec_id
+        ]
         branch: dict[str, tuple[float, float]] = {}
         for idx, visit_id in enumerate(visits):
             if idx == 0:
@@ -154,7 +163,9 @@ def _temporal_prices(
     phi_by_visit: dict[str, float] = {}
     for uav_id, visits in info.contact_order.items():
         uav = instance.uavs[uav_id]
-        direct = (1.0 + mu_battery[uav_id]) * (uav.hover_power_w + uav.tx_power_w)
+        direct = (1.0 + mu_battery[uav_id]) * (
+            uav.hover_power_w + uav.tx_power_w
+        )
         for idx, visit_id in enumerate(visits):
             phi = direct + xi_cycle[uav_id]
             # This upload stop delays later task collection times.
