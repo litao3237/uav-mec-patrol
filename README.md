@@ -218,8 +218,12 @@ kkt_no_feasible_iterate
 - [x] 同一状态下 feasible_seed energy = 190059.701 J；
 - [x] CVXPY Stage-1 optimum = 189740.470 J；
 - [x] reported-vs-CVX gap = 0.168%；
-- [ ] **[VERIFY]** 对多个 scenario seed 与 ALNS-best 状态重复 gap scan；
-- [ ] **[TODO]** 若跨状态 gap 仍稳定很小，则将 feasible-seed proxy 作为 outer-search 快速评价，并仅对 elite/final states 做精确 refinement；
+- [x] 已对 scenario seeds 42/43/44，repaired + proxy-ALNS-best 共 6 个状态执行 gap scan；
+- [x] 当前 mean gap = 0.173%，max gap = 0.274%；
+- [x] 6 个状态中 5 个使用 feasible_seed fallback，1 个得到 feasible_approx；
+- [ ] **[VERIFY]** 区分 CVXPY Stage-1 与 Stage-2 status，避免将 Stage-2 optimal_inaccurate 误认为 Stage-1 oracle 不可靠；
+- [ ] **[VERIFY]** 验证 proxy 是否保持候选解之间的能耗排序，而不只检查绝对 gap；
+- [ ] **[TODO]** 若 ranking preservation 也稳定，则将 feasible-seed proxy 作为 outer-search 快速评价，并仅对 elite/final states 做精确 refinement；
 - [ ] **[TODO]** dual-guided operators 仍需等待可用 dual certificate，不能使用 feasible_seed 伪造影子价格。
 
 因此：
@@ -607,6 +611,12 @@ uv run python experiments\run_mec_repair_sanity.py --tasks 30 --cvx-check
 uv run python experiments\run_recourse_gap_scan.py --tasks 30 --seeds 42,43,44 --candidate both --alns-iterations 20
 ~~~
 
+Proxy ranking preservation scan：
+
+~~~powershell
+uv run python experiments\run_proxy_ranking_scan.py --tasks 30 --scenario-seeds 42,43,44 --algorithm-seeds 100,101,102,103,104 --iterations 20
+~~~
+
 ALNS proxy：
 
 ~~~powershell
@@ -623,12 +633,14 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 1. [x] K=30/50 MEC repair 已恢复为 proxy-feasible，KKT 正确保留 feasible_seed；
 2. [x] K=30, seed=42 已完成 CVXPY oracle check，gap = 0.168%；
-3. [ ] **[VERIFY]** 运行 recourse gap scan，覆盖多个 scenario seed；
-4. [ ] **[VERIFY]** gap scan 同时覆盖 repaired 与 proxy-ALNS-best 离散状态；
-5. [ ] **[TODO]** 若 mean/max gap 均保持较小，则采用 fast proxy/feasible-seed 进行大部分 outer search；
-6. [ ] **[TODO]** 对 elite/final states 使用 CVXPY 或收敛 KKT 做 refinement；
-7. [ ] **[TODO]** dual-guided operators 仅在 dual_certificate_available=True 时启用；
-8. [ ] **[TODO]** 完成上述验证后进入 Contact / Batch / resource-aware ALNS operators。
+3. [x] recourse gap scan 已覆盖多个 scenario seed；
+4. [x] gap scan 已覆盖 repaired 与 proxy-ALNS-best 状态；
+5. [x] 当前 6 个状态 mean gap = 0.173%，max gap = 0.274%；
+6. [ ] **[VERIFY]** 重跑新版 gap scan，确认 CVXPY Stage-1 status；
+7. [ ] **[VERIFY]** 运行 proxy ranking preservation scan；
+8. [ ] **[TODO]** 若排序一致性高，则正式采用 fast proxy outer search + elite/final CVX refinement；
+9. [ ] **[TODO]** dual-guided operators 仅在 dual_certificate_available=True 时启用；
+10. [ ] **[TODO]** 完成上述验证后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -685,4 +697,4 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 \boxed{\text{Fast feasible-seed/proxy 对不同离散状态的 resource-optimality gap}}
 \]
 
-首个 K=30 repaired state 的 gap 仅为 0.168%，因此 paper-scale KKT primal recovery 已从“可行性 blocker”降级为“精度/效率验证问题”。下一步先做多 seed、多状态 gap scan，再决定 outer search 的最终两层评价策略。
+当前 6 个 paper-scale 状态的 mean gap 为 0.173%，max gap 为 0.274%，因此 paper-scale KKT primal recovery 已从“可行性 blocker”降级为“精度/效率验证问题”。下一步不再只看绝对 gap，而要验证 fast proxy 是否保持不同候选离散解之间的排序；只有 ranking preservation 也稳定，才正式冻结为 fast outer search + elite/final CVX refinement 的两层评价策略。
