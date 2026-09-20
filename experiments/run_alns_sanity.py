@@ -74,10 +74,10 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     print(
         "K    objective   init-obj        best-obj        improve-%   "
-        "contacts   best-cvx-status       eval-calls  cache-hits  "
-        "pre-rej   gray   cvx-ref   runtime-s"
+        "contacts   best-cvx-status   best-cvx-E-J   gap-%   "
+        "eval-calls  cache-hits  pre-rej   gray   cvx-ref   runtime-s"
     )
-    print("-" * 154)
+    print("-" * 184)
 
     for k in _parse_int_list(args.tasks):
         instance = build_paper_scale_instance(
@@ -138,11 +138,26 @@ def main() -> None:
                 best_info,
             )
 
-        improvement = (
-            100.0
-            * (result.initial_objective - result.best_objective)
-            / max(1.0, abs(result.initial_objective))
+        penalty = getattr(evaluator, "infeasible_penalty_j", None)
+        initial_is_penalized = (
+            penalty is not None
+            and result.initial_objective >= 0.5 * float(penalty)
         )
+        improvement = None
+        if not initial_is_penalized:
+            improvement = (
+                100.0
+                * (result.initial_objective - result.best_objective)
+                / max(1.0, abs(result.initial_objective))
+            )
+
+        best_vs_cvx_gap = None
+        if best_cvx.feasible:
+            best_vs_cvx_gap = (
+                100.0
+                * abs(result.best_objective - best_cvx.energy_stage1_j)
+                / max(1.0, abs(best_cvx.energy_stage1_j))
+            )
         stats = getattr(evaluator, "stats", None)
         calls = getattr(stats, "calls", None)
         hits = getattr(stats, "cache_hits", None)
@@ -154,6 +169,8 @@ def main() -> None:
             "initial_objective": result.initial_objective,
             "best_objective": result.best_objective,
             "improvement_pct": improvement,
+            "initial_objective_is_penalized": initial_is_penalized,
+            "best_vs_cvx_gap_pct": best_vs_cvx_gap,
             "initial": initial_summary,
             "best": best_summary,
             "best_cvx_status": best_cvx.diagnostics.get(
@@ -182,14 +199,30 @@ def main() -> None:
         }
         rows.append(row)
 
+        improvement_text = (
+            f"{improvement:.3f}" if improvement is not None else "n/a"
+        )
+        cvx_energy_text = (
+            f"{best_cvx.energy_stage1_j:.3f}"
+            if best_cvx.feasible
+            else "-"
+        )
+        gap_text = (
+            f"{best_vs_cvx_gap:.3f}"
+            if best_vs_cvx_gap is not None
+            else "-"
+        )
+
         print(
             f"{k:<4} "
             f"{args.objective:<11} "
             f"{result.initial_objective:<15.3f} "
             f"{result.best_objective:<15.3f} "
-            f"{improvement:<11.3f} "
+            f"{improvement_text:<11} "
             f"{best_summary['contacts']:<10} "
-            f"{str(row['best_cvx_status']):<21} "
+            f"{str(row['best_cvx_status']):<17} "
+            f"{cvx_energy_text:<14} "
+            f"{gap_text:<7} "
             f"{str(calls):<11} "
             f"{str(hits):<11} "
             f"{str(row['precheck_rejects']):<9} "
