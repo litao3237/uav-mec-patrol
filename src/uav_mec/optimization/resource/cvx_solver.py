@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+import warnings
 
 import cvxpy as cp
 import numpy as np
@@ -39,13 +40,17 @@ def _solve_with_fallback(
     verbose: bool,
     preferred_solver: str | None = None,
 ) -> tuple[str | None, list[str]]:
-    """Solve robustly and fall back when a solver raises SolverError.
+    """Solve robustly and prefer an exact CVXPY status over an inaccurate one.
 
-    Clarabel can occasionally report ``InsufficientProgress`` on infeasible
-    conic problems, which CVXPY maps to ``SolverError`` instead of
-    ``INFEASIBLE``. In that case we retry with another installed conic solver
-    (normally SCS) so infeasible fixed-discrete solutions are handled as normal
-    optimization outcomes rather than crashing the outer algorithm.
+    A solver may return OPTIMAL_INACCURATE (or another *_INACCURATE status)
+    without raising SolverError. Treat that as a usable fallback, but continue
+    trying the remaining installed conic solvers first. This prevents Clarabel
+    or SCS from stopping the fallback chain prematurely on a numerically
+    difficult candidate.
+
+    The generic CVXPY "Solution may be inaccurate" warning is suppressed here
+    because the status is recorded explicitly in diagnostics. If every solver
+    is inaccurate, the final ResourceSolveResult still exposes that status.
     """
 
     candidates = _solver_candidates()
@@ -54,17 +59,61 @@ def _solve_with_fallback(
         candidates.insert(0, preferred_solver)
 
     errors: list[str] = []
+    inaccurate_solver: str | None = None
+
+    inaccurate_statuses = {
+        cp.OPTIMAL_INACCURATE,
+        cp.INFEASIBLE_INACCURATE,
+        cp.UNBOUNDED_INACCURATE,
+    }
+
     for solver in candidates:
         try:
-            problem.solve(solver=solver, **_solver_kwargs(solver, verbose))
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Solution may be inaccurate.*",
+                    category=UserWarning,
+                )
+                problem.solve(
+                    solver=solver,
+                    **_solver_kwargs(solver, verbose),
+                )
         except cp.error.SolverError as exc:
             errors.append(f"{solver}: {exc}")
             continue
 
-        # Any recognized CVXPY status is useful. Infeasible/unbounded statuses
-        # are valid terminal outcomes, not reasons to try to force an 'optimal' solve.
-        if problem.status is not None:
+        status = problem.status
+        if status in inaccurate_statuses:
+            errors.append(f"{solver}: status={status}")
+            inaccurate_solver = solver
+            continue
+
+        # Exact optimal / infeasible / unbounded statuses are terminal.
+        if status is not None:
             return solver, errors
+
+    if inaccurate_solver is not None:
+        # A later solver may have raised after the inaccurate solution was
+        # obtained. Re-solve with the selected fallback so problem.value and
+        # variable/dual values definitely correspond to the returned solver.
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Solution may be inaccurate.*",
+                    category=UserWarning,
+                )
+                problem.solve(
+                    solver=inaccurate_solver,
+                    **_solver_kwargs(inaccurate_solver, verbose),
+                )
+        except cp.error.SolverError as exc:
+            errors.append(
+                f"{inaccurate_solver}: fallback re-solve failed: {exc}"
+            )
+            return None, errors
+        return inaccurate_solver, errors
 
     return None, errors
 
