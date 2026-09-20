@@ -75,6 +75,12 @@ def _resource_compare(instance, solution) -> dict[str, Any]:
         ),
         "kkt_runtime_s": kkt_runtime,
         "cvx_status": cvx.status,
+        "cvx_stage1_status": cvx.diagnostics.get(
+            "stage1_status", cvx.status
+        ),
+        "cvx_stage2_status": cvx.diagnostics.get("stage2_status"),
+        "cvx_stage1_solver": cvx.diagnostics.get("stage1_solver"),
+        "cvx_stage2_solver": cvx.diagnostics.get("stage2_solver"),
         "cvx_feasible": cvx.feasible,
         "cvx_energy_stage1_j": cvx.energy_stage1_j,
         "cvx_runtime_s": cvx_runtime,
@@ -109,10 +115,10 @@ def main() -> None:
 
     print(
         "K    seed   source     p-vio   contacts   offload   "
-        "kkt-status        cvx-status   kkt-E-J       cvx-E-J       "
-        "gap-%    kkt-s    cvx-s"
+        "kkt-status        cvx-s1       cvx-s2       "
+        "kkt-E-J       cvx-E-J       gap-%    kkt-s    cvx-s"
     )
-    print("-" * 144)
+    print("-" * 162)
 
     for k in task_counts:
         for seed_idx, scenario_seed in enumerate(seeds):
@@ -184,7 +190,8 @@ def main() -> None:
                     f"{summary['contacts']:<10} "
                     f"{summary['offloaded']:<9} "
                     f"{resource['kkt_status']:<17} "
-                    f"{resource['cvx_status']:<12} "
+                    f"{str(resource['cvx_stage1_status']):<12} "
+                    f"{str(resource['cvx_stage2_status']):<12} "
                     f"{kkt_energy:<13} "
                     f"{cvx_energy:<13} "
                     f"{gap_text:<8} "
@@ -203,22 +210,49 @@ def main() -> None:
         for row in rows
     )
 
+    trusted_gaps = [
+        row["reported_vs_cvx_relative_gap"]
+        for row in rows
+        if (
+            row["reported_vs_cvx_relative_gap"] is not None
+            and row["cvx_stage1_status"] == "optimal"
+        )
+    ]
+    approximate_oracle_rows = sum(
+        row["cvx_stage1_status"] == "optimal_inaccurate"
+        for row in rows
+    )
+
     aggregate = {
         "rows": len(rows),
         "comparable_rows": len(gaps),
+        "trusted_stage1_optimal_rows": len(trusted_gaps),
+        "stage1_optimal_inaccurate_rows": approximate_oracle_rows,
         "feasible_seed_rows": fallback_count,
         "kkt_iterate_rows": converged_count,
         "mean_reported_vs_cvx_relative_gap": mean(gaps) if gaps else None,
         "max_reported_vs_cvx_relative_gap": max(gaps) if gaps else None,
+        "mean_trusted_stage1_gap": (
+            mean(trusted_gaps) if trusted_gaps else None
+        ),
+        "max_trusted_stage1_gap": (
+            max(trusted_gaps) if trusted_gaps else None
+        ),
     }
 
     if gaps:
-        print(
+        message = (
             "\nAggregate: "
-            f"mean-gap={100.0 * aggregate['mean_reported_vs_cvx_relative_gap']:.3f}%  "
-            f"max-gap={100.0 * aggregate['max_reported_vs_cvx_relative_gap']:.3f}%  "
+            f"all-mean={100.0 * aggregate['mean_reported_vs_cvx_relative_gap']:.3f}%  "
+            f"all-max={100.0 * aggregate['max_reported_vs_cvx_relative_gap']:.3f}%  "
             f"feasible-seed={fallback_count}/{len(rows)}"
         )
+        if trusted_gaps:
+            message += (
+                f"  trusted-S1-mean={100.0 * aggregate['mean_trusted_stage1_gap']:.3f}%"
+                f"  trusted-S1-max={100.0 * aggregate['max_trusted_stage1_gap']:.3f}%"
+            )
+        print(message)
 
     out = Path("outputs/results/recourse_gap_scan.json")
     out.parent.mkdir(parents=True, exist_ok=True)
