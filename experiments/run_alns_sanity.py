@@ -22,7 +22,10 @@ from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
-from uav_mec.optimization.resource import solve_kkt_resource_problem
+from uav_mec.optimization.resource import (
+    CVXResourceSolver,
+    solve_kkt_resource_problem,
+)
 
 
 def _parse_int_list(text: str) -> list[int]:
@@ -71,7 +74,7 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     print(
         "K    objective   init-obj        best-obj        improve-%   "
-        "contacts   best-kkt-status       eval-calls  cache-hits  runtime-s"
+        "contacts   best-cvx-status       eval-calls  cache-hits  runtime-s"
     )
     print("-" * 125)
 
@@ -121,11 +124,18 @@ def main() -> None:
             instance,
             result.best_solution,
         )
-        best_kkt = solve_kkt_resource_problem(
+        best_cvx = CVXResourceSolver(run_stage2=False).solve(
             instance,
             result.best_solution,
             best_info,
         )
+        best_kkt = None
+        if args.objective == "kkt":
+            best_kkt = solve_kkt_resource_problem(
+                instance,
+                result.best_solution,
+                best_info,
+            )
 
         improvement = (
             100.0
@@ -145,10 +155,21 @@ def main() -> None:
             "improvement_pct": improvement,
             "initial": initial_summary,
             "best": best_summary,
-            "best_kkt_status": best_kkt.status,
-            "best_kkt_feasible": best_kkt.feasible,
-            "best_kkt_energy_j": best_kkt.energy_stage1_j,
-            "best_kkt_iterations": best_kkt.diagnostics.get("iterations"),
+            "best_cvx_status": best_cvx.diagnostics.get(
+                "stage1_status", best_cvx.status
+            ),
+            "best_cvx_feasible": best_cvx.feasible,
+            "best_cvx_energy_j": best_cvx.energy_stage1_j,
+            "best_kkt_status": None if best_kkt is None else best_kkt.status,
+            "best_kkt_feasible": None if best_kkt is None else best_kkt.feasible,
+            "best_kkt_energy_j": (
+                None if best_kkt is None else best_kkt.energy_stage1_j
+            ),
+            "best_kkt_iterations": (
+                None
+                if best_kkt is None
+                else best_kkt.diagnostics.get("iterations")
+            ),
             "evaluator_calls": calls,
             "evaluator_cache_hits": hits,
             "runtime_s": runtime,
@@ -167,7 +188,7 @@ def main() -> None:
             f"{result.best_objective:<15.3f} "
             f"{improvement:<11.3f} "
             f"{best_summary['contacts']:<10} "
-            f"{best_kkt.status:<21} "
+            f"{str(row['best_cvx_status']):<21} "
             f"{str(calls):<11} "
             f"{str(hits):<11} "
             f"{runtime:.2f}"
