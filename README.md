@@ -668,11 +668,12 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 13. [x] K=50：shared-state rate = 16.7%，属于过渡负载；
 14. [x] K=80：E=2 与 E=3 均为 shared-state rate = 100%，max pairs/MEC = 4，资源竞争自然出现；
 15. [x] 当前 baseline 无需为了制造 shared MEC 而修改 deadline/B/F 等参数；
-16. [ ] **[VERIFY]** 对 K=80, E=2/3 的代表性 shared-MEC 状态运行 CVX non-degeneracy；
-17. [ ] **[VERIFY]** 检查 shared-MEC 状态下 bandwidth/CPU capacity dual 是否真正活跃；
-18. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
-19. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
-20. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
+16. [ ] **[VERIFY]** 对 K=80, E=2/3 的 shared-MEC 状态重跑新版 CVX non-degeneracy；
+17. [ ] **[VERIFY]** 新版脚本必须显示全部 6 个候选状态；旧版会静默跳过 CVX non-feasible 行，因此旧聚合值只覆盖打印出来的可行子集；
+18. [ ] **[VERIFY]** 检查 shared-MEC 本身对应的 bandwidth/CPU capacity dual 是否真正活跃，而不是只统计任意 MEC 的 active dual；
+19. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
+20. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
+21. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -768,3 +769,15 @@ K=80	ext{：高负载/共享 MEC 竞争}
 ]
 
 下一步只需要对 K=80 的 shared-MEC 状态做精确 CVX non-degeneracy，验证 bandwidth/CPU capacity 是否不仅结构上共享，而且对应 dual/shadow price 也真正活跃。
+
+
+## K=80 CVX non-degeneracy：当前诊断注意事项
+
+首轮 K=80 CVX non-degeneracy 输出中，每个 E 本应有 3 个 scenario seed × 2 类 candidate = 6 个状态，但控制台只打印了 3 行。原因是旧版脚本在 `cvx.feasible == False` 时只写 JSON、不打印控制台，因此：
+
+- 当前看到的 fixed-route / var-gain / dual 聚合只基于**打印出来的 CVX-feasible 子集**；
+- 不能据此写成“6/6 全部可行”或“所有 K=80 状态都满足相同 dual 结论”；
+- 新版脚本已改为打印全部状态，并额外输出 `p-vio`、`cvx-s1`、`sh-bw`、`sh-cpu`；
+- `sh-bw` / `sh-cpu` 只统计**shared MEC 本身**的正 bandwidth/CPU dual，比原先的全局 dual 计数更适合判断真实多 UAV 资源竞争。
+
+下一步只需重跑 K=80, E=2/3 的两条命令，确认被旧脚本省略的 seed 43 / seed 44 repaired 状态究竟是 proxy infeasible、CVX infeasible 还是其它 solver status，然后再冻结 non-degeneracy 结论。
