@@ -130,7 +130,7 @@ def main() -> None:
         gap_pct = None
         if args.cvx_check:
             t0 = perf_counter()
-            cvx = CVXResourceSolver().solve(instance, repaired, info)
+            cvx = CVXResourceSolver(run_stage2=False).solve(instance, repaired, info)
             row["cvx_runtime_s"] = perf_counter() - t0
             row["cvx_status"] = cvx.status
             row["cvx_feasible"] = cvx.feasible
