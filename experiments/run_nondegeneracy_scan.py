@@ -281,7 +281,7 @@ def main() -> None:
                     solution,
                     info,
                 )
-                cvx = CVXResourceSolver().solve(
+                cvx = CVXResourceSolver(run_stage2=False).solve(
                     instance,
                     solution,
                     info,
