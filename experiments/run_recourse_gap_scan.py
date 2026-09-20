@@ -54,7 +54,7 @@ def _resource_compare(instance, solution) -> dict[str, Any]:
     kkt_runtime = perf_counter() - t0
 
     t0 = perf_counter()
-    cvx = CVXResourceSolver().solve(instance, solution, info)
+    cvx = CVXResourceSolver(run_stage2=False).solve(instance, solution, info)
     cvx_runtime = perf_counter() - t0
 
     gap = None
