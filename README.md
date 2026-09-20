@@ -629,6 +629,8 @@ Objective / constraint non-degeneracy scan：
 uv run python experiments\run_nondegeneracy_scan.py --tasks 30 --seeds 42,43,44 --candidate both --alns-iterations 20
 ~~~
 
+新版 non-degeneracy scan 还会输出 active UAV-MEC pair 数、shared-MEC 数和 max pairs/MEC，用于判断 bandwidth/CPU allocation 是否真正存在多 UAV 竞争。
+
 ALNS proxy：
 
 ~~~powershell
@@ -650,11 +652,14 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 5. [x] 当前 6 个状态 mean gap = 0.173%，max gap = 0.274%；
 6. [x] 新版 gap scan 已确认 6/6 Stage-1 status = optimal；
 7. [x] proxy ranking scan：18 个候选，mean gap = 0.192%，max gap = 0.274%，mean Spearman = 1.0，mean pairwise order = 1.0；
-8. [ ] **[VERIFY]** 运行 non-degeneracy scan，检查 fixed-route energy 占比和 variable-resource gain；
-9. [ ] **[VERIFY]** 检查 deadline / avg-delay / cycle / bandwidth / MEC CPU utilization；
-10. [ ] **[TODO]** non-degeneracy 通过后冻结 fast proxy outer search + elite/final CVX refinement；
-11. [ ] **[TODO]** dual-guided operators 仅在可靠 dual certificate 可用时启用；
-12. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
+8. [x] 首轮 non-degeneracy scan 已完成：fixed-route energy 平均占比 99.72%，资源层主要影响 variable energy 与 QoS；
+9. [x] deadline / avg-delay / cycle / bandwidth / MEC CPU utilization 已完成首轮检查；
+10. [ ] **[VERIFY]** 重跑新版 non-degeneracy scan，确认 active pairs / shared MEC / max pairs per MEC；
+11. [ ] **[VERIFY]** 扩展到 K=50，并优先检查是否形成多 UAV 共享同一 MEC 的资源竞争；
+12. [ ] **[TODO]** 根据 shared-resource 结果决定是否需要调整 E/B/F/deadline 等实验参数；
+13. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
+14. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
+15. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -713,4 +718,17 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 当前 18 个 paper-scale 候选状态的 proxy/CVX mean gap 为 0.192%，max gap 为 0.274%，三个场景的 Spearman 与 pairwise ordering agreement 均为 1.0。说明 fast proxy 目前不仅绝对误差小，而且保持了候选解排序。
 
-但这还不足以直接冻结算法：总能耗中的 flight/fixed-route 项可能占比很高，从而让 proxy 与 CVX 天然看起来非常接近。下一步必须做 objective/constraint non-degeneracy scan，确认计算、通信和资源分配在 variable energy 与 QoS 约束上确实具有数值意义。通过该检查后，再正式冻结 fast proxy outer search + elite/final CVX refinement。
+首轮 non-degeneracy scan（K=30, seeds 42/43/44, repaired + ALNS-best）得到：
+
+- mean fixed-route energy fraction = 99.72%；
+- mean variable-resource gain = 126.51%；
+- max variable-resource gain = 264.62%；
+- max deadline utilization = 1.000；
+- avg-delay utilization ≈ 0.667；
+- cycle utilization ≈ 0.580；
+- offloading states 的 bandwidth utilization = 1.000；
+- offloading states 的 MEC CPU utilization 约 0.74~0.78。
+
+这说明总 UAV 能耗确实被飞行/采集项强烈支配，因此 0.2% 左右的总能耗 gap 不能单独作为“资源 proxy 很精确”的充分证据；但资源优化对 variable energy 的影响很大，而且 deadline 处于活跃边界，资源层仍然对 QoS 可行性具有实际作用。
+
+下一步需要进一步确认 MEC 资源竞争是否真实存在，即同一 MEC 是否同时存在多个 active (UAV,MEC) pair。若长期每个 MEC 只服务一个 UAV，则 bandwidth/CPU allocation 会退化成近似单用户问题，需要通过规模/参数扫描校准，而不是通过人为放大能耗项制造效果。
