@@ -117,7 +117,9 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \rightarrow
 \text{Problem-Specific ALNS}
 \rightarrow
-\text{KKT Resource Recourse}
+\text{Precheck/Proxy Screening}
+\rightarrow
+\text{Elite/Gray-zone CVX Refinement}
 }
 \]
 
@@ -127,7 +129,8 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 - **VRP**：描述路径子问题结构，不是一种具体算法；
 - **ALNS**：外层主元启发式；
 - **ACO / GA**：可作为独立的元启发式 baseline；
-- **KKT / Convex**：固定离散解后的连续资源优化；
+- **CVXPY / Convex**：固定离散解后的 Stage-1 correctness oracle 与 elite/final refinement；
+- **KKT**：保留用于解析结构、闭式资源关系、dual/shadow-price 分析与小规模验证，不再作为 paper-scale 每个 ALNS candidate 的默认评价器；
 - **Chaos perturbation**：当前不加入，只有在初始化敏感性实验表明确有收益时再考虑。
 
 ---
@@ -197,7 +200,7 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \]
 
 \[
-\boxed{\text{KKT = intended outer-search evaluator}}
+\boxed{\text{KKT = analytical validation / dual-structure tool}}
 \]
 
 ### 当前新增问题：paper-scale primal recovery
@@ -226,10 +229,10 @@ kkt_no_feasible_iterate
 - [x] ranking scan mean gap = 0.192%，max gap = 0.274%；
 - [x] 三个场景的 Spearman rank correlation 均为 1.0；
 - [x] 三个场景的 pairwise ordering agreement 均为 1.0；
-- [ ] **[VERIFY]** 在冻结两层评价策略前，检查总能耗是否被 flight/fixed-route 项过度支配；
-- [ ] **[VERIFY]** 检查资源优化对 variable energy 的实际改善幅度；
-- [ ] **[VERIFY]** 检查 deadline / avg-delay / cycle / bandwidth / MEC CPU 是否存在有效紧约束；
-- [ ] **[TODO]** 通过 non-degeneracy scan 后，冻结 fast proxy outer search + elite/final CVX refinement；
+- [x] non-degeneracy 已确认 total energy 被 flight/fixed-route 强烈支配，但 variable energy 与 QoS/resource dual 均非退化；
+- [x] K=80 高负载下 shared MEC bandwidth dual 在全部已验证可行状态中为正，shared MEC CPU dual 在多数状态中为正；
+- [x] fast proxy 用于常规候选排序，CVX 用于 correctness/refinement 的总体方向已成立；
+- [ ] **[VERIFY]** ScreenedProxyObjectiveEvaluator：precheck hard reject + proxy fast path + gray-zone Stage-1 CVX refinement；
 - [ ] **[TODO]** dual-guided operators 仍需等待可用 dual certificate，不能使用 feasible_seed 伪造影子价格。
 
 因此：
@@ -378,7 +381,9 @@ alns>=7.0,<8.0
 ### Objective / State
 
 - [x] ProxyObjectiveEvaluator；
-- [ ] **[VERIFY]** KKTObjectiveEvaluator on paper-scale；
+- [x] optimistic precheck 作为 fixed-discrete hard-infeasibility certificate；
+- [ ] **[VERIFY]** ScreenedProxyObjectiveEvaluator：只对 precheck-feasible / proxy-infeasible gray zone 调用 Stage-1 CVX；
+- [x] KKTObjectiveEvaluator 保留为诊断/解析验证工具，不作为 paper-scale 默认主路径；
 - [x] solution-signature cache；
 - [x] finite infeasibility penalty；
 - [x] partial destroyed-state support；
@@ -799,7 +804,14 @@ K=80	ext{：高负载/共享 MEC 竞争}
 
 ## High-load feasibility robustness scan
 
-用于判断 K=80 的剩余不可行性究竟只是 ALNS 迭代预算不足，还是当前 neighborhood/operator 不够强：
+K=80, scenario seed=43 的 budget scan 已完成，结果表明此前 20-iteration 不可行主要是**搜索预算不足**，而不是当前 neighborhood 完全无法恢复可行性。
+
+- E=2：20 iter 为 0/3 precheck-feasible；100 iter 为 2/3；300 iter 为 3/3，且所有被 CVX 检查的状态均 Stage-1 optimal；
+- E=3：20 iter 为 1/3；100 iter 为 3/3；300 iter 为 3/3，且所有被 CVX 检查的状态均 Stage-1 optimal；
+- 所有 remaining precheck infeasibility 都来自 task-deadline lower bound，未观察到 avg-delay 或 cycle precheck violation；
+- 因此项目默认的 300 iterations 在该高负载困难 seed 上已有充分的可行性恢复能力；M6 新算子应主要服务于**搜索效率、解质量和问题特定创新**，而不是为了弥补“完全无法找到可行解”。
+
+用于复现实验：
 
 ~~~powershell
 uv run python experiments\run_high_load_feasibility_scan.py --tasks 80 --mecs 2,3 --scenario-seeds 43 --algorithm-seeds 100,101,102 --iterations 20,100,300
@@ -816,3 +828,45 @@ uv run python experiments\run_high_load_feasibility_scan.py --tasks 80 --mecs 2,
 
 - 若 100/300 iterations 后大多数 algorithm seed 能恢复 precheck/CVX feasibility，则当前 neighborhood 基本足够，问题主要是搜索预算与参数；
 - 若 300 iterations 后 seed=43 仍大量 `infeasible_precheck`，则进入 M6，优先实现 deadline-critical compute-aware relocate / contact restructure，而不是继续增加迭代数。
+
+
+## Screened outer evaluator
+
+高负载实验还确认了一个关键现象：
+
+[
+\text{proxy violation}>0
+\not\Rightarrow
+P1\text{-R infeasible}.
+]
+
+因此新增 `ScreenedProxyObjectiveEvaluator`，采用三段式判断：
+
+[
+\boxed{
+\text{Optimistic Precheck}
+\rightarrow
+\begin{cases}
+\text{fail} & \Rightarrow \text{hard infeasible penalty}\\
+\text{pass + proxy feasible} & \Rightarrow \text{fast proxy energy}\\
+\text{pass + proxy infeasible} & \Rightarrow \text{Stage-1 CVX gray-zone refinement}
+\end{cases}}
+]
+
+这样避免把“equal-share resource point 不可行”误判为“固定离散解不可行”，同时绝大多数正常候选仍走快速 proxy 路径。
+
+验证命令：
+
+~~~powershell
+uv run python experiments\run_alns_sanity.py --tasks 80 --mecs 2 --seed 42 --iterations 100 --objective screened
+~~~
+
+重点观察 JSON 中：
+
+- `precheck_rejects`
+- `ambiguous_proxy_calls`
+- `cvx_refinements`
+- runtime
+- best solution 最终可行性
+
+若该 smoke test 通过，resource/evaluator 阶段即可冻结，项目正式进入 M6 Problem-Specific ALNS Operators。
