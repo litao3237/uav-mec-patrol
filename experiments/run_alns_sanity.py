@@ -74,9 +74,10 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     print(
         "K    objective   init-obj        best-obj        improve-%   "
-        "contacts   best-cvx-status       eval-calls  cache-hits  runtime-s"
+        "contacts   best-cvx-status       eval-calls  cache-hits  "
+        "pre-rej   gray   cvx-ref   runtime-s"
     )
-    print("-" * 125)
+    print("-" * 154)
 
     for k in _parse_int_list(args.tasks):
         instance = build_paper_scale_instance(
@@ -191,6 +192,9 @@ def main() -> None:
             f"{str(row['best_cvx_status']):<21} "
             f"{str(calls):<11} "
             f"{str(hits):<11} "
+            f"{str(row['precheck_rejects']):<9} "
+            f"{str(row['ambiguous_proxy_calls']):<6} "
+            f"{str(row['cvx_refinements']):<9} "
             f"{runtime:.2f}"
         )
 
