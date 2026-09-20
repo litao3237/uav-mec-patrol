@@ -114,6 +114,21 @@ def _cvx_breakdown(instance, solution, info, cvx):
     )
 
 
+def _structure_stats(info) -> dict[str, Any]:
+    pairs_per_mec: dict[str, int] = {}
+    for _, mec_id in info.active_uav_mec_pairs:
+        pairs_per_mec[mec_id] = pairs_per_mec.get(mec_id, 0) + 1
+
+    return {
+        "pairs_per_mec": pairs_per_mec,
+        "active_uav_mec_pairs": len(info.active_uav_mec_pairs),
+        "shared_mec_count": sum(
+            count >= 2 for count in pairs_per_mec.values()
+        ),
+        "max_pairs_per_mec": max(pairs_per_mec.values(), default=0),
+    }
+
+
 def _resource_utilization(instance, info, cvx) -> dict[str, Any]:
     bandwidth_values = cvx.stage1_values["bandwidth_mhz"]
     mec_cpu_values = cvx.stage1_values["mec_cpu_ghz"]
@@ -141,15 +156,11 @@ def _resource_utilization(instance, info, cvx) -> dict[str, Any]:
         bw_util[mec_id] = used_b / max(1e-12, mec.bandwidth_mhz)
         cpu_util[mec_id] = used_f / max(1e-12, mec.cpu_ghz)
 
+    structure = _structure_stats(info)
     return {
         "bandwidth_utilization": bw_util,
         "mec_cpu_utilization": cpu_util,
-        "pairs_per_mec": pairs_per_mec,
-        "active_uav_mec_pairs": len(info.active_uav_mec_pairs),
-        "shared_mec_count": sum(
-            count >= 2 for count in pairs_per_mec.values()
-        ),
-        "max_pairs_per_mec": max(pairs_per_mec.values(), default=0),
+        **structure,
         "max_bandwidth_utilization": max(bw_util.values(), default=0.0),
         "max_mec_cpu_utilization": max(cpu_util.values(), default=0.0),
     }
@@ -192,20 +203,28 @@ def _qos_utilization(instance, cvx) -> dict[str, float]:
     }
 
 
-def _dual_summary(instance, cvx) -> dict[str, Any]:
+def _dual_summary(instance, info, cvx) -> dict[str, Any]:
     duals = cvx.stage1_duals
     deadline_duals = [
         duals.get(f"deadline::{task_id}", 0.0)
         for task_id in instance.tasks
     ]
-    bw_duals = [
-        duals.get(f"bandwidth_cap::{mec_id}", 0.0)
+    bw_dual_by_mec = {
+        mec_id: duals.get(f"bandwidth_cap::{mec_id}", 0.0)
         for mec_id in instance.mecs
-    ]
-    cpu_duals = [
-        duals.get(f"mec_cpu_cap::{mec_id}", 0.0)
+    }
+    cpu_dual_by_mec = {
+        mec_id: duals.get(f"mec_cpu_cap::{mec_id}", 0.0)
         for mec_id in instance.mecs
-    ]
+    }
+    structure = _structure_stats(info)
+    shared_mecs = {
+        mec_id
+        for mec_id, count in structure["pairs_per_mec"].items()
+        if count >= 2
+    }
+    bw_duals = list(bw_dual_by_mec.values())
+    cpu_duals = list(cpu_dual_by_mec.values())
     tol = 1e-7
     return {
         "active_deadline_duals": sum(value > tol for value in deadline_duals),
@@ -215,6 +234,20 @@ def _dual_summary(instance, cvx) -> dict[str, Any]:
         "max_bandwidth_dual": max(bw_duals, default=0.0),
         "active_mec_cpu_duals": sum(value > tol for value in cpu_duals),
         "max_mec_cpu_dual": max(cpu_duals, default=0.0),
+        "active_shared_bandwidth_duals": sum(
+            bw_dual_by_mec[mec_id] > tol for mec_id in shared_mecs
+        ),
+        "active_shared_mec_cpu_duals": sum(
+            cpu_dual_by_mec[mec_id] > tol for mec_id in shared_mecs
+        ),
+        "shared_bandwidth_dual_by_mec": {
+            mec_id: bw_dual_by_mec[mec_id]
+            for mec_id in sorted(shared_mecs)
+        },
+        "shared_mec_cpu_dual_by_mec": {
+            mec_id: cpu_dual_by_mec[mec_id]
+            for mec_id in sorted(shared_mecs)
+        },
     }
 
 
@@ -244,11 +277,12 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
 
     print(
-        "K    seed   source     offload   contacts   fixed-%   "
+        "K    seed   source     p-vio   cvx-s1       offload   contacts   fixed-%   "
         "proxy-var-J   cvx-var-J   var-gain-%   "
-        "deadline-u   avg-u   cycle-u   bw-u   cpu-u   pairs   shared   bw-dual   cpu-dual"
+        "deadline-u   avg-u   cycle-u   bw-u   cpu-u   pairs   shared   "
+        "bw-dual   cpu-dual   sh-bw   sh-cpu"
     )
-    print("-" * 190)
+    print("-" * 230)
 
     for k in task_counts:
         for seed_idx, scenario_seed in enumerate(seeds):
@@ -284,6 +318,11 @@ def main() -> None:
 
             for source, solution in candidates:
                 info = build_event_info(instance, solution)
+                structure = _structure_stats(info)
+                offloaded = sum(
+                    decision.mode is ExecutionMode.OFFLOAD
+                    for decision in solution.task_decisions.values()
+                )
                 proxy, proxy_energy = _proxy_breakdown(
                     instance,
                     solution,
@@ -294,17 +333,47 @@ def main() -> None:
                     solution,
                     info,
                 )
+                cvx_stage1_status = cvx.diagnostics.get(
+                    "stage1_status", cvx.status
+                )
                 if not cvx.feasible:
-                    rows.append(
-                        {
-                            "K": k,
-                            "scenario_seed": scenario_seed,
-                            "source": source,
-                            "cvx_status": cvx.status,
-                            "proxy_violated_constraints": (
-                                proxy.score.violated_constraints
-                            ),
-                        }
+                    row = {
+                        "K": k,
+                        "scenario_seed": scenario_seed,
+                        "source": source,
+                        "offloaded": offloaded,
+                        "contacts": len(solution.contact_visits),
+                        "cvx_status": cvx.status,
+                        "cvx_stage1_status": cvx_stage1_status,
+                        "proxy_violated_constraints": (
+                            proxy.score.violated_constraints
+                        ),
+                        "structure": structure,
+                    }
+                    rows.append(row)
+                    print(
+                        f"{k:<4} "
+                        f"{scenario_seed:<6} "
+                        f"{source:<10} "
+                        f"{proxy.score.violated_constraints:<7} "
+                        f"{str(cvx_stage1_status):<12} "
+                        f"{offloaded:<9} "
+                        f"{len(solution.contact_visits):<10} "
+                        f"{'-':<9} "
+                        f"{proxy_energy['variable_resource_j']:<13.2f} "
+                        f"{'-':<11} "
+                        f"{'-':<12} "
+                        f"{'-':<12} "
+                        f"{'-':<7} "
+                        f"{'-':<9} "
+                        f"{'-':<6} "
+                        f"{'-':<7} "
+                        f"{structure['active_uav_mec_pairs']:<7} "
+                        f"{structure['shared_mec_count']:<8} "
+                        f"{'-':<9} "
+                        f"{'-':<10} "
+                        f"{'-':<7} "
+                        f"{'-'}"
                     )
                     continue
 
@@ -320,7 +389,7 @@ def main() -> None:
                     cvx,
                 )
                 qos = _qos_utilization(instance, cvx)
-                duals = _dual_summary(instance, cvx)
+                duals = _dual_summary(instance, info, cvx)
 
                 variable_gain = (
                     proxy_energy["variable_resource_j"]
@@ -336,17 +405,12 @@ def main() -> None:
                     "K": k,
                     "scenario_seed": scenario_seed,
                     "source": source,
-                    "offloaded": sum(
-                        decision.mode is ExecutionMode.OFFLOAD
-                        for decision in solution.task_decisions.values()
-                    ),
+                    "offloaded": offloaded,
                     "contacts": len(solution.contact_visits),
                     "proxy_violated_constraints": (
                         proxy.score.violated_constraints
                     ),
-                    "cvx_stage1_status": cvx.diagnostics.get(
-                        "stage1_status", cvx.status
-                    ),
+                    "cvx_stage1_status": cvx_stage1_status,
                     "cvx_stage2_status": cvx.diagnostics.get(
                         "stage2_status"
                     ),
@@ -364,6 +428,8 @@ def main() -> None:
                     f"{k:<4} "
                     f"{scenario_seed:<6} "
                     f"{source:<10} "
+                    f"{proxy.score.violated_constraints:<7} "
+                    f"{str(cvx_stage1_status):<12} "
                     f"{row['offloaded']:<9} "
                     f"{row['contacts']:<10} "
                     f"{100.0 * cvx_energy['fixed_route_fraction']:<9.2f} "
@@ -378,13 +444,29 @@ def main() -> None:
                     f"{resources['active_uav_mec_pairs']:<7} "
                     f"{resources['shared_mec_count']:<8} "
                     f"{duals['active_bandwidth_duals']:<9} "
-                    f"{duals['active_mec_cpu_duals']}"
+                    f"{duals['active_mec_cpu_duals']:<10} "
+                    f"{duals['active_shared_bandwidth_duals']:<7} "
+                    f"{duals['active_shared_mec_cpu_duals']}"
                 )
 
     valid = [row for row in rows if "cvx_energy" in row]
-    aggregate = {}
+    invalid = [row for row in rows if "cvx_energy" not in row]
+    shared_valid = [
+        row
+        for row in valid
+        if row["resources"]["shared_mec_count"] > 0
+    ]
+    aggregate = {
+        "states_total": len(rows),
+        "cvx_feasible_states": len(valid),
+        "cvx_nonfeasible_states": len(invalid),
+        "proxy_feasible_but_cvx_nonfeasible": sum(
+            row.get("proxy_violated_constraints", 1) == 0
+            for row in invalid
+        ),
+    }
     if valid:
-        aggregate = {
+        aggregate.update({
             "rows": len(valid),
             "mean_fixed_route_fraction": mean(
                 row["cvx_energy"]["fixed_route_fraction"]
@@ -438,7 +520,16 @@ def main() -> None:
                 row["duals"]["active_mec_cpu_duals"] > 0
                 for row in valid
             ),
-        }
+            "shared_feasible_states": len(shared_valid),
+            "shared_states_with_active_bandwidth_dual": sum(
+                row["duals"]["active_shared_bandwidth_duals"] > 0
+                for row in shared_valid
+            ),
+            "shared_states_with_active_mec_cpu_dual": sum(
+                row["duals"]["active_shared_mec_cpu_duals"] > 0
+                for row in shared_valid
+            ),
+        })
         print(
             "\nAggregate: "
             f"fixed-route={100.0 * aggregate['mean_fixed_route_fraction']:.2f}%  "
@@ -453,7 +544,10 @@ def main() -> None:
             f"shared={aggregate['states_with_shared_mec']}/{len(valid)}  "
             f"max-pairs/mec={aggregate['max_pairs_per_mec']}  "
             f"bw-dual={aggregate['states_with_active_bandwidth_dual']}/{len(valid)}  "
-            f"cpu-dual={aggregate['states_with_active_mec_cpu_dual']}/{len(valid)}"
+            f"cpu-dual={aggregate['states_with_active_mec_cpu_dual']}/{len(valid)}  "
+            f"shared-bw-dual={aggregate['shared_states_with_active_bandwidth_dual']}/{len(shared_valid)}  "
+            f"shared-cpu-dual={aggregate['shared_states_with_active_mec_cpu_dual']}/{len(shared_valid)}  "
+            f"cvx-feasible={len(valid)}/{len(rows)}"
         )
 
     out = Path("outputs/results/nondegeneracy_scan.json")
