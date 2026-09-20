@@ -246,9 +246,9 @@ def main() -> None:
     print(
         "K    seed   source     offload   contacts   fixed-%   "
         "proxy-var-J   cvx-var-J   var-gain-%   "
-        "deadline-u   avg-u   cycle-u   bw-u   cpu-u   pairs   shared"
+        "deadline-u   avg-u   cycle-u   bw-u   cpu-u   pairs   shared   bw-dual   cpu-dual"
     )
-    print("-" * 164)
+    print("-" * 190)
 
     for k in task_counts:
         for seed_idx, scenario_seed in enumerate(seeds):
@@ -376,7 +376,9 @@ def main() -> None:
                     f"{resources['max_bandwidth_utilization']:<6.3f} "
                     f"{resources['max_mec_cpu_utilization']:<7.3f} "
                     f"{resources['active_uav_mec_pairs']:<7} "
-                    f"{resources['shared_mec_count']}"
+                    f"{resources['shared_mec_count']:<8} "
+                    f"{duals['active_bandwidth_duals']:<9} "
+                    f"{duals['active_mec_cpu_duals']}"
                 )
 
     valid = [row for row in rows if "cvx_energy" in row]
@@ -428,6 +430,14 @@ def main() -> None:
                 row["resources"]["max_pairs_per_mec"]
                 for row in valid
             ),
+            "states_with_active_bandwidth_dual": sum(
+                row["duals"]["active_bandwidth_duals"] > 0
+                for row in valid
+            ),
+            "states_with_active_mec_cpu_dual": sum(
+                row["duals"]["active_mec_cpu_duals"] > 0
+                for row in valid
+            ),
         }
         print(
             "\nAggregate: "
@@ -441,7 +451,9 @@ def main() -> None:
             f"cpu-u={aggregate['mean_max_mec_cpu_utilization']:.3f}  "
             f"pairs={aggregate['mean_active_uav_mec_pairs']:.2f}  "
             f"shared={aggregate['states_with_shared_mec']}/{len(valid)}  "
-            f"max-pairs/mec={aggregate['max_pairs_per_mec']}"
+            f"max-pairs/mec={aggregate['max_pairs_per_mec']}  "
+            f"bw-dual={aggregate['states_with_active_bandwidth_dual']}/{len(valid)}  "
+            f"cpu-dual={aggregate['states_with_active_mec_cpu_dual']}/{len(valid)}"
         )
 
     out = Path("outputs/results/nondegeneracy_scan.json")
