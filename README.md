@@ -780,4 +780,39 @@ K=80	ext{：高负载/共享 MEC 竞争}
 - 新版脚本已改为打印全部状态，并额外输出 `p-vio`、`cvx-s1`、`sh-bw`、`sh-cpu`；
 - `sh-bw` / `sh-cpu` 只统计**shared MEC 本身**的正 bandwidth/CPU dual，比原先的全局 dual 计数更适合判断真实多 UAV 资源竞争。
 
-下一步只需重跑 K=80, E=2/3 的两条命令，确认被旧脚本省略的 seed 43 / seed 44 repaired 状态究竟是 proxy infeasible、CVX infeasible 还是其它 solver status，然后再冻结 non-degeneracy 结论。
+新版 K=80 结果已经确认：被旧脚本省略的状态主要是 `infeasible_precheck`，不是 CVXPY 数值失败。
+
+对 K=80：
+
+- E=2：6 个状态中 3 个 Stage-1 CVX optimal，3 个 optimistic precheck infeasible；
+- E=3：6 个状态中 3 个 Stage-1 CVX optimal，3 个 optimistic precheck infeasible；
+- 所有 CVX-feasible shared-MEC 状态均满足 shared bandwidth dual > 0；
+- 其中 2/3 状态还满足 shared MEC CPU dual > 0；
+- 因此资源竞争本身已经通过 non-degeneracy 验证；
+- 当前新的算法性问题是：现有 20-iteration generic ALNS 在高负载 seed=43 上还不能稳定修复 fixed-discrete infeasibility。
+
+另一个重要现象是 E=2, seed=42 repaired：`p-vio=1` 但 Stage-1 CVX 仍为 optimal。这说明 equal-share/max-local-CPU proxy 是**保守可行点**，`proxy violation > 0` 不等价于真实 P1-R infeasible。后续 outer evaluator 必须区分：
+1. optimistic precheck infeasible：固定离散解确定不可行；
+2. precheck feasible + proxy infeasible：资源层不确定区，不能直接当成结构不可行；
+3. proxy feasible：已有构造式可行资源点。
+
+
+## High-load feasibility robustness scan
+
+用于判断 K=80 的剩余不可行性究竟只是 ALNS 迭代预算不足，还是当前 neighborhood/operator 不够强：
+
+~~~powershell
+uv run python experiments\run_high_load_feasibility_scan.py --tasks 80 --mecs 2,3 --scenario-seeds 43 --algorithm-seeds 100,101,102 --iterations 20,100,300
+~~~
+
+输出同时区分：
+
+- proxy violations；
+- optimistic precheck 是否可行；
+- precheck 中 task-deadline / avg-delay / cycle 原因数；
+- 对 precheck-feasible 最终状态的 Stage-1 CVX 确认。
+
+判定规则：
+
+- 若 100/300 iterations 后大多数 algorithm seed 能恢复 precheck/CVX feasibility，则当前 neighborhood 基本足够，问题主要是搜索预算与参数；
+- 若 300 iterations 后 seed=43 仍大量 `infeasible_precheck`，则进入 M6，优先实现 deadline-critical compute-aware relocate / contact restructure，而不是继续增加迭代数。
