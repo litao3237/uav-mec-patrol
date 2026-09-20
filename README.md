@@ -1,18 +1,18 @@
 # UAV-MEC Patrol Research Codebase
 
-> 面向“大型林区固定监测节点周期巡护下的多无人机协同边缘计算”场景的研究代码。  
+> 面向“大型林区固定监测节点周期巡护下的多无人机协同边缘计算”场景。  
 > 当前主线：**Route–Contact–Offloading–Resource Coupling**。
 
-## 0. README 用法：任务清单 + 研究路线图
+## 0. README 的用途
 
-本 README 不仅用于说明如何运行代码，也作为论文第一项工作的**长期任务清单、阶段记录和开发参考**。
+本 README 同时作为项目说明、论文第一项工作的整体路线图、开发任务清单、实验进度记录和下一步工作的参考入口。
 
 状态约定：
 
 - [x] 已完成并通过当前验证；
-- [ ] **[VERIFY]** 已实现，但还需要本地实验/回归测试确认；
+- [ ] **[VERIFY]** 已实现，但仍需本地实验或回归测试确认；
 - [ ] **[TODO]** 尚未实现；
-- [ ] **[OPTIONAL]** 只有实验表明确有收益时才加入。
+- [ ] **[OPTIONAL]** 仅在实验表明确有收益时加入。
 
 当前代码版本：**v0.5.0**  
 主开发分支：**develop**
@@ -23,47 +23,39 @@
 
 论文场景：
 
-[
-oxed{	ext{大型林区固定监测节点周期巡护下的多无人机协同边缘计算}}
-]
+\[
+\boxed{\text{大型林区固定监测节点周期巡护下的多无人机协同边缘计算}}
+\]
 
 系统链路：
 
-[
-	ext{固定监测节点}
-ightarrow
-	ext{多 UAV 巡护/采集/缓存/携带/有限机载计算}
-ightarrow
-	ext{稀疏异构 MEC 边缘站}
-]
+\[
+\text{固定监测节点}
+\rightarrow
+\text{多 UAV 巡护/采集/缓存/携带/有限机载计算}
+\rightarrow
+\text{稀疏异构 MEC 边缘站}
+\]
 
 核心机制：
 
-[
-oxed{	ext{空间间歇边缘连接 / Contact Opportunity}}
-]
+\[
+\boxed{\text{空间间歇边缘连接 / Contact Opportunity}}
+\]
 
 核心耦合：
 
-[
-oxed{	ext{Route–Contact–Offloading–Resource Coupling}}
-]
+\[
+\boxed{\text{Route–Contact–Offloading–Resource Coupling}}
+\]
 
 主目标：
 
-[
-oxed{min E_{mathrm{UAV}}^{mathrm{tot}}}
-]
+\[
+\boxed{\min E_{\mathrm{UAV}}^{\mathrm{tot}}}
+\]
 
-主要约束：
-
-- 单任务 deadline；
-- 平均任务时延；
-- UAV 周期返航约束；
-- UAV 电池约束；
-- MEC 带宽容量；
-- MEC CPU 容量；
-- Store–Carry–Batch-Offload 时序与 FIFO/EDF 约束。
+主要约束包括任务 deadline、平均任务时延、UAV 周期返航、UAV 电池、MEC 带宽容量、MEC CPU 容量、Store–Carry–Batch-Offload 时序、UAV 本地 FIFO，以及 MEC 虚拟队列 FIFO + 批内 EDF。
 
 工作标题：
 
@@ -73,71 +65,70 @@
 
 # 2. 总体求解架构
 
-完整问题拆成：
+完整问题：
 
-[
-(P1):quad
-min_{mathbf D,mathbf R}
-E_{mathrm{UAV}}(mathbf D,mathbf R)
-]
+\[
+(P1):\quad
+\min_{\mathbf D,\mathbf R}
+E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
+\]
 
-其中离散变量：
+离散变量：
 
-[
-mathbf D=
-{	ext{UAV assignment, route, contact, Local/MEC, batch}}
-]
+\[
+\mathbf D=
+\{\text{UAV assignment, route, contact, Local/MEC, batch}\}
+\]
 
 连续资源变量：
 
-[
-mathbf R=
-{	ext{UAV CPU, MEC bandwidth, MEC CPU, upload time, event times}}
-]
+\[
+\mathbf R=
+\{\text{UAV CPU, MEC bandwidth, MEC CPU, upload/event times}\}
+\]
 
-采用：
+固定离散解后的资源价值函数：
 
-[
-V(mathbf D)
+\[
+V(\mathbf D)
 =
-min_{mathbf Rinmathcal R(mathbf D)}
-E_{mathrm{UAV}}(mathbf D,mathbf R)
-]
+\min_{\mathbf R\in\mathcal R(\mathbf D)}
+E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
+\]
 
-外层：
+因此：
 
-[
-(P1-D):quad min_{mathbf D}V(mathbf D)
-]
+\[
+(P1-D):\quad \min_{\mathbf D}V(\mathbf D)
+\]
 
-内层：
-
-[
-(P1-Rmidmathbf D):quad min_{mathbf R}E_{mathrm{UAV}}
-]
+\[
+(P1-R\mid\mathbf D):\quad
+\min_{\mathbf R}E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
+\]
 
 目标算法结构：
 
-[
-oxed{
-	ext{Greedy Route Seed}
-ightarrow
-	ext{MEC Contact/Offloading Repair}
-ightarrow
-	ext{Problem-Specific ALNS}
-ightarrow
-	ext{KKT Resource Recourse}
+\[
+\boxed{
+\text{Greedy Route Seed}
+\rightarrow
+\text{MEC Contact/Offloading Repair}
+\rightarrow
+\text{Problem-Specific ALNS}
+\rightarrow
+\text{KKT Resource Recourse}
 }
-]
+\]
 
-定位说明：
+角色说明：
 
-- **Greedy**：主要用于初始解构造，也可额外作为 Greedy-only baseline；
-- **VRP**：是路径子问题的结构，不是一种算法；
-- **ALNS**：主元启发式搜索框架；
-- **ACO / GA**：可作为外部元启发式 baseline，不属于当前主算法；
-- **KKT / Convex**：负责固定离散解后的连续资源优化；
-- **Chaos perturbation**：当前不加入，除非后续实验显示 ALNS 对初始解高度敏感。
+- **Greedy**：主要是初始解构造器，也可作为 Greedy-only baseline；
+- **VRP**：描述路径子问题结构，不是一种具体算法；
+- **ALNS**：外层主元启发式；
+- **ACO / GA**：可作为独立的元启发式 baseline；
+- **KKT / Convex**：固定离散解后的连续资源优化；
+- **Chaos perturbation**：当前不加入，只有在初始化敏感性实验表明确有收益时再考虑。
 
 ---
 
@@ -145,31 +136,32 @@ E_{mathrm{UAV}}(mathbf D,mathbf R)
 
 ## M0. 场景与数学模型
 
-- [x] 锁定大型林区固定监测节点周期巡护场景；
-- [x] 固定多 UAV + 稀疏异构固定 MEC 架构；
-- [x] 固定 Store–Carry–Batch-Offload 机制；
-- [x] 固定周期内准静态带宽/CPU 切片；
-- [x] 固定 UAV 本地 FIFO；
-- [x] 固定 MEC 同 UAV/MEC 虚拟队列 FIFO、批内 EDF；
-- [x] 明确 UAV 无需等待 MEC 完成计算；
-- [x] 明确主目标为 UAV 总能耗最小化；
+- [x] 固定林区监测节点周期巡护场景；
+- [x] 多 UAV + 稀疏异构固定 MEC；
+- [x] Store–Carry–Batch-Offload；
+- [x] 周期内准静态带宽/CPU 切片；
+- [x] UAV 本地 FIFO；
+- [x] MEC 同 UAV/MEC 虚拟 FIFO；
+- [x] 批内 EDF；
+- [x] UAV 不等待 MEC 计算完成；
+- [x] 主目标为 UAV 总能耗最小化；
 - [x] 完成 P1-D / P1-R 分解。
 
 ---
 
 ## M1. P1-R 连续资源层
 
-### 模型
+### 已完成模型
 
 - [x] Event timeline；
 - [x] Local FIFO；
 - [x] MEC FIFO / EDF；
-- [x] upload epigraph；
+- [x] upload time；
 - [x] bandwidth capacity；
 - [x] MEC CPU capacity；
 - [x] deadline / avg-delay / cycle / battery；
-- [x] CVXPY DCP 参考模型；
-- [x] optimistic infeasibility precheck。
+- [x] CVXPY DCP oracle；
+- [x] optimistic feasibility precheck。
 
 ### KKT / Dual Solver
 
@@ -177,125 +169,131 @@ E_{mathrm{UAV}}(mathbf D,mathbf R)
 - [x] MEC CPU square-root KKT；
 - [x] bandwidth dual price + bisection；
 - [x] event-graph shadow-price backward propagation；
-- [x] KKT stationarity verifier；
-- [x] primal feasibility；
-- [x] dual feasibility；
-- [x] complementary slackness；
+- [x] stationarity / primal / dual / complementarity diagnostics；
 - [x] complementarity-aware stopping rule；
-- [x] lexicographic Stage-2 保留在 CVXPY oracle。
+- [x] Stage-2 仍由 CVXPY oracle 负责。
 
-### 已验证结果
+### 已验证的小规模 / stress 结果
 
-当前 hard-regime stress validation 中，所有可行测试均与 CVXPY Stage-1 高度一致：
+此前 hard-regime validation：
 
-[
-oxed{
-max 	ext{ relative energy gap}
+\[
+\max \text{ relative Stage-1 energy gap}
 =
-1.233	imes 10^{-9}
-}
-]
+1.233\times 10^{-9}
+\]
 
-当前记录：
+记录：
 
-- max KKT stationarity residual: (7.13	imes10^{-12})
-- max primal residual: (1.876	imes10^{-3})
-- max dual residual: (0)
-- two-MEC 场景相对能耗 gap: (9.755	imes10^{-12})
-
-结论：
-
-[
-oxed{	ext{P1-R 已冻结}}
-]
+- max stationarity residual: \(7.13\times10^{-12}\)
+- max primal residual: \(1.876\times10^{-3}\)
+- max dual residual: \(0\)
+- two-MEC relative gap: \(9.755\times10^{-12}\)
 
 当前定位：
 
-[
-oxed{	ext{CVXPY = correctness oracle}}
-]
+\[
+\boxed{\text{CVXPY = correctness oracle}}
+\]
 
-[
-oxed{	ext{KKT = outer-search resource evaluator}}
-]
+\[
+\boxed{\text{KKT = intended outer-search evaluator}}
+\]
+
+### 当前新增问题：paper-scale primal recovery
+
+Paper-scale MEC-repaired 解已经存在**明确的构造式可行资源点**，但原 KKT dual iteration 仍可能在 3000 次迭代内没有重新进入可行域，从而错误返回：
+
+~~~text
+kkt_no_feasible_iterate
+~~~
+
+这不能直接解释为 P1-R 数学不可行，更可能是 paper-scale dual/primal recovery 的数值问题。
+
+已加入修复：
+
+- [ ] **[VERIFY]** KKT 保留初始 equal-share / max-local-CPU 的已验证可行 primal seed；
+- [ ] **[VERIFY]** 若 dual iteration 未恢复可行点，则返回 feasible_seed，而不是错误的 kkt_no_feasible_iterate；
+- [ ] **[TODO]** 用 CVXPY oracle 测量 feasible_seed 与真正 Stage-1 optimum 的 gap；
+- [ ] **[TODO]** 根据 gap 决定是否需要 dual warm start、primal averaging 或更稳健 primal recovery。
+
+因此：
+
+> **P1-R 数学模型和小规模 KKT 推导保持冻结，但 paper-scale KKT 数值收敛仍需继续验证。**
 
 ---
 
 ## M2. Paper-scale Instance Generator
 
 - [x] 1000 m × 1000 m 林区；
-- [x] (K=30/50/80/100)；
-- [x] (M=3/5/8)；
-- [x] (E=2/3/4)；
+- [x] \(K=30/50/80/100\)；
+- [x] \(M=3/5/8\)；
+- [x] \(E=2/3/4\)；
 - [x] fixed heterogeneous MEC sites；
-- [x] MEC 连续覆盖区域离散为 candidate contact points；
+- [x] MEC coverage candidate points；
 - [x] seed-controlled monitoring nodes；
-- [x] seed-controlled task size / cycles-per-bit；
-- [x] optimistic individual-deadline lower-bound guard；
+- [x] task data / workload generator；
+- [x] optimistic individual-deadline lower bound；
 - [x] reproducibility tests；
-- [x] geometry/range regression tests。
+- [x] geometry/range tests。
 
-已完成 sanity scan：
+当前 sanity：
 
-| K | M | E | Contacts | Mean data (MB) | Mean workload (Gcy) | Mean deadline (s) |
+| K | M | E | Contacts | Mean data MB | Mean workload Gcy | Mean deadline s |
 |---:|---:|---:|---:|---:|---:|---:|
 | 30 | 5 | 3 | 37 | 2.501 | 20.529 | 324.67 |
 | 50 | 5 | 3 | 37 | 2.476 | 19.983 | 329.23 |
 | 80 | 5 | 3 | 37 | 2.511 | 20.063 | 336.58 |
 | 100 | 5 | 3 | 37 | 2.486 | 20.013 | 336.15 |
 
-注意：当前 cycle、avg-delay、deadline 区间、MEC 坐标等仍属于**实验校准参数**，不是理论常数。
+当前 cycle、avg-delay、deadline 区间、MEC 坐标等仍是待 non-degeneracy 校准的实验参数。
 
 ---
 
 ## M3. Greedy Initial Route
 
-当前 Greedy 的定位：
+定位：
 
-[
-oxed{	ext{初始解构造器}}
-]
+\[
+\boxed{\text{Greedy = 初始解构造器}}
+\]
 
-实现结构：
+实现：
 
-[
-	ext{Parallel Greedy Insertion}
-ightarrow
-	ext{2-opt}
-]
+\[
+\text{Parallel Greedy Insertion}
+\rightarrow
+\text{2-opt}
+\]
 
 - [x] Task-to-UAV assignment；
 - [x] deadline-aware insertion；
 - [x] cycle-aware insertion；
-- [x] route-distance insertion cost；
+- [x] route-distance insertion；
 - [x] route-local 2-opt；
 - [x] deterministic construction；
-- [x] solution validity；
-- [x] all-local initial seed。
+- [x] valid all-local seed。
 
-当前 paper-scale 路由 sanity：
+当前 paper-scale 路由结果：
 
-| K | Total km | Max return (s) | Cycle overflow (s) | Tasks/UAV [min,max] |
+| K | Total km | Max return s | Cycle overflow s | Tasks/UAV [min,max] |
 |---:|---:|---:|---:|---:|
 | 30 | 10.187 | 231.37 | 0.00 | [3,14] |
 | 50 | 11.277 | 246.22 | 0.00 | [4,17] |
 | 80 | 12.853 | 292.04 | 0.00 | [9,21] |
 | 100 | 13.485 | 304.82 | 0.00 | [12,24] |
 
-重要观察：
+关键观察：
 
-[
-oxed{	ext{路径层可行} 
-otRightarrow 	ext{计算层可行}}
-]
+\[
+\boxed{
+\text{几何路径可行}
+\not\Rightarrow
+\text{计算/QoS 可行}
+}
+\]
 
-K=30/50 的 all-local seed 均出现：
-
-[
-	exttt{kkt_no_feasible_iterate}
-]
-
-说明瓶颈主要来自 local FIFO / deadline / avg-delay，而不是纯巡护路径。
+K=30/50 的 all-local 解会产生明显 local FIFO / deadline 压力。
 
 ---
 
@@ -303,127 +301,120 @@ K=30/50 的 all-local seed 均出现：
 
 目标：
 
-[
-	ext{All-Local Seed}
-ightarrow
-	ext{Critical Task Detection}
-ightarrow
-	ext{Local}ightarrow	ext{MEC}
-ightarrow
-	ext{Contact Insertion / Reuse}
-]
+\[
+\text{All-Local}
+\rightarrow
+\text{Critical Task Detection}
+\rightarrow
+\text{Local}\rightarrow\text{MEC}
+\rightarrow
+\text{Contact Insertion / Reuse}
+\]
 
 当前实现：
 
-- [ ] **[VERIFY]** critical-local-task detection；
-- [ ] **[VERIFY]** equal-share resource proxy；
-- [ ] **[VERIFY]** normalized infeasibility ranking；
-- [ ] **[VERIFY]** Local→MEC mode switch；
-- [ ] **[VERIFY]** new contact insertion；
-- [ ] **[VERIFY]** reuse existing later contact；
-- [ ] **[VERIFY]** Store–Carry–Batch-Offload；
-- [ ] **[VERIFY]** per-MEC candidate preservation；
-- [ ] **[VERIFY]** deterministic MEC repair；
-- [ ] **[VERIFY]** final exact KKT feasibility check。
+- [x] critical-local-task detection；
+- [x] equal-share capacity-feasible resource proxy；
+- [x] normalized infeasibility ranking；
+- [x] Local→MEC；
+- [x] new contact insertion；
+- [x] reuse existing later contact；
+- [x] Store–Carry–Batch-Offload；
+- [x] per-MEC candidate preservation；
+- [x] deterministic MEC repair；
+- [ ] **[VERIFY]** exact CVX/KKT Stage-1 comparison on repaired paper-scale states。
 
-当前待跑：
+当前实测：
 
-```powershell
-uv run python experiments\run_mec_repair_sanity.py --tasks 30,50
-```
+| K | Proxy violations before | after | Contacts | Offloaded | Proxy max violation |
+|---:|---:|---:|---:|---:|---:|
+| 30 | 2 | 0 | 1 | 1 | 0 |
+| 50 | 4 | 0 | 1 | 2 | 0 |
 
-关键判据：
+说明 MEC repair 已经能够用很少的 offloading/contact 动作把构造式 resource proxy 恢复到可行。
 
-[
-oxed{
-	ext{all-local infeasible}
-ightarrow
-	ext{MEC-repaired feasible}
-}
-]
+但原 KKT dual iteration 在这两个解上均跑满 3000 次而未产生可行 iterate，因此当前优先排查 KKT paper-scale primal recovery，而不是继续盲目增加 offloading 数量。
 
 ---
 
 ## M5. Mature ALNS Framework Integration
 
-当前使用成熟外部包：
+使用：
 
-[
-oxed{	exttt{alns>=7.0,<8.0}}
-]
+~~~text
+alns>=7.0,<8.0
+~~~
 
-通用机制交给外部框架：
+成熟框架负责 iteration loop、adaptive operator selection、RouletteWheel、Record-to-Record Travel 和 stopping criteria。
 
-- adaptive operator selection；
-- RouletteWheel；
-- Record-to-Record Travel；
-- stopping criteria；
-- iteration loop。
+### Destroy
 
-项目自身只实现领域相关逻辑。
+- [x] random task removal；
+- [x] deadline/compute-critical removal；
+- [x] route-segment removal。
 
-### 当前已实现但待本地验证
+### Repair
 
-Destroy：
+- [x] cheapest insertion；
+- [x] regret-2 insertion；
+- [x] route repair 后继续 MEC repair。
 
-- [ ] **[VERIFY]** random task removal；
-- [ ] **[VERIFY]** deadline/compute-critical removal；
-- [ ] **[VERIFY]** route-segment removal。
+### Objective / State
 
-Repair：
+- [x] ProxyObjectiveEvaluator；
+- [ ] **[VERIFY]** KKTObjectiveEvaluator on paper-scale；
+- [x] solution-signature cache；
+- [x] finite infeasibility penalty；
+- [x] partial destroyed-state support；
+- [x] ALNS v7 operator metadata compatibility。
 
-- [ ] **[VERIFY]** cheapest insertion；
-- [ ] **[VERIFY]** regret-2 insertion；
-- [ ] **[VERIFY]** route repair 后 MEC repair。
+### 当前 proxy smoke test
 
-Objective：
+K=30, 30 iterations：
 
-- [ ] **[VERIFY]** ProxyObjectiveEvaluator；
-- [ ] **[VERIFY]** KKTObjectiveEvaluator；
-- [ ] **[VERIFY]** solution-signature cache；
-- [ ] **[VERIFY]** finite infeasibility penalty。
+~~~text
+initial proxy objective = 190059.701
+best proxy objective    = 116581.701
+proxy improvement       = 38.660%
+contacts                = 2
+evaluator calls         = 31
+cache hits              = 17
+runtime                 = 1.44 s
+~~~
 
-Runner：
+说明：
 
-- [ ] **[VERIFY]** external ALNS integration；
-- [ ] **[VERIFY]** valid best-state return；
-- [ ] **[VERIFY]** exact final KKT validation。
+\[
+\boxed{\text{destroy} \rightarrow \text{repair} \rightarrow \text{ALNS acceptance/adaptation}}
+\]
 
-当前 smoke-test：
+这条外层链路已经能正常工作。
 
-```powershell
-uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --objective proxy
-```
-
-然后：
-
-```powershell
-uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 10 --objective kkt
-```
+但 **38.660% 目前只能解释为 proxy objective 改善**，不能写成“真实最优 UAV 能耗降低 38.660%”，因为最终 KKT paper-scale recourse 尚未收敛验证。
 
 ---
 
 ## M6. Problem-Specific ALNS Operators
 
-这是后续论文算法的核心开发区。
+后续论文算法重点。
 
-### Route operators
+### Route
 
 - [ ] **[TODO]** relocate；
 - [ ] **[TODO]** swap；
-- [ ] **[TODO]** inter-route 2-opt / segment exchange；
+- [ ] **[TODO]** inter-route segment exchange；
 - [ ] **[TODO]** compute-aware relocate；
 - [ ] **[TODO]** deadline-critical route repair。
 
-### Contact operators
+### Contact
 
 - [ ] **[TODO]** contact insert；
 - [ ] **[TODO]** contact remove；
 - [ ] **[TODO]** contact replace；
 - [ ] **[TODO]** candidate-point shift；
-- [ ] **[TODO]** same-MEC repeated-contact restructuring。
+- [ ] **[TODO]** repeated same-MEC restructuring。
 
-### Batch / Offloading operators
+### Batch / Mode
 
 - [ ] **[TODO]** Local→MEC；
 - [ ] **[TODO]** MEC→Local；
@@ -432,80 +423,61 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 10 --object
 - [ ] **[TODO]** batch merge；
 - [ ] **[TODO]** batch reassign。
 
-### Resource-aware repair
+### Resource-aware
 
-- [ ] **[TODO]** deadline dual (alpha_k) guided repair；
-- [ ] **[TODO]** avg-delay dual (eta) guided repair；
-- [ ] **[TODO]** bandwidth shadow price (lambda_e^B) guided repair；
-- [ ] **[TODO]** MEC CPU shadow price (lambda_e^F) guided repair；
-- [ ] **[TODO]** congestion-aware MEC switching；
-- [ ] **[TODO]** shadow-price-assisted candidate pruning。
+- [ ] **[TODO]** deadline dual \(\alpha_k\) guided repair；
+- [ ] **[TODO]** avg-delay dual \(\beta\) guided repair；
+- [ ] **[TODO]** bandwidth shadow price \(\lambda_e^B\)；
+- [ ] **[TODO]** MEC CPU shadow price \(\lambda_e^F\)；
+- [ ] **[TODO]** congestion-aware MEC switch；
+- [ ] **[TODO]** dual-aware candidate pruning。
 
 ---
 
-## M7. Local Search Layer
+## M7. Local Search
 
 - [ ] **[TODO]** route-only local search；
 - [ ] **[TODO]** contact-only local search；
-- [ ] **[TODO]** Local/MEC mode local search；
+- [ ] **[TODO]** mode local search；
 - [ ] **[TODO]** mixed neighborhood；
-- [ ] **[TODO]** first-improvement / best-improvement comparison；
-- [ ] **[TODO]** runtime profile。
-
-Local Search 既可以：
-
-1. 单独作为 baseline；
-2. 用于 ALNS repair 后的 intensification。
+- [ ] **[TODO]** intensification after ALNS repair。
 
 ---
 
-## M8. Baseline Algorithms
-
-计划至少包含：
+## M8. Baselines
 
 - [ ] **[TODO]** Greedy-only；
-- [ ] **[TODO]** Route-only + KKT；
 - [ ] **[TODO]** Local-only；
-- [ ] **[TODO]** nearest-MEC offloading；
-- [ ] **[TODO]** mature VRP routing baseline（优先考虑 PyVRP）；
-- [ ] **[TODO]** generic metaheuristic baseline（ACO 或 GA 中至少一个）；
+- [ ] **[TODO]** Route-only + resource allocation；
+- [ ] **[TODO]** nearest-MEC；
+- [ ] **[TODO]** mature VRP baseline（优先考虑 PyVRP）；
+- [ ] **[TODO]** ACO 或 GA 中至少一个；
 - [ ] **[TODO]** Proposed ALNS + KKT。
-
-说明：
-
-- Greedy 是初始解构造器，但“停在 Greedy 阶段”可以额外定义为 Greedy-only baseline；
-- ACO 与 Greedy、ALNS 是不同算法；
-- PyVRP 主要用于 routing baseline，而不是替代 Route–Contact–Offloading 联合搜索。
 
 ---
 
 ## M9. Small Exact / Strong Benchmark
 
-- [ ] **[TODO]** (K=8sim12) 小规模 exact/near-exact benchmark；
-- [ ] **[TODO]** Gurobi/SCIP/GBD 可行性评估；
-- [ ] **[TODO]** optimality-gap comparison；
-- [ ] **[TODO]** heuristic quality validation。
+- [ ] **[TODO]** \(K=8\sim12\) exact/near-exact benchmark；
+- [ ] **[TODO]** Gurobi / SCIP / GBD feasibility；
+- [ ] **[TODO]** optimality-gap comparison。
 
 ---
 
-## M10. Experiment Calibration / Non-degeneracy
+## M10. Non-degeneracy / Parameter Calibration
 
-需要确保问题既不是“全部本地最优”，也不是“全部卸载最优”。
-
-- [ ] **[TODO]** Local-only feasibility rate；
-- [ ] **[TODO]** Offload ratio；
-- [ ] **[TODO]** average deadline utilization；
+- [ ] **[TODO]** Local-only feasibility；
+- [ ] **[TODO]** offload ratio；
+- [ ] **[TODO]** deadline utilization；
+- [ ] **[TODO]** avg-delay utilization；
 - [ ] **[TODO]** cycle utilization；
 - [ ] **[TODO]** battery utilization；
-- [ ] **[TODO]** MEC bandwidth utilization；
-- [ ] **[TODO]** MEC CPU utilization；
-- [ ] **[TODO]** contact count / UAV；
-- [ ] **[TODO]** repeated same-MEC contacts；
-- [ ] **[TODO]** route detour caused by MEC；
-- [ ] **[TODO]** nearest-MEC 与 resource-aware MEC 选择差异；
-- [ ] **[TODO]** (T^{cycle}) calibration；
-- [ ] **[TODO]** avg-delay budget calibration；
-- [ ] **[TODO]** deadline distribution calibration。
+- [ ] **[TODO]** MEC bandwidth / CPU utilization；
+- [ ] **[TODO]** contacts/UAV；
+- [ ] **[TODO]** MEC selection distribution；
+- [ ] **[TODO]** route detour caused by contacts；
+- [ ] **[TODO]** nearest-MEC vs resource-aware MEC；
+- [ ] **[TODO]** final cycle/deadline/avg-delay calibration。
 
 ---
 
@@ -513,47 +485,41 @@ Local Search 既可以：
 
 ### Scale
 
-- [ ] **[TODO]** (K=30,50,80,100)；
-- [ ] **[TODO]** (M=3,5,8)；
-- [ ] **[TODO]** (E=2,3,4)。
+- [ ] **[TODO]** \(K=30,50,80,100\)；
+- [ ] **[TODO]** \(M=3,5,8\)；
+- [ ] **[TODO]** \(E=2,3,4\)。
 
-### Performance
+### Metrics
 
 - [ ] **[TODO]** total UAV energy；
-- [ ] **[TODO]** average task delay；
-- [ ] **[TODO]** worst deadline slack；
+- [ ] **[TODO]** average delay；
+- [ ] **[TODO]** deadline slack；
 - [ ] **[TODO]** route distance；
-- [ ] **[TODO]** contact count；
+- [ ] **[TODO]** contacts；
 - [ ] **[TODO]** offload ratio；
 - [ ] **[TODO]** runtime；
-- [ ] **[TODO]** convergence curve；
+- [ ] **[TODO]** convergence；
 - [ ] **[TODO]** feasibility rate。
 
 ### Ablation
 
 - [ ] **[TODO]** without contact-specific operators；
 - [ ] **[TODO]** without batch-aware repair；
-- [ ] **[TODO]** without KKT dual guidance；
+- [ ] **[TODO]** without dual guidance；
 - [ ] **[TODO]** without adaptive operator selection；
-- [ ] **[TODO]** Greedy initialization vs random initialization；
-- [ ] **[OPTIONAL]** chaos initialization，仅在初始化敏感性明显时评估。
+- [ ] **[TODO]** Greedy vs random initialization；
+- [ ] **[OPTIONAL]** chaos initialization。
 
 ---
 
 # 4. 当前代码结构
 
-```text
+~~~text
 uav-mec-patrol/
 ├── configs/
-│   ├── small.yaml
-│   └── baseline.yaml
 ├── src/uav_mec/
 │   ├── domain/
 │   ├── instances/
-│   │   ├── small.py
-│   │   ├── random_validation.py
-│   │   ├── stress_validation.py
-│   │   └── paper_scale.py
 │   ├── evaluation/
 │   ├── optimization/resource/
 │   │   ├── cvx_solver.py
@@ -575,160 +541,136 @@ uav-mec-patrol/
 ├── tests/
 ├── outputs/
 └── CHANGELOG_v*.md
-```
+~~~
 
 ---
 
-# 5. 环境与常用命令
+# 5. 常用命令
 
-安装/同步：
+同步环境：
 
-```powershell
+~~~powershell
 uv sync --dev
-```
+~~~
 
-全部测试：
+测试：
 
-```powershell
+~~~powershell
 uv run pytest
-```
+~~~
 
-Windows hardlink warning 不影响正确性。如需关闭：
+Windows hardlink warning 不影响正确性。可选：
 
-```powershell
+~~~powershell
 $env:UV_LINK_MODE="copy"
-```
+~~~
 
----
+资源 stress validation：
 
-# 6. 已有验证脚本
-
-P1-R small validation：
-
-```powershell
-uv run python experiments\run_small_validation.py
-```
-
-CVX/KKT cross validation：
-
-```powershell
-uv run python experiments\run_kkt_cross_validation.py --seeds 30
-```
-
-Hard-regime resource validation：
-
-```powershell
+~~~powershell
 uv run python experiments\run_resource_stress_validation.py
-```
+~~~
 
 Paper-scale generator：
 
-```powershell
+~~~powershell
 uv run python experiments\run_instance_sanity.py
-```
+~~~
 
-Greedy route seed：
+Greedy route：
 
-```powershell
+~~~powershell
 uv run python experiments\run_initial_solution_sanity.py --tasks 30,50,80,100
-```
-
-Greedy all-local + KKT：
-
-```powershell
-uv run python experiments\run_initial_solution_sanity.py --tasks 30,50 --solve-resources
-```
+~~~
 
 MEC repair：
 
-```powershell
+~~~powershell
 uv run python experiments\run_mec_repair_sanity.py --tasks 30,50
-```
+~~~
 
-ALNS proxy smoke test：
+MEC repair + CVXPY oracle：
 
-```powershell
+~~~powershell
+uv run python experiments\run_mec_repair_sanity.py --tasks 30 --cvx-check
+~~~
+
+ALNS proxy：
+
+~~~powershell
 uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --objective proxy
-```
-
-ALNS exact-KKT smoke test：
-
-```powershell
-uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 10 --objective kkt
-```
+~~~
 
 ---
 
-# 7. 当前“下一步”清单
+# 6. 当前最高优先级任务
 
-按优先级执行：
+当前**不要继续堆新的 ALNS 算子**，先把 resource recourse 在 paper-scale 上确认清楚。
 
-1. [ ] **[VERIFY]** 拉取 v0.5.0 后运行 `uv sync --dev`；
-2. [ ] **[VERIFY]** 运行完整 pytest；
-3. [ ] **[VERIFY]** 跑 `run_mec_repair_sanity.py --tasks 30,50`；
-4. [ ] **[VERIFY]** 跑 ALNS proxy smoke test；
-5. [ ] **[VERIFY]** 跑 ALNS KKT smoke test；
-6. [ ] **[TODO]** 根据结果决定是否先修 MEC repair；
-7. [ ] **[TODO]** 加 Contact Remove/Replace/Shift；
-8. [ ] **[TODO]** 加 Batch Split/Merge/Reassign；
-9. [ ] **[TODO]** 加 KKT dual-guided repair；
-10. [ ] **[TODO]** 做 non-degeneracy scan；
-11. [ ] **[TODO]** 冻结最终 baseline 参数；
-12. [ ] **[TODO]** 跑主实验、消融和 baseline comparison。
+执行顺序：
 
----
+1. [ ] **[VERIFY]** git pull；
+2. [ ] **[VERIFY]** uv run pytest；
+3. [ ] **[VERIFY]** 重跑 K=30/50 MEC repair，确认 KKT 现在至少保留 feasible_seed；
+4. [ ] **[VERIFY]** 对 K=30 执行 --cvx-check；
+5. [ ] **[TODO]** 比较 proxy/feasible-seed energy、CVXPY Stage-1 optimum 和相对 gap；
+6. [ ] **[TODO]** 如果 seed gap 很小：可暂时用 seed fallback 继续外层开发；
+7. [ ] **[TODO]** 如果 seed gap 很大：优先增强 KKT primal recovery；
+8. [ ] **[TODO]** KKT paper-scale 稳定后再进入 Contact / Batch / Dual-guided operators。
 
-# 8. 研究开发原则
+暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
-1. **不为了“看起来复杂”而堆算法模块。**
-2. 通用算法机制优先复用成熟实现。
-3. 论文贡献集中在问题特定结构：
-   - route-dependent intermittent MEC contact；
-   - Store–Carry–Batch-Offload；
-   - contact/batch/mode joint operators；
-   - KKT resource recourse；
-   - shadow-price-aware repair。
-4. Greedy、ACO、ALNS、VRP 必须区分层级与角色。
-5. Chaos perturbation 只有在实验显示初始化敏感性时才考虑。
-6. 所有新增模块都要通过：
-   - validity test；
-   - numerical sanity；
-   - ablation；
-   - runtime/benefit comparison。
-7. 每次参数调整都要有 non-degeneracy 或实验依据，避免人为制造“算法优势”。
-
----
-
-# 9. 当前阶段结论
-
-已经完成并基本冻结：
-
-[
-oxed{	ext{System Model}}
-]
-
-[
-oxed{	ext{P1-R Convex/KKT Resource Layer}}
-]
-
-[
-oxed{	ext{Paper-scale Instance Generator}}
-]
-
-[
-oxed{	ext{Greedy Route Initializer}}
-]
-
-当前正在打通：
-
-[
-oxed{
-	ext{MEC Repair}
-ightarrow
-	ext{ALNS}
-ightarrow
-	ext{KKT}
+\[
+\boxed{
+\text{paper-scale fixed } \mathbf D
+\text{ 下，KKT recourse 能否稳定恢复接近 CVX optimum 的 primal 解}
 }
-]
+\]
 
-当 v0.5.0 smoke tests 全部通过后，下一阶段重点将不再是搭框架，而是实现和验证真正的问题特定算子。
+---
+
+# 7. 研究开发原则
+
+1. 不为了“复杂”而堆算法模块；
+2. 通用机制优先复用成熟库；
+3. 创新集中在问题特定结构；
+4. Greedy / ACO / ALNS / VRP 明确区分层级；
+5. Chaos 只有有实验依据才加入；
+6. 所有新模块必须做 validity / sanity / ablation；
+7. 参数调整必须有 non-degeneracy 依据；
+8. **Proxy improvement 不等价于 final optimal-energy improvement**；
+9. **Solver failure 不等价于 mathematical infeasibility**。
+
+---
+
+# 8. 当前阶段结论
+
+已完成：
+
+\[
+\boxed{\text{System Model}}
+\]
+
+\[
+\boxed{\text{Paper-scale Generator}}
+\]
+
+\[
+\boxed{\text{Greedy Route Initializer}}
+\]
+
+\[
+\boxed{\text{MEC Proxy Repair}}
+\]
+
+\[
+\boxed{\text{External ALNS Structural Integration}}
+\]
+
+当前主要 blocker：
+
+\[
+\boxed{\text{Paper-scale KKT primal recovery / convergence}}
+\]
+
+解决该问题后，再进入真正的问题特定 ALNS 算子阶段。
