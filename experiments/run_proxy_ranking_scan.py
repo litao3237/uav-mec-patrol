@@ -104,7 +104,7 @@ def _evaluate_candidate(instance, solution) -> dict[str, Any]:
     info = build_event_info(instance, solution)
 
     t0 = perf_counter()
-    cvx = CVXResourceSolver().solve(instance, solution, info)
+    cvx = CVXResourceSolver(run_stage2=False).solve(instance, solution, info)
     cvx_runtime = perf_counter() - t0
 
     gap = None
