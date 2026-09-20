@@ -11,6 +11,10 @@ from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
+from uav_mec.optimization.resource import (
+    KKTResourceSolverConfig,
+    solve_kkt_resource_problem,
+)
 
 
 def test_mec_repair_returns_valid_solution_and_never_worsens_proxy() -> None:
@@ -87,3 +91,36 @@ def test_mec_repair_is_deterministic() -> None:
     }
     assert a.task_decisions == b.task_decisions
     assert a.contact_visits == b.contact_visits
+
+
+def test_kkt_never_discards_a_constructive_feasible_seed() -> None:
+    cfg = load_paper_scale_config()
+    instance = build_paper_scale_instance(
+        cfg,
+        num_tasks=30,
+        scenario_seed=42,
+    )
+    base = build_greedy_initial_solution(instance)
+    repaired = build_mec_assisted_initial_solution(
+        instance,
+        base_solution=base,
+    )
+
+    proxy = evaluate_initial_proxy(instance, repaired)
+    assert proxy.score.violated_constraints == 0
+
+    # One iteration is deliberately too short for dual convergence. The KKT
+    # solver must still preserve the already verified feasible primal seed
+    # instead of incorrectly reporting that no feasible iterate exists.
+    result = solve_kkt_resource_problem(
+        instance,
+        repaired,
+        config=KKTResourceSolverConfig(
+            max_iterations=1,
+            min_iterations=1,
+            convergence_patience=1,
+        ),
+    )
+
+    assert result.feasible
+    assert result.diagnostics.get("initial_seed_feasible") is True
