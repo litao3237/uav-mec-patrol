@@ -94,6 +94,10 @@ def _run_case(name, instance, solution) -> dict[str, Any]:
                     kkt.diagnostics.get("battery_violation_j")
                 ),
                 "kkt_stationarity_residual": kkt_report.get("max_abs_stationarity_residual"),
+                "kkt_primal_residual": kkt_report.get("max_primal_violation"),
+                "kkt_dual_residual": kkt_report.get("max_dual_violation"),
+                "kkt_complementarity_residual": kkt_report.get("max_abs_complementarity"),
+                "kkt_top_complementarity": kkt_report.get("top_complementarity", []),
                 "kkt_dual_avg_delay": kkt.stage1_duals.get("avg_delay", 0.0),
                 "kkt_dual_bandwidth_E1": kkt.stage1_duals.get("bandwidth_cap::E1", 0.0),
                 "kkt_dual_mec_cpu_E1": kkt.stage1_duals.get("mec_cpu_cap::E1", 0.0),
@@ -101,8 +105,10 @@ def _run_case(name, instance, solution) -> dict[str, Any]:
         )
 
     if cvx.feasible and kkt.feasible:
+        absolute_gap = abs(kkt.energy_stage1_j - cvx.energy_stage1_j)
         denom = max(1.0, abs(cvx.energy_stage1_j))
-        row["relative_energy_gap"] = abs(kkt.energy_stage1_j - cvx.energy_stage1_j) / denom
+        row["absolute_energy_gap_j"] = absolute_gap
+        row["relative_energy_gap"] = absolute_gap / denom
 
     return row
 
@@ -111,17 +117,19 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     print(
         "case                    cvx-status          kkt-status          rel-gap      "
-        "kkt-iters  term"
+        "abs-gap-J    kkt-iters  term"
     )
-    print("-" * 106)
+    print("-" * 120)
     for name, instance, solution in build_resource_stress_cases():
         row = _run_case(name, instance, solution)
         rows.append(row)
         gap = row.get("relative_energy_gap")
         gap_text = "-" if gap is None else f"{gap:.3e}"
+        abs_gap = row.get("absolute_energy_gap_j")
+        abs_gap_text = "-" if abs_gap is None else f"{abs_gap:.3e}"
         print(
             f"{name:<23} {row['cvx_status']:<19} {row['kkt_status']:<19} "
-            f"{gap_text:<12} {str(row.get('kkt_iterations')):<10} "
+            f"{gap_text:<12} {abs_gap_text:<12} {str(row.get('kkt_iterations')):<10} "
             f"{row.get('kkt_termination_reason')}"
         )
 
@@ -130,6 +138,12 @@ def main() -> None:
         print("\nmax relative Stage-1 energy gap:", max(r["relative_energy_gap"] for r in comparable))
         print("mean relative Stage-1 energy gap:", sum(r["relative_energy_gap"] for r in comparable) / len(comparable))
         print("max KKT stationarity residual:", max(float(r.get("kkt_stationarity_residual", 0.0)) for r in comparable))
+        print("max KKT primal residual:", max(float(r.get("kkt_primal_residual", 0.0)) for r in comparable))
+        print("max KKT dual residual:", max(float(r.get("kkt_dual_residual", 0.0)) for r in comparable))
+        print(
+            "max KKT complementarity residual:",
+            max(float(r.get("kkt_complementarity_residual", 0.0)) for r in comparable),
+        )
 
     print("\nDual activation summary:")
     for row in rows:
@@ -139,6 +153,20 @@ def main() -> None:
             f"{row['name']:<23} beta={row.get('kkt_dual_avg_delay', 0.0):.3e} "
             f"lambdaB(E1)={row.get('kkt_dual_bandwidth_E1', 0.0):.3e} "
             f"lambdaF(E1)={row.get('kkt_dual_mec_cpu_E1', 0.0):.3e}"
+        )
+
+    print("\nLargest complementarity offenders:")
+    for row in rows:
+        if not row.get("kkt_feasible"):
+            continue
+        top = row.get("kkt_top_complementarity") or []
+        if not top:
+            continue
+        item = top[0]
+        print(
+            f"{row['name']:<23} {item['name']:<36} "
+            f"dual={item['dual']:.3e} slack={item['slack']:.3e} "
+            f"product={item['dual_times_slack']:.3e}"
         )
 
     out = Path("outputs/results/resource_stress_validation.json")
