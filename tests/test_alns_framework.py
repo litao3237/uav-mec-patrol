@@ -13,6 +13,7 @@ from uav_mec.algorithms.alns import (
     DestroyConfig,
     UavMecState,
     cheapest_insertion_repair,
+    make_destroy_operators,
     random_task_removal,
 )
 from uav_mec.evaluation import validate_solution
@@ -100,3 +101,19 @@ def test_short_external_alns_run_returns_valid_best_state() -> None:
 
     validate_solution(instance, result.best_solution)
     assert result.best_objective <= result.initial_objective + 1e-9
+
+
+def test_destroy_operator_factories_preserve_function_names() -> None:
+    operators = make_destroy_operators(
+        DestroyConfig(
+            fraction=0.2,
+            min_remove=1,
+            max_remove=2,
+        )
+    )
+
+    assert operators
+    for registered_name, operator in operators:
+        assert hasattr(operator, "__name__")
+        assert operator.__name__
+        assert registered_name
