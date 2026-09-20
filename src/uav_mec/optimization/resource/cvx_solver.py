@@ -108,6 +108,7 @@ def solve_resource_problem(
     *,
     verbose: bool = False,
     energy_tol_rel: float = 1e-6,
+    run_stage2: bool = True,
 ) -> ResourceSolveResult:
     info = info or build_event_info(instance, solution)
 
@@ -177,29 +178,47 @@ def solve_resource_problem(
         for u, expr in model.return_time.items()
     }
 
-    # Lexicographic stage 2: among energy-optimal solutions, minimize MEC CPU occupation.
+    # Lexicographic stage 2: among energy-optimal solutions, minimize MEC CPU
+    # occupation. Diagnostic experiments that only need the Stage-1 energy
+    # optimum may skip this second solve; doing so avoids an unnecessarily tight
+    # energy-guarded conic problem and keeps Stage-1 oracle checks independent
+    # from Stage-2 numerical accuracy.
     tol_j = max(1e-5, energy_tol_rel * max(1.0, abs(energy_star)))
-    energy_guard = model.total_energy <= energy_star + tol_j
-    problem2 = cp.Problem(
-        cp.Minimize(model.normalized_mec_cpu),
-        model.constraints + [energy_guard],
-    )
-    solver2, stage2_errors = _solve_with_fallback(
-        problem2,
-        verbose=verbose,
-        preferred_solver=solver1,
-    )
+    solver2 = None
+    stage2_errors: list[str] = []
 
-    if solver2 is None or problem2.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
+    if run_stage2:
+        energy_guard = model.total_energy <= energy_star + tol_j
+        problem2 = cp.Problem(
+            cp.Minimize(model.normalized_mec_cpu),
+            model.constraints + [energy_guard],
+        )
+        solver2, stage2_errors = _solve_with_fallback(
+            problem2,
+            verbose=verbose,
+            preferred_solver=solver1,
+        )
+
+        if solver2 is None or problem2.status not in (
+            cp.OPTIMAL,
+            cp.OPTIMAL_INACCURATE,
+        ):
+            final_values = stage1_values
+            final_energy = energy_star
+            stage2_status = (
+                "solver_error" if solver2 is None else str(problem2.status)
+            )
+            solver_final = solver1
+        else:
+            final_values = _snapshot_vars(model.variables)
+            final_energy = _value(model.total_energy.value)
+            stage2_status = str(problem2.status)
+            solver_final = solver2
+    else:
         final_values = stage1_values
         final_energy = energy_star
-        stage2_status = "solver_error" if solver2 is None else str(problem2.status)
+        stage2_status = "skipped"
         solver_final = solver1
-    else:
-        final_values = _snapshot_vars(model.variables)
-        final_energy = _value(model.total_energy.value)
-        stage2_status = str(problem2.status)
-        solver_final = solver2
 
     diagnostics = {
         "stage1_status": str(problem1.status),
