@@ -111,6 +111,23 @@ def solve_kkt_resource_problem(
         local_cpu_ghz=local_cpu,
     )
 
+    # The equal-share / max-local-CPU resource point is a constructive primal
+    # seed. On larger paper-scale instances the dual subgradient iterations can
+    # temporarily leave the feasible set and may fail to return to it within a
+    # finite iteration budget. Never discard a resource point that has already
+    # been verified feasible: doing so would misclassify a feasible P1-R.
+    initial_seed_feasible = _is_feasible(
+        instance,
+        evaluation,
+        time_tol=cfg.feasibility_tol_s,
+        avg_tol=cfg.avg_delay_tol_s,
+        energy_tol_j=cfg.energy_tol_j,
+    )
+    seed_evaluation = evaluation
+    seed_bandwidth = dict(bandwidth)
+    seed_mec_cpu = dict(mec_cpu)
+    seed_local_cpu = dict(local_cpu)
+
     Snapshot = tuple[
         float,
         ReducedResourceEvaluation,
@@ -275,6 +292,41 @@ def solve_kkt_resource_problem(
             )
 
     if best is None:
+        if initial_seed_feasible:
+            seed_values = _snapshot_values(
+                seed_evaluation,
+                bandwidth=seed_bandwidth,
+                mec_cpu=seed_mec_cpu,
+                local_cpu=seed_local_cpu,
+            )
+            return ResourceSolveResult(
+                status="feasible_seed",
+                solver="KKT-DUAL",
+                is_dcp=True,
+                energy_stage1_j=seed_evaluation.total_energy_j,
+                energy_final_j=seed_evaluation.total_energy_j,
+                stage1_values=seed_values,
+                final_values=seed_values,
+                stage1_duals={},
+                diagnostics={
+                    "iterations": iteration,
+                    "termination_reason": "initial_feasible_seed_fallback",
+                    "converged": False,
+                    "initial_seed_feasible": True,
+                    "dual_certificate_available": False,
+                    "normalized_outer_complementarity": outer_complementarity,
+                    "avg_delay_final_s": seed_evaluation.avg_delay_s,
+                    "return_times_final_s": seed_evaluation.return_time_s,
+                    "deadline_violation_s": seed_evaluation.deadline_violation_s,
+                    "cycle_violation_s": seed_evaluation.cycle_violation_s,
+                    "battery_violation_j": seed_evaluation.battery_violation_j,
+                    "last_energy_j": evaluation.total_energy_j,
+                    "last_avg_delay_s": evaluation.avg_delay_s,
+                    "last_deadline_violation_s": evaluation.deadline_violation_s,
+                    "last_cycle_violation_s": evaluation.cycle_violation_s,
+                },
+            )
+
         return ResourceSolveResult(
             status="kkt_no_feasible_iterate",
             solver="KKT-DUAL",
@@ -285,6 +337,7 @@ def solve_kkt_resource_problem(
                 "iterations": iteration,
                 "termination_reason": termination_reason,
                 "converged": False,
+                "initial_seed_feasible": False,
                 "normalized_outer_complementarity": outer_complementarity,
                 "last_energy_j": evaluation.total_energy_j,
                 "last_avg_delay_s": evaluation.avg_delay_s,
@@ -356,6 +409,8 @@ def solve_kkt_resource_problem(
             "iterations": iteration,
             "termination_reason": termination_reason,
             "converged": converged,
+            "initial_seed_feasible": initial_seed_feasible,
+            "dual_certificate_available": True,
             "normalized_outer_complementarity": best_outer_complementarity,
             "stage2_status": "not_implemented_in_kkt_v0.3",
             "avg_delay_final_s": best_eval.avg_delay_s,
