@@ -56,6 +56,9 @@ def _run_case(name, instance, solution) -> dict[str, Any]:
         "kkt_runtime_s": kkt_time,
         "kkt_iterations": kkt.diagnostics.get("iterations"),
         "kkt_termination_reason": kkt.diagnostics.get("termination_reason"),
+        "kkt_normalized_outer_complementarity": kkt.diagnostics.get(
+            "normalized_outer_complementarity"
+        ),
     }
 
     if cvx.feasible:
@@ -117,9 +120,9 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     print(
         "case                    cvx-status          kkt-status          rel-gap      "
-        "abs-gap-J    kkt-iters  term"
+        "abs-gap-J    outer-comp   kkt-iters  term"
     )
-    print("-" * 120)
+    print("-" * 134)
     for name, instance, solution in build_resource_stress_cases():
         row = _run_case(name, instance, solution)
         rows.append(row)
@@ -127,10 +130,12 @@ def main() -> None:
         gap_text = "-" if gap is None else f"{gap:.3e}"
         abs_gap = row.get("absolute_energy_gap_j")
         abs_gap_text = "-" if abs_gap is None else f"{abs_gap:.3e}"
+        outer_comp = row.get("kkt_normalized_outer_complementarity")
+        outer_comp_text = "-" if outer_comp is None else f"{outer_comp:.3e}"
         print(
             f"{name:<23} {row['cvx_status']:<19} {row['kkt_status']:<19} "
-            f"{gap_text:<12} {abs_gap_text:<12} {str(row.get('kkt_iterations')):<10} "
-            f"{row.get('kkt_termination_reason')}"
+            f"{gap_text:<12} {abs_gap_text:<12} {outer_comp_text:<12} "
+            f"{str(row.get('kkt_iterations')):<10} {row.get('kkt_termination_reason')}"
         )
 
     comparable = [r for r in rows if "relative_energy_gap" in r]
