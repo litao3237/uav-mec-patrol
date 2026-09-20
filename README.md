@@ -210,12 +210,17 @@ kkt_no_feasible_iterate
 
 这不能直接解释为 P1-R 数学不可行，更可能是 paper-scale dual/primal recovery 的数值问题。
 
-已加入修复：
+已加入修复并完成首个 paper-scale 验证：
 
-- [ ] **[VERIFY]** KKT 保留初始 equal-share / max-local-CPU 的已验证可行 primal seed；
-- [ ] **[VERIFY]** 若 dual iteration 未恢复可行点，则返回 feasible_seed，而不是错误的 kkt_no_feasible_iterate；
-- [ ] **[TODO]** 用 CVXPY oracle 测量 feasible_seed 与真正 Stage-1 optimum 的 gap；
-- [ ] **[TODO]** 根据 gap 决定是否需要 dual warm start、primal averaging 或更稳健 primal recovery。
+- [x] KKT 保留初始 equal-share / max-local-CPU 的已验证可行 primal seed；
+- [x] 若 dual iteration 未恢复可行点，则返回 feasible_seed，而不是错误的 kkt_no_feasible_iterate；
+- [x] K=30, seed=42 的 repaired state 已由 CVXPY 验证为 Stage-1 optimal；
+- [x] 同一状态下 feasible_seed energy = 190059.701 J；
+- [x] CVXPY Stage-1 optimum = 189740.470 J；
+- [x] reported-vs-CVX gap = 0.168%；
+- [ ] **[VERIFY]** 对多个 scenario seed 与 ALNS-best 状态重复 gap scan；
+- [ ] **[TODO]** 若跨状态 gap 仍稳定很小，则将 feasible-seed proxy 作为 outer-search 快速评价，并仅对 elite/final states 做精确 refinement；
+- [ ] **[TODO]** dual-guided operators 仍需等待可用 dual certificate，不能使用 feasible_seed 伪造影子价格。
 
 因此：
 
@@ -322,7 +327,8 @@ K=30/50 的 all-local 解会产生明显 local FIFO / deadline 压力。
 - [x] Store–Carry–Batch-Offload；
 - [x] per-MEC candidate preservation；
 - [x] deterministic MEC repair；
-- [ ] **[VERIFY]** exact CVX/KKT Stage-1 comparison on repaired paper-scale states。
+- [x] K=30 repaired state 的 CVX/feasible-seed Stage-1 首次对照；
+- [ ] **[VERIFY]** 多 seed / ALNS-best 的 resource gap scan。
 
 当前实测：
 
@@ -595,6 +601,12 @@ MEC repair + CVXPY oracle：
 uv run python experiments\run_mec_repair_sanity.py --tasks 30 --cvx-check
 ~~~
 
+多状态 resource recourse gap scan：
+
+~~~powershell
+uv run python experiments\run_recourse_gap_scan.py --tasks 30 --seeds 42,43,44 --candidate both --alns-iterations 20
+~~~
+
 ALNS proxy：
 
 ~~~powershell
@@ -609,14 +621,14 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 执行顺序：
 
-1. [ ] **[VERIFY]** git pull；
-2. [ ] **[VERIFY]** uv run pytest；
-3. [ ] **[VERIFY]** 重跑 K=30/50 MEC repair，确认 KKT 现在至少保留 feasible_seed；
-4. [ ] **[VERIFY]** 对 K=30 执行 --cvx-check；
-5. [ ] **[TODO]** 比较 proxy/feasible-seed energy、CVXPY Stage-1 optimum 和相对 gap；
-6. [ ] **[TODO]** 如果 seed gap 很小：可暂时用 seed fallback 继续外层开发；
-7. [ ] **[TODO]** 如果 seed gap 很大：优先增强 KKT primal recovery；
-8. [ ] **[TODO]** KKT paper-scale 稳定后再进入 Contact / Batch / Dual-guided operators。
+1. [x] K=30/50 MEC repair 已恢复为 proxy-feasible，KKT 正确保留 feasible_seed；
+2. [x] K=30, seed=42 已完成 CVXPY oracle check，gap = 0.168%；
+3. [ ] **[VERIFY]** 运行 recourse gap scan，覆盖多个 scenario seed；
+4. [ ] **[VERIFY]** gap scan 同时覆盖 repaired 与 proxy-ALNS-best 离散状态；
+5. [ ] **[TODO]** 若 mean/max gap 均保持较小，则采用 fast proxy/feasible-seed 进行大部分 outer search；
+6. [ ] **[TODO]** 对 elite/final states 使用 CVXPY 或收敛 KKT 做 refinement；
+7. [ ] **[TODO]** dual-guided operators 仅在 dual_certificate_available=True 时启用；
+8. [ ] **[TODO]** 完成上述验证后进入 Contact / Batch / resource-aware ALNS operators。
 
 暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
 
@@ -667,10 +679,10 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 \boxed{\text{External ALNS Structural Integration}}
 \]
 
-当前主要 blocker：
+当前主要待确认项：
 
 \[
-\boxed{\text{Paper-scale KKT primal recovery / convergence}}
+\boxed{\text{Fast feasible-seed/proxy 对不同离散状态的 resource-optimality gap}}
 \]
 
-解决该问题后，再进入真正的问题特定 ALNS 算子阶段。
+首个 K=30 repaired state 的 gap 仅为 0.168%，因此 paper-scale KKT primal recovery 已从“可行性 blocker”降级为“精度/效率验证问题”。下一步先做多 seed、多状态 gap scan，再决定 outer search 的最终两层评价策略。
