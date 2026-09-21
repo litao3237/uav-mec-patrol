@@ -2128,3 +2128,47 @@ until it matches the proposed method on K=80/E=2. Instead, it is reported as a
 high-load robustness baseline. Its energy-quality comparison should be evaluated
 on a lighter setting (K=50/E=2) where classical decomposition/metaheuristics have
 a realistic chance to remain feasible.
+
+
+## Light-load baseline comparison: K=50/E=2
+
+To separate energy-quality comparison from high-load feasibility robustness, the
+classical baselines are also evaluated on K=50, E=2 using the same scenario seeds
+45/46/47.
+
+### Deterministic / ALNS baselines
+
+| method | strict feasibility | mean Stage-1 energy (J) | median Stage-1 energy (J) |
+|---|---:|---:|---:|
+| Greedy + MEC repair | 2/3 unique scenarios | 230637.625 | 230637.625 |
+| Fixed-route Nearest-MEC (FR-NM) | 3/3 unique scenarios | 229613.102 | 229866.963 |
+| Generic ALNS | 9/9 | 170323.586 | 172689.240 |
+| Proposed Hybrid | 9/9 | 167015.350 | 170279.207 |
+
+Paired Hybrid comparisons:
+
+- vs FR-NM: 9/9 Hybrid better, mean advantage 27.297%, median 26.629%;
+- vs Generic ALNS: 5/9 Hybrid better, 4/9 equal, 0/9 worse,
+  mean advantage 1.803%, median 0.047%;
+- vs Greedy+MEC repair: only the 2/3 feasible scenarios are comparable,
+  giving 6 repeated algorithm-seed pairs, all favoring Hybrid.
+
+This light-load result complements the K=80/E=2 robustness result: classical
+decomposition heuristics become feasible at moderate load, but their energy is
+substantially higher than the joint-search methods.
+
+### Route-GA pilot
+
+The P24/G40 Route-GA + deterministic MEC-repair pilot is strict feasible on all
+three K=50/E=2 scenarios with GA seed 100:
+
+| scenario | GA energy (J) | Generic ALNS (J) | Hybrid (J) | Hybrid vs GA |
+|---|---:|---:|---:|---:|
+| 45 | 218491.917 | 186697.241 | 183137.357 | 16.181% |
+| 46 | 227768.558 | 145847.987 | 145847.987 | 35.967% |
+| 47 | 251771.746 | 179418.364 | 179334.443 | 28.771% |
+
+The GA pilot mean energy is 232677.407 J versus 169439.929 J for Hybrid, with a
+mean paired Hybrid advantage of 26.973% (median 28.771%). Because all three GA
+runs are strict feasible, the GA baseline is now suitable for a full 3x3 seed
+matrix on K=50/E=2.
