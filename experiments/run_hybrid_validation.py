@@ -171,6 +171,12 @@ def main() -> None:
         default=None,
     )
     parser.add_argument(
+        "--max-contacts-per-uav",
+        type=int,
+        default=None,
+        help="override the per-UAV contact-visit budget",
+    )
+    parser.add_argument(
         "--task-spatial-profile",
         choices=("uniform", "clustered", "boundary"),
         default="uniform",
@@ -208,6 +214,13 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_paper_scale_config(args.config)
+    if args.max_contacts_per_uav is not None:
+        if args.max_contacts_per_uav <= 0:
+            raise ValueError("--max-contacts-per-uav must be positive")
+        cfg = replace(
+            cfg,
+            max_contacts_per_uav=args.max_contacts_per_uav,
+        )
     if args.mec_bandwidth_scale <= 0.0:
         raise ValueError("--mec-bandwidth-scale must be positive")
     if args.mec_radius_scale <= 0.0:
@@ -255,6 +268,7 @@ def main() -> None:
         "elite_rounds": args.elite_rounds,
         "uavs": args.uavs,
         "paper_metrics": args.paper_metrics,
+        "max_contacts_per_uav": cfg.max_contacts_per_uav,
         "task_spatial_profile": args.task_spatial_profile,
         "mec_bandwidth_scale": args.mec_bandwidth_scale,
         "mec_radius_scale": args.mec_radius_scale,
@@ -441,6 +455,7 @@ def main() -> None:
                         "K": k,
                         "M": len(instance.uavs),
                         "E": e,
+                        "max_contacts_per_uav": cfg.max_contacts_per_uav,
                         "task_spatial_profile": args.task_spatial_profile,
                         "mec_bandwidth_scale": args.mec_bandwidth_scale,
                         "mec_radius_scale": args.mec_radius_scale,
