@@ -518,7 +518,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] K=80,E=2 out-of-sample paired validation；
 - [x] K=50/80/100 workload sensitivity（E=2）；
 - [x] K=100 MEC-count sensitivity（E=2/3/4）；
-- [ ] **[NEXT]** Full Hybrid vs **w/o route-compute relocation**（开关与 paired 脚本已实现，待运行）；
+- [x] Full Hybrid vs **w/o route-compute relocation**：9/9 strict，Full 6 better / 3 equal / 0 worse，mean paired advantage 0.709%；
 - [ ] **[TODO]** w/o contact family；
 - [ ] **[TODO]** w/o batch family；
 - [ ] **[TODO]** w/o progressive widening；
@@ -730,8 +730,8 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 
 1. [x] 完成 Hybrid 主算法与严格 CVX acceptance；
 2. [x] 完成 K=100,E=2/3/4 高负载 MEC-count sensitivity；
-3. [ ] **[NEXT]** `w/o route_compute_relocate` 核心消融；
-4. [ ] **[TODO]** contact / batch / progressive-widening 消融；
+3. [x] `w/o route_compute_relocate` 核心消融；
+4. [ ] **[NEXT]** contact / batch / progressive-widening 消融；
 5. [ ] **[TODO]** Greedy / nearest-MEC / route-only / ACO-or-GA baselines；
 6. [ ] **[TODO]** K=8~12 strong benchmark；
 7. [ ] **[TODO]** M=3/5/8 sensitivity 与最终指标汇总；
@@ -1846,3 +1846,40 @@ The robust paper-facing conclusion from this experiment is instead:
 
 The K=100 MEC-count sensitivity is now considered complete for the frozen
 100-iteration algorithm.
+
+
+## Elite route-family ablation: route-compute relocation is a material contributor
+
+Paired ablation on K=80, E=2, scenario seeds 45/46/47 and algorithm seeds
+100/101/102, with 100 Generic ALNS iterations, compares the same generic
+exploration elite under two exact elite refinements:
+
+- `full`: all frozen elite structural families enabled;
+- `no-route`: identical elite search except
+  `route_compute_relocate` is disabled.
+
+Because both branches start from the same Generic ALNS best state for each seed
+pair, this is a direct family-level ablation rather than a comparison of
+different stochastic search trajectories.
+
+| profile | strict pairs | improved | unchanged | mean elite gain | median elite gain | mean elite CVX calls |
+|---|---:|---:|---:|---:|---:|---:|
+| Full Hybrid | 9/9 | 8 | 1 | 1.378% | 1.154% | 11.67 |
+| w/o route-compute relocation | 9/9 | 6 | 3 | 0.675% | 0.047% | 10.78 |
+
+Direct Full-vs-No-Route paired comparison:
+
+- comparable strict pairs: 9/9;
+- Full better: 6/9;
+- equal: 3/9;
+- No-Route better: 0/9;
+- mean Full advantage over No-Route final energy: 0.709%;
+- median Full advantage: 0.649%.
+
+This result supports the mechanism-level claim that computing-aware task route
+relocation contributes material improvement beyond contact/batch-only elite
+restructuring under the K=80/E=2 high-load sparse-MEC setting.
+
+The result should still be reported with its experimental scope: it establishes a
+clear contribution at K=80/E=2 over 3 scenario seeds x 3 algorithm seeds, but
+does not by itself imply the same effect size for every workload/MEC density.
