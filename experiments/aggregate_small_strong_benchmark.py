@@ -72,10 +72,41 @@ def _group(rows: list[dict[str, Any]], k: int) -> dict[str, Any]:
         standard_hits = sum(
             bool(row["is_best_known_hit"]) for row in standard_rows
         )
+        hit_rows = [
+            row
+            for row in scenario_rows
+            if row["is_best_known_hit"]
+            and row["strict_energy_j"] is not None
+        ]
+        best_structure = (
+            hit_rows[0]["solution"] if hit_rows else None
+        )
         scenario_refs.append(
             {
                 "scenario_seed": scenario,
                 "best_known_energy_j": best_known,
+                "best_known_contacts": (
+                    best_structure["contacts"]
+                    if best_structure is not None
+                    else None
+                ),
+                "best_known_offloaded": (
+                    best_structure["offloaded"]
+                    if best_structure is not None
+                    else None
+                ),
+                "best_known_distance_m": (
+                    best_structure["distance_m"]
+                    if best_structure is not None
+                    else None
+                ),
+                "nondegenerate_reference": bool(
+                    best_structure is not None
+                    and (
+                        best_structure["contacts"] > 0
+                        or best_structure["offloaded"] > 0
+                    )
+                ),
                 "strong_hits": strong_hits,
                 "strong_runs": len(strong_rows),
                 "standard_hits": standard_hits,
@@ -121,6 +152,10 @@ def _group(rows: list[dict[str, Any]], k: int) -> dict[str, Any]:
             standard_gaps,
             1.0,
         ),
+        "nondegenerate_reference_scenarios": sum(
+            bool(ref["nondegenerate_reference"])
+            for ref in scenario_refs
+        ),
         "strong_best_known_hits": sum(
             bool(row["is_best_known_hit"]) for row in strong
         ),
@@ -158,6 +193,7 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
         "standard_within_0_01pct",
         "standard_within_0_1pct",
         "standard_within_1pct",
+        "nondegenerate_reference_scenarios",
         "strong_best_known_hits",
         "strong_best_known_hit_rate",
         "standard_best_known_hits",
@@ -239,6 +275,9 @@ def main() -> None:
             print(
                 f"K={group['K']} S={ref['scenario_seed']} "
                 f"best_known={best_text} J "
+                f"contacts={ref['best_known_contacts']} "
+                f"offloaded={ref['best_known_offloaded']} "
+                f"nondegenerate={ref['nondegenerate_reference']} "
                 f"strong_hits={ref['strong_hits']}/{ref['strong_runs']} "
                 f"standard_hits={ref['standard_hits']}/{ref['standard_runs']}"
             )
