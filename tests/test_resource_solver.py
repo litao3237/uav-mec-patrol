@@ -6,6 +6,7 @@ from dataclasses import replace
 from uav_mec.evaluation import build_event_info
 from uav_mec.instances import build_small_instance
 from uav_mec.optimization.resource import solve_resource_problem, verify_kkt
+from uav_mec.optimization.resource.cvx_solver import _sanitize_positive_group
 
 
 def _solve(instance, solution):
@@ -55,3 +56,36 @@ def test_impossible_deadline_is_infeasible() -> None:
     impossible.tasks["S1"] = replace(instance.tasks["S1"], deadline_s=20.0)
     _, result = _solve(impossible, solution)
     assert not result.feasible
+
+
+
+class _FakeVar:
+    def __init__(self, value):
+        self.value = value
+
+
+def test_positive_resource_sanitizer_clips_tiny_violation() -> None:
+    values, violations = _sanitize_positive_group(
+        {
+            "near": _FakeVar(0.0009995),
+            "ok": _FakeVar(0.25),
+        },
+        minimum=1e-3,
+    )
+
+    assert not violations
+    assert values["near"] == 1e-3
+    assert values["ok"] == 0.25
+
+
+def test_positive_resource_sanitizer_rejects_zero_and_nonfinite() -> None:
+    values, violations = _sanitize_positive_group(
+        {
+            "zero": _FakeVar(0.0),
+            "nan": _FakeVar(float("nan")),
+        },
+        minimum=1e-3,
+    )
+
+    assert not values
+    assert len(violations) == 2
