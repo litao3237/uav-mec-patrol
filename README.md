@@ -732,7 +732,7 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 2. [x] 完成 K=100,E=2/3/4 高负载 MEC-count sensitivity；
 3. [x] `w/o route_compute_relocate` 核心消融；
 4. [x] contact / batch / progressive-widening 消融；
-5. [ ] **[NEXT]** Greedy / nearest-MEC / route-only / ACO-or-GA baselines；
+5. [x] Greedy / FR-NM / Generic ALNS / Route-GA / Proposed Hybrid baselines；
 6. [ ] **[TODO]** K=8~12 strong benchmark；
 7. [ ] **[TODO]** M=3/5/8 sensitivity 与最终指标汇总；
 8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
@@ -2096,6 +2096,43 @@ The result should be reported as a feasibility/decomposition baseline, not as a
 competitive energy baseline. A separate independent feasible metaheuristic
 baseline is still required.
 
+
+## Route-GA formal baseline: K=50/E=2 3x3 matrix
+
+The formal Route-GA baseline uses the pilot-validated parameters without further
+retuning: population size 24, 40 generations, scenario seeds 45/46/47, and GA
+seeds 100/101/102. Generic ALNS and Proposed Hybrid use the same paired scenario
+and algorithm seeds, and all final energies are evaluated by strict Stage-1 CVX.
+
+| method | strict optimal | mean energy (J) | median energy (J) |
+|---|---:|---:|---:|
+| Route-GA + deterministic MEC repair | 9/9 | 235438.000 | 227768.558 |
+| Generic ALNS | 9/9 | 170323.586 | 172689.240 |
+| Proposed Hybrid | 9/9 | 167015.350 | 170279.207 |
+
+Paired Hybrid-vs-GA comparison:
+
+- comparable pairs: 9/9;
+- Hybrid better: 9/9;
+- equal: 0/9;
+- GA better: 0/9;
+- mean paired Hybrid advantage: 28.884%;
+- median paired Hybrid advantage: 28.771%.
+
+The GA evaluates on average 894.44 distinct route structures per run, with mean
+GA search time about 61.36 s, and all 9 final GA proxy states are feasible before
+the strict CVX verification. Therefore the comparison is not driven by an
+undersized or infeasible GA run: under moderate load the GA is feasible, but its
+solution quality remains substantially worse than the joint ALNS-based methods.
+
+Together with the K=80/E=2 result (Route-GA 0/3 strict-feasible even after about
+903-904 distinct route evaluations per scenario), the two load levels support a
+two-part interpretation:
+
+1. at moderate load, the Proposed Hybrid improves energy quality over an
+   independent feasible metaheuristic baseline;
+2. at high load with sparse MEC availability, the coupled ALNS search is also
+   substantially more robust at recovering feasible structures.
 
 ## Route-GA pilot: high-load feasibility limit at K=80/E=2
 
