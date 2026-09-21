@@ -10,7 +10,18 @@ from typing import Any
 
 STAGE1_METRICS = (
     "energy_stage1_j",
+    "total_distance_m",
+    "route_detour_pct_vs_reference",
+    "offload_ratio",
+    "contacts_per_uav",
+    "active_uav_mec_pairs",
     "fixed_energy_ratio",
+    "mean_active_mec_bandwidth_relative_shadow",
+    "max_active_mec_bandwidth_relative_shadow",
+    "mean_active_mec_cpu_relative_shadow",
+    "max_active_mec_cpu_relative_shadow",
+    "active_mec_bandwidth_shadow_count",
+    "active_mec_cpu_shadow_count",
 )
 
 STAGE2_METRICS = (
@@ -20,11 +31,6 @@ STAGE2_METRICS = (
     "min_deadline_slack_s",
     "max_cycle_utilization",
     "max_battery_utilization",
-    "total_distance_m",
-    "route_detour_pct_vs_reference",
-    "offload_ratio",
-    "contacts_per_uav",
-    "active_uav_mec_pairs",
     "mean_active_mec_bandwidth_utilization",
     "max_active_mec_bandwidth_utilization",
     "mean_active_mec_cpu_utilization",
@@ -239,7 +245,7 @@ def main() -> None:
     print(
         "K    M    E    runs strict metrics s2-opt "
         "energy-J delay-s slack-s offload contacts/UAV dist-km "
-        "bw-util cpu-util fixed-share runtime-s"
+        "bw-util cpu-util bw-shadow cpu-shadow fixed-share runtime-s"
     )
     print("-" * 154)
     for group in aggregate:
@@ -269,6 +275,8 @@ def main() -> None:
             f"{distance_km:<7} "
             f"{m('mean_active_mec_bandwidth_utilization'):<7} "
             f"{m('mean_active_mec_cpu_utilization'):<8} "
+            f"{m('mean_active_mec_bandwidth_relative_shadow'):<9} "
+            f"{m('mean_active_mec_cpu_relative_shadow'):<10} "
             f"{m('fixed_energy_ratio'):<11} "
             f"{group['mean_algorithm_runtime_s']:.3f}"
         )
