@@ -92,3 +92,32 @@ def test_mec_count_sweep_keeps_task_realization_fixed() -> None:
 
     assert tuple(instances[1].mecs)[:2] == tuple(instances[0].mecs)
     assert tuple(instances[2].mecs)[:3] == tuple(instances[1].mecs)
+
+
+def test_uav_count_sweep_keeps_task_and_mec_realization_fixed() -> None:
+    cfg = load_paper_scale_config()
+    instances = [
+        build_paper_scale_instance(
+            cfg,
+            num_tasks=80,
+            num_uavs=num_uavs,
+            num_mecs=2,
+            scenario_seed=45,
+        )
+        for num_uavs in (3, 5, 8)
+    ]
+
+    reference_tasks = instances[0].tasks
+    reference_mecs = instances[0].mecs
+    reference_contacts = instances[0].contact_points
+
+    assert instances[1].tasks == reference_tasks
+    assert instances[2].tasks == reference_tasks
+    assert instances[1].mecs == reference_mecs
+    assert instances[2].mecs == reference_mecs
+    assert instances[1].contact_points == reference_contacts
+    assert instances[2].contact_points == reference_contacts
+
+    # UAVs are homogeneous, so increasing M only appends additional UAV IDs.
+    assert tuple(instances[1].uavs)[:3] == tuple(instances[0].uavs)
+    assert tuple(instances[2].uavs)[:5] == tuple(instances[1].uavs)
