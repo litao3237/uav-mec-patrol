@@ -15,6 +15,8 @@ from .alns import (
 )
 from .initial import (
     GreedyInitialConfig,
+    GARouteConfig,
+    GARouteResult,
     GreedyMECRepairConfig,
     NearestMECFixedRouteConfig,
     ProxyEvaluation,
@@ -23,12 +25,15 @@ from .initial import (
     build_fixed_route_nearest_mec_solution,
     build_mec_assisted_initial_solution,
     evaluate_initial_proxy,
+    run_route_ga,
 )
 
 __all__ = [
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "GreedyInitialConfig",
+    "GARouteConfig",
+    "GARouteResult",
     "GreedyMECRepairConfig",
     "NearestMECFixedRouteConfig",
     "KKTObjectiveEvaluator",
@@ -44,6 +49,7 @@ __all__ = [
     "build_fixed_route_nearest_mec_solution",
     "build_mec_assisted_initial_solution",
     "evaluate_initial_proxy",
+    "run_route_ga",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
 ]
