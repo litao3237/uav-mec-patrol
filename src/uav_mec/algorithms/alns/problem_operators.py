@@ -1210,6 +1210,7 @@ def contact_mode_intensification(
         "candidates_evaluated": 0,
         "improvements": 0,
         "accepted_moves": [],
+        "evaluated_moves": [],
     }
 
     def value(solution: DiscreteSolution) -> float:
@@ -1230,10 +1231,27 @@ def contact_mode_intensification(
         best_label: str | None = None
         best_solution: DiscreteSolution | None = None
 
+        round_base_value = current_value
+        evaluated_moves = list(stats["evaluated_moves"])
         for label, candidate in shortlist:
             candidate_value = value(candidate)
             stats["candidates_evaluated"] = (
                 int(stats["candidates_evaluated"]) + 1
+            )
+            improvement_pct = (
+                100.0
+                * (round_base_value - candidate_value)
+                / max(1.0, abs(round_base_value))
+                if np.isfinite(candidate_value)
+                else float("-inf")
+            )
+            evaluated_moves.append(
+                {
+                    "round": int(stats["rounds"]),
+                    "move": label,
+                    "objective": candidate_value,
+                    "improvement_pct": improvement_pct,
+                }
             )
             scale = max(
                 1.0,
@@ -1247,6 +1265,7 @@ def contact_mode_intensification(
                 best_value = candidate_value
                 best_label = label
                 best_solution = candidate
+        stats["evaluated_moves"] = evaluated_moves
 
         if best_solution is None or best_label is None:
             break
