@@ -2514,3 +2514,54 @@ Interpretation:
 
 No global-optimality or exact discrete-optimality claim should be made from this
 experiment.
+
+
+---
+
+## M12. Supplementary Completeness Experiments
+
+为补齐论文实验展示完整性，并直接回应“间歇 MEC / Contact Opportunity”与
+“100 iterations 预算合理性”，新增以下实验：
+
+- [x] **Dense workload curve**：\(K=30/40/50/60/70/80\)，Generic/Hybrid 均
+  9/9 strict；Hybrid gain 从 K=30/40 的近 0 增长到 K>=50 后约 1%–1.8%；
+- [x] **Iteration-budget convergence / budget sensitivity**：
+  25/50/100/200 iterations；100 iterations 为 9/9 strict，200 iterations 在
+  7 个 common-strict pair 上平均再降约 3.172% energy，但 strict rate 降到
+  7/9、mean runtime 增至约 88.6 s，因此 100 iterations 定位为
+  feasibility/runtime/quality operating point，而不是“完全收敛”；
+- [x] **MEC bandwidth sensitivity**：0.5x/1.0x/1.5x；低带宽下 strict rate
+  由 9/9 降到 8/9，bandwidth relative shadow 约由 0.005 升至 0.011；
+  1.5x 时 CPU relative shadow 上升，体现资源压力转移；
+- [x] **MEC coverage-radius sensitivity**：0.75x/1.0x/1.25x；三档均 9/9
+  strict，但能耗不单调，因此作为 contact-geometry robustness，而不是单调容量结论；
+- [x] **Spatial-distribution robustness**：uniform / clustered /
+  boundary-biased；strict rate 分别为 9/9、7/9、6/9，用于检验 spatial
+  distribution shift；
+- [ ] **[RUNNING]** **Per-UAV contact-budget sensitivity**：
+  \(C_{\max}=1/2/3/4\)，固定任务、几何、MEC、UAV 与 seeds，用作最直接的
+  Contact Opportunity 约束实验。
+
+### Resource-bottleneck metric correction
+
+Stage-2 仅最小化 normalized MEC CPU occupation，并不最小化 bandwidth。
+因此 bandwidth utilization 仅作为该 CPU-tie-break realization 下的描述性指标，
+**不再单独作为 bandwidth bottleneck 证据**。
+
+论文资源瓶颈判断改用：
+
+\[
+\boxed{
+\text{Stage-1 capacity shadow price}
++
+\text{explicit resource/contact scaling response}
+}
+\]
+
+其中 relative shadow 使用
+
+\[
+\frac{\lambda_r C_r}{E^\star}
+\]
+
+表征按比例放宽资源容量时对 Stage-1 最优 UAV energy 的局部边际价值。
