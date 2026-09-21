@@ -317,3 +317,63 @@ The planned experiment set is now complete:
 
 The remaining work is presentation: final figures, compact paper tables, and
 integration into the manuscript.
+
+
+---
+
+# 补充实验：Dense Workload 与 Iteration-Budget Convergence
+
+## A. Dense Workload Curve
+
+为增强主负载图的连续性，在原 \(K=50/80/100\) detailed table 之外，新增：
+
+\[
+K\in\{30,40,50,60,70,80\},\quad M=5,\quad E=2
+\]
+
+每个 K 使用 scenario seeds 45/46/47 与 algorithm seeds 100/101/102，共 9 runs。
+
+| K | Generic strict | Hybrid strict | Generic Mean Energy (J) | Hybrid Mean Energy (J) | Mean Hybrid Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | Runtime (s) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 30 | 9/9 | 9/9 | 122917.377 | 122914.052 | 0.003% | 5.9% | 0.267 | 6.465 | 3.611 |
+| 40 | 9/9 | 9/9 | 135783.361 | 135693.420 | 0.066% | 8.9% | 0.378 | 7.034 | 5.491 |
+| 50 | 9/9 | 9/9 | 170323.586 | 167015.350 | 1.803% | 8.0% | 0.533 | 8.655 | 14.449 |
+| 60 | 9/9 | 9/9 | 186149.891 | 182822.562 | 1.807% | 9.6% | 0.667 | 9.385 | 24.501 |
+| 70 | 9/9 | 9/9 | 205019.285 | 202464.782 | 1.271% | 9.8% | 0.689 | 10.342 | 28.862 |
+| 80 | 9/9 | 9/9 | 230038.323 | 226768.196 | 1.378% | 12.2% | 1.044 | 11.494 | 52.303 |
+
+该结果显示：
+
+- \(K=30/40\) 时 Hybrid 相对 Generic ALNS 的额外结构收益接近 0；
+- 从 \(K=50\) 起，Hybrid 的 paired energy gain 明显增大；
+- 随 K 增加，offload、contacts/UAV、route distance 与 runtime 总体上升；
+- 这支持“Route–Contact–Offloading coupling 越紧，problem-specific elite refinement 越有价值”的解释。
+
+## B. Iteration-Budget Convergence / Budget Sensitivity
+
+设置：
+
+\[
+K=80,\quad M=5,\quad E=2
+\]
+
+比较 25/50/100/200 iterations。各预算使用相同 scenario/algorithm seed 组合，但由于 RRT acceptance schedule 会随总 iteration budget 改变，因此这些是 paired budget runs，不是同一搜索轨迹的简单前缀。
+
+| Iterations | Strict | Conditional Mean Energy (J) | Mean Gap to Pair-Best | Mean Runtime (s) |
+|---:|---:|---:|---:|---:|
+| 25 | 6/9 | 245028.040 | 14.452% | 20.798 |
+| 50 | 8/9 | 238428.651 | 9.580% | 26.343 |
+| 100 | **9/9** | 226768.196 | 2.568% | 50.011 |
+| 200 | 7/9 | 217985.012 | 0.000% on its strict subset | 88.577 |
+
+在 100 与 200 都 strict 的 7 个 paired runs 中：
+
+- 200 iterations：7/7 energy lower；
+- mean 200-vs-100 energy advantage：约 **3.172%**；
+- 但 200 iterations 有 2/9 runs 退化为 \`optimal_inaccurate\`，因此 strict robustness 低于 100 iterations。
+
+因此论文中 100 iterations 的定位应写成：
+
+> **固定计算预算下兼顾 strict-feasibility robustness、runtime 与 solution quality 的 operating point。**
+
+不能写成“100 iterations 后算法已经完全收敛”。
