@@ -433,6 +433,14 @@ def main() -> None:
                 for row in strict_paired
                 if row["improvement_pct"] is not None
             ]
+            strict_improved_runs = sum(
+                value > 1e-9
+                for value in strict_improvements
+            )
+            strict_unchanged_runs = sum(
+                abs(value) <= 1e-9
+                for value in strict_improvements
+            )
 
             accepted_family_counts: dict[str, int] = {}
             accepted_move_count = 0
@@ -452,6 +460,8 @@ def main() -> None:
                 "runs": len(subset),
                 "paired_feasible_runs": len(paired),
                 "strict_paired_runs": len(strict_paired),
+                "strict_improved_runs": strict_improved_runs,
+                "strict_unchanged_runs": strict_unchanged_runs,
                 "strict_base_optimal_runs": sum(
                     row["base_stage1_status"] == "optimal"
                     for row in subset
@@ -476,12 +486,28 @@ def main() -> None:
                     if paired
                     else None
                 ),
+                "strict_mean_base_cvx_energy_j": (
+                    mean(
+                        row["base_cvx_energy_j"]
+                        for row in strict_paired
+                    )
+                    if strict_paired
+                    else None
+                ),
                 "mean_hybrid_cvx_energy_j": (
                     mean(
                         row["hybrid_cvx_energy_j"]
                         for row in paired
                     )
                     if paired
+                    else None
+                ),
+                "strict_mean_hybrid_cvx_energy_j": (
+                    mean(
+                        row["hybrid_cvx_energy_j"]
+                        for row in strict_paired
+                    )
+                    if strict_paired
                     else None
                 ),
                 "mean_improvement_pct": (
@@ -554,39 +580,39 @@ def main() -> None:
 
     print("\nAggregate")
     print(
-        "K    E    runs   paired   improved   unchanged   "
-        "base-E-J       hybrid-E-J     mean-gain-%   "
+        "K    E    runs   strict   s-improved   s-unchanged   "
+        "strict-base-E-J strict-hybrid-E-J mean-gain-%   "
         "median-gain-%   elite-cvx   elite-s   widened   overhead-%"
     )
     print("-" * 126)
     for group in aggregate:
         base_text = (
-            f"{group['mean_base_cvx_energy_j']:.3f}"
-            if group["mean_base_cvx_energy_j"] is not None
+            f"{group['strict_mean_base_cvx_energy_j']:.3f}"
+            if group["strict_mean_base_cvx_energy_j"] is not None
             else "-"
         )
         final_text = (
-            f"{group['mean_hybrid_cvx_energy_j']:.3f}"
-            if group["mean_hybrid_cvx_energy_j"] is not None
+            f"{group['strict_mean_hybrid_cvx_energy_j']:.3f}"
+            if group["strict_mean_hybrid_cvx_energy_j"] is not None
             else "-"
         )
         mean_gain = (
-            f"{group['mean_improvement_pct']:.3f}"
-            if group["mean_improvement_pct"] is not None
+            f"{group['strict_mean_improvement_pct']:.3f}"
+            if group["strict_mean_improvement_pct"] is not None
             else "-"
         )
         median_gain = (
-            f"{group['median_improvement_pct']:.3f}"
-            if group["median_improvement_pct"] is not None
+            f"{group['strict_median_improvement_pct']:.3f}"
+            if group["strict_median_improvement_pct"] is not None
             else "-"
         )
         print(
             f"{group['K']:<4} "
             f"{group['E']:<4} "
             f"{group['runs']:<6} "
-            f"{group['paired_feasible_runs']:<8} "
-            f"{group['improved_runs']:<10} "
-            f"{group['unchanged_runs']:<11} "
+            f"{group['strict_paired_runs']:<8} "
+            f"{group['strict_improved_runs']:<12} "
+            f"{group['strict_unchanged_runs']:<13} "
             f"{base_text:<14} "
             f"{final_text:<14} "
             f"{mean_gain:<13} "
