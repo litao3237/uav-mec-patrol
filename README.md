@@ -2274,8 +2274,8 @@ For every strict Hybrid solution:
 - **route distance**: total UAV route length including realized contact detours;
 - **route detour**: final route distance relative to the original Greedy route
   seed for the same task instance;
-- **MEC bandwidth / CPU utilization**: per-MEC allocated capacity fraction, with
-  paper summaries using the mean/max over active MECs;
+- **MEC bandwidth / CPU utilization**: per-MEC allocated capacity fraction. CPU utilization is reproducible under the Stage-2 CPU tie-break; bandwidth utilization is descriptive only;
+- **capacity shadow prices**: Stage-1 bandwidth/CPU capacity duals normalized by capacity and Stage-1 energy, used for bottleneck interpretation;
 - **MEC selection distribution**: offloaded-task and contact counts per MEC;
 - **energy decomposition**: fixed flight+collection, communication/hover, and
   local-compute shares;
@@ -2406,11 +2406,7 @@ orthogonal system dimensions:
    feasibility and modestly reduces energy/latency, while spreading contact
    burden across the fleet.
 
-Across all strict resource solutions, active-MEC bandwidth is consistently near
-full utilization. This is the clearest recurring systems result: in the current
-sparse intermittent-MEC setting, communication/contact opportunity is the
-persistent bottleneck, whereas MEC CPU has more headroom and is redistributed
-by E and M.
+The Stage-2 tie-break minimizes normalized MEC CPU occupation, not bandwidth. Therefore the reported bandwidth utilization is descriptive for that CPU-minimizing realization and must not be treated by itself as a bottleneck certificate. The resource-bottleneck conclusion is now evaluated using Stage-1 capacity shadow prices together with explicit bandwidth/contact sensitivity experiments.
 
 This supports the paper's core structural motivation for jointly optimizing
 Route-Contact-Offloading rather than optimizing the route first and treating
