@@ -1384,6 +1384,7 @@ def contact_mode_intensification(
         if best_solution is None or best_label is None:
             break
 
+        previous_value = current_value
         current.solution = best_solution
         current.invalidate()
         current_value = best_value
@@ -1396,12 +1397,12 @@ def contact_mode_intensification(
                 "move": best_label,
                 "objective": best_value,
                 "improvement_j": (
-                    current_value - best_value
+                    previous_value - best_value
                 ),
                 "improvement_pct": (
                     100.0
-                    * (current_value - best_value)
-                    / max(1.0, abs(current_value))
+                    * (previous_value - best_value)
+                    / max(1.0, abs(previous_value))
                 ),
             }
         )
