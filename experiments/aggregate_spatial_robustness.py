@@ -42,13 +42,13 @@ def _group(rows: list[dict[str, Any]], profile: str) -> dict[str, Any]:
         if row["hybrid_stage1_status"] == "optimal"
         and row["hybrid_cvx_energy_j"] is not None
     ]
+    metric_rows = [
+        row for row in strict if row.get("paper_metrics") is not None
+    ]
     stage2 = [
         row
-        for row in strict
-        if (
-            row.get("paper_metrics") is not None
-            and row["paper_metrics"].get("stage2_status") == "optimal"
-        )
+        for row in metric_rows
+        if row["paper_metrics"].get("stage2_status") == "optimal"
     ]
     paired = [
         row
@@ -125,6 +125,26 @@ def _group(rows: list[dict[str, Any]], profile: str) -> dict[str, Any]:
                 for row in stage2
             ]
         ),
+        "bandwidth_relative_shadow": _stats(
+            [
+                float(
+                    row["paper_metrics"][
+                        "mean_active_mec_bandwidth_relative_shadow"
+                    ]
+                )
+                for row in metric_rows
+            ]
+        ),
+        "cpu_relative_shadow": _stats(
+            [
+                float(
+                    row["paper_metrics"][
+                        "mean_active_mec_cpu_relative_shadow"
+                    ]
+                )
+                for row in metric_rows
+            ]
+        ),
         "runtime_s": _stats(
             [float(row["total_runtime_s"]) for row in subset]
         ),
@@ -147,6 +167,8 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
         "deadline_slack_mean_s",
         "bandwidth_util_mean",
         "cpu_util_mean",
+        "bandwidth_relative_shadow_mean",
+        "cpu_relative_shadow_mean",
         "runtime_mean_s",
     ]
     with path.open("w", newline="", encoding="utf-8") as fh:
@@ -179,6 +201,12 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
                         group["bandwidth_utilization"]["mean"]
                     ),
                     "cpu_util_mean": group["cpu_utilization"]["mean"],
+                    "bandwidth_relative_shadow_mean": (
+                        group["bandwidth_relative_shadow"]["mean"]
+                    ),
+                    "cpu_relative_shadow_mean": (
+                        group["cpu_relative_shadow"]["mean"]
+                    ),
                     "runtime_mean_s": group["runtime_s"]["mean"],
                 }
             )
@@ -221,7 +249,7 @@ def main() -> None:
 
     print(
         "profile runs strict s2 energy-J gain-% offload contacts/UAV "
-        "dist-km delay-s slack-s bw-util cpu-util runtime-s"
+        "dist-km delay-s slack-s bw-util cpu-util bw-shadow cpu-shadow runtime-s"
     )
     print("-" * 125)
     for group in aggregate:
@@ -243,6 +271,8 @@ def main() -> None:
             f"{fmt('deadline_slack_s'):<7} "
             f"{fmt('bandwidth_utilization'):<7} "
             f"{fmt('cpu_utilization'):<8} "
+            f"{fmt('bandwidth_relative_shadow'):<9} "
+            f"{fmt('cpu_relative_shadow'):<10} "
             f"{fmt('runtime_s')}"
         )
 
