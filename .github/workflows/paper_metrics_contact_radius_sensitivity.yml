@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/paper_metrics_contact_radius_sensitivity.yml'
 
+# Stage-1 shadow-price metrics enabled
 jobs:
   metrics:
     runs-on: ubuntu-latest
