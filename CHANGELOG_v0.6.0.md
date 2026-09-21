@@ -70,3 +70,40 @@ the final correctness oracle; KKT remains an analytical/dual-structure tool.
 The code in this changelog has been committed to `develop`, but local tests and
 paper-scale operator ablations must be run before marking the M6 items as
 validated.
+
+
+## Hybrid elite intensification refinement
+
+The first generic-vs-hybrid check on K=80, E=2, scenario seed=42,
+algorithm seeds 100/101/102, 100 ALNS iterations showed:
+
+- generic mean Stage-1 CVX energy: 210810.848 J;
+- hybrid mean Stage-1 CVX energy: 210705.268 J;
+- mean improvement: small but monotone;
+- generic mean runtime: 60.89 s;
+- hybrid mean runtime: 62.70 s;
+- elite CVX calls: 2--3 per run.
+
+The first hybrid neighborhood improved seeds 100 and 102 and left seed 101
+unchanged. Both accepted improvements were contact moves; the task-level
+mode/batch move did not improve any of the three elite states.
+
+This validates the exploration-plus-intensification architecture, but the
+improvement magnitude is too small to freeze the paper algorithm. The elite
+neighborhood is therefore expanded while keeping the generic ALNS trajectory
+unchanged.
+
+New elite structural candidates include:
+
+- contact visit relocation along the same UAV route;
+- contact removal with local fallback;
+- explicit batch merge to another feasible later contact;
+- new contact insertion for a critical task;
+- batch split by moving one task to a newly inserted contact;
+- contact point / MEC replacement;
+- task-level Local/MEC and batch reassignment;
+- compute-aware single-task route relocation, followed by deterministic MEC
+  repair and exact Stage-1 CVX acceptance.
+
+Only a small proxy/precheck-ranked shortlist is passed to the exact elite oracle.
+Accepted elite moves remain monotone in Stage-1 CVX energy.
