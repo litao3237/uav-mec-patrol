@@ -135,7 +135,22 @@ def run_uav_mec_hybrid_alns(
         instance,
         exploration.best_solution,
     )
+    stage1_status = str(
+        exploration_cvx.diagnostics.get(
+            "stage1_status",
+            exploration_cvx.status,
+        )
+    )
+    skip_reason = None
     if not exploration_cvx.feasible:
+        skip_reason = "exploration_stage1_infeasible"
+    elif stage1_status != "optimal":
+        # Elite acceptance is intended to be an exact monotone refinement.
+        # Do not compare candidate energies against an approximate
+        # OPTIMAL_INACCURATE baseline.
+        skip_reason = "exploration_stage1_not_strict_optimal"
+
+    if skip_reason is not None:
         return HybridUavMecALNSResult(
             exploration=exploration,
             best_solution=deepcopy(exploration.best_solution),
@@ -146,7 +161,8 @@ def run_uav_mec_hybrid_alns(
                 "candidates_evaluated": 0,
                 "improvements": 0,
                 "accepted_moves": [],
-                "skipped": "exploration_stage1_infeasible",
+                "evaluated_moves": [],
+                "skipped": skip_reason,
             },
             elite_cvx_calls=oracle.calls,
             elite_cvx_cache_hits=oracle.cache_hits,
