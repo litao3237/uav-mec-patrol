@@ -30,6 +30,24 @@ def _parse_int_list(text: str) -> list[int]:
     ]
 
 
+def _move_family(label: str) -> str:
+    if label.startswith("route_compute_relocate::"):
+        return "route_compute_relocate"
+    if label.startswith("contact_relocate::"):
+        return "contact_relocate"
+    if label == "contact_point_replace":
+        return "contact_point_replace"
+    if label.startswith("contact_remove::"):
+        return "contact_remove"
+    if label.startswith("batch_merge::"):
+        return "batch_merge"
+    if label.startswith("batch_split_or_new_contact::"):
+        return "batch_split_or_new_contact"
+    if label == "task_mode_or_batch_reassign":
+        return "task_mode_or_batch_reassign"
+    return "other"
+
+
 def _stage1_status(result) -> str:
     return str(
         result.diagnostics.get(
@@ -397,16 +415,43 @@ def main() -> None:
                     and row["hybrid_cvx_feasible"]
                 )
             ]
+            strict_paired = [
+                row
+                for row in paired
+                if (
+                    row["base_stage1_status"] == "optimal"
+                    and row["hybrid_stage1_status"] == "optimal"
+                )
+            ]
             improvements = [
                 row["improvement_pct"]
                 for row in paired
                 if row["improvement_pct"] is not None
             ]
+            strict_improvements = [
+                row["improvement_pct"]
+                for row in strict_paired
+                if row["improvement_pct"] is not None
+            ]
+
+            accepted_family_counts: dict[str, int] = {}
+            accepted_move_count = 0
+            for row in subset:
+                for move in row["elite_stats"].get(
+                    "accepted_moves",
+                    [],
+                ):
+                    family = _move_family(str(move["move"]))
+                    accepted_family_counts[family] = (
+                        accepted_family_counts.get(family, 0) + 1
+                    )
+                    accepted_move_count += 1
             group = {
                 "K": k,
                 "E": e,
                 "runs": len(subset),
                 "paired_feasible_runs": len(paired),
+                "strict_paired_runs": len(strict_paired),
                 "strict_base_optimal_runs": sum(
                     row["base_stage1_status"] == "optimal"
                     for row in subset
@@ -444,9 +489,19 @@ def main() -> None:
                     if improvements
                     else None
                 ),
+                "strict_mean_improvement_pct": (
+                    mean(strict_improvements)
+                    if strict_improvements
+                    else None
+                ),
                 "median_improvement_pct": (
                     median(improvements)
                     if improvements
+                    else None
+                ),
+                "strict_median_improvement_pct": (
+                    median(strict_improvements)
+                    if strict_improvements
                     else None
                 ),
                 "max_improvement_pct": (
@@ -474,6 +529,22 @@ def main() -> None:
                     row["elite_runtime_s"]
                     for row in subset
                 ),
+                "mean_runtime_overhead_pct": mean(
+                    100.0
+                    * row["elite_runtime_s"]
+                    / max(1e-12, row["exploration_runtime_s"])
+                    for row in subset
+                ),
+                "widened_runs": sum(
+                    row["elite_widenings"] > 0
+                    for row in subset
+                ),
+                "mean_widened_candidates": mean(
+                    row["elite_widened_candidates"]
+                    for row in subset
+                ),
+                "accepted_move_count": accepted_move_count,
+                "accepted_family_counts": accepted_family_counts,
                 "mean_total_runtime_s": mean(
                     row["total_runtime_s"]
                     for row in subset
@@ -485,7 +556,7 @@ def main() -> None:
     print(
         "K    E    runs   paired   improved   unchanged   "
         "base-E-J       hybrid-E-J     mean-gain-%   "
-        "median-gain-%   elite-cvx   elite-s"
+        "median-gain-%   elite-cvx   elite-s   widened   overhead-%"
     )
     print("-" * 126)
     for group in aggregate:
@@ -521,8 +592,20 @@ def main() -> None:
             f"{mean_gain:<13} "
             f"{median_gain:<15} "
             f"{group['mean_elite_cvx_calls']:<11.2f} "
-            f"{group['mean_elite_runtime_s']:.2f}"
+            f"{group['mean_elite_runtime_s']:<9.2f} "
+            f"{group['widened_runs']:<9} "
+            f"{group['mean_runtime_overhead_pct']:.2f}"
         )
+        if group["accepted_family_counts"]:
+            print(
+                "  accepted families: "
+                + ", ".join(
+                    f"{name}={count}"
+                    for name, count in sorted(
+                        group["accepted_family_counts"].items()
+                    )
+                )
+            )
 
     out = Path(
         "outputs/results/hybrid_validation.json"
