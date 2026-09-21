@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from uav_mec.algorithms import (
+    GARouteConfig,
     build_fixed_route_nearest_mec_solution,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
     evaluate_initial_proxy,
+    run_route_ga,
 )
 from uav_mec.domain import ExecutionMode
 from uav_mec.evaluation import validate_solution
@@ -173,3 +175,51 @@ def test_fixed_route_nearest_mec_preserves_routes_and_uses_nearest_mec() -> None
         assert assigned_mec == nearest_mec
 
     assert offloaded > 0
+
+
+def test_route_ga_is_deterministic_and_not_worse_than_greedy_proxy() -> None:
+    cfg = load_paper_scale_config()
+    instance = build_paper_scale_instance(
+        cfg,
+        num_tasks=24,
+        num_mecs=2,
+        scenario_seed=42,
+    )
+    route_seed = build_greedy_initial_solution(instance)
+    repaired = build_mec_assisted_initial_solution(
+        instance,
+        base_solution=route_seed,
+    )
+    baseline_proxy = evaluate_initial_proxy(instance, repaired)
+
+    ga_cfg = GARouteConfig(
+        population_size=8,
+        generations=4,
+        tournament_size=3,
+        elite_count=2,
+    )
+    a = run_route_ga(
+        instance,
+        seed=100,
+        config=ga_cfg,
+    )
+    b = run_route_ga(
+        instance,
+        seed=100,
+        config=ga_cfg,
+    )
+
+    validate_solution(instance, a.best_solution)
+    validate_solution(instance, b.best_solution)
+
+    assert a.best_proxy.score.key <= baseline_proxy.score.key
+    assert a.best_proxy.score.key == b.best_proxy.score.key
+    assert {
+        uav_id: route.task_ids()
+        for uav_id, route in a.best_solution.routes.items()
+    } == {
+        uav_id: route.task_ids()
+        for uav_id, route in b.best_solution.routes.items()
+    }
+    assert a.best_solution.task_decisions == b.best_solution.task_decisions
+    assert a.best_solution.contact_visits == b.best_solution.contact_visits
