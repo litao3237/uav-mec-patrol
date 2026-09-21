@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import partial, update_wrapper
 
 import numpy as np
@@ -52,6 +52,12 @@ class ProblemOperatorConfig:
     elite_family_quota: int = 1
     elite_min_improvement_rel: float = 1e-4
     elite_min_improvement_j: float = 1.0
+    elite_progressive_widening: bool = True
+    elite_widen_trigger_rel: float = 2e-5
+    elite_widen_extra_limit: int = 6
+    elite_widen_task_limit: int = 6
+    elite_widen_route_options_per_task: int = 3
+    elite_widen_family_quota: int = 3
 
 
 def _proxy_precheck_key(
@@ -1287,6 +1293,25 @@ def _structural_elite_candidates(
     ]
 
 
+def _elite_move_family(label: str) -> str:
+    if label.startswith("route_compute_relocate::"):
+        return "route"
+    if (
+        label.startswith("contact_relocate::")
+        or label == "contact_point_replace"
+    ):
+        return "contact"
+    if label.startswith("contact_remove::"):
+        return "contact_remove"
+    if label.startswith("batch_merge::"):
+        return "batch_merge"
+    if label.startswith("batch_split_or_new_contact::"):
+        return "batch_split"
+    if label == "task_mode_or_batch_reassign":
+        return "mode_batch"
+    return "other"
+
+
 def contact_mode_intensification(
     state: UavMecState,
     *,
@@ -1311,6 +1336,9 @@ def contact_mode_intensification(
         "improvements": 0,
         "accepted_moves": [],
         "evaluated_moves": [],
+        "widenings": 0,
+        "widened_candidates_evaluated": 0,
+        "widened_families": [],
     }
 
     def value(solution: DiscreteSolution) -> float:
@@ -1333,11 +1361,23 @@ def contact_mode_intensification(
 
         round_base_value = current_value
         evaluated_moves = list(stats["evaluated_moves"])
-        for label, candidate in shortlist:
+        evaluated_labels: set[str] = set()
+
+        def evaluate_candidate(
+            label: str,
+            candidate: DiscreteSolution,
+            *,
+            widened: bool = False,
+        ) -> None:
+            nonlocal best_value, best_label, best_solution
             candidate_value = value(candidate)
             stats["candidates_evaluated"] = (
                 int(stats["candidates_evaluated"]) + 1
             )
+            if widened:
+                stats["widened_candidates_evaluated"] = (
+                    int(stats["widened_candidates_evaluated"]) + 1
+                )
             finite_candidate = np.isfinite(candidate_value)
             improvement_pct = (
                 100.0
@@ -1356,8 +1396,11 @@ def contact_mode_intensification(
                         else None
                     ),
                     "improvement_pct": improvement_pct,
+                    "widened": widened,
                 }
             )
+            evaluated_labels.add(label)
+
             scale = max(
                 1.0,
                 abs(best_value),
@@ -1379,6 +1422,97 @@ def contact_mode_intensification(
                 best_value = candidate_value
                 best_label = label
                 best_solution = candidate
+
+        for label, candidate in shortlist:
+            evaluate_candidate(label, candidate)
+
+        # Progressive widening is only triggered by an exact-CVX positive
+        # near miss. This preserves the cheap default budget on clearly flat
+        # elite states while expanding the same structural family when the
+        # first representative looks promising but falls below the meaningful
+        # acceptance threshold.
+        if (
+            best_solution is None
+            and config.elite_progressive_widening
+        ):
+            round_moves = [
+                move
+                for move in evaluated_moves
+                if (
+                    move["round"] == int(stats["rounds"])
+                    and move["improvement_pct"] is not None
+                )
+            ]
+            if round_moves:
+                near_miss = max(
+                    round_moves,
+                    key=lambda move: move["improvement_pct"],
+                )
+                near_miss_rel = (
+                    float(near_miss["improvement_pct"]) / 100.0
+                )
+                if near_miss_rel >= config.elite_widen_trigger_rel:
+                    focus_family = _elite_move_family(
+                        str(near_miss["move"])
+                    )
+                    widened_config = replace(
+                        config,
+                        elite_shortlist_limit=max(
+                            config.elite_shortlist_limit * 2,
+                            config.elite_shortlist_limit
+                            + config.elite_widen_extra_limit,
+                        ),
+                        elite_task_limit=max(
+                            config.elite_task_limit,
+                            config.elite_widen_task_limit,
+                        ),
+                        elite_route_options_per_task=max(
+                            config.elite_route_options_per_task,
+                            config.elite_widen_route_options_per_task,
+                        ),
+                        elite_family_quota=max(
+                            config.elite_family_quota,
+                            config.elite_widen_family_quota,
+                        ),
+                    )
+                    widened = _structural_elite_candidates(
+                        current,
+                        config=widened_config,
+                    )
+                    extras = [
+                        (label, candidate)
+                        for label, candidate in widened
+                        if (
+                            label not in evaluated_labels
+                            and _elite_move_family(label)
+                            == focus_family
+                        )
+                    ][: config.elite_widen_extra_limit]
+                    if extras:
+                        stats["widenings"] = (
+                            int(stats["widenings"]) + 1
+                        )
+                        widened_families = list(
+                            stats["widened_families"]
+                        )
+                        widened_families.append(
+                            {
+                                "round": int(stats["rounds"]),
+                                "family": focus_family,
+                                "trigger_move": near_miss["move"],
+                                "trigger_improvement_pct": (
+                                    near_miss["improvement_pct"]
+                                ),
+                            }
+                        )
+                        stats["widened_families"] = widened_families
+                        for label, candidate in extras:
+                            evaluate_candidate(
+                                label,
+                                candidate,
+                                widened=True,
+                            )
+
         stats["evaluated_moves"] = evaluated_moves
 
         if best_solution is None or best_label is None:
