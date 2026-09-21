@@ -585,7 +585,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 - [x] 核心 family ablation；
 - [x] baseline comparison；
-- [ ] **[NEXT]** UAV 数量 M=3/5/8 sensitivity（K=80,E=2 正式 3x3 matrix 已启动）；
+- [x] UAV 数量 M=3/5/8 sensitivity：M=3 当前预算 0/9 strict，M=5/8 均 9/9 strict；M=8 Hybrid 6 better / 3 equal / 0 worse；
 - [ ] **[TODO]** 小规模 exact/near-exact benchmark；
 - [ ] **[TODO]** 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
 - [ ] **[TODO]** 最终绘图、统计与论文表格。
@@ -734,7 +734,7 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 4. [x] contact / batch / progressive-widening 消融；
 5. [x] Greedy / FR-NM / Generic ALNS / Route-GA / Proposed Hybrid baselines；
 6. [ ] **[TODO]** K=8~12 strong benchmark；
-7. [ ] **[TODO]** M=3/5/8 sensitivity 与最终指标汇总；
+7. [x] M=3/5/8 sensitivity；[ ] **[NEXT]** 最终指标汇总；
 8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
 
 当前原则：
@@ -2209,3 +2209,38 @@ The GA pilot mean energy is 232677.407 J versus 169439.929 J for Hybrid, with a
 mean paired Hybrid advantage of 26.973% (median 28.771%). Because all three GA
 runs are strict feasible, the GA baseline is now suitable for a full 3x3 seed
 matrix on K=50/E=2.
+
+
+## UAV-count sensitivity: K=80/E=2, M=3/5/8
+
+The UAV-count sweep keeps the task realization, deadlines, MEC sites, contact
+points, scenario seeds, algorithm seeds, and 100-iteration search budget fixed.
+A regression test locks this instance fairness; only the number of homogeneous
+UAVs changes.
+
+| UAVs M | strict pairs | mean Hybrid energy (J) | median Hybrid energy (J) | mean Hybrid-vs-Generic gain | median gain | mean offload ratio | mean contacts/UAV | mean route distance (km) | mean runtime (s) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3 | 0/9 | - | - | - | - | - | - | - | 36.196 |
+| 5 | 9/9 | 226768.196 | 225479.779 | 1.378% | 1.154% | 0.122 | 1.044 | 11.494 | 52.372 |
+| 8 | 9/9 | 224480.040 | 224416.742 | 0.454% | 0.042% | 0.122 | 0.597 | 11.395 | 39.366 |
+
+For M=3, all 9 Generic/Hybrid terminal states are rejected by the optimistic
+fixed-discrete feasibility precheck. This means the frozen 100-iteration search
+does not recover a strict-feasible discrete structure for these runs. It is not
+a proof that the global M=3 mathematical problem is infeasible.
+
+For M=8, the paired result is 6/9 improved, 3/9 unchanged, and 0/9 worse.
+The additional Hybrid advantage over Generic ALNS therefore becomes smaller as
+more UAVs relieve route/compute pressure. This is consistent with the structural
+interpretation that elite Route-Contact-Offloading intensification is most useful
+when resource/route coupling is tighter.
+
+Comparing the two fully strict settings, increasing M from 5 to 8 reduces mean
+Hybrid energy from 226768.196 J to 224480.040 J (about 1.01%), while mean route
+distance falls only slightly from 11.494 km to 11.395 km. The offload ratio stays
+near 12.2%, whereas contacts per UAV fall from 1.044 to 0.597 because contact
+work is distributed over a larger fleet.
+
+The UAV-count experiment should therefore be presented primarily as a
+feasibility/pressure sensitivity plus a structural-gain sensitivity, rather than
+as a claim that energy decreases monotonically with fleet size for all M.
