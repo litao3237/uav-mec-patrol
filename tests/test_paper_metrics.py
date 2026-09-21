@@ -56,3 +56,11 @@ def test_paper_metrics_are_consistent_on_small_instance() -> None:
     for value in metrics["cpu_utilization_by_mec"].values():
         assert value >= 0.0
         assert value <= 1.0 + 1e-5
+
+    assert metrics["bandwidth_utilization_is_minimal_certificate"] is False
+    for value in metrics["bandwidth_relative_shadow_by_mec"].values():
+        assert value >= 0.0
+    for value in metrics["cpu_relative_shadow_by_mec"].values():
+        assert value >= 0.0
+    assert metrics["mean_active_mec_bandwidth_relative_shadow"] >= 0.0
+    assert metrics["mean_active_mec_cpu_relative_shadow"] >= 0.0
