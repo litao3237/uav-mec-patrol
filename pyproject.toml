@@ -1,6 +1,6 @@
 [project]
 name = "uav-mec-patrol"
-version = "0.5.0"
+version = "0.6.0"
 description = "Research codebase for multi-UAV forest patrol, intermittent MEC contact, batch offloading, and resource allocation."
 readme = "README.md"
 requires-python = ">=3.11"
