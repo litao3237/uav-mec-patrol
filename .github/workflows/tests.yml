@@ -28,5 +28,7 @@ jobs:
           experiments/aggregate_ga_baselines.py
           experiments/aggregate_uav_sensitivity.py
           experiments/aggregate_paper_metrics.py
+          experiments/run_small_strong_benchmark.py
+          experiments/aggregate_small_strong_benchmark.py
       - name: Run tests
         run: uv run pytest
