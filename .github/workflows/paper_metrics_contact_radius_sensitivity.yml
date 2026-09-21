@@ -1,0 +1,72 @@
+name: paper-metrics-contact-radius-sensitivity
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/paper_metrics_contact_radius_sensitivity.yml'
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        scale: [0.75, 1.0, 1.25]
+        scenario: [45, 46, 47]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run contact-radius sensitivity
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks 80
+          --mecs 2
+          --uavs 5
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+          --mec-bandwidth-scale 1.0
+          --mec-radius-scale ${{ matrix.scale }}
+          --paper-metrics
+          --output outputs/results/contact_radius_K80_M5_E2_R${{ matrix.scale }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+      - name: Upload pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radius-R${{ matrix.scale }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/contact_radius_K80_M5_E2_R${{ matrix.scale }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: metrics
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: radius-R*-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate contact-radius sensitivity
+        run: >-
+          python experiments/aggregate_mec_environment_sensitivity.py
+          --input-dir outputs/results/matrix
+          --field mec_radius_scale
+          --output-json outputs/results/contact_radius_sensitivity_K80_M5_E2.json
+          --output-csv outputs/results/contact_radius_sensitivity_K80_M5_E2.csv
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: contact-radius-sensitivity-K80-M5-E2
+          path: |
+            outputs/results/contact_radius_sensitivity_K80_M5_E2.json
+            outputs/results/contact_radius_sensitivity_K80_M5_E2.csv
