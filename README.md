@@ -530,8 +530,8 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 主算法已经具备独立运行能力，剩余工作是构建论文对照组：
 
-- [ ] **[TODO]** Greedy + MEC repair；
-- [x] Generic ALNS（天然 baseline）；
+- [x] Greedy + MEC repair：K=80,E=2 下 0/3 unique scenarios strict-feasible，仅作为初始化/可行性恢复 baseline；
+- [x] Generic ALNS：9/9 strict；Hybrid paired 8 better / 1 equal / 0 worse，mean advantage 1.378%；
 - [ ] **[TODO]** Route-only + resource allocation；
 - [ ] **[TODO]** nearest-MEC / nearest-contact heuristic；
 - [ ] **[TODO]** ACO 或 GA 至少一个独立元启发式 baseline；
@@ -2012,3 +2012,56 @@ previous K=100/E=4 validation observed one near-miss-triggered widening event.
 Because the mechanism is dormant when the trigger is not met, it can be retained
 in the implementation as a robustness safeguard while being demoted from the
 paper's core contribution claims.
+
+
+## Core baseline comparison: initialization feasibility and Hybrid gain
+
+Core baseline comparison on K=80, E=2, scenario seeds 45/46/47 and algorithm
+seeds 100/101/102 uses a shared instance/initialization and evaluates all reported
+final energies with Stage-1 CVX.
+
+### Greedy + MEC repair
+
+The deterministic Greedy+MEC-repair initializer is not a valid energy baseline
+under this high-load setting because none of the three unique scenario instances
+has a strict Stage-1 feasible resource solution:
+
+- scenario 45: `infeasible_precheck`;
+- scenario 46: `infeasible_precheck`;
+- scenario 47: CVX `infeasible` after passing the optimistic precheck.
+
+Because this initializer does not depend on `algorithm_seed`, the matrix contains
+three repeated copies per scenario. Its independent feasibility count is therefore
+**0/3 unique scenarios**, not 0/9 independent trials.
+
+This result should be used as a feasibility-recovery baseline rather than for an
+energy-reduction percentage.
+
+### Generic ALNS vs Proposed Hybrid
+
+| method | strict pairs | mean Stage-1 energy (J) | median Stage-1 energy (J) |
+|---|---:|---:|---:|
+| Generic ALNS | 9/9 | 230038.323 | 227529.698 |
+| Proposed Hybrid | 9/9 | 226768.196 | 225479.779 |
+
+Paired Hybrid-vs-Generic comparison:
+
+- comparable strict pairs: 9/9;
+- Hybrid better: 8/9;
+- equal: 1/9;
+- Generic better: 0/9;
+- mean paired Hybrid advantage: 1.378%;
+- median paired Hybrid advantage: 1.154%.
+
+The mean-energy difference is about 3270.127 J, corresponding to roughly 1.422%
+when comparing the two aggregate means.
+
+Interpretation: Generic ALNS is responsible for robustly recovering feasible
+high-load discrete structures from the weak greedy initializer, while the
+problem-specific Hybrid elite stage provides an additional, consistently
+non-worsening energy reduction over that already-strong feasible baseline.
+
+Therefore the paper should use Generic ALNS as the principal algorithmic energy
+baseline for this setting, while Greedy+MEC repair is reported mainly for
+initialization/feasibility comparison. Additional independent feasible baselines
+are still required for the final paper.
