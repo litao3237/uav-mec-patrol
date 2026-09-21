@@ -1,0 +1,66 @@
+name: dense-workload-curve
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/dense_workload_curve.yml'
+
+jobs:
+  workload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        tasks: [30, 40, 50, 60, 70, 80]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run dense workload point
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks ${{ matrix.tasks }}
+          --mecs 2
+          --uavs 5
+          --scenario-seeds 45,46,47
+          --algorithm-seeds 100,101,102
+          --iterations 100
+          --output outputs/results/dense_workload_K${{ matrix.tasks }}_M5_E2.json
+      - name: Upload workload point
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dense-workload-K${{ matrix.tasks }}
+          path: outputs/results/dense_workload_K${{ matrix.tasks }}_M5_E2.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: workload
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dense-workload-K*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate dense workload
+        run: >-
+          python experiments/aggregate_dense_workload.py
+          --input-dir outputs/results/matrix
+          --output-json outputs/results/dense_workload_K30-80_M5_E2.json
+          --output-csv outputs/results/dense_workload_K30-80_M5_E2.csv
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: dense-workload-K30-80-M5-E2
+          path: |
+            outputs/results/dense_workload_K30-80_M5_E2.json
+            outputs/results/dense_workload_K30-80_M5_E2.csv
