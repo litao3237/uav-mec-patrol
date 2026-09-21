@@ -45,6 +45,30 @@ def _default_output_path(
     return Path("outputs/results") / name
 
 
+def _write_result_file(
+    out: Path,
+    *,
+    experiment: dict[str, Any],
+    rows: list[dict[str, Any]],
+    aggregate: list[dict[str, Any]],
+    complete: bool,
+) -> None:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(
+            {
+                "complete": complete,
+                "experiment": experiment,
+                "aggregate": aggregate,
+                "rows": rows,
+            },
+            indent=2,
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+
 def _parse_int_list(text: str) -> list[int]:
     return [
         int(item.strip())
@@ -166,6 +190,26 @@ def main() -> None:
     )
 
     rows: list[dict[str, Any]] = []
+    out = (
+        Path(args.output)
+        if args.output is not None
+        else _default_output_path(
+            task_counts=task_counts,
+            mec_counts=mec_counts,
+            scenario_seeds=scenario_seeds,
+            algorithm_seeds=algorithm_seeds,
+            iterations=args.iterations,
+        )
+    )
+    experiment = {
+        "tasks": task_counts,
+        "mecs": mec_counts,
+        "scenario_seeds": scenario_seeds,
+        "algorithm_seeds": algorithm_seeds,
+        "iterations": args.iterations,
+        "elite_rounds": args.elite_rounds,
+        "uavs": args.uavs,
+    }
 
     print(
         "K    E    scen   alg    base-s1      hybrid-s1    "
@@ -341,6 +385,15 @@ def main() -> None:
                         ),
                     }
                     rows.append(row)
+                    # Persist every completed run so an expensive workload
+                    # sweep is not lost if a later solver/candidate fails.
+                    _write_result_file(
+                        out,
+                        experiment=experiment,
+                        rows=rows,
+                        aggregate=[],
+                        complete=False,
+                    )
 
                     base_text = (
                         f"{base_energy:.3f}"
@@ -395,7 +448,7 @@ def main() -> None:
                         f"{final_text:<14} "
                         f"{improve_text:<11} "
                         f"{result.elite_cvx_calls:<11} "
-                        f"{move_text:<10} "
+                        f"{move_text:<44} "
                         f"{search_runtime_s:<10.2f} "
                         f"{result.elite_runtime_s:<9.2f} "
                         f"{total_runtime_s:.2f}"
@@ -665,37 +718,12 @@ def main() -> None:
                 )
             )
 
-    out = (
-        Path(args.output)
-        if args.output is not None
-        else _default_output_path(
-            task_counts=task_counts,
-            mec_counts=mec_counts,
-            scenario_seeds=scenario_seeds,
-            algorithm_seeds=algorithm_seeds,
-            iterations=args.iterations,
-        )
-    )
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        json.dumps(
-            {
-                "experiment": {
-                    "tasks": task_counts,
-                    "mecs": mec_counts,
-                    "scenario_seeds": scenario_seeds,
-                    "algorithm_seeds": algorithm_seeds,
-                    "iterations": args.iterations,
-                    "elite_rounds": args.elite_rounds,
-                    "uavs": args.uavs,
-                },
-                "aggregate": aggregate,
-                "rows": rows,
-            },
-            indent=2,
-            ensure_ascii=False,
-        ),
-        encoding="utf-8",
+    _write_result_file(
+        out,
+        experiment=experiment,
+        rows=rows,
+        aggregate=aggregate,
+        complete=True,
     )
     print(f"\nSaved: {out}")
 
