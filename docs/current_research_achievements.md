@@ -1157,3 +1157,85 @@ K=80,\quad M=5,\quad E=2
 > **固定计算预算下兼顾 strict-feasibility robustness、runtime 与 solution quality 的 operating point。**
 
 不能写成“100 iterations 后算法已经完全收敛”。
+
+
+---
+
+# 补充实验：Bandwidth / Contact Geometry / Spatial Robustness
+
+## C. MEC Bandwidth Sensitivity
+
+设置：
+
+\[
+K=80,\quad M=5,\quad E=2,\quad B/B_0\in\{0.5,1.0,1.5\}
+\]
+
+任务、deadline、UAV、MEC 坐标和随机种子全部固定，仅缩放 MEC bandwidth。
+
+| Bandwidth Scale | Stage-1 Strict | Mean Energy (J) | Offload Ratio | Contacts/UAV | Mean BW Relative Shadow | Mean CPU Relative Shadow | Mean Runtime (s) |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.50 | 8/9 | 230892.958 | 12.8% | 1.125 | **0.011** | 0.000 | 61.768 |
+| 1.00 | **9/9** | **226768.196** | 12.2% | 1.044 | 0.005 | 0.000 | 51.825 |
+| 1.50 | **9/9** | 227432.750 | 13.1% | 1.089 | 0.005 | **0.008** | 52.077 |
+
+其中 relative shadow 定义为 Stage-1 capacity dual 乘以对应容量，再除以 Stage-1 最优能耗；它反映按比例放宽该资源容量时的局部边际价值。
+
+结果支持：
+
+- bandwidth 减半后 strict feasibility 从 9/9 降为 8/9；
+- 条件平均 UAV energy 上升；
+- bandwidth relative shadow 从约 0.005 上升至约 0.011，说明低带宽状态下额外通信容量具有更高边际价值；
+- bandwidth 放大到 1.5× 后，bandwidth shadow 不再明显下降，而 CPU relative shadow 上升，说明资源压力可能从通信侧部分转移到 MEC compute 侧；
+- 因此“通信资源紧张”应由 **capacity shadow + explicit scaling response** 支撑，而不是由某个 Stage-2 bandwidth utilization 数值单独证明。
+
+## D. MEC Coverage-Radius / Contact-Geometry Sensitivity
+
+设置：
+
+\[
+R/R_0\in\{0.75,1.0,1.25\}
+\]
+
+| Radius Scale | Stage-1 Strict | Mean Energy (J) | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.75 | 9/9 | 229060.049 | 13.1% | 0.978 | 11.645 | 0.004 |
+| 1.00 | 9/9 | **226768.196** | 12.2% | 1.044 | **11.494** | 0.005 |
+| 1.25 | 9/9 | 231151.142 | 11.9% | 0.889 | 11.754 | 0.004 |
+
+覆盖半径变化并未产生单调能耗趋势。原因是半径变化同时改变可选 contact-point 几何位置、绕行距离、通信距离和最终卸载结构。因此这组实验应解释为：
+
+> **contact geometry sensitivity / robustness**
+
+而不是“coverage 越大一定越优”的单调容量实验。
+
+更直接的 Contact Opportunity 约束实验采用独立的 per-UAV contact-budget sweep \(C_{\max}=1/2/3/4\)。
+
+## E. Spatial-Distribution Robustness
+
+固定：
+
+\[
+K=80,\quad M=5,\quad E=2
+\]
+
+任务 data size 与 cycles-per-bit 随机流保持一致，仅改变监测节点空间分布：
+
+- uniform；
+- clustered；
+- boundary-biased。
+
+| Spatial Profile | Stage-1 Strict | Mean Energy on Strict Subset (J) | Mean Hybrid Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| uniform | **9/9** | 226768.196 | 1.378% | 12.2% | 1.044 | 11.494 | 0.005 |
+| clustered | 7/9 | 146764.392 | 0.200% | 27.5% | 0.971 | 6.981 | **0.013** |
+| boundary-biased | 6/9 | 226126.636 | 0.381% | 13.1% | 0.933 | 11.485 | 0.004 |
+
+该实验的主要用途是验证 distribution shift，而不是比较三个 profile 的绝对能耗高低。特别是 clustered profile 的几何路径显著更短，因此绝对能耗天然更低。
+
+可以支持的结论：
+
+- Proposed Hybrid 在三种空间分布下均能恢复一定比例的 strict solutions；
+- clustered/boundary shift 会降低 strict-feasibility robustness，说明空间分布本身是重要难度来源；
+- clustered 情况虽然路线更短，但 offload ratio 显著上升且 bandwidth shadow 更高，表明“几何距离更短”并不等价于“通信/计算耦合更弱”；
+- 因此后续论文可以把这组实验定位为 **out-of-distribution spatial robustness**。
