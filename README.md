@@ -2454,3 +2454,58 @@ Scale-scout evidence used to select K=28:
 
 Thus K=28 is the smallest tested baseline-parameter scale that is both
 strict-feasible and nondegenerate under the strong-reference pilot.
+
+
+## Reduced-scale best-known strong benchmark: final results
+
+Formal setting: K=28, M=2, E=2, scenario seeds 45/46/47. The standard
+Proposed Hybrid uses seeds 100/101/102 with 100 iterations. The strong reference
+uses 12 seeds (700-711) with 1000 iterations, 6 elite rounds, and the expanded
+exact elite candidate budget defined above.
+
+All reported energies are strict Stage-1 CVX optima.
+
+| scenario | best-known energy (J) | best-known contacts | best-known offloaded tasks | strong hits | mean standard gap | median standard gap |
+|---:|---:|---:|---:|---:|---:|---:|
+| 45 | 97905.087437 | 1 | 2 | 4/12 | 9.695% | 8.610% |
+| 46 | 99503.124192 | 2 | 2 | 5/12 | 0.071% | 0.071% |
+| 47 | 103608.196273 | 1 | 1 | 1/12 | 8.137% | 9.203% |
+
+Aggregate over the 9 standard runs and 36 formal strong runs:
+
+- standard strict feasibility: **9/9**;
+- strong strict feasibility: **36/36**;
+- mean standard-to-best-known gap: **5.968%**;
+- median gap: **8.610%**;
+- maximum gap: **11.866%**;
+- standard runs within 0.01% of best-known: **0/9**;
+- within 0.1%: **3/9**;
+- within 1%: **3/9**;
+- formal strong best-known hits: **10/36 (27.8%)**;
+- mean standard runtime: **3.990 s**;
+- mean strong runtime: **31.380 s**.
+
+All three scenario references are nondegenerate: each best-known solution contains
+at least one realized MEC contact and at least one offloaded task.
+
+Because scenario 47 had only one hit in the initial 12-seed strong batch, an
+additional confirmation batch was run with 12 new strong seeds (712-723) plus
+seed 707 as a deterministic anchor. No new seed found a solution below
+103608.196273 J, so the S47 best-known reference is unchanged. The low repeat
+frequency is retained as evidence that this reference lies in a narrow search
+basin, not as evidence of global optimality.
+
+Interpretation:
+
+1. the frozen 100-iteration configuration is a computational-budget operating
+   point, not a near-optimality guarantee;
+2. in an easier scenario (S46), standard Hybrid is already within about 0.07%
+   of the best-known strong reference;
+3. in harder reduced-scale scenarios (S45/S47), additional search can reduce
+   energy materially, producing standard-run gaps of several percent;
+4. the strong benchmark therefore provides an honest empirical solution-quality
+   reference while preserving the paper's distinction between heuristic search
+   and the exact continuous resource oracle.
+
+No global-optimality or exact discrete-optimality claim should be made from this
+experiment.
