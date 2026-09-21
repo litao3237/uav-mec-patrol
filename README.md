@@ -1393,3 +1393,54 @@ uv run python experiments\run_hybrid_validation.py --tasks 80 --mecs 2 --scenari
 
 The output now reports `progressive widening` diagnostics and the number of
 additional exact candidates evaluated.
+
+
+## Progressive widening seed-44 verification: keep the adaptive policy
+
+K=80, E=2, scenario seed=44, algorithm seeds 100/101/102, default small
+family-diverse shortlist with exact near-miss progressive widening:
+
+| alg seed | base Stage-1 CVX (J) | hybrid Stage-1 CVX (J) | gain | elite CVX | outcome |
+|---:|---:|---:|---:|---:|---|
+| 100 | 210916.901 | 210748.036 | 0.080% | 16 | route-compute relocate accepted |
+| 101 | 214161.876 | 214161.876 | 0.000% | 6 | no widening / no meaningful move |
+| 102 | 215420.390 | 215420.390 | 0.000% | 7 | no widening / no meaningful move |
+
+For seed 100, the initial exact shortlist found
+`route_compute_relocate::S72->U1@19` with a 0.0066% near miss. This correctly
+triggered route-family widening and recovered the stronger
+`route_compute_relocate::S30->U4@19`, producing a 0.080% accepted reduction.
+
+Round 2 then observed a `batch_merge` near miss of about 0.0066%; widening was
+triggered, but the move remained below the configured meaningful acceptance
+threshold and was not accepted. This is intentional: a positive exact delta is
+not automatically promoted to a paper-relevant structural improvement.
+
+Compared with the earlier always-wide 12-candidate experiment on the same three
+algorithm seeds:
+
+- mean elite CVX calls: 22.67 -> 9.67 (about 57% lower);
+- mean elite runtime: 22.95 s -> 9.58 s (about 58% lower);
+- seed-100 elite CVX calls: 24 -> 16;
+- seed-100 accepted energy reduction retains most of the wide-search gain.
+
+The adaptive elite-screening policy is therefore frozen for the next validation
+stage:
+
+[
+\boxed{
+\text{small diverse exact shortlist}
+\rightarrow
+\text{exact positive near-miss detection}
+\rightarrow
+\text{same-family progressive widening}
+\rightarrow
+\text{meaningful Stage-1 CVX acceptance}
+}
+]
+
+The next work item is no longer shortlist tuning. It is cross-scenario and
+cross-load validation of the frozen hybrid algorithm.
+
+The paired validation script now also aggregates strict-optimal pairs, accepted
+move families, widening frequency, exact-CVX budget and elite runtime overhead.
