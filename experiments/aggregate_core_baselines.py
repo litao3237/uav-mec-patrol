@@ -23,7 +23,7 @@ def _method_rows(
     rows: list[dict[str, Any]],
     method: str,
 ) -> list[dict[str, Any]]:
-    if method != "greedy_repair":
+    if method not in {"greedy_repair", "nearest_mec"}:
         return rows
 
     # Greedy+MEC repair is deterministic for a fixed instance and does not
@@ -99,6 +99,7 @@ def main() -> None:
             method: _method_summary(rows, method)
             for method in (
                 "greedy_repair",
+                "nearest_mec",
                 "generic_alns",
                 "hybrid",
             )
@@ -107,6 +108,10 @@ def main() -> None:
             "hybrid_vs_greedy_repair": _paired(
                 rows,
                 "greedy_repair",
+            ),
+            "hybrid_vs_nearest_mec": _paired(
+                rows,
+                "nearest_mec",
             ),
             "hybrid_vs_generic_alns": _paired(
                 rows,
