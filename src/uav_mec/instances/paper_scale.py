@@ -299,10 +299,80 @@ def _individual_optimistic_deadline_lb(
     return direct_collect + workload_gcycles / fastest_cpu
 
 
+def _sample_task_xy(
+    cfg: PaperScaleConfig,
+    rng: Random,
+    *,
+    profile: str,
+) -> tuple[float, float]:
+    margin = cfg.task_margin_m
+    width = cfg.width_m - 2.0 * margin
+    height = cfg.height_m - 2.0 * margin
+
+    if profile == "uniform":
+        # Keep the historical baseline path bit-for-bit compatible.
+        return (
+            rng.uniform(margin, cfg.width_m - margin),
+            rng.uniform(margin, cfg.height_m - margin),
+        )
+
+    # Every non-uniform profile consumes exactly two RNG draws, matching the
+    # uniform profile. Task data/workload random streams therefore stay aligned.
+    u = rng.random()
+    v = rng.random()
+
+    if profile == "clustered":
+        centers = (
+            (0.28, 0.30),
+            (0.70, 0.38),
+            (0.55, 0.76),
+        )
+        scaled = min(u * len(centers), len(centers) - 1e-12)
+        cluster_idx = int(scaled)
+        phase = scaled - cluster_idx
+        cx_n, cy_n = centers[cluster_idx]
+        cx = margin + cx_n * width
+        cy = margin + cy_n * height
+        radius = 0.14 * min(width, height) * math.sqrt(v)
+        angle = 2.0 * math.pi * phase
+        x = cx + radius * math.cos(angle)
+        y = cy + radius * math.sin(angle)
+        return (
+            min(max(x, margin), cfg.width_m - margin),
+            min(max(y, margin), cfg.height_m - margin),
+        )
+
+    if profile == "boundary":
+        scaled = min(u * 4.0, 4.0 - 1e-12)
+        edge = int(scaled)
+        along = scaled - edge
+        depth = 0.18 * min(width, height) * (v ** 2)
+        if edge == 0:  # left
+            x = margin + depth
+            y = margin + along * height
+        elif edge == 1:  # right
+            x = cfg.width_m - margin - depth
+            y = margin + along * height
+        elif edge == 2:  # bottom
+            x = margin + along * width
+            y = margin + depth
+        else:  # top
+            x = margin + along * width
+            y = cfg.height_m - margin - depth
+        return x, y
+
+    raise ValueError(
+        f"Unknown task spatial profile {profile!r}; "
+        "expected 'uniform', 'clustered', or 'boundary'"
+    )
+
+
 def _build_tasks(
     cfg: PaperScaleConfig,
     rng: Random,
     mecs: Mapping[str, MEC],
+    *,
+    spatial_profile: str = "uniform",
 ) -> dict[str, Task]:
     tasks: dict[str, Task] = {}
     margin = cfg.task_margin_m
@@ -311,8 +381,11 @@ def _build_tasks(
     deadline_lo, deadline_hi = cfg.task_deadline_ratio_range
 
     for idx in range(1, cfg.num_tasks + 1):
-        x = rng.uniform(margin, cfg.width_m - margin)
-        y = rng.uniform(margin, cfg.height_m - margin)
+        x, y = _sample_task_xy(
+            cfg,
+            rng,
+            profile=spatial_profile,
+        )
         data_mb = rng.uniform(data_lo, data_hi)
         cycles_per_bit = rng.uniform(cpb_lo, cpb_hi)
         workload_gcycles = data_mb * 8.0e-3 * cycles_per_bit
@@ -354,6 +427,7 @@ def build_paper_scale_instance(
     num_uavs: int | None = None,
     num_mecs: int | None = None,
     scenario_seed: int | None = None,
+    task_spatial_profile: str = "uniform",
 ) -> Instance:
     cfg = config or load_paper_scale_config(config_path)
     cfg = cfg.with_scale(
@@ -368,7 +442,12 @@ def build_paper_scale_instance(
     mecs = _build_mecs(cfg)
     contact_points = _build_contact_points(cfg, mecs)
     uavs = _build_uavs(cfg)
-    tasks = _build_tasks(cfg, rng, mecs)
+    tasks = _build_tasks(
+        cfg,
+        rng,
+        mecs,
+        spatial_profile=task_spatial_profile,
+    )
 
     return Instance(
         depot_xy=cfg.depot_xy,
