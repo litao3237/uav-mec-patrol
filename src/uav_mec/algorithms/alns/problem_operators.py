@@ -44,6 +44,10 @@ class ProblemOperatorConfig:
     critical_task_limit: int = 6
     mode_candidate_limit: int = 24
     compute_option_limit: int = 12
+    elite_shortlist_limit: int = 6
+    elite_task_limit: int = 4
+    elite_positions_per_contact: int = 2
+    elite_points_per_mec: int = 1
 
 
 def _proxy_precheck_key(
@@ -634,6 +638,433 @@ def compute_aware_insertion_repair(
     return repaired
 
 
+
+def _next_elite_visit_id(
+    solution: DiscreteSolution,
+    uav_id: str,
+) -> str:
+    prefix = f"EL_{uav_id}_"
+    idx = 1
+    while f"{prefix}{idx}" in solution.contact_visits:
+        idx += 1
+    return f"{prefix}{idx}"
+
+
+def _visit_batch_tasks(
+    solution: DiscreteSolution,
+    visit_id: str,
+) -> list[str]:
+    return [
+        task_id
+        for task_id, decision in solution.task_decisions.items()
+        if (
+            decision.mode is ExecutionMode.OFFLOAD
+            and decision.contact_visit_id == visit_id
+        )
+    ]
+
+
+def _relocate_contact_candidates(
+    state: UavMecState,
+    visit_id: str,
+    *,
+    positions_limit: int,
+) -> list[tuple[str, DiscreteSolution]]:
+    solution = state.solution
+    visit = solution.contact_visits[visit_id]
+    route = solution.routes[visit.uav_id]
+    batch = _visit_batch_tasks(solution, visit_id)
+    if not batch:
+        return []
+
+    without = [
+        stop
+        for stop in route.stops
+        if not (
+            stop.kind is StopType.CONTACT
+            and stop.ref_id == visit_id
+        )
+    ]
+    task_pos = {
+        stop.ref_id: idx
+        for idx, stop in enumerate(without)
+        if stop.kind is StopType.TASK
+    }
+    earliest = max(task_pos[task_id] for task_id in batch) + 1
+
+    point = state.instance.contact_points[visit.point_id]
+    ranked: list[tuple[float, int]] = []
+    for pos in range(earliest, len(without)):
+        prev_xy = stop_xy(
+            state.instance,
+            solution,
+            without[pos - 1],
+        )
+        next_xy = stop_xy(
+            state.instance,
+            solution,
+            without[pos],
+        )
+        detour = (
+            distance(prev_xy, (point.x, point.y))
+            + distance((point.x, point.y), next_xy)
+            - distance(prev_xy, next_xy)
+        )
+        ranked.append((detour, pos))
+
+    # Keep the earliest feasible opportunity for latency plus the geometrically
+    # best alternatives for flight energy.
+    positions = [earliest]
+    for _, pos in sorted(ranked):
+        if pos not in positions:
+            positions.append(pos)
+        if len(positions) >= positions_limit:
+            break
+
+    candidates: list[tuple[str, DiscreteSolution]] = []
+    for pos in positions:
+        current_pos = next(
+            idx
+            for idx, stop in enumerate(route.stops)
+            if (
+                stop.kind is StopType.CONTACT
+                and stop.ref_id == visit_id
+            )
+        )
+        # Convert the insertion position in the contact-free route back to a
+        # meaningful move; if the order is unchanged this is a no-op.
+        candidate = deepcopy(solution)
+        stops = [
+            stop
+            for stop in candidate.routes[visit.uav_id].stops
+            if not (
+                stop.kind is StopType.CONTACT
+                and stop.ref_id == visit_id
+            )
+        ]
+        stops.insert(pos, RouteStop.contact(visit_id))
+        candidate.routes[visit.uav_id] = Route(
+            visit.uav_id,
+            tuple(stops),
+        )
+        if candidate.routes[visit.uav_id].stops == route.stops:
+            continue
+        validate_solution(state.instance, candidate)
+        candidates.append(
+            (f"contact_relocate::{visit_id}::{current_pos}->{pos}", candidate)
+        )
+    return candidates
+
+
+def _best_new_contact_options(
+    state: UavMecState,
+    task_id: str,
+    *,
+    per_mec: int,
+) -> list[tuple[float, str, int]]:
+    solution = state.solution
+    owner = next(
+        uav_id
+        for uav_id, route in solution.routes.items()
+        if task_id in route.task_ids()
+    )
+    route = solution.routes[owner]
+    task_pos, _ = _route_positions(route)
+    task_idx = task_pos[task_id]
+
+    by_mec: dict[str, list[tuple[float, str, int]]] = {}
+    for point_id, point in state.instance.contact_points.items():
+        best: tuple[float, int] | None = None
+        for pos in range(task_idx + 1, len(route.stops)):
+            prev_xy = stop_xy(
+                state.instance,
+                solution,
+                route.stops[pos - 1],
+            )
+            next_xy = stop_xy(
+                state.instance,
+                solution,
+                route.stops[pos],
+            )
+            detour = (
+                distance(prev_xy, (point.x, point.y))
+                + distance((point.x, point.y), next_xy)
+                - distance(prev_xy, next_xy)
+            )
+            if best is None or detour < best[0]:
+                best = (detour, pos)
+
+        if best is not None:
+            by_mec.setdefault(point.mec_id, []).append(
+                (best[0], point_id, best[1])
+            )
+
+    options: list[tuple[float, str, int]] = []
+    for mec_id in sorted(by_mec):
+        options.extend(
+            sorted(by_mec[mec_id])[:per_mec]
+        )
+    return sorted(options)
+
+
+def _insert_new_contact_for_task(
+    state: UavMecState,
+    task_id: str,
+    point_id: str,
+    insert_pos: int,
+) -> DiscreteSolution | None:
+    solution = state.solution
+    owner = next(
+        uav_id
+        for uav_id, route in solution.routes.items()
+        if task_id in route.task_ids()
+    )
+    route = solution.routes[owner]
+
+    current_contacts = len(route.contact_visit_ids())
+    decision = solution.task_decisions[task_id]
+    old_singleton = False
+    if (
+        decision.mode is ExecutionMode.OFFLOAD
+        and decision.contact_visit_id is not None
+    ):
+        old_singleton = (
+            len(
+                _visit_batch_tasks(
+                    solution,
+                    decision.contact_visit_id,
+                )
+            )
+            == 1
+        )
+
+    if (
+        current_contacts >= state.instance.max_contacts_per_uav
+        and not old_singleton
+    ):
+        return None
+
+    candidate = deepcopy(solution)
+    visit_id = _next_elite_visit_id(candidate, owner)
+    stops = list(candidate.routes[owner].stops)
+    stops.insert(insert_pos, RouteStop.contact(visit_id))
+    candidate.routes[owner] = Route(owner, tuple(stops))
+    candidate.contact_visits[visit_id] = ContactVisit(
+        visit_id=visit_id,
+        uav_id=owner,
+        point_id=point_id,
+    )
+    candidate.task_decisions[task_id] = TaskDecision.offload(
+        visit_id
+    )
+    _cleanup_orphan_contacts(candidate)
+    try:
+        validate_solution(state.instance, candidate)
+    except ValueError:
+        return None
+    return candidate
+
+
+def _batch_merge_candidates(
+    state: UavMecState,
+) -> list[tuple[str, DiscreteSolution]]:
+    solution = state.solution
+    candidates: list[tuple[str, DiscreteSolution]] = []
+
+    for uav_id, route in solution.routes.items():
+        task_pos, visit_pos = _route_positions(route)
+        visits = sorted(
+            route.contact_visit_ids(),
+            key=lambda visit_id: visit_pos[visit_id],
+        )
+        for source in visits:
+            batch = _visit_batch_tasks(solution, source)
+            if not batch:
+                continue
+            for target in visits:
+                if target == source:
+                    continue
+                target_pos = visit_pos[target]
+                if any(
+                    task_pos[task_id] >= target_pos
+                    for task_id in batch
+                ):
+                    continue
+
+                candidate = deepcopy(solution)
+                for task_id in batch:
+                    candidate.task_decisions[task_id] = (
+                        TaskDecision.offload(target)
+                    )
+                _cleanup_orphan_contacts(candidate)
+                try:
+                    validate_solution(
+                        state.instance,
+                        candidate,
+                    )
+                except ValueError:
+                    continue
+                candidates.append(
+                    (
+                        f"batch_merge::{source}->{target}",
+                        candidate,
+                    )
+                )
+    return candidates
+
+
+def _contact_removal_candidates(
+    state: UavMecState,
+) -> list[tuple[str, DiscreteSolution]]:
+    candidates: list[tuple[str, DiscreteSolution]] = []
+    for visit_id in state.solution.contact_visits:
+        batch = _visit_batch_tasks(
+            state.solution,
+            visit_id,
+        )
+        if not batch:
+            continue
+        candidate = deepcopy(state.solution)
+        for task_id in batch:
+            candidate.task_decisions[task_id] = (
+                TaskDecision.local()
+            )
+        _cleanup_orphan_contacts(candidate)
+        try:
+            validate_solution(state.instance, candidate)
+        except ValueError:
+            continue
+        candidates.append(
+            (f"contact_remove::{visit_id}", candidate)
+        )
+    return candidates
+
+
+def _structural_elite_candidates(
+    state: UavMecState,
+    *,
+    config: ProblemOperatorConfig,
+) -> list[tuple[str, DiscreteSolution]]:
+    candidates: list[tuple[str, DiscreteSolution]] = []
+
+    for visit_id in state.solution.contact_visits:
+        candidates.extend(
+            _relocate_contact_candidates(
+                state,
+                visit_id,
+                positions_limit=(
+                    config.elite_positions_per_contact
+                ),
+            )
+        )
+
+    candidates.extend(_batch_merge_candidates(state))
+    candidates.extend(_contact_removal_candidates(state))
+
+    critical = _critical_tasks_for_mode_move(
+        state,
+        limit=config.elite_task_limit,
+    )
+    for task_id in critical:
+        for _, point_id, insert_pos in _best_new_contact_options(
+            state,
+            task_id,
+            per_mec=config.elite_points_per_mec,
+        ):
+            candidate = _insert_new_contact_for_task(
+                state,
+                task_id,
+                point_id,
+                insert_pos,
+            )
+            if candidate is None:
+                continue
+            candidates.append(
+                (
+                    f"batch_split_or_new_contact::{task_id}"
+                    f"::{point_id}@{insert_pos}",
+                    candidate,
+                )
+            )
+
+    # Existing point replacement and task-level mode/batch moves remain useful
+    # cheap generators, but they now compete with structural moves only in the
+    # elite shortlist.
+    point_candidate = _best_contact_opportunity_move(
+        state,
+        config=config,
+    )
+    if point_candidate != state.solution:
+        candidates.append(
+            ("contact_point_replace", point_candidate)
+        )
+
+    mode_candidate = _best_mode_batch_move(
+        state,
+        config=config,
+    )
+    if mode_candidate != state.solution:
+        candidates.append(
+            ("task_mode_or_batch_reassign", mode_candidate)
+        )
+
+    ranked: list[
+        tuple[tuple[float, ...], str, DiscreteSolution]
+    ] = []
+    seen: set[str] = set()
+    for label, candidate in candidates:
+        signature = repr(
+            (
+                tuple(
+                    (
+                        uav_id,
+                        candidate.routes[uav_id].labels(),
+                    )
+                    for uav_id in sorted(candidate.routes)
+                ),
+                tuple(
+                    sorted(
+                        (
+                            visit_id,
+                            visit.point_id,
+                        )
+                        for visit_id, visit
+                        in candidate.contact_visits.items()
+                    )
+                ),
+                tuple(
+                    sorted(
+                        (
+                            task_id,
+                            decision.mode.value,
+                            decision.contact_visit_id,
+                        )
+                        for task_id, decision
+                        in candidate.task_decisions.items()
+                    )
+                ),
+            )
+        )
+        if signature in seen:
+            continue
+        seen.add(signature)
+        ranked.append(
+            (
+                _proxy_precheck_key(state, candidate),
+                label,
+                candidate,
+            )
+        )
+
+    ranked.sort(key=lambda item: item[0])
+    return [
+        (label, candidate)
+        for _, label, candidate in ranked[
+            : config.elite_shortlist_limit
+        ]
+    ]
+
+
 def contact_mode_intensification(
     state: UavMecState,
     *,
@@ -641,23 +1072,22 @@ def contact_mode_intensification(
     objective,
     max_rounds: int = 2,
     tolerance: float = 1e-12,
-) -> tuple[UavMecState, dict[str, int]]:
-    """Exact-oracle elite intensification for contact and mode/batch moves.
+) -> tuple[UavMecState, dict[str, object]]:
+    """Exact-oracle elite intensification over structural MEC neighborhoods.
 
-    The main ALNS may use a fast screened evaluator. This routine is intended
-    for elite/post-search states, where a small number of shortlisted
-    contact/mode moves can afford a stronger objective oracle (for example,
-    Stage-1 CVX). Every accepted move is therefore monotone with respect to
-    that oracle.
+    The main ALNS keeps its generic exploration budget. Only the elite state is
+    exposed to a small shortlist of contact relocation/insertion/removal,
+    explicit batch merge/split, point replacement and task-level mode/batch
+    reassignment candidates. Cheap proxy/precheck logic builds the shortlist;
+    the supplied objective oracle decides every accepted move.
     """
 
     current = state.copy()
-    stats = {
+    stats: dict[str, object] = {
         "rounds": 0,
-        "contact_attempts": 0,
-        "contact_improvements": 0,
-        "mode_attempts": 0,
-        "mode_improvements": 0,
+        "candidates_evaluated": 0,
+        "improvements": 0,
+        "accepted_moves": [],
     }
 
     def value(solution: DiscreteSolution) -> float:
@@ -666,60 +1096,57 @@ def contact_mode_intensification(
     current_value = value(current.solution)
 
     for _ in range(max_rounds):
-        improved = False
-        stats["rounds"] += 1
-
-        contact_candidate = _best_contact_opportunity_move(
+        stats["rounds"] = int(stats["rounds"]) + 1
+        shortlist = _structural_elite_candidates(
             current,
             config=config,
         )
-        if contact_candidate != current.solution:
-            stats["contact_attempts"] += 1
-            candidate_value = value(contact_candidate)
-            scale = max(
-                1.0,
-                abs(current_value),
-                abs(candidate_value),
-            )
-            if (
-                candidate_value
-                < current_value - tolerance * scale
-            ):
-                current.solution = contact_candidate
-                current.invalidate()
-                current_value = candidate_value
-                stats["contact_improvements"] += 1
-                improved = True
-
-        mode_candidate = _best_mode_batch_move(
-            current,
-            config=config,
-        )
-        if mode_candidate != current.solution:
-            stats["mode_attempts"] += 1
-            candidate_value = value(mode_candidate)
-            scale = max(
-                1.0,
-                abs(current_value),
-                abs(candidate_value),
-            )
-            if (
-                candidate_value
-                < current_value - tolerance * scale
-            ):
-                current.solution = mode_candidate
-                current.invalidate()
-                current_value = candidate_value
-                stats["mode_improvements"] += 1
-                improved = True
-
-        if not improved:
+        if not shortlist:
             break
+
+        best_value = current_value
+        best_label: str | None = None
+        best_solution: DiscreteSolution | None = None
+
+        for label, candidate in shortlist:
+            candidate_value = value(candidate)
+            stats["candidates_evaluated"] = (
+                int(stats["candidates_evaluated"]) + 1
+            )
+            scale = max(
+                1.0,
+                abs(best_value),
+                abs(candidate_value),
+            )
+            if (
+                candidate_value
+                < best_value - tolerance * scale
+            ):
+                best_value = candidate_value
+                best_label = label
+                best_solution = candidate
+
+        if best_solution is None or best_label is None:
+            break
+
+        current.solution = best_solution
+        current.invalidate()
+        current_value = best_value
+        stats["improvements"] = int(
+            stats["improvements"]
+        ) + 1
+        accepted_moves = list(stats["accepted_moves"])
+        accepted_moves.append(
+            {
+                "move": best_label,
+                "objective": best_value,
+            }
+        )
+        stats["accepted_moves"] = accepted_moves
 
     validate_solution(current.instance, current.solution)
     current.invalidate()
     return current, stats
-
 
 def _configured(func, **kwargs):
     operator = partial(func, **kwargs)
