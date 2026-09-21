@@ -239,6 +239,18 @@ def main() -> None:
                         "hybrid_cvx_energy_j": final_energy,
                         "improvement_pct": improvement_pct,
                         "elite_stats": result.elite_stats,
+                        "elite_widenings": int(
+                            result.elite_stats.get(
+                                "widenings",
+                                0,
+                            )
+                        ),
+                        "elite_widened_candidates": int(
+                            result.elite_stats.get(
+                                "widened_candidates_evaluated",
+                                0,
+                            )
+                        ),
                         "elite_config": {
                             "shortlist_limit": (
                                 config.problem.elite_shortlist_limit
@@ -347,6 +359,19 @@ def main() -> None:
                             f"{best_rejected['move']} "
                             f"delta={best_rejected['improvement_pct']:.3f}%"
                         )
+                    widened_families = list(
+                        result.elite_stats.get(
+                            "widened_families",
+                            [],
+                        )
+                    )
+                    if widened_families:
+                        print(
+                            "  progressive widening: "
+                            f"{widened_families} "
+                            "extra_exact="
+                            f"{result.elite_stats.get('widened_candidates_evaluated', 0)}"
+                        )
                     skipped = result.elite_stats.get("skipped")
                     if skipped:
                         print(
@@ -431,6 +456,14 @@ def main() -> None:
                 ),
                 "mean_elite_cvx_calls": mean(
                     row["elite_cvx_calls"]
+                    for row in subset
+                ),
+                "mean_elite_widenings": mean(
+                    row["elite_widenings"]
+                    for row in subset
+                ),
+                "mean_elite_widened_candidates": mean(
+                    row["elite_widened_candidates"]
                     for row in subset
                 ),
                 "mean_exploration_runtime_s": mean(
