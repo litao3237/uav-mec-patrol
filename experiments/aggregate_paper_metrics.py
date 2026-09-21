@@ -8,8 +8,12 @@ from statistics import mean, median, stdev
 from typing import Any
 
 
-METRICS = (
+STAGE1_METRICS = (
     "energy_stage1_j",
+    "fixed_energy_ratio",
+)
+
+STAGE2_METRICS = (
     "avg_delay_s",
     "avg_delay_utilization",
     "mean_deadline_slack_s",
@@ -25,10 +29,11 @@ METRICS = (
     "max_active_mec_bandwidth_utilization",
     "mean_active_mec_cpu_utilization",
     "max_active_mec_cpu_utilization",
-    "fixed_energy_ratio",
     "communication_energy_ratio",
     "local_compute_energy_ratio",
 )
+
+METRICS = STAGE1_METRICS + STAGE2_METRICS
 
 
 def _load_rows(input_dir: Path) -> list[dict[str, Any]]:
@@ -81,11 +86,23 @@ def _group(
     metric_rows = [
         row for row in subset if row.get("paper_metrics") is not None
     ]
+    stage2_strict_rows = [
+        row
+        for row in metric_rows
+        if row["paper_metrics"].get("stage2_status") == "optimal"
+    ]
     metrics: dict[str, Any] = {}
-    for metric in METRICS:
+    for metric in STAGE1_METRICS:
         values = [
             float(row["paper_metrics"][metric])
             for row in metric_rows
+            if row["paper_metrics"].get(metric) is not None
+        ]
+        metrics[metric] = _stats(values)
+    for metric in STAGE2_METRICS:
+        values = [
+            float(row["paper_metrics"][metric])
+            for row in stage2_strict_rows
             if row["paper_metrics"].get(metric) is not None
         ]
         metrics[metric] = _stats(values)
@@ -105,6 +122,7 @@ def _group(
             for row in subset
         ),
         "paper_metric_runs": len(metric_rows),
+        "stage2_strict_runs": len(stage2_strict_rows),
         "paper_metric_errors": sum(
             row.get("paper_metrics_error") is not None
             for row in subset
@@ -136,6 +154,7 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
         "strict_hybrid_runs",
         "paper_metric_runs",
         "paper_metric_errors",
+        "stage2_strict_runs",
         "stage2_optimal_runs",
         "mean_algorithm_runtime_s",
         "mean_metric_stage2_runtime_s",
@@ -161,6 +180,7 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
                 "strict_hybrid_runs": group["strict_hybrid_runs"],
                 "paper_metric_runs": group["paper_metric_runs"],
                 "paper_metric_errors": group["paper_metric_errors"],
+                "stage2_strict_runs": group["stage2_strict_runs"],
                 "stage2_optimal_runs": group[
                     "stage2_status_counts"
                 ].get("optimal", 0),
