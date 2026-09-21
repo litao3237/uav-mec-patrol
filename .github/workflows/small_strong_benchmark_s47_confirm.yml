@@ -1,0 +1,39 @@
+name: small-strong-benchmark-s47-confirm
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/small_strong_benchmark_s47_confirm.yml'
+
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Confirm S47 best-known reference
+        run: >-
+          uv run python experiments/run_small_strong_benchmark.py
+          --tasks 28
+          --uavs 2
+          --mecs 2
+          --scenario-seeds 47
+          --standard-seeds 100
+          --strong-seeds 707,712,713,714,715,716,717,718,719,720,721,722,723
+          --standard-iterations 100
+          --strong-iterations 1000
+          --standard-elite-rounds 2
+          --strong-elite-rounds 6
+          --hit-tolerance-rel 1e-5
+          --output outputs/results/small_strong_K28_M2_E2_S47_confirm.json
+      - name: Upload confirmation
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-strong-K28-S47-confirm
+          path: outputs/results/small_strong_K28_M2_E2_S47_confirm.json
