@@ -20,8 +20,8 @@ jobs:
       - name: Run small strong-reference pilot
         run: >-
           uv run python experiments/run_small_strong_benchmark.py
-          --tasks 12
-          --uavs 1
+          --tasks 16
+          --uavs 2
           --mecs 2
           --scenario-seeds 45
           --standard-seeds 100,101,102
@@ -30,7 +30,7 @@ jobs:
           --strong-iterations 300
           --standard-elite-rounds 2
           --strong-elite-rounds 4
-          --output outputs/results/small_strong_pilot_K12_M1_E2_S45.json
+          --output outputs/results/small_strong_pilot_K16_M2_E2_S45.json
       - name: Aggregate pilot
         run: >-
           python experiments/aggregate_small_strong_benchmark.py
