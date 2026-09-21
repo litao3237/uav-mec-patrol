@@ -1,0 +1,35 @@
+name: elite-route-ablation
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/elite_route_ablation.yml'
+
+jobs:
+  ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run paired full vs no-route ablation
+        run: >-
+          uv run python experiments/run_elite_family_ablation.py
+          --tasks 80
+          --mecs 2
+          --scenario-seeds 45,46,47
+          --algorithm-seeds 100,101,102
+          --iterations 100
+          --profiles full,no-route
+      - name: Upload ablation result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elite-route-ablation-K80-E2
+          path: outputs/results/elite_family_ablation_K80_E2_S45-46-47_A100-101-102_I100.json
+          if-no-files-found: warn
