@@ -57,6 +57,14 @@ def main() -> None:
     parser.add_argument("--uavs", type=int, default=None)
     parser.add_argument("--mecs", type=int, default=None)
     parser.add_argument(
+        "--disable-problem-operators",
+        action="store_true",
+        help=(
+            "use only the generic task-removal/insertion ALNS operators; "
+            "intended for operator ablation"
+        ),
+    )
+    parser.add_argument(
         "--objective",
         choices=("proxy", "screened", "kkt"),
         default="proxy",
@@ -105,6 +113,7 @@ def main() -> None:
             iterations=args.iterations,
             seed=cfg.algorithm_seed,
             destroy=DestroyConfig(),
+            enable_problem_operators=not args.disable_problem_operators,
         )
 
         t0 = perf_counter()
@@ -166,6 +175,9 @@ def main() -> None:
             "K": k,
             "objective_mode": args.objective,
             "iterations": args.iterations,
+            "problem_operators_enabled": (
+                not args.disable_problem_operators
+            ),
             "initial_objective": result.initial_objective,
             "best_objective": result.best_objective,
             "improvement_pct": improvement,
