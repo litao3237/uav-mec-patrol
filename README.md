@@ -7,6 +7,9 @@
 
 本 README 同时作为项目说明、论文第一项工作的整体路线图、开发任务清单、实验进度记录和下一步工作的参考入口。
 
+成果总览：[`docs/current_research_achievements.md`](docs/current_research_achievements.md)  
+论文实验汇总：[`docs/paper_experiment_summary.md`](docs/paper_experiment_summary.md)
+
 状态约定：
 
 - [x] 已完成并通过当前验证；
@@ -17,7 +20,7 @@
 当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
-**当前阶段：主算法冻结，进入消融与主实验阶段。**
+**当前阶段：核心实验链已完成，进入最终绘图、论文表格与正文整合阶段。**
 
 ---
 
@@ -540,11 +543,17 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 ---
 
-## M9. Small Exact / Strong Benchmark
+## M9. Reduced-scale Best-Known Strong Benchmark
 
-- [ ] **[TODO]** K=8~12 exact / near-exact benchmark；
-- [ ] **[TODO]** 评估 SCIP / Gurobi / enumeration / decomposition 的可行实现；
-- [ ] **[TODO]** Proposed Algorithm 对 best-known 的 optimality gap。
+- [x] 完成 reduced-scale strong-reference scale scout；
+- [x] 最终固定 K=28, M=2, E=2，保持 baseline.yaml 系统参数不变；
+- [x] Standard Hybrid：3 scenario × 3 seeds，100 iterations；
+- [x] Strong reference：3 scenario × 12 seeds，1000 iterations，expanded elite exact budget；
+- [x] standard 9/9 strict，strong 36/36 strict；
+- [x] mean standard-to-best-known gap = 5.968%，median = 8.610%，max = 11.866%；
+- [x] 三个 best-known reference 均保留实际 contact/offloading，非 all-local 退化解；
+- [x] S47 额外 12 个新 strong seeds confirmation 未刷新 best-known；
+- [x] 明确论文口径：仅称 empirical best-known gap，不声称 global optimum。
 
 ---
 
@@ -586,7 +595,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] 核心 family ablation；
 - [x] baseline comparison；
 - [x] UAV 数量 M=3/5/8 sensitivity：M=3 当前预算 0/9 strict，M=5/8 均 9/9 strict；M=8 Hybrid 6 better / 3 equal / 0 worse；
-- [ ] **[TODO]** 小规模 exact/near-exact benchmark；
+- [x] reduced-scale best-known strong benchmark；
 - [x] 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
 - [ ] **[TODO]** 最终绘图、统计与论文表格。
 
@@ -733,7 +742,7 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 3. [x] `w/o route_compute_relocate` 核心消融；
 4. [x] contact / batch / progressive-widening 消融；
 5. [x] Greedy / FR-NM / Generic ALNS / Route-GA / Proposed Hybrid baselines；
-6. [ ] **[TODO]** K=8~12 strong benchmark；
+6. [x] K=28 reduced-scale best-known strong benchmark；
 7. [x] M=3/5/8 sensitivity 与最终指标汇总；
 8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
 
