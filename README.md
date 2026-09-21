@@ -917,3 +917,37 @@ K=80, E=2, scenario seed=42, 100 ALNS iterations 已完成同场景对照：
 `run_alns_sanity.py` 已进一步修正：
 - 若 initial objective 明显包含 infeasibility penalty，则 `improve-%` 输出 `n/a`，避免出现 99.989% 这类无物理意义的“改善率”；
 - 控制台直接打印 `best-cvx-E-J` 与 `best-vs-cvx gap-%`。
+
+
+## Evaluator decision after apples-to-apples CVX check
+
+K=80, E=2, scenario seed=42, 100 ALNS iterations:
+
+| evaluator | final Stage-1 CVX energy (J) | runtime (s) |
+|---|---:|---:|
+| screened | 196035.484 | 63.93 |
+| pure proxy | 214759.456 | 51.55 |
+
+Compared with pure proxy, screened finds a final CVX-verified solution with about 8.72% lower energy, while runtime increases by about 24.0%.
+
+The pure-proxy best search objective is 215215.929 J versus its own final Stage-1 CVX energy 214759.456 J, i.e. about 0.213% resource-evaluation error on that final discrete state. The larger gap between pure proxy and screened therefore comes mainly from **search guidance / false-negative gray-zone rejection**, not from final resource refinement alone.
+
+Decision for the development default:
+
+[
+\boxed{\text{ScreenedProxyObjectiveEvaluator = default paper-scale ALNS evaluator}}
+]
+
+[
+\boxed{\text{ProxyObjectiveEvaluator = fast smoke-test / ablation evaluator}}
+]
+
+[
+\boxed{\text{CVXPY Stage-1 = final correctness oracle}}
+]
+
+[
+\boxed{\text{KKT = analytical / dual-structure validation tool}}
+]
+
+This default is now wired into `run_uav_mec_alns(...)` when no evaluator is explicitly supplied. The current numerical comparison is still a single scenario-level design check; the final paper should report multi-seed comparisons rather than generalize the 8.72% figure universally.
