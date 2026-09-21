@@ -26,5 +26,6 @@ jobs:
           experiments/aggregate_core_baselines.py
           experiments/run_ga_baseline_comparison.py
           experiments/aggregate_ga_baselines.py
+          experiments/aggregate_uav_sensitivity.py
       - name: Run tests
         run: uv run pytest
