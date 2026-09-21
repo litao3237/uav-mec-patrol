@@ -1,0 +1,71 @@
+name: small-strong-benchmark
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/small_strong_benchmark.yml'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [45, 46, 47]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run formal best-known strong reference
+        run: >-
+          uv run python experiments/run_small_strong_benchmark.py
+          --tasks 28
+          --uavs 2
+          --mecs 2
+          --scenario-seeds ${{ matrix.scenario }}
+          --standard-seeds 100,101,102
+          --strong-seeds 700,701,702,703,704,705,706,707,708,709,710,711
+          --standard-iterations 100
+          --strong-iterations 1000
+          --standard-elite-rounds 2
+          --strong-elite-rounds 6
+          --hit-tolerance-rel 1e-5
+          --output outputs/results/small_strong_K28_M2_E2_S${{ matrix.scenario }}.json
+      - name: Upload scenario result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-strong-K28-S${{ matrix.scenario }}
+          path: outputs/results/small_strong_K28_M2_E2_S${{ matrix.scenario }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: benchmark
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: small-strong-K28-S*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate strong benchmark
+        run: >-
+          python experiments/aggregate_small_strong_benchmark.py
+          --input-dir outputs/results/matrix
+          --output-json outputs/results/small_strong_K28_M2_E2_S45-46-47_matrix.json
+          --output-csv outputs/results/small_strong_K28_M2_E2_S45-46-47_matrix.csv
+      - name: Upload benchmark aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-strong-benchmark-K28
+          path: |
+            outputs/results/small_strong_K28_M2_E2_S45-46-47_matrix.json
+            outputs/results/small_strong_K28_M2_E2_S45-46-47_matrix.csv
