@@ -318,21 +318,30 @@ def test_contact_mode_intensification_is_monotone_for_supplied_objective() -> No
 
 
 class _ConstantEliteOracle:
-    def __init__(self, energy_j: float = 123.0) -> None:
+    def __init__(
+        self,
+        energy_j: float = 123.0,
+        *,
+        stage1_status: str = "optimal",
+    ) -> None:
         self.energy_j = energy_j
+        self.stage1_status = stage1_status
         self.calls = 0
         self.cache_hits = 0
 
     def solve(self, instance, solution):
         self.calls += 1
         return ResourceSolveResult(
-            status="optimal",
+            status=self.stage1_status,
             solver="FAKE",
             is_dcp=True,
             energy_stage1_j=self.energy_j,
             energy_final_j=self.energy_j,
             stage1_values={"fake": {"x": 1.0}},
             final_values={"fake": {"x": 1.0}},
+            diagnostics={
+                "stage1_status": self.stage1_status,
+            },
         )
 
     def __call__(self, instance, solution):
@@ -367,3 +376,33 @@ def test_hybrid_runner_uses_generic_exploration_and_nonworsening_elite() -> None
     assert result.final_cvx_energy_j == 321.0
     assert result.improvement_pct == 0.0
     assert result.exploration.operator_pair_counts
+
+
+
+def test_hybrid_skips_elite_refinement_without_strict_stage1_optimum() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    oracle = _ConstantEliteOracle(
+        energy_j=321.0,
+        stage1_status="optimal_inaccurate",
+    )
+
+    result = run_uav_mec_hybrid_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=1,
+            seed=23,
+        ),
+        evaluator=evaluator,
+        elite_rounds=2,
+        elite_oracle=oracle,
+    )
+
+    assert result.best_solution == result.exploration.best_solution
+    assert result.elite_stats["rounds"] == 0
+    assert (
+        result.elite_stats["skipped"]
+        == "exploration_stage1_not_strict_optimal"
+    )
