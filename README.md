@@ -1494,3 +1494,51 @@ JSON as diagnostics, but no longer contaminate the paper-facing aggregate.
 The next verification should rerun only the affected scenario-45 algorithm seed
 101, then proceed to cross-load validation rather than further tuning the
 K=80/E=2 neighborhood.
+
+
+## Corrected scenario-45 seed-101 rerun and frozen K=80/E=2 out-of-sample result
+
+After strict rejection of `optimal_inaccurate` elite candidates, the affected
+scenario-45 / algorithm-seed-101 run was repeated:
+
+- base Stage-1: `optimal`, 231476.995 J;
+- hybrid Stage-1: `optimal`, 230813.478 J;
+- reduction: 0.287%;
+- accepted move: `route_compute_relocate::S35->U5@2`;
+- elite CVX calls: 13.
+
+Therefore the corrected out-of-sample scenario set 45/46/47 now contains nine
+strict `optimal -> optimal` pairs:
+
+- 8/9 improved;
+- 1/9 unchanged;
+- mean of per-run percentage reductions: about 1.378%;
+- median reduction: 1.154%;
+- mean base energy: about 230038.323 J;
+- mean hybrid energy: about 226768.196 J;
+- reduction of the mean energies: about 1.422%.
+
+The corrected accepted-move counts are:
+
+- `route_compute_relocate`: 8;
+- `batch_merge`: 2;
+- `contact_remove`: 2;
+- `contact_point_replace`: 1;
+- `contact_relocate`: 1.
+
+This is sufficient to freeze the current K=80/E=2 hybrid algorithm for
+cross-load validation. Further tuning on the same setting risks overfitting the
+evaluation scenarios.
+
+### Validation output preservation
+
+`run_hybrid_validation.py` no longer overwrites a single
+`outputs/results/hybrid_validation.json` file by default. It now writes a
+parameterized deterministic filename such as:
+
+~~~text
+outputs/results/hybrid_validation_K80_E3_S45-46-47_A100-101-102_I100.json
+~~~
+
+An explicit `--output` path can still be supplied. The JSON also records the
+experiment arguments so later cross-load aggregation remains reproducible.
