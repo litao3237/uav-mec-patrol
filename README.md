@@ -1178,3 +1178,87 @@ uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenari
 Only if hybrid shows useful improvement/equality with modest extra runtime should
 the contact/mode elite intensification be promoted into the main proposed
 algorithm. Core/full remain diagnostic ablations for now.
+
+
+## v0.6.0 fourth ablation: hybrid route-contact intensification starts to pay off
+
+K=80, E=2, scenario seed=42, algorithm seeds 100/101/102, 100 iterations:
+
+| mode | mean Stage-1 CVX energy (J) | mean runtime (s) | mean elite CVX calls |
+|---|---:|---:|---:|
+| generic | 210810.848 | 61.04 | 0.00 |
+| hybrid | 209386.873 | 69.58 | 10.67 |
+
+Paired outcomes:
+
+- seed 100: 196035.484 -> 192521.023 J, about 1.79% lower;
+- seed 101: 214080.691 -> 213323.227 J, about 0.35% lower;
+- seed 102: unchanged at 222316.370 J.
+
+The mean paired reduction on this one scenario is about 0.68%, while runtime
+increases by about 14%. The result is encouraging but is **not yet a paper-level
+claim**, because it covers only scenario seed 42.
+
+The accepted elite moves reveal the important mechanism:
+
+- seed 100: `route_compute_relocate::S64->U2@11`;
+- seed 101: `route_compute_relocate::S80->U4@3`;
+- seed 102: no improving elite move.
+
+Therefore the first material hybrid gain comes from **route-compute relocation
+followed by MEC/contact reconstruction and exact resource recourse**, not from
+fixed-route contact-point tuning alone.
+
+This supports the paper's main hypothesis:
+
+[
+\boxed{
+\text{shortest/geometric route decisions}
+\neq
+\text{best computing-aware route decisions}
+}
+]
+
+but more scenario-level evidence is required.
+
+### Main API change
+
+The default `run_uav_mec_alns(...)` trajectory is now generic exploration
+(`enable_problem_operators=False` by default), because core/full peer-operator
+profiles were empirically weaker.
+
+A new high-level proposed runner is added:
+
+~~~python
+run_uav_mec_hybrid_alns(...)
+~~~
+
+It implements:
+
+[
+\boxed{
+\text{Generic ALNS Exploration}
+\rightarrow
+\text{Elite Structural Neighborhood}
+\rightarrow
+\text{Stage-1 CVX Monotone Acceptance}
+}
+]
+
+The elite neighborhood contains route-compute relocation, contact relocation,
+contact insertion/removal, contact-point/MEC replacement, batch merge/split and
+task-level mode/batch reassignment.
+
+### Paired validation script
+
+A dedicated script now runs generic exploration **once** and compares the
+exploration elite against its exact intensified descendant, avoiding duplicate
+generic searches:
+
+~~~powershell
+uv run python experiments\run_hybrid_validation.py --tasks 80 --mecs 2,3 --scenario-seeds 42,43,44 --algorithm-seeds 100,101,102 --iterations 100
+~~~
+
+It reports paired Stage-1 CVX energies, improvement rate, accepted structural
+moves, elite CVX calls and elite runtime. This should be the next validation
+before further neighborhood tuning.
