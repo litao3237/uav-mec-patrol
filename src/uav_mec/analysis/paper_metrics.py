@@ -44,8 +44,10 @@ def build_paper_metrics(
 
     The supplied ResourceSolveResult should normally come from the lexicographic
     CVX solve (Stage 1: minimum UAV energy; Stage 2: minimum normalized MEC CPU
-    under the Stage-1 energy guard). This makes resource-utilization metrics
-    reproducible even when the Stage-1 resource allocation is non-unique.
+    under the Stage-1 energy guard). CPU utilization is therefore reproducible.
+    Bandwidth utilization is descriptive for that CPU-minimizing realization,
+    but is not a minimum-bandwidth certificate. Resource bottleneck claims
+    should use the Stage-1 capacity shadow prices reported below.
     """
 
     if not result.feasible:
@@ -161,6 +163,56 @@ def build_paper_metrics(
         for mec_id in active_mecs
     ]
 
+    bandwidth_shadow_price_by_mec = {
+        mec_id: max(
+            0.0,
+            float(
+                result.stage1_duals.get(
+                    f"bandwidth_cap::{mec_id}",
+                    0.0,
+                )
+            ),
+        )
+        for mec_id in instance.mecs
+    }
+    cpu_shadow_price_by_mec = {
+        mec_id: max(
+            0.0,
+            float(
+                result.stage1_duals.get(
+                    f"mec_cpu_cap::{mec_id}",
+                    0.0,
+                )
+            ),
+        )
+        for mec_id in instance.mecs
+    }
+    energy_scale = max(1e-12, float(result.energy_stage1_j))
+    bandwidth_relative_shadow_by_mec = {
+        mec_id: (
+            bandwidth_shadow_price_by_mec[mec_id]
+            * instance.mecs[mec_id].bandwidth_mhz
+            / energy_scale
+        )
+        for mec_id in instance.mecs
+    }
+    cpu_relative_shadow_by_mec = {
+        mec_id: (
+            cpu_shadow_price_by_mec[mec_id]
+            * instance.mecs[mec_id].cpu_ghz
+            / energy_scale
+        )
+        for mec_id in instance.mecs
+    }
+    active_bw_shadow = [
+        bandwidth_relative_shadow_by_mec[mec_id]
+        for mec_id in active_mecs
+    ]
+    active_cpu_shadow = [
+        cpu_relative_shadow_by_mec[mec_id]
+        for mec_id in active_mecs
+    ]
+
     offloaded = sum(offloaded_tasks_by_mec.values())
     route_detour_pct = None
     if reference_distance_m is not None:
@@ -225,6 +277,31 @@ def build_paper_metrics(
         ),
         "max_active_mec_cpu_utilization": (
             max(active_cpu) if active_cpu else 0.0
+        ),
+        "bandwidth_utilization_is_minimal_certificate": False,
+        "bandwidth_shadow_price_by_mec": bandwidth_shadow_price_by_mec,
+        "cpu_shadow_price_by_mec": cpu_shadow_price_by_mec,
+        "bandwidth_relative_shadow_by_mec": (
+            bandwidth_relative_shadow_by_mec
+        ),
+        "cpu_relative_shadow_by_mec": cpu_relative_shadow_by_mec,
+        "mean_active_mec_bandwidth_relative_shadow": (
+            mean(active_bw_shadow) if active_bw_shadow else 0.0
+        ),
+        "max_active_mec_bandwidth_relative_shadow": (
+            max(active_bw_shadow) if active_bw_shadow else 0.0
+        ),
+        "mean_active_mec_cpu_relative_shadow": (
+            mean(active_cpu_shadow) if active_cpu_shadow else 0.0
+        ),
+        "max_active_mec_cpu_relative_shadow": (
+            max(active_cpu_shadow) if active_cpu_shadow else 0.0
+        ),
+        "active_mec_bandwidth_shadow_count": sum(
+            value > 1e-8 for value in active_bw_shadow
+        ),
+        "active_mec_cpu_shadow_count": sum(
+            value > 1e-8 for value in active_cpu_shadow
         ),
         "fixed_energy_j": fixed_energy_j,
         "fixed_energy_ratio": (
