@@ -14,7 +14,7 @@
 - [ ] **[TODO]** 尚未实现；
 - [ ] **[OPTIONAL]** 仅在实验表明确有收益时加入。
 
-当前代码版本：**v0.5.0**  
+当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
 ---
@@ -417,32 +417,35 @@ runtime                 = 1.44 s
 
 ## M6. Problem-Specific ALNS Operators
 
-后续论文算法重点。
+v0.6.0 已进入论文核心算法实现阶段。当前实现采用“问题特定 destroy + repair/intensification”方式，把路径、接触、卸载模式和 batch 结构直接嵌入 ALNS neighborhood。
 
 ### Route
 
-- [ ] **[TODO]** relocate；
+- [ ] **[TODO]** standalone relocate；
 - [ ] **[TODO]** swap；
 - [ ] **[TODO]** inter-route segment exchange；
-- [ ] **[TODO]** compute-aware relocate；
-- [ ] **[TODO]** deadline-critical route repair。
+- [ ] **[VERIFY]** compute-aware insertion / relocate：基于 optimistic local-FIFO deadline pressure 选择跨 UAV/跨位置插入；
+- [ ] **[VERIFY]** deadline-critical route repair：critical removal + compute-aware insertion + MEC repair 联动。
 
 ### Contact
 
-- [ ] **[TODO]** contact insert；
-- [ ] **[TODO]** contact remove；
-- [ ] **[TODO]** contact replace；
-- [ ] **[TODO]** candidate-point shift；
+- [ ] **[TODO]** standalone contact insert operator；
+- [ ] **[VERIFY]** orphan contact remove：Mode/Batch reassignment 后自动清理；
+- [ ] **[VERIFY]** contact replace：保留 batch，替换 contact point；
+- [ ] **[VERIFY]** candidate-point shift：同 MEC 内候选点移动；
+- [ ] **[VERIFY]** cross-MEC contact replacement：同一 batch 可通过接触点替换切换 MEC；
 - [ ] **[TODO]** repeated same-MEC restructuring。
 
 ### Batch / Mode
 
-- [ ] **[TODO]** Local→MEC；
-- [ ] **[TODO]** MEC→Local；
-- [ ] **[TODO]** MEC reassignment；
-- [ ] **[TODO]** batch split；
-- [ ] **[TODO]** batch merge；
-- [ ] **[TODO]** batch reassign。
+- [ ] **[VERIFY]** Local→MEC：重分配到同 UAV 后续已有 contact；
+- [ ] **[VERIFY]** MEC→Local；
+- [ ] **[VERIFY]** MEC / contact reassignment；
+- [ ] **[TODO]** explicit batch split operator；
+- [ ] **[TODO]** explicit batch merge operator；
+- [ ] **[VERIFY]** task-level batch reassign；
+- [ ] **[VERIFY]** MEC-batch pressure destroy；
+- [ ] **[VERIFY]** shared-MEC pressure destroy。
 
 ### Resource-aware
 
@@ -450,8 +453,12 @@ runtime                 = 1.44 s
 - [ ] **[TODO]** avg-delay dual \(\beta\) guided repair；
 - [ ] **[TODO]** bandwidth shadow price \(\lambda_e^B\)；
 - [ ] **[TODO]** MEC CPU shadow price \(\lambda_e^F\)；
-- [ ] **[TODO]** congestion-aware MEC switch；
+- [ ] **[VERIFY]** congestion-aware destroy：按 shared UAV-MEC pair 数优先破坏拥塞 MEC；
 - [ ] **[TODO]** dual-aware candidate pruning。
+
+### Ablation switch
+
+`UavMecALNSConfig.enable_problem_operators` 默认开启。关闭后只保留 generic random/critical/segment destroy + cheapest/regret repair，可直接作为问题特定算子的消融基线。
 
 ---
 
@@ -557,6 +564,7 @@ uav-mec-patrol/
 │           ├── state.py
 │           ├── evaluator.py
 │           ├── operators.py
+│           ├── problem_operators.py
 │           └── runner.py
 ├── experiments/
 ├── tests/
@@ -654,7 +662,7 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 # 6. 当前最高优先级任务
 
-当前**不要继续堆新的 ALNS 算子**，先把 resource recourse 在 paper-scale 上确认清楚。
+resource/evaluator 与 non-degeneracy 阶段已基本冻结，当前最高优先级切换为 **M6 Problem-Specific ALNS Operators 的正确性与消融验证**。
 
 执行顺序：
 
@@ -951,3 +959,44 @@ Decision for the development default:
 ]
 
 This default is now wired into `run_uav_mec_alns(...)` when no evaluator is explicitly supplied. The current numerical comparison is still a single scenario-level design check; the final paper should report multi-seed comparisons rather than generalize the 8.72% figure universally.
+
+
+## v0.6.0 M6 verification
+
+首批问题特定 neighborhood 已实现，但在本地测试和 paper-scale ablation 通过前统一标记为 **[VERIFY]**。
+
+建议验证顺序：
+
+~~~powershell
+git pull
+uv sync --dev
+uv run pytest
+~~~
+
+先做短 smoke test：
+
+~~~powershell
+uv run python experiments\run_alns_sanity.py --tasks 30 --mecs 3 --seed 42 --iterations 20 --objective screened
+~~~
+
+再做同场景 generic/proposed 小规模消融：
+
+~~~powershell
+uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenario-seeds 42 --algorithm-seeds 100 --iterations 50
+~~~
+
+若 smoke test 与单 seed ablation 正常，再扩展：
+
+~~~powershell
+uv run python experiments\run_operator_ablation.py --tasks 50,80 --mecs 2,3 --scenario-seeds 42,43,44 --algorithm-seeds 100,101,102 --iterations 100
+~~~
+
+核心比较指标不是 ALNS 内部 proxy/search objective，而是每个最终离散解统一经过 **Stage-1 CVX** 后的：
+
+- CVX feasibility rate；
+- final CVX UAV energy；
+- runtime；
+- contacts / offload / active UAV-MEC pairs；
+- gray-zone CVX refinement 次数。
+
+只有多 seed 消融确认 proposed operator family 在可行率、能耗或收敛速度上有稳定收益后，才把 M6 对应条目从 **[VERIFY]** 改为 **[x]**。
