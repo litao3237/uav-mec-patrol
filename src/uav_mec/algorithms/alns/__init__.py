@@ -4,6 +4,11 @@ from .evaluator import (
     ScreenedProxyObjectiveEvaluator,
     solution_signature,
 )
+from .hybrid import (
+    HybridUavMecALNSResult,
+    Stage1CVXObjectiveOracle,
+    run_uav_mec_hybrid_alns,
+)
 from .operators import (
     DestroyConfig,
     cheapest_insertion_repair,
@@ -31,10 +36,12 @@ from .state import UavMecState
 
 __all__ = [
     "DestroyConfig",
+    "HybridUavMecALNSResult",
     "KKTObjectiveEvaluator",
     "ProxyObjectiveEvaluator",
     "ProblemOperatorConfig",
     "ScreenedProxyObjectiveEvaluator",
+    "Stage1CVXObjectiveOracle",
     "UavMecALNSConfig",
     "UavMecALNSResult",
     "UavMecState",
@@ -51,5 +58,6 @@ __all__ = [
     "route_segment_removal",
     "shared_mec_pressure_removal",
     "run_uav_mec_alns",
+    "run_uav_mec_hybrid_alns",
     "solution_signature",
 ]
