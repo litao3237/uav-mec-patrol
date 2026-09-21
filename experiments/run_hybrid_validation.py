@@ -8,6 +8,7 @@ from statistics import mean, median
 from time import perf_counter
 from typing import Any
 
+from uav_mec.analysis import build_paper_metrics
 from uav_mec.algorithms import (
     ScreenedProxyObjectiveEvaluator,
     UavMecALNSConfig,
@@ -20,6 +21,7 @@ from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
+from uav_mec.optimization.resource import CVXResourceSolver
 
 
 def _compact_list_tag(values: list[int]) -> str:
@@ -169,6 +171,14 @@ def main() -> None:
         default=None,
     )
     parser.add_argument(
+        "--paper-metrics",
+        action="store_true",
+        help=(
+            "rerun the final strict Hybrid solution with lexicographic "
+            "Stage-2 resource allocation and record paper-facing metrics"
+        ),
+    )
+    parser.add_argument(
         "--output",
         default=None,
         help=(
@@ -209,6 +219,7 @@ def main() -> None:
         "iterations": args.iterations,
         "elite_rounds": args.elite_rounds,
         "uavs": args.uavs,
+        "paper_metrics": args.paper_metrics,
     }
 
     print(
@@ -234,6 +245,13 @@ def main() -> None:
                 initial = build_mec_assisted_initial_solution(
                     instance,
                     base_solution=route_seed,
+                )
+                route_seed_info = build_event_info(
+                    instance,
+                    route_seed,
+                )
+                route_seed_distance_m = sum(
+                    route_seed_info.route_distance_m.values()
                 )
 
                 for algorithm_seed in algorithm_seeds:
@@ -313,6 +331,71 @@ def main() -> None:
                     search_runtime_s = float(
                         result.exploration.raw_result.statistics.total_runtime
                     )
+
+                    paper_metrics = None
+                    paper_metrics_error = None
+                    paper_metrics_stage2_runtime_s = 0.0
+                    if (
+                        args.paper_metrics
+                        and final_status == "optimal"
+                        and result.final_cvx.feasible
+                    ):
+                        metrics_info = build_event_info(
+                            instance,
+                            result.best_solution,
+                        )
+                        metrics_solver = CVXResourceSolver(
+                            run_stage2=True
+                        )
+                        t_metrics = perf_counter()
+                        metrics_cvx = metrics_solver.solve(
+                            instance,
+                            result.best_solution,
+                            metrics_info,
+                        )
+                        paper_metrics_stage2_runtime_s = (
+                            perf_counter() - t_metrics
+                        )
+                        metrics_stage1_status = _stage1_status(
+                            metrics_cvx
+                        )
+                        if (
+                            not metrics_cvx.feasible
+                            or metrics_stage1_status != "optimal"
+                        ):
+                            paper_metrics_error = (
+                                "metrics_recompute_not_strict: "
+                                f"stage1={metrics_stage1_status}, "
+                                "stage2="
+                                f"{metrics_cvx.diagnostics.get('stage2_status')}"
+                            )
+                        else:
+                            energy_delta = abs(
+                                float(metrics_cvx.energy_stage1_j)
+                                - float(final_energy)
+                            )
+                            energy_tol = max(
+                                1e-3,
+                                2e-6 * max(
+                                    1.0,
+                                    abs(float(final_energy)),
+                                ),
+                            )
+                            if energy_delta > energy_tol:
+                                raise RuntimeError(
+                                    "Paper-metrics Stage-1 energy "
+                                    "does not reproduce final oracle: "
+                                    f"delta={energy_delta:.6g} J"
+                                )
+                            paper_metrics = build_paper_metrics(
+                                instance,
+                                result.best_solution,
+                                metrics_cvx,
+                                info=metrics_info,
+                                reference_distance_m=(
+                                    route_seed_distance_m
+                                ),
+                            )
 
                     row = {
                         "K": k,
@@ -407,6 +490,12 @@ def main() -> None:
                             result.elite_runtime_s
                         ),
                         "total_runtime_s": total_runtime_s,
+                        "paper_metrics": paper_metrics,
+                        "paper_metrics_error": paper_metrics_error,
+                        "paper_metrics_stage2_runtime_s": (
+                            paper_metrics_stage2_runtime_s
+                        ),
+                        "route_seed_distance_m": route_seed_distance_m,
                         "base_solution": _summary(
                             instance,
                             result.exploration.best_solution,
