@@ -17,7 +17,7 @@ from uav_mec.algorithms.initial import (
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation.validator import validate_solution
 
-from .evaluator import KKTObjectiveEvaluator
+from .evaluator import ScreenedProxyObjectiveEvaluator
 from .operators import (
     DestroyConfig,
     make_destroy_operators,
@@ -63,7 +63,7 @@ def run_uav_mec_alns(
 
     The mature ALNS package owns operator selection, adaptive weights,
     acceptance and stopping. This project supplies only the domain state,
-    destroy/repair operators, and P1-R objective evaluation.
+    destroy/repair operators, and screened P1-R objective evaluation.
     """
 
     cfg = config or UavMecALNSConfig()
@@ -80,7 +80,7 @@ def run_uav_mec_alns(
         initial_solution = deepcopy(initial_solution)
 
     validate_solution(instance, initial_solution)
-    objective_evaluator = evaluator or KKTObjectiveEvaluator()
+    objective_evaluator = evaluator or ScreenedProxyObjectiveEvaluator()
     initial_state = UavMecState(
         instance,
         initial_solution,
