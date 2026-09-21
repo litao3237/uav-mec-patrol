@@ -282,7 +282,6 @@ def _individual_optimistic_deadline_lb(
     x: float,
     y: float,
     workload_gcycles: float,
-    mecs: Mapping[str, MEC],
 ) -> float:
     """Very optimistic task-only lower bound used only to avoid trivial deadlines."""
 
@@ -290,8 +289,12 @@ def _individual_optimistic_deadline_lb(
         distance(cfg.depot_xy, (x, y)) / cfg.uav_speed_mps
         + cfg.task_collect_s
     )
+    # Use the configured infrastructure envelope, not only the active MEC
+    # subset. This keeps the task/deadline realization invariant when E is
+    # varied in an MEC-count sensitivity experiment.
     fastest_cpu = max(
-        [cfg.uav_local_cpu_ghz] + [mec.cpu_ghz for mec in mecs.values()]
+        [cfg.uav_local_cpu_ghz]
+        + [spec.cpu_ghz for spec in cfg.mec_sites]
     )
     return direct_collect + workload_gcycles / fastest_cpu
 
@@ -323,7 +326,6 @@ def _build_tasks(
             x=x,
             y=y,
             workload_gcycles=workload_gcycles,
-            mecs=mecs,
         )
         deadline_s = max(
             sampled_deadline,
