@@ -113,6 +113,46 @@ def _operator_coupling(
     return coupling
 
 
+class _TrackingRouletteWheel(RouletteWheel):
+    """Roulette wheel with destroy-repair pair outcome diagnostics."""
+
+    def __init__(
+        self,
+        *args,
+        destroy_names: list[str],
+        repair_names: list[str],
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self._destroy_names = destroy_names
+        self._repair_names = repair_names
+        self._pair_counts: dict[str, list[int]] = {}
+
+    @property
+    def pair_counts(self) -> dict[str, list[int]]:
+        return {
+            key: list(values)
+            for key, values in self._pair_counts.items()
+        }
+
+    def update(self, cand, d_idx, r_idx, outcome):
+        key = (
+            f"{self._destroy_names[d_idx]}"
+            f" -> {self._repair_names[r_idx]}"
+        )
+        counts = self._pair_counts.setdefault(
+            key,
+            [0, 0, 0, 0],
+        )
+        counts[outcome] += 1
+        super().update(
+            cand,
+            d_idx,
+            r_idx,
+            outcome,
+        )
+
+
 @dataclass(frozen=True)
 class UavMecALNSConfig:
     iterations: int = 300
@@ -142,6 +182,7 @@ class UavMecALNSResult:
     best_objective: float
     raw_result: Any
     evaluator: ObjectiveEvaluator
+    operator_pair_counts: dict[str, list[int]]
 
 
 def run_uav_mec_alns(
@@ -209,12 +250,18 @@ def run_uav_mec_alns(
     for name, operator in repair_operators:
         engine.add_repair_operator(operator, name=name)
 
-    select = RouletteWheel(
+    select = _TrackingRouletteWheel(
         scores=list(cfg.operator_scores),
         decay=cfg.operator_decay,
         num_destroy=len(destroy_operators),
         num_repair=len(repair_operators),
         op_coupling=op_coupling,
+        destroy_names=[
+            name for name, _ in destroy_operators
+        ],
+        repair_names=[
+            name for name, _ in repair_operators
+        ],
     )
     accept = RecordToRecordTravel.autofit(
         initial_objective,
@@ -244,4 +291,5 @@ def run_uav_mec_alns(
         best_objective=float(best_state.objective()),
         raw_result=raw_result,
         evaluator=objective_evaluator,
+        operator_pair_counts=select.pair_counts,
     )
