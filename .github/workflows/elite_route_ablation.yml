@@ -5,9 +5,6 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/elite_route_ablation.yml'
-      - 'experiments/run_elite_family_ablation.py'
-      - 'experiments/aggregate_elite_family_ablation.py'
-      - 'src/uav_mec/algorithms/alns/problem_operators.py'
 
 jobs:
   ablation:
