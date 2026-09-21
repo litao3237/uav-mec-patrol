@@ -9,6 +9,8 @@ from .mec_repair import (
 
 __all__ = [
     "GreedyInitialConfig",
+    "GARouteConfig",
+    "GARouteResult",
     "GreedyMECRepairConfig",
     "NearestMECFixedRouteConfig",
     "ProxyEvaluation",
@@ -17,9 +19,12 @@ __all__ = [
     "build_fixed_route_nearest_mec_solution",
     "build_mec_assisted_initial_solution",
     "evaluate_initial_proxy",
+    "run_route_ga",
 ]
 
 from .nearest_mec import (
     NearestMECFixedRouteConfig,
     build_fixed_route_nearest_mec_solution,
 )
+
+from .ga_route import GARouteConfig, GARouteResult, run_route_ga
