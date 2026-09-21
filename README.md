@@ -1672,3 +1672,55 @@ If these runs recover strict Stage-1 status, the remaining E=3 failures are
 primarily a search-budget issue. If they remain non-strict, the next full
 physical-resource sensitivity point should be K=100, E=4 at the frozen
 100-iteration budget.
+
+
+## K=100, E=3 search-budget diagnostic: only the precheck failure recovers
+
+The three non-strict K=100/E=3 seed pairs were rerun with the ALNS budget
+increased from 100 to 200 iterations:
+
+| scenario | alg seed | I=100 status | I=200 status | I=200 gain | interpretation |
+|---:|---:|---|---|---:|---|
+| 45 | 100 | optimal_inaccurate | optimal_inaccurate | - | unchanged numerical-oracle/stagnation case |
+| 46 | 101 | optimal_inaccurate | optimal_inaccurate | - | unchanged numerical-oracle/stagnation case |
+| 46 | 102 | infeasible_precheck | optimal | 0.512% | recovered with larger search budget |
+
+The two persistent `optimal_inaccurate` runs also return exactly the same
+Stage-1 energies as at 100 iterations:
+
+- scenario 45 / alg 100: 247361.688 J;
+- scenario 46 / alg 101: 251179.504 J.
+
+Thus doubling the ALNS budget does **not** generally resolve the remaining
+K=100/E=3 failures. One failure is clearly search-budget sensitive, while the
+two inaccurate cases are better treated as persistent solver-conditioning or
+search-stagnation diagnostics.
+
+The recovered scenario-46 / alg-102 run is structurally informative:
+
+- base Stage-1: 244505.144 J;
+- hybrid Stage-1: 243252.611 J;
+- reduction: 0.512%;
+- accepted moves:
+  `route_compute_relocate::S61->U3@13` and
+  `batch_split_or_new_contact::S22::E1_C@26`.
+
+This continues to support the joint route-compute/contact mechanism at high
+load.
+
+The validation script now records and prints Stage-1 solver/fallback diagnostics
+for non-strict runs, so future `optimal_inaccurate` outcomes can distinguish
+which conic solver returned which status.
+
+### Next full sensitivity point
+
+Keep the paper-facing search budget frozen at 100 iterations and increase the
+physical MEC count:
+
+~~~powershell
+git pull
+uv run python experiments\run_hybrid_validation.py --tasks 100 --mecs 4 --scenario-seeds 45,46,47 --algorithm-seeds 100,101,102 --iterations 100
+~~~
+
+This is the clean next comparison because it changes only MEC availability while
+keeping workload, seeds, algorithm, and search budget fixed.
