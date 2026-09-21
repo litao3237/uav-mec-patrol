@@ -237,10 +237,30 @@ a complete 9-run sample.
 
 ---
 
-## 9. Remaining experimental gap
+## 9. Reduced-scale best-known strong-reference benchmark
 
-The main heuristic/sensitivity evidence is now complete. The principal remaining
-paper-strengthening experiment is a small-scale strong benchmark
-((Kapprox 8) to (12)) against a clearly defined exact or near-exact method.
-No global-optimality claim should be made until that benchmark is implemented
-with an explicit search space and solver guarantee.
+The final paper-strengthening experiment is defined as a **best-known strong
+reference**, not a global-optimality certificate.
+
+Scale scouting with the original baseline parameters showed that very small
+instances are not structurally representative: K=8/M=2 and K=16/M=2 converge
+to all-local references, while K=12/M=1 is too tight to recover a strict
+solution. K=28/M=2/E=2 is the smallest tested setting whose strong pilot is both
+strict-feasible and nondegenerate.
+
+The formal benchmark therefore fixes:
+
+- K=28, M=2, E=2;
+- scenario seeds 45/46/47;
+- standard Proposed Hybrid: seeds 100/101/102, 100 iterations, 2 elite rounds;
+- strong reference: seeds 700-711, 1000 iterations, 6 elite rounds;
+- expanded elite exact shortlist/task/route-position budgets;
+- strict Stage-1 CVX verification for every reported energy.
+
+For each scenario, the best-known energy is the minimum strict Stage-1 energy
+over all 15 standard+strong runs. The standard Hybrid gap is measured relative
+to this value. The benchmark also reports strong-reference repeat hits and the
+contact/offload structure of the best-known solution.
+
+The result must be described as an empirical best-known gap. No statement of
+global optimality is permitted without an exact search-space certificate.
