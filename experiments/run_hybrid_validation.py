@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 from statistics import mean, median
 from time import perf_counter
@@ -83,6 +84,21 @@ def main() -> None:
         default=2,
     )
     parser.add_argument(
+        "--elite-shortlist-limit",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--elite-task-limit",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--elite-route-options-per-task",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
         "--uavs",
         type=int,
         default=None,
@@ -128,9 +144,36 @@ def main() -> None:
 
                 for algorithm_seed in algorithm_seeds:
                     evaluator = ScreenedProxyObjectiveEvaluator()
-                    config = UavMecALNSConfig(
+                    base_config = UavMecALNSConfig(
                         iterations=args.iterations,
                         seed=algorithm_seed,
+                    )
+                    problem_config = base_config.problem
+                    if args.elite_shortlist_limit is not None:
+                        problem_config = replace(
+                            problem_config,
+                            elite_shortlist_limit=(
+                                args.elite_shortlist_limit
+                            ),
+                        )
+                    if args.elite_task_limit is not None:
+                        problem_config = replace(
+                            problem_config,
+                            elite_task_limit=args.elite_task_limit,
+                        )
+                    if (
+                        args.elite_route_options_per_task
+                        is not None
+                    ):
+                        problem_config = replace(
+                            problem_config,
+                            elite_route_options_per_task=(
+                                args.elite_route_options_per_task
+                            ),
+                        )
+                    config = replace(
+                        base_config,
+                        problem=problem_config,
                     )
 
                     t0 = perf_counter()
@@ -196,6 +239,17 @@ def main() -> None:
                         "hybrid_cvx_energy_j": final_energy,
                         "improvement_pct": improvement_pct,
                         "elite_stats": result.elite_stats,
+                        "elite_config": {
+                            "shortlist_limit": (
+                                config.problem.elite_shortlist_limit
+                            ),
+                            "task_limit": (
+                                config.problem.elite_task_limit
+                            ),
+                            "route_options_per_task": (
+                                config.problem.elite_route_options_per_task
+                            ),
+                        },
                         "elite_cvx_calls": (
                             result.elite_cvx_calls
                         ),
@@ -249,6 +303,20 @@ def main() -> None:
                         if accepted_moves
                         else "-"
                     )
+                    evaluated_moves = list(
+                        result.elite_stats.get(
+                            "evaluated_moves",
+                            [],
+                        )
+                    )
+                    best_rejected = None
+                    if evaluated_moves:
+                        best_rejected = max(
+                            evaluated_moves,
+                            key=lambda item: (
+                                item["improvement_pct"]
+                            ),
+                        )
                     print(
                         f"{k:<4} "
                         f"{e:<4} "
@@ -265,6 +333,20 @@ def main() -> None:
                         f"{result.elite_runtime_s:<9.2f} "
                         f"{total_runtime_s:.2f}"
                     )
+                    if (
+                        not accepted_moves
+                        and best_rejected is not None
+                    ):
+                        print(
+                            "  best elite candidate: "
+                            f"{best_rejected['move']} "
+                            f"delta={best_rejected['improvement_pct']:.3f}%"
+                        )
+                    skipped = result.elite_stats.get("skipped")
+                    if skipped:
+                        print(
+                            f"  elite skipped: {skipped}"
+                        )
 
     aggregate: list[dict[str, Any]] = []
     for k in task_counts:
