@@ -161,7 +161,7 @@ class UavMecALNSConfig:
     problem: ProblemOperatorConfig = field(
         default_factory=ProblemOperatorConfig
     )
-    enable_problem_operators: bool = True
+    enable_problem_operators: bool = False
     problem_operator_profile: str = "core"
     operator_scores: tuple[float, float, float, float] = (
         25.0,
