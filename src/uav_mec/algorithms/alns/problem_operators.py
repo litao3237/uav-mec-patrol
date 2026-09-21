@@ -58,6 +58,13 @@ class ProblemOperatorConfig:
     elite_widen_task_limit: int = 6
     elite_widen_route_options_per_task: int = 3
     elite_widen_family_quota: int = 3
+    elite_enable_route_compute_relocate: bool = True
+    elite_enable_contact_relocate: bool = True
+    elite_enable_contact_point_replace: bool = True
+    elite_enable_contact_remove: bool = True
+    elite_enable_batch_merge: bool = True
+    elite_enable_batch_split: bool = True
+    elite_enable_mode_batch_reassign: bool = True
 
 
 def _proxy_precheck_key(
@@ -1072,72 +1079,79 @@ def _structural_elite_candidates(
 ) -> list[tuple[str, DiscreteSolution]]:
     candidates: list[tuple[str, DiscreteSolution]] = []
 
-    for visit_id in state.solution.contact_visits:
+    if config.elite_enable_contact_relocate:
+        for visit_id in state.solution.contact_visits:
+            candidates.extend(
+                _relocate_contact_candidates(
+                    state,
+                    visit_id,
+                    positions_limit=(
+                        config.elite_positions_per_contact
+                    ),
+                )
+            )
+
+    if config.elite_enable_batch_merge:
+        candidates.extend(_batch_merge_candidates(state))
+    if config.elite_enable_contact_remove:
+        candidates.extend(_contact_removal_candidates(state))
+    if config.elite_enable_route_compute_relocate:
         candidates.extend(
-            _relocate_contact_candidates(
+            _route_compute_relocate_candidates(
                 state,
-                visit_id,
-                positions_limit=(
-                    config.elite_positions_per_contact
-                ),
+                config=config,
             )
         )
-
-    candidates.extend(_batch_merge_candidates(state))
-    candidates.extend(_contact_removal_candidates(state))
-    candidates.extend(
-        _route_compute_relocate_candidates(
-            state,
-            config=config,
-        )
-    )
 
     critical = _critical_tasks_for_mode_move(
         state,
         limit=config.elite_task_limit,
     )
-    for task_id in critical:
-        for _, point_id, insert_pos in _best_new_contact_options(
-            state,
-            task_id,
-            per_mec=config.elite_points_per_mec,
-        ):
-            candidate = _insert_new_contact_for_task(
+    if config.elite_enable_batch_split:
+        for task_id in critical:
+            for _, point_id, insert_pos in _best_new_contact_options(
                 state,
                 task_id,
-                point_id,
-                insert_pos,
-            )
-            if candidate is None:
-                continue
-            candidates.append(
-                (
-                    f"batch_split_or_new_contact::{task_id}"
-                    f"::{point_id}@{insert_pos}",
-                    candidate,
+                per_mec=config.elite_points_per_mec,
+            ):
+                candidate = _insert_new_contact_for_task(
+                    state,
+                    task_id,
+                    point_id,
+                    insert_pos,
                 )
-            )
+                if candidate is None:
+                    continue
+                candidates.append(
+                    (
+                        f"batch_split_or_new_contact::{task_id}"
+                        f"::{point_id}@{insert_pos}",
+                        candidate,
+                    )
+                )
 
     # Existing point replacement and task-level mode/batch moves remain useful
     # cheap generators, but they now compete with structural moves only in the
     # elite shortlist.
-    point_candidate = _best_contact_opportunity_move(
-        state,
-        config=config,
-    )
-    if point_candidate != state.solution:
-        candidates.append(
-            ("contact_point_replace", point_candidate)
+    if config.elite_enable_contact_point_replace:
+        point_candidate = _best_contact_opportunity_move(
+            state,
+            config=config,
         )
+        if point_candidate != state.solution:
+            candidates.append(
+                ("contact_point_replace", point_candidate)
+            )
 
-    mode_candidate = _best_mode_batch_move(
-        state,
-        config=config,
-    )
-    if mode_candidate != state.solution:
-        candidates.append(
-            ("task_mode_or_batch_reassign", mode_candidate)
+    if config.elite_enable_mode_batch_reassign:
+        mode_candidate = _best_mode_batch_move(
+            state,
+            config=config,
         )
+        if mode_candidate != state.solution:
+            candidates.append(
+                ("task_mode_or_batch_reassign", mode_candidate)
+            )
 
     ranked: list[
         tuple[tuple[float, ...], str, DiscreteSolution]
