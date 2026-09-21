@@ -21,5 +21,6 @@ jobs:
           uvx ruff check --select F821
           experiments/run_hybrid_validation.py
           experiments/run_elite_family_ablation.py
+          experiments/aggregate_elite_family_ablation.py
       - name: Run tests
         run: uv run pytest
