@@ -2095,3 +2095,36 @@ optimization rather than being optimized once and then held fixed.
 The result should be reported as a feasibility/decomposition baseline, not as a
 competitive energy baseline. A separate independent feasible metaheuristic
 baseline is still required.
+
+
+## Route-GA pilot: high-load feasibility limit at K=80/E=2
+
+An independent route-level GA baseline was implemented with a two-part task
+chromosome (UAV assignment + route priority), tournament selection, uniform
+crossover, assignment/order mutation, elitism, and deterministic MEC repair.
+Its internal fitness is feasibility-first; final feasibility/energy is still
+judged by Stage-1 CVX.
+
+Two pilot budgets were tested on scenario seeds 45/46/47 with GA seed 100:
+
+| GA budget | distinct route evaluations | strict feasible |
+|---|---:|---:|
+| population 16 x 12 generations | about 183-184 per scenario | 0/3 |
+| population 24 x 40 generations | about 903-904 per scenario | 0/3 |
+
+For the larger P24/G40 pilot, the best GA proxy still has remaining normalized
+constraint counts of:
+
+- scenario 45: 6 violated constraints;
+- scenario 46: 4 violated constraints;
+- scenario 47: 4 violated constraints.
+
+All three final Stage-1 solves terminate at `infeasible_precheck`.
+
+Interpretation: increasing the GA search budget by roughly five times does not
+recover the high-load sparse-MEC feasible region. Therefore the current
+Route-GA + deterministic MEC-repair baseline should not be artificially tuned
+until it matches the proposed method on K=80/E=2. Instead, it is reported as a
+high-load robustness baseline. Its energy-quality comparison should be evaluated
+on a lighter setting (K=50/E=2) where classical decomposition/metaheuristics have
+a realistic chance to remain feasible.
