@@ -433,3 +433,31 @@ def test_hybrid_skips_elite_refinement_without_strict_stage1_optimum() -> None:
         result.elite_stats["skipped"]
         == "exploration_stage1_not_strict_optimal"
     )
+
+
+def test_elite_route_family_can_be_disabled_for_ablation() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+
+    _, stats = contact_mode_intensification(
+        state,
+        config=ProblemOperatorConfig(
+            contact_points_per_mec=1,
+            contact_target_pool=1,
+            critical_task_limit=3,
+            mode_candidate_limit=6,
+            elite_shortlist_limit=12,
+            elite_enable_route_compute_relocate=False,
+        ),
+        objective=evaluator,
+        max_rounds=1,
+    )
+
+    assert all(
+        not str(move["move"]).startswith(
+            "route_compute_relocate::"
+        )
+        for move in stats["evaluated_moves"]
+    )
