@@ -519,8 +519,8 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] K=50/80/100 workload sensitivity（E=2）；
 - [x] K=100 MEC-count sensitivity（E=2/3/4）；
 - [x] Full Hybrid vs **w/o route-compute relocation**：9/9 strict，Full 6 better / 3 equal / 0 worse，mean paired advantage 0.709%；
-- [ ] **[TODO]** w/o contact family；
-- [ ] **[TODO]** w/o batch family；
+- [x] w/o contact family：9/9 strict，Full 3 better / 5 equal / 1 worse，mean paired advantage 0.302%；
+- [ ] **[NEXT]** w/o explicit batch family（batch merge + split/new-contact）；
 - [ ] **[TODO]** w/o progressive widening；
 - [ ] **[OPTIONAL]** w/o adaptive ALNS selection。
 
@@ -1883,3 +1883,54 @@ restructuring under the K=80/E=2 high-load sparse-MEC setting.
 The result should still be reported with its experimental scope: it establishes a
 clear contribution at K=80/E=2 over 3 scenario seeds x 3 algorithm seeds, but
 does not by itself imply the same effect size for every workload/MEC density.
+
+
+## Elite contact-family ablation: positive but weaker incremental contribution
+
+Paired ablation on K=80, E=2, scenario seeds 45/46/47 and algorithm seeds
+100/101/102, with 100 Generic ALNS iterations, compares the same generic
+exploration elite under:
+
+- `full`: all frozen elite structural families enabled;
+- `no-contact`: disables only pure contact-structure moves:
+  `contact_relocate`, `contact_point_replace`, and `contact_remove`.
+
+Explicit batch split/new-contact remains enabled so that this experiment does not
+conflate contact-structure ablation with the next batch-family ablation.
+
+| profile | strict pairs | improved | unchanged | mean elite gain | median elite gain |
+|---|---:|---:|---:|---:|---:|
+| Full Hybrid | 9/9 | 8 | 1 | 1.378% | 1.154% |
+| w/o pure contact family | 9/9 | 7 | 2 | 1.077% | 0.649% |
+
+Direct paired comparison:
+
+- comparable strict pairs: 9/9;
+- Full better: 3/9;
+- equal: 5/9;
+- No-Contact better: 1/9;
+- mean Full advantage: 0.302%;
+- median Full advantage: 0.000%.
+
+The single No-Contact-better pair is scenario 47 / algorithm seed 100. Both
+branches are strict Stage-1 optimal. Full accepts one route-compute relocation,
+while No-Contact accepts the same first route relocation and then a second route
+relocation, producing only about a 0.057% lower final energy. This is consistent
+with shortlist / greedy-sequence competition rather than a solver-status anomaly.
+
+Interpretation: the pure contact family has a positive average contribution in
+this setting, but its effect is substantially weaker and less robust than the
+route-compute family. Therefore the contact family should be described as a
+supporting structural mechanism rather than the dominant source of improvement.
+
+## Third ablation definition: explicit batch-structure family
+
+The next paired ablation uses:
+
+- Full Hybrid;
+- `no-batch`: disables `batch_merge` and
+  `batch_split_or_new_contact`.
+
+`task_mode_or_batch_reassign` remains enabled because it jointly changes
+execution mode and batch assignment; disabling it here would mix explicit batch
+structure with offloading-mode ablation.
