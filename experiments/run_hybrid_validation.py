@@ -345,7 +345,8 @@ def main() -> None:
                             result.best_solution,
                         )
                         metrics_solver = CVXResourceSolver(
-                            run_stage2=True
+                            run_stage2=True,
+                            energy_tol_rel=1e-5,
                         )
                         t_metrics = perf_counter()
                         metrics_cvx = metrics_solver.solve(
@@ -496,6 +497,7 @@ def main() -> None:
                         "paper_metrics_stage2_runtime_s": (
                             paper_metrics_stage2_runtime_s
                         ),
+                        "paper_metrics_energy_tol_rel": 1e-5,
                         "route_seed_distance_m": route_seed_distance_m,
                         "base_solution": _summary(
                             instance,
