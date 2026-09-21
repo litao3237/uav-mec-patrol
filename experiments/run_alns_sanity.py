@@ -56,12 +56,21 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--uavs", type=int, default=None)
     parser.add_argument("--mecs", type=int, default=None)
-    parser.add_argument(
+    operator_group = parser.add_mutually_exclusive_group()
+    operator_group.add_argument(
+        "--enable-problem-operators",
+        action="store_true",
+        help=(
+            "enable the diagnostic core/full problem-specific peer operator "
+            "profiles; generic exploration remains the default"
+        ),
+    )
+    operator_group.add_argument(
         "--disable-problem-operators",
         action="store_true",
         help=(
-            "use only the generic task-removal/insertion ALNS operators; "
-            "intended for operator ablation"
+            "explicitly keep only the generic task-removal/insertion ALNS "
+            "operators; retained for backward-compatible experiment commands"
         ),
     )
     parser.add_argument(
@@ -122,7 +131,7 @@ def main() -> None:
             iterations=args.iterations,
             seed=cfg.algorithm_seed,
             destroy=DestroyConfig(),
-            enable_problem_operators=not args.disable_problem_operators,
+            enable_problem_operators=args.enable_problem_operators,
             problem_operator_profile=args.operator_profile,
         )
 
@@ -186,7 +195,7 @@ def main() -> None:
             "objective_mode": args.objective,
             "iterations": args.iterations,
             "problem_operators_enabled": (
-                not args.disable_problem_operators
+                args.enable_problem_operators
             ),
             "problem_operator_profile": args.operator_profile,
             "initial_objective": result.initial_objective,
