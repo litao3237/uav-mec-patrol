@@ -1000,3 +1000,57 @@ uv run python experiments\run_operator_ablation.py --tasks 50,80 --mecs 2,3 --sc
 - gray-zone CVX refinement 次数。
 
 只有多 seed 消融确认 proposed operator family 在可行率、能耗或收敛速度上有稳定收益后，才把 M6 对应条目从 **[VERIFY]** 改为 **[x]**。
+
+
+## v0.6.0 first operator-level ablation: full profile diagnosis
+
+K=80, E=2, scenario seed=42, algorithm seeds 100/101/102, 100 iterations:
+
+| mode | mean Stage-1 CVX energy (J) | mean runtime (s) |
+|---|---:|---:|
+| generic | 210810.848 | 61.11 |
+| full problem-specific | 221220.773 | 60.00 |
+
+The first full-profile implementation is therefore about 4.94% worse in mean final CVX energy on this three-seed diagnostic, although one seed (102) is about 0.66% better. The result is treated as an operator-design diagnostic, not as a paper claim.
+
+Aggregated operator outcomes from the full profile reveal a clear hierarchy:
+
+- `mode_batch_repair`: 86 uses, 22 BEST + 12 BETTER; strongest new repair family;
+- `contact_opportunity_repair`: 78 uses, 17 BEST + 1 BETTER; useful global-best generator;
+- `shared_mec_pressure_removal`: 69 uses, 13 BEST + 3 BETTER; useful high-load destroy family;
+- `mec_batch_pressure_removal`: 37 uses, only 7 improving outcomes but 28 accepted; mainly diversification;
+- `compute_aware_insertion_repair`: 23 uses, 3 improving outcomes, 17 rejected; currently weak;
+- `route_segment_removal`: 16 uses, 0 improving outcomes, 15 rejected; clearly weak in this setting.
+
+Because ALNS outcome counts are attributed separately to the selected destroy and repair operators, they are not causal pairwise scores. The next design iteration therefore does **not** add more operators. Instead it introduces:
+
+1. a `core` problem-specific profile;
+2. semantic destroy/repair coupling;
+3. explicit `generic/core/full` profile ablation.
+
+The new default `core` profile keeps:
+
+Destroy:
+- `random_task_removal`
+- `critical_task_removal`
+- `shared_mec_pressure_removal`
+
+Repair:
+- `cheapest_insertion_mec_repair`
+- `regret2_insertion_mec_repair`
+- `contact_opportunity_repair`
+- `mode_batch_repair`
+
+It temporarily excludes `route_segment_removal`, `mec_batch_pressure_removal` and `compute_aware_insertion_repair` from the main proposed profile, while retaining them in `full` for ablation/research.
+
+Semantic coupling also prevents MEC-specific destroy operators from being paired with repairs that cannot meaningfully restructure contact/offloading decisions.
+
+Recommended next command:
+
+~~~powershell
+git pull
+uv run pytest
+uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenario-seeds 42 --algorithm-seeds 100,101,102 --iterations 100 --profiles generic,core,full
+~~~
+
+The core profile must outperform or at least match generic consistently before it is promoted from **[VERIFY]** to a validated paper algorithm component.
