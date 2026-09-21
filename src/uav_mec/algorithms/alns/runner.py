@@ -23,6 +23,11 @@ from .operators import (
     make_destroy_operators,
     make_repair_operators,
 )
+from .problem_operators import (
+    ProblemOperatorConfig,
+    make_problem_destroy_operators,
+    make_problem_repair_operators,
+)
 from .state import ObjectiveEvaluator, UavMecState
 
 
@@ -31,6 +36,10 @@ class UavMecALNSConfig:
     iterations: int = 300
     seed: int = 100
     destroy: DestroyConfig = field(default_factory=DestroyConfig)
+    problem: ProblemOperatorConfig = field(
+        default_factory=ProblemOperatorConfig
+    )
+    enable_problem_operators: bool = True
     operator_scores: tuple[float, float, float, float] = (
         25.0,
         5.0,
@@ -92,6 +101,14 @@ def run_uav_mec_alns(
 
     destroy_operators = make_destroy_operators(cfg.destroy)
     repair_operators = make_repair_operators()
+    if cfg.enable_problem_operators:
+        destroy_operators += make_problem_destroy_operators(
+            cfg.destroy,
+            cfg.problem,
+        )
+        repair_operators += make_problem_repair_operators(
+            cfg.problem,
+        )
 
     for name, operator in destroy_operators:
         engine.add_destroy_operator(operator, name=name)
