@@ -1054,3 +1054,63 @@ uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenari
 ~~~
 
 The core profile must outperform or at least match generic consistently before it is promoted from **[VERIFY]** to a validated paper algorithm component.
+
+
+## v0.6.0 second operator ablation: objective-alignment diagnosis
+
+The generic/core/full comparison on K=80, E=2, scenario seed=42, algorithm seeds
+100/101/102, 100 iterations produced:
+
+| profile | mean Stage-1 CVX energy (J) | mean runtime (s) |
+|---|---:|---:|
+| generic | 210810.848 | 61.29 |
+| core | 220054.542 | 58.46 |
+| full | 223612.984 | 41.87 |
+
+The core profile is therefore still about 4.39% worse than generic in mean final
+CVX energy, while full is about 6.07% worse. Core is better than generic on
+algorithm seed 102, but worse on 100 and 101. This is not sufficient to validate
+the proposed operator family.
+
+A structural issue was identified in the implementation: problem-specific local
+moves were internally ranked by a key that placed **proxy violation count ahead
+of energy** after the optimistic precheck. This conflicts with the already
+validated screened-evaluator rule:
+
+[
+\text{proxy violation}>0
+\not\Rightarrow
+P1\text{-R infeasible}.
+]
+
+The effect is visible in the final discrete structures: core/full often reduce
+contacts/offloaded tasks/active pairs relative to generic, pushing the search
+toward proxy-feasible low-contention states even when a gray-zone state can be
+better after Stage-1 CVX resource optimization.
+
+The implementation is therefore changed as follows:
+
+1. optimistic precheck remains the only hard structural feasibility screen;
+2. among precheck-feasible local candidates, the cheap shortlist is energy-first
+   rather than proxy-violation-first;
+3. contact and mode/batch intensification choose only one cheap promising move;
+4. that selected move is accepted locally only if the injected outer evaluator
+   (normally ScreenedProxyObjectiveEvaluator) confirms improvement over the
+   repaired baseline;
+5. destroy-repair **pair outcome tracking** is added, because separate destroy
+   and repair BEST/BETTER counts do not identify causal operator pairings.
+
+This preserves cheap candidate generation while aligning local intensification
+with the exact same objective logic used by the outer ALNS.
+
+Next verification:
+
+~~~powershell
+git pull
+uv run pytest
+uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenario-seeds 42 --algorithm-seeds 100,101,102 --iterations 100 --profiles generic,core,full
+~~~
+
+The new output additionally reports destroy-repair pair outcomes. The next
+decision should be based on final Stage-1 CVX energy and pair-level BEST/BETTER
+evidence, not on individual operator counts alone.
