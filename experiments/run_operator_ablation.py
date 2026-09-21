@@ -14,12 +14,48 @@ from uav_mec.algorithms import (
     build_mec_assisted_initial_solution,
     run_uav_mec_alns,
 )
+from uav_mec.algorithms.alns.evaluator import solution_signature
+from uav_mec.algorithms.alns.problem_operators import (
+    contact_mode_intensification,
+)
+from uav_mec.algorithms.alns.state import UavMecState
 from uav_mec.evaluation import build_event_info
 from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
 from uav_mec.optimization.resource import CVXResourceSolver
+
+
+class _Stage1CVXOracle:
+    """Cached exact Stage-1 oracle for elite intensification only."""
+
+    def __init__(self) -> None:
+        self.solver = CVXResourceSolver(run_stage2=False)
+        self.cache: dict[tuple, float] = {}
+        self.calls = 0
+        self.cache_hits = 0
+
+    def __call__(self, instance, solution) -> float:
+        key = solution_signature(solution)
+        if key in self.cache:
+            self.cache_hits += 1
+            return self.cache[key]
+
+        self.calls += 1
+        info = build_event_info(instance, solution)
+        result = self.solver.solve(
+            instance,
+            solution,
+            info,
+        )
+        value = (
+            float(result.energy_stage1_j)
+            if result.feasible
+            else float("inf")
+        )
+        self.cache[key] = value
+        return value
 
 
 def _parse_int_list(text: str) -> list[int]:
@@ -133,8 +169,8 @@ def main() -> None:
     parser.add_argument("--algorithm-seeds", default="100")
     parser.add_argument(
         "--profiles",
-        default="generic,core,full",
-        help="comma-separated subset of generic,core,full",
+        default="generic,hybrid,core,full",
+        help="comma-separated subset of generic,hybrid,core,full",
     )
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--uavs", type=int, default=None)
@@ -150,7 +186,12 @@ def main() -> None:
         for item in args.profiles.split(",")
         if item.strip()
     ]
-    invalid_profiles = set(profiles) - {"generic", "core", "full"}
+    invalid_profiles = set(profiles) - {
+        "generic",
+        "hybrid",
+        "core",
+        "full",
+    }
     if invalid_profiles:
         raise ValueError(
             f"Unknown profiles: {sorted(invalid_profiles)}"
@@ -161,7 +202,7 @@ def main() -> None:
     print(
         "K    E    scen   alg    mode       cvx-s1       "
         "cvx-E-J        contacts   offload   pairs   "
-        "cvx-ref   pre-rej   runtime-s"
+        "cvx-ref   elite-cvx   pre-rej   runtime-s"
     )
     print("-" * 132)
 
@@ -183,16 +224,16 @@ def main() -> None:
 
                 for algorithm_seed in algorithm_seeds:
                     for mode in profiles:
-                        enabled = mode != "generic"
+                        enabled = mode in {"core", "full"}
                         evaluator = ScreenedProxyObjectiveEvaluator()
                         config = UavMecALNSConfig(
                             iterations=args.iterations,
                             seed=algorithm_seed,
                             enable_problem_operators=enabled,
                             problem_operator_profile=(
-                                "core"
-                                if mode == "generic"
-                                else mode
+                                mode
+                                if mode in {"core", "full"}
+                                else "core"
                             ),
                         )
 
@@ -203,17 +244,43 @@ def main() -> None:
                             config=config,
                             evaluator=evaluator,
                         )
+
+                        final_solution = result.best_solution
+                        intensification_stats = None
+                        elite_cvx_calls = 0
+                        elite_cvx_cache_hits = 0
+                        if mode == "hybrid":
+                            elite_oracle = _Stage1CVXOracle()
+                            elite_state = UavMecState(
+                                instance,
+                                final_solution,
+                                evaluator,
+                            )
+                            elite_state, intensification_stats = (
+                                contact_mode_intensification(
+                                    elite_state,
+                                    config=config.problem,
+                                    objective=elite_oracle,
+                                    max_rounds=2,
+                                )
+                            )
+                            final_solution = elite_state.solution
+                            elite_cvx_calls = elite_oracle.calls
+                            elite_cvx_cache_hits = (
+                                elite_oracle.cache_hits
+                            )
+
                         runtime_s = perf_counter() - t0
 
                         best_info = build_event_info(
                             instance,
-                            result.best_solution,
+                            final_solution,
                         )
                         cvx = CVXResourceSolver(
                             run_stage2=False
                         ).solve(
                             instance,
-                            result.best_solution,
+                            final_solution,
                             best_info,
                         )
                         cvx_status = cvx.diagnostics.get(
@@ -222,7 +289,7 @@ def main() -> None:
                         )
                         summary = _solution_summary(
                             instance,
-                            result.best_solution,
+                            final_solution,
                         )
 
                         row = {
@@ -254,6 +321,13 @@ def main() -> None:
                             "cvx_refinements": (
                                 evaluator.stats.cvx_refinements
                             ),
+                            "elite_cvx_calls": elite_cvx_calls,
+                            "elite_cvx_cache_hits": (
+                                elite_cvx_cache_hits
+                            ),
+                            "intensification_stats": (
+                                intensification_stats
+                            ),
                             "solution": summary,
                             "operator_counts": _operator_counts(
                                 result.raw_result
@@ -281,9 +355,16 @@ def main() -> None:
                             f"{summary['offloaded']:<9} "
                             f"{summary['active_pairs']:<7} "
                             f"{evaluator.stats.cvx_refinements:<9} "
+                            f"{elite_cvx_calls:<11} "
                             f"{evaluator.stats.precheck_rejects:<9} "
                             f"{runtime_s:.2f}"
                         )
+                        if intensification_stats is not None:
+                            print(
+                                "  Elite intensification "
+                                f"{intensification_stats} "
+                                f"cvx_calls={elite_cvx_calls}"
+                            )
                         _print_operator_summary(
                             mode,
                             result.raw_result,
@@ -333,6 +414,9 @@ def main() -> None:
                     "mean_cvx_refinements": mean(
                         row["cvx_refinements"] for row in subset
                     ),
+                    "mean_elite_cvx_calls": mean(
+                        row["elite_cvx_calls"] for row in subset
+                    ),
                     "mean_precheck_rejects": mean(
                         row["precheck_rejects"] for row in subset
                     ),
@@ -342,7 +426,7 @@ def main() -> None:
     print("\nAggregate")
     print(
         "K    E    mode       runs   feasible-rate   "
-        "mean-cvx-E-J   mean-runtime-s   mean-cvx-ref"
+        "mean-cvx-E-J   mean-runtime-s   mean-cvx-ref   elite-cvx"
     )
     print("-" * 92)
     for group in aggregate:
@@ -359,7 +443,8 @@ def main() -> None:
             f"{group['cvx_feasible_rate']:<15.3f} "
             f"{energy_text:<14} "
             f"{group['mean_runtime_s']:<16.2f} "
-            f"{group['mean_cvx_refinements']:.2f}"
+            f"{group['mean_cvx_refinements']:<14.2f} "
+            f"{group['mean_elite_cvx_calls']:.2f}"
         )
 
     out = Path("outputs/results/operator_ablation.json")
