@@ -19,19 +19,45 @@ def _load_rows(input_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _method_rows(
+    rows: list[dict[str, Any]],
+    method: str,
+) -> list[dict[str, Any]]:
+    if method != "greedy_repair":
+        return rows
+
+    # Greedy+MEC repair is deterministic for a fixed instance and does not
+    # depend on algorithm_seed. Deduplicate repeated matrix copies so its
+    # feasibility count reflects unique scenarios rather than pseudo-replicates.
+    unique: dict[tuple[int, int, int], dict[str, Any]] = {}
+    for row in rows:
+        key = (
+            int(row["K"]),
+            int(row["E"]),
+            int(row["scenario_seed"]),
+        )
+        unique.setdefault(key, row)
+    return list(unique.values())
+
+
 def _method_summary(rows: list[dict[str, Any]], method: str) -> dict[str, Any]:
-    statuses = [row[method]["stage1_status"] for row in rows]
+    effective_rows = _method_rows(rows, method)
+    statuses = [
+        row[method]["stage1_status"]
+        for row in effective_rows
+    ]
     energies = [
         float(row[method]["energy_j"])
-        for row in rows
+        for row in effective_rows
         if row[method]["energy_j"] is not None
     ]
     return {
-        "runs": len(rows),
+        "runs": len(effective_rows),
         "strict_optimal": sum(status == "optimal" for status in statuses),
         "strict_rate": (
-            sum(status == "optimal" for status in statuses) / len(rows)
-            if rows
+            sum(status == "optimal" for status in statuses)
+            / len(effective_rows)
+            if effective_rows
             else 0.0
         ),
         "mean_energy_j": mean(energies) if energies else None,
