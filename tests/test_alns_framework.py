@@ -525,3 +525,28 @@ def test_elite_batch_family_can_be_disabled_for_ablation() -> None:
         not str(move["move"]).startswith(forbidden_prefixes)
         for move in stats["evaluated_moves"]
     )
+
+
+def test_elite_progressive_widening_can_be_disabled_for_ablation() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+
+    _, stats = contact_mode_intensification(
+        state,
+        config=ProblemOperatorConfig(
+            contact_points_per_mec=1,
+            contact_target_pool=1,
+            critical_task_limit=3,
+            mode_candidate_limit=6,
+            elite_shortlist_limit=6,
+            elite_progressive_widening=False,
+        ),
+        objective=evaluator,
+        max_rounds=1,
+    )
+
+    assert stats["widenings"] == 0
+    assert stats["widened_candidates_evaluated"] == 0
+    assert stats["widened_families"] == []
