@@ -634,6 +634,93 @@ def compute_aware_insertion_repair(
     return repaired
 
 
+def contact_mode_intensification(
+    state: UavMecState,
+    *,
+    config: ProblemOperatorConfig,
+    objective,
+    max_rounds: int = 2,
+    tolerance: float = 1e-12,
+) -> tuple[UavMecState, dict[str, int]]:
+    """Exact-oracle elite intensification for contact and mode/batch moves.
+
+    The main ALNS may use a fast screened evaluator. This routine is intended
+    for elite/post-search states, where a small number of shortlisted
+    contact/mode moves can afford a stronger objective oracle (for example,
+    Stage-1 CVX). Every accepted move is therefore monotone with respect to
+    that oracle.
+    """
+
+    current = state.copy()
+    stats = {
+        "rounds": 0,
+        "contact_attempts": 0,
+        "contact_improvements": 0,
+        "mode_attempts": 0,
+        "mode_improvements": 0,
+    }
+
+    def value(solution: DiscreteSolution) -> float:
+        return float(objective(current.instance, solution))
+
+    current_value = value(current.solution)
+
+    for _ in range(max_rounds):
+        improved = False
+        stats["rounds"] += 1
+
+        contact_candidate = _best_contact_opportunity_move(
+            current,
+            config=config,
+        )
+        if contact_candidate != current.solution:
+            stats["contact_attempts"] += 1
+            candidate_value = value(contact_candidate)
+            scale = max(
+                1.0,
+                abs(current_value),
+                abs(candidate_value),
+            )
+            if (
+                candidate_value
+                < current_value - tolerance * scale
+            ):
+                current.solution = contact_candidate
+                current.invalidate()
+                current_value = candidate_value
+                stats["contact_improvements"] += 1
+                improved = True
+
+        mode_candidate = _best_mode_batch_move(
+            current,
+            config=config,
+        )
+        if mode_candidate != current.solution:
+            stats["mode_attempts"] += 1
+            candidate_value = value(mode_candidate)
+            scale = max(
+                1.0,
+                abs(current_value),
+                abs(candidate_value),
+            )
+            if (
+                candidate_value
+                < current_value - tolerance * scale
+            ):
+                current.solution = mode_candidate
+                current.invalidate()
+                current_value = candidate_value
+                stats["mode_improvements"] += 1
+                improved = True
+
+        if not improved:
+            break
+
+    validate_solution(current.instance, current.solution)
+    current.invalidate()
+    return current, stats
+
+
 def _configured(func, **kwargs):
     operator = partial(func, **kwargs)
     update_wrapper(operator, func)
