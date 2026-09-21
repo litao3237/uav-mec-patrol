@@ -250,7 +250,11 @@ def main() -> None:
     parser.add_argument("--input-dir", required=True)
     parser.add_argument(
         "--field",
-        choices=("mec_bandwidth_scale", "mec_radius_scale"),
+        choices=(
+            "mec_bandwidth_scale",
+            "mec_radius_scale",
+            "max_contacts_per_uav",
+        ),
         required=True,
     )
     parser.add_argument("--output-json", required=True)
