@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from uav_mec.evaluation.geometry import distance
 from uav_mec.instances import (
     build_paper_scale_instance,
@@ -121,3 +123,48 @@ def test_uav_count_sweep_keeps_task_and_mec_realization_fixed() -> None:
     # UAVs are homogeneous, so increasing M only appends additional UAV IDs.
     assert tuple(instances[1].uavs)[:3] == tuple(instances[0].uavs)
     assert tuple(instances[2].uavs)[:5] == tuple(instances[1].uavs)
+
+
+def test_mec_resource_and_radius_scaling_keep_tasks_fixed() -> None:
+    cfg = load_paper_scale_config()
+    scaled = replace(
+        cfg,
+        mec_sites=tuple(
+            replace(
+                spec,
+                bandwidth_mhz=1.5 * spec.bandwidth_mhz,
+                radius_m=0.75 * spec.radius_m,
+            )
+            for spec in cfg.mec_sites
+        ),
+    )
+
+    base = build_paper_scale_instance(
+        cfg,
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+    changed = build_paper_scale_instance(
+        scaled,
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+
+    assert changed.tasks == base.tasks
+    assert changed.uavs == base.uavs
+    assert tuple(changed.mecs) == tuple(base.mecs)
+    for mec_id in base.mecs:
+        assert changed.mecs[mec_id].x == base.mecs[mec_id].x
+        assert changed.mecs[mec_id].y == base.mecs[mec_id].y
+        assert (
+            changed.mecs[mec_id].bandwidth_mhz
+            == 1.5 * base.mecs[mec_id].bandwidth_mhz
+        )
+        assert (
+            changed.mecs[mec_id].radius_m
+            == 0.75 * base.mecs[mec_id].radius_m
+        )
