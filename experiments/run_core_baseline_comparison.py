@@ -10,6 +10,7 @@ from typing import Any
 from uav_mec.algorithms import (
     ScreenedProxyObjectiveEvaluator,
     UavMecALNSConfig,
+    build_fixed_route_nearest_mec_solution,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
     run_uav_mec_hybrid_alns,
@@ -105,7 +106,12 @@ def _write(
 
 
 def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    methods = ("greedy_repair", "generic_alns", "hybrid")
+    methods = (
+        "greedy_repair",
+        "nearest_mec",
+        "generic_alns",
+        "hybrid",
+    )
     result: dict[str, Any] = {"methods": {}, "paired": {}}
 
     for method in methods:
@@ -126,7 +132,11 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "median_energy_j": median(energies) if energies else None,
         }
 
-    for baseline in ("greedy_repair", "generic_alns"):
+    for baseline in (
+        "greedy_repair",
+        "nearest_mec",
+        "generic_alns",
+    ):
         gains: list[float] = []
         for row in rows:
             base = row[baseline]["energy_j"]
@@ -198,9 +208,9 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
 
     print(
-        "K    E    scen   alg    greedy-s1    generic-s1   hybrid-s1    "
-        "greedy-E-J      generic-E-J     hybrid-E-J      "
-        "H-vs-Greedy%   H-vs-Generic%"
+        "K    E    scen   alg    greedy-s1    nearest-s1   "
+        "generic-s1   hybrid-s1    greedy-E-J      nearest-E-J     "
+        "generic-E-J     hybrid-E-J      H-vs-Nearest%  H-vs-Generic%"
     )
     print("-" * 142)
 
@@ -233,6 +243,27 @@ def main() -> None:
                 )
                 greedy_cvx_runtime_s = perf_counter() - t_greedy
 
+                t_nearest_build = perf_counter()
+                nearest_solution = build_fixed_route_nearest_mec_solution(
+                    instance,
+                    base_solution=route_seed,
+                )
+                nearest_build_runtime_s = perf_counter() - t_nearest_build
+                nearest_solver = CVXResourceSolver(run_stage2=False)
+                nearest_info = build_event_info(
+                    instance,
+                    nearest_solution,
+                )
+                t_nearest_cvx = perf_counter()
+                nearest_cvx = nearest_solver.solve(
+                    instance,
+                    nearest_solution,
+                    nearest_info,
+                )
+                nearest_cvx_runtime_s = (
+                    perf_counter() - t_nearest_cvx
+                )
+
                 for algorithm_seed in algorithm_seeds:
                     evaluator = ScreenedProxyObjectiveEvaluator()
                     config = UavMecALNSConfig(
@@ -250,6 +281,7 @@ def main() -> None:
                     hybrid_wall_s = perf_counter() - t_hybrid
 
                     greedy_energy = _energy_if_strict(greedy_cvx)
+                    nearest_energy = _energy_if_strict(nearest_cvx)
                     generic_energy = _energy_if_strict(
                         hybrid_result.exploration_cvx
                     )
@@ -280,6 +312,20 @@ def main() -> None:
                             "solution": _solution_summary(
                                 instance,
                                 initial,
+                            ),
+                        },
+                        "nearest_mec": {
+                            "stage1_status": _stage1_status(
+                                nearest_cvx
+                            ),
+                            "energy_j": nearest_energy,
+                            "runtime_s": (
+                                nearest_build_runtime_s
+                                + nearest_cvx_runtime_s
+                            ),
+                            "solution": _solution_summary(
+                                instance,
+                                nearest_solution,
                             ),
                         },
                         "generic_alns": {
@@ -322,6 +368,9 @@ def main() -> None:
                         "hybrid_advantage_vs_greedy_pct": gain(
                             greedy_energy
                         ),
+                        "hybrid_advantage_vs_nearest_pct": gain(
+                            nearest_energy
+                        ),
                         "hybrid_advantage_vs_generic_pct": gain(
                             generic_energy
                         ),
@@ -342,12 +391,14 @@ def main() -> None:
                         f"{k:<4} {e:<4} {scenario_seed:<6} "
                         f"{algorithm_seed:<6} "
                         f"{row['greedy_repair']['stage1_status']:<12} "
+                        f"{row['nearest_mec']['stage1_status']:<12} "
                         f"{row['generic_alns']['stage1_status']:<12} "
                         f"{row['hybrid']['stage1_status']:<12} "
                         f"{fmt(greedy_energy):<15} "
+                        f"{fmt(nearest_energy):<15} "
                         f"{fmt(generic_energy):<15} "
                         f"{fmt(hybrid_energy):<15} "
-                        f"{fmt(row['hybrid_advantage_vs_greedy_pct']):<14} "
+                        f"{fmt(row['hybrid_advantage_vs_nearest_pct']):<14} "
                         f"{fmt(row['hybrid_advantage_vs_generic_pct'])}"
                     )
 
