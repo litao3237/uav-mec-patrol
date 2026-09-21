@@ -171,6 +171,12 @@ def main() -> None:
         default=None,
     )
     parser.add_argument(
+        "--task-spatial-profile",
+        choices=("uniform", "clustered", "boundary"),
+        default="uniform",
+        help="monitoring-node spatial distribution profile",
+    )
+    parser.add_argument(
         "--mec-bandwidth-scale",
         type=float,
         default=1.0,
@@ -249,6 +255,7 @@ def main() -> None:
         "elite_rounds": args.elite_rounds,
         "uavs": args.uavs,
         "paper_metrics": args.paper_metrics,
+        "task_spatial_profile": args.task_spatial_profile,
         "mec_bandwidth_scale": args.mec_bandwidth_scale,
         "mec_radius_scale": args.mec_radius_scale,
     }
@@ -269,6 +276,7 @@ def main() -> None:
                     num_uavs=args.uavs,
                     num_mecs=e,
                     scenario_seed=scenario_seed,
+                    task_spatial_profile=args.task_spatial_profile,
                 )
                 route_seed = build_greedy_initial_solution(
                     instance
@@ -433,6 +441,7 @@ def main() -> None:
                         "K": k,
                         "M": len(instance.uavs),
                         "E": e,
+                        "task_spatial_profile": args.task_spatial_profile,
                         "mec_bandwidth_scale": args.mec_bandwidth_scale,
                         "mec_radius_scale": args.mec_radius_scale,
                         "scenario_seed": scenario_seed,
