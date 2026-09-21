@@ -239,8 +239,10 @@ a complete 9-run sample.
 
 ## 9. Reduced-scale best-known strong-reference benchmark
 
-The final paper-strengthening experiment is defined as a **best-known strong
-reference**, not a global-optimality certificate.
+The final paper-strengthening experiment is a **best-known strong reference**,
+not a global-optimality certificate.
+
+### 9.1 Protocol
 
 Scale scouting with the original baseline parameters showed that very small
 instances are not structurally representative: K=8/M=2 and K=16/M=2 converge
@@ -248,7 +250,7 @@ to all-local references, while K=12/M=1 is too tight to recover a strict
 solution. K=28/M=2/E=2 is the smallest tested setting whose strong pilot is both
 strict-feasible and nondegenerate.
 
-The formal benchmark therefore fixes:
+The formal benchmark fixes:
 
 - K=28, M=2, E=2;
 - scenario seeds 45/46/47;
@@ -258,9 +260,60 @@ The formal benchmark therefore fixes:
 - strict Stage-1 CVX verification for every reported energy.
 
 For each scenario, the best-known energy is the minimum strict Stage-1 energy
-over all 15 standard+strong runs. The standard Hybrid gap is measured relative
-to this value. The benchmark also reports strong-reference repeat hits and the
-contact/offload structure of the best-known solution.
+over the union of the 3 standard runs and 12 strong runs.
 
-The result must be described as an empirical best-known gap. No statement of
-global optimality is permitted without an exact search-space certificate.
+### 9.2 Results
+
+| Scenario | Best-known energy (J) | Contacts | Offloaded tasks | Strong hits | Mean standard gap | Median standard gap |
+|---:|---:|---:|---:|---:|---:|---:|
+| 45 | 97905.087437 | 1 | 2 | 4/12 | 9.695% | 8.610% |
+| 46 | 99503.124192 | 2 | 2 | 5/12 | 0.071% | 0.071% |
+| 47 | 103608.196273 | 1 | 1 | 1/12 | 8.137% | 9.203% |
+
+Aggregate:
+
+- standard strict: 9/9;
+- strong strict: 36/36;
+- mean standard-to-best-known gap: 5.968%;
+- median gap: 8.610%;
+- maximum gap: 11.866%;
+- standard runs within 0.01% / 0.1% / 1% of best-known:
+  0/9, 3/9, and 3/9;
+- formal strong reference hits: 10/36 (27.8%);
+- mean runtime: 3.990 s for standard versus 31.380 s for strong.
+
+All three best-known solutions are structurally nondegenerate and retain actual
+MEC contact/offloading decisions.
+
+Because S47 had only one formal hit, a confirmation batch added 12 new strong
+seeds (712-723), with seed 707 included as an anchor. No new seed improved the
+103608.196273 J reference. Therefore the best-known value is retained, while
+its low repeat frequency is explicitly interpreted as a narrow search basin.
+
+### 9.3 Interpretation
+
+The result supports a computational-budget interpretation rather than a
+near-optimality claim. The frozen 100-iteration configuration can be very close
+to the best-known reference in some scenarios (S46), but can retain several
+percent gap in harder reduced-scale instances (S45/S47). More intensive search
+improves solution quality at substantially higher runtime.
+
+The discrete search remains heuristic. CVXPY is exact only for the continuous
+fixed-discrete resource subproblem. Therefore these results must be described as
+**empirical best-known gaps**, not global-optimality gaps.
+
+---
+
+## 10. Experimental status
+
+The planned experiment set is now complete:
+
+- workload sensitivity: complete;
+- MEC-count sensitivity: complete;
+- UAV-count sensitivity: complete;
+- baseline comparison: complete;
+- elite-family ablation: complete;
+- reduced-scale best-known strong benchmark: complete.
+
+The remaining work is presentation: final figures, compact paper tables, and
+integration into the manuscript.
