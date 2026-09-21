@@ -61,7 +61,16 @@ class Stage1CVXObjectiveOracle:
         solution: DiscreteSolution,
     ) -> float:
         result = self.solve(instance, solution)
-        if not result.feasible:
+        stage1_status = str(
+            result.diagnostics.get(
+                "stage1_status",
+                result.status,
+            )
+        )
+        if (
+            not result.feasible
+            or stage1_status != "optimal"
+        ):
             return float("inf")
         return float(result.energy_stage1_j)
 
