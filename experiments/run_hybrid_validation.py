@@ -171,6 +171,18 @@ def main() -> None:
         default=None,
     )
     parser.add_argument(
+        "--mec-bandwidth-scale",
+        type=float,
+        default=1.0,
+        help="multiply every active MEC bandwidth by this factor",
+    )
+    parser.add_argument(
+        "--mec-radius-scale",
+        type=float,
+        default=1.0,
+        help="multiply every MEC coverage radius by this factor",
+    )
+    parser.add_argument(
         "--paper-metrics",
         action="store_true",
         help=(
@@ -190,6 +202,23 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_paper_scale_config(args.config)
+    if args.mec_bandwidth_scale <= 0.0:
+        raise ValueError("--mec-bandwidth-scale must be positive")
+    if args.mec_radius_scale <= 0.0:
+        raise ValueError("--mec-radius-scale must be positive")
+    cfg = replace(
+        cfg,
+        mec_sites=tuple(
+            replace(
+                spec,
+                bandwidth_mhz=(
+                    spec.bandwidth_mhz * args.mec_bandwidth_scale
+                ),
+                radius_m=spec.radius_m * args.mec_radius_scale,
+            )
+            for spec in cfg.mec_sites
+        ),
+    )
     task_counts = _parse_int_list(args.tasks)
     mec_counts = _parse_int_list(args.mecs)
     scenario_seeds = _parse_int_list(
@@ -220,6 +249,8 @@ def main() -> None:
         "elite_rounds": args.elite_rounds,
         "uavs": args.uavs,
         "paper_metrics": args.paper_metrics,
+        "mec_bandwidth_scale": args.mec_bandwidth_scale,
+        "mec_radius_scale": args.mec_radius_scale,
     }
 
     print(
@@ -402,6 +433,8 @@ def main() -> None:
                         "K": k,
                         "M": len(instance.uavs),
                         "E": e,
+                        "mec_bandwidth_scale": args.mec_bandwidth_scale,
+                        "mec_radius_scale": args.mec_radius_scale,
                         "scenario_seed": scenario_seed,
                         "algorithm_seed": algorithm_seed,
                         "iterations": args.iterations,
