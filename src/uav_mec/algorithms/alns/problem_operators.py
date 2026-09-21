@@ -49,6 +49,9 @@ class ProblemOperatorConfig:
     elite_positions_per_contact: int = 2
     elite_points_per_mec: int = 1
     elite_route_options_per_task: int = 2
+    elite_family_quota: int = 1
+    elite_min_improvement_rel: float = 1e-4
+    elite_min_improvement_j: float = 1.0
 
 
 def _proxy_precheck_key(
@@ -1179,11 +1182,108 @@ def _structural_elite_candidates(
         )
 
     ranked.sort(key=lambda item: item[0])
+
+    def family(label: str) -> str:
+        if label.startswith("route_compute_relocate::"):
+            return "route"
+        if (
+            label.startswith("contact_relocate::")
+            or label == "contact_point_replace"
+        ):
+            return "contact"
+        if label.startswith("contact_remove::"):
+            return "contact_remove"
+        if label.startswith("batch_merge::"):
+            return "batch_merge"
+        if label.startswith("batch_split_or_new_contact::"):
+            return "batch_split"
+        if label == "task_mode_or_batch_reassign":
+            return "mode_batch"
+        return "other"
+
+    # A global proxy top-k can starve an entire structural family even when
+    # that family contains the exact-CVX improving move. Preserve one (or the
+    # configured quota) from each family first, then fill the remaining budget
+    # by the global proxy ranking.
+    selected: list[
+        tuple[tuple[float, ...], str, DiscreteSolution]
+    ] = []
+    selected_signatures: set[str] = set()
+    per_family: dict[str, int] = {}
+
+    for item in ranked:
+        _, label, candidate = item
+        fam = family(label)
+        if per_family.get(fam, 0) >= config.elite_family_quota:
+            continue
+        signature = repr(
+            (
+                label,
+                tuple(
+                    (
+                        uav_id,
+                        candidate.routes[uav_id].labels(),
+                    )
+                    for uav_id in sorted(candidate.routes)
+                ),
+                tuple(
+                    sorted(
+                        (
+                            task_id,
+                            decision.mode.value,
+                            decision.contact_visit_id,
+                        )
+                        for task_id, decision
+                        in candidate.task_decisions.items()
+                    )
+                ),
+            )
+        )
+        if signature in selected_signatures:
+            continue
+        selected.append(item)
+        selected_signatures.add(signature)
+        per_family[fam] = per_family.get(fam, 0) + 1
+        if len(selected) >= config.elite_shortlist_limit:
+            break
+
+    if len(selected) < config.elite_shortlist_limit:
+        for item in ranked:
+            _, label, candidate = item
+            signature = repr(
+                (
+                    label,
+                    tuple(
+                        (
+                            uav_id,
+                            candidate.routes[uav_id].labels(),
+                        )
+                        for uav_id in sorted(candidate.routes)
+                    ),
+                    tuple(
+                        sorted(
+                            (
+                                task_id,
+                                decision.mode.value,
+                                decision.contact_visit_id,
+                            )
+                            for task_id, decision
+                            in candidate.task_decisions.items()
+                        )
+                    ),
+                )
+            )
+            if signature in selected_signatures:
+                continue
+            selected.append(item)
+            selected_signatures.add(signature)
+            if len(selected) >= config.elite_shortlist_limit:
+                break
+
+    selected.sort(key=lambda item: item[0])
     return [
         (label, candidate)
-        for _, label, candidate in ranked[
-            : config.elite_shortlist_limit
-        ]
+        for _, label, candidate in selected
     ]
 
 
@@ -1263,9 +1363,18 @@ def contact_mode_intensification(
                 abs(best_value),
                 abs(candidate_value),
             )
+            numerical_tol = tolerance * scale
+            meaningful_tol = max(
+                config.elite_min_improvement_j,
+                config.elite_min_improvement_rel * scale,
+            )
+            acceptance_tol = max(
+                numerical_tol,
+                meaningful_tol,
+            )
             if (
                 candidate_value
-                < best_value - tolerance * scale
+                < best_value - acceptance_tol
             ):
                 best_value = candidate_value
                 best_label = label
@@ -1286,6 +1395,14 @@ def contact_mode_intensification(
             {
                 "move": best_label,
                 "objective": best_value,
+                "improvement_j": (
+                    current_value - best_value
+                ),
+                "improvement_pct": (
+                    100.0
+                    * (current_value - best_value)
+                    / max(1.0, abs(current_value))
+                ),
             }
         )
         stats["accepted_moves"] = accepted_moves
