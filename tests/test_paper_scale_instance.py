@@ -168,3 +168,52 @@ def test_mec_resource_and_radius_scaling_keep_tasks_fixed() -> None:
             changed.mecs[mec_id].radius_m
             == 0.75 * base.mecs[mec_id].radius_m
         )
+
+
+def test_spatial_profiles_preserve_baseline_and_task_attribute_stream() -> None:
+    cfg = load_paper_scale_config()
+    default = build_paper_scale_instance(
+        cfg,
+        num_tasks=40,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+    explicit_uniform = build_paper_scale_instance(
+        cfg,
+        num_tasks=40,
+        num_mecs=2,
+        scenario_seed=45,
+        task_spatial_profile="uniform",
+    )
+    clustered = build_paper_scale_instance(
+        cfg,
+        num_tasks=40,
+        num_mecs=2,
+        scenario_seed=45,
+        task_spatial_profile="clustered",
+    )
+    boundary = build_paper_scale_instance(
+        cfg,
+        num_tasks=40,
+        num_mecs=2,
+        scenario_seed=45,
+        task_spatial_profile="boundary",
+    )
+
+    assert explicit_uniform == default
+    assert clustered.mecs == default.mecs
+    assert boundary.mecs == default.mecs
+    assert clustered.uavs == default.uavs
+    assert boundary.uavs == default.uavs
+    assert clustered.contact_points == default.contact_points
+    assert boundary.contact_points == default.contact_points
+
+    assert clustered.tasks != default.tasks
+    assert boundary.tasks != default.tasks
+
+    for task_id, base_task in default.tasks.items():
+        for variant in (clustered.tasks[task_id], boundary.tasks[task_id]):
+            assert variant.data_mb == base_task.data_mb
+            assert variant.cycles_per_bit == base_task.cycles_per_bit
+            assert variant.collect_s == base_task.collect_s
+            assert variant.release_s == base_task.release_s
