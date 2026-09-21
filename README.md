@@ -1724,3 +1724,69 @@ uv run python experiments\run_hybrid_validation.py --tasks 100 --mecs 4 --scenar
 
 This is the clean next comparison because it changes only MEC availability while
 keeping workload, seeds, algorithm, and search budget fixed.
+
+
+## K=100 MEC-count sensitivity completed: E=4 restores strict robustness
+
+With K=100, scenario seeds 45/46/47, algorithm seeds 100/101/102, and the
+paper-facing ALNS budget frozen at 100 iterations, the MEC-count sweep is now:
+
+| E | strict pairs / runs | strict rate | strict improved | strict unchanged | infeasible-precheck | optimal-inaccurate | strict mean gain | strict median gain |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 2/9 | 0.222 | 2/2 | 0/2 | 3 | 4 | 0.665% | 0.665% |
+| 3 | 6/9 | 0.667 | 5/6 | 1/6 | 1 | 2 | 0.562% | 0.255% |
+| 4 | 9/9 | 1.000 | 8/9 | 1/9 | 0 | 0 | 0.555% | 0.063% |
+
+The strongest result is the strict-pair recovery:
+
+\[
+\boxed{
+22.2\% \; (E=2)
+\rightarrow
+66.7\% \; (E=3)
+\rightarrow
+100\% \; (E=4)
+}
+\]
+
+under the same workload, scenario seeds, algorithm seeds, and search budget.
+
+Therefore increasing MEC availability clearly improves fixed-discrete
+resource-solve robustness at K=100. In this sampled sweep, E=4 completely removes
+the observed `infeasible_precheck` and `optimal_inaccurate` outcomes.
+
+For E=4, 8/9 strict pairs improve and one is unchanged. Accepted move families:
+
+- `route_compute_relocate`: 6;
+- `batch_merge`: 4;
+- `contact_point_replace`: 1;
+- `contact_relocate`: 1.
+
+The intended computing-aware route mechanism therefore remains active even when
+MEC deployment is denser.
+
+The E=4 paired gains are highly skewed:
+
+- mean strict per-run gain: 0.555%;
+- median strict per-run gain: 0.063%;
+- large gains include 1.430%, 0.973%, 0.838%, and 1.636%.
+
+Thus the mean should not be interpreted as a typical per-instance gain. The
+median shows that many E=4 runs have only small residual room for elite
+structural improvement.
+
+This pattern is consistent with the working hypothesis that denser MEC
+availability weakens Route-Contact-Offloading coupling and reduces the marginal
+value of structural intensification. However, the E=2 conditional mean is based
+on only two strict pairs, so a formal monotone energy-gain claim across E should
+not be made from this sweep alone.
+
+The robust paper-facing conclusion from this experiment is instead:
+
+> Under high task load, sparse MEC deployment strongly increases search/resource
+> difficulty. Adding MEC opportunities progressively restores strict Stage-1
+> feasibility/numerical stability, while the proposed hybrid structural phase
+> continues to produce non-increasing exact energy on strict pairs.
+
+The K=100 MEC-count sensitivity is now considered complete for the frozen
+100-iteration algorithm.
