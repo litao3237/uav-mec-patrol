@@ -2282,3 +2282,46 @@ utilization is therefore not taken from an arbitrary Stage-1 primal allocation.
 
 The unified metric pipeline writes both JSON (full per-run records) and CSV
 (grouped mean/std/median) outputs.
+
+
+## Final workload paper-metrics table: K=50/80/100, M=5, E=2
+
+The unified paper-metrics pipeline has now been run on the workload sweep using
+scenario seeds 45/46/47, algorithm seeds 100/101/102, and the frozen
+100-iteration Hybrid configuration.
+
+Stage-1/discrete metrics use every strict Stage-1 run. Resource/QoS tie-break
+metrics use only runs whose lexicographic Stage-2 status is strict `optimal`.
+
+| K | Stage-1 strict | Stage-2 strict | mean Hybrid energy (J) | mean delay (s) | mean deadline slack (s) | offload ratio | contacts/UAV | route distance (km) | active-MEC BW util. | active-MEC CPU util. | fixed-energy share |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 50 | 9/9 | 8/9 | 167015.350 | 204.607 | 132.680 | 0.080 | 0.533 | 8.655 | 1.000 | 0.441 | 0.992 |
+| 80 | 9/9 | 8/9 | 226768.196 | 217.543 | 123.068 | 0.122 | 1.044 | 11.494 | 1.000 | 0.489 | 0.983 |
+| 100 | 3/9 | 3/9 | 249008.510 | 220.135 | 122.442 | 0.167 | 1.467 | 12.362 | 1.000 | 0.594 | 0.974 |
+
+Two Stage-2 tie-break diagnostics are intentionally excluded from the
+resource/QoS aggregate: K=50/S47/A101 returns Stage-2 `infeasible`, and
+K=80/S47/A100 returns `optimal_inaccurate`. Their strict Stage-1 energy and
+discrete structural metrics remain valid.
+
+For K=100/E=2, only 3/9 runs are strict Stage-1 at the frozen search budget, so
+the K=100 energy/QoS numbers above describe only the strict subset and must not
+be presented as a full nine-run average.
+
+Main trends over the strict data:
+
+- higher workload increases offloading pressure (8.0% -> 12.2% -> 16.7%);
+- contacts/UAV rise from 0.533 to 1.044 and then 1.467;
+- mean route distance rises from 8.655 km to 11.494 km and 12.362 km;
+- active-MEC bandwidth is essentially saturated in every strict resource
+  solution, while mean active-MEC CPU utilization rises from about 44%/49% to
+  59%;
+- the fixed flight+collection energy share falls from 99.2% to 98.3% and 97.4%,
+  while communication/resource-coupled energy becomes more important as load
+  grows.
+
+Thus bandwidth/contact opportunity is a persistent bottleneck in this sparse-MEC
+setting, while MEC CPU headroom remains available on average. The increasing
+offload/contact demand with K supports the paper's focus on
+Route-Contact-Offloading coupling rather than treating communication as a
+post-processing step.
