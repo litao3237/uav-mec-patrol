@@ -2406,3 +2406,51 @@ by E and M.
 This supports the paper's core structural motivation for jointly optimizing
 Route-Contact-Offloading rather than optimizing the route first and treating
 MEC assignment/resource allocation as a post-processing step.
+
+
+## Reduced-scale best-known strong benchmark protocol
+
+The final paper-strengthening benchmark uses a **best-known strong reference**,
+not a claimed global optimum.
+
+After scale scouting, the benchmark is fixed at:
+
+- K=28 tasks, M=2 UAVs, E=2 MECs;
+- original `configs/baseline.yaml` system/task/channel parameters unchanged;
+- scenario seeds 45/46/47;
+- standard Proposed Hybrid: algorithm seeds 100/101/102, 100 iterations,
+  2 elite rounds;
+- strong reference: algorithm seeds 700-711, 1000 iterations, 6 elite rounds;
+- strong elite search uses a larger exact shortlist/task/route-position budget;
+- every candidate reference energy is verified by strict Stage-1 CVX.
+
+For each scenario, the best-known reference is the minimum strict Stage-1 energy
+over the union of the 3 standard runs and 12 strong runs. The reported gap is
+
+[
+100(E_{standard}-E_{best-known})/E_{best-known}.
+]
+
+The benchmark additionally records:
+
+- strict feasibility of all standard and strong runs;
+- the fraction of standard runs within 0.01%, 0.1%, and 1% of the best-known;
+- strong-reference hit rate within 1e-5 relative tolerance;
+- best-known contact/offload structure to ensure the reference is nondegenerate;
+- standard versus strong runtime.
+
+This benchmark is intentionally described as an empirical best-known/strong
+reference. It does **not** certify global optimality.
+
+Scale-scout evidence used to select K=28:
+
+- K=8,M=2: strict but degenerate all-local reference;
+- K=12,M=1: all tested runs fail the optimistic precheck;
+- K=16,M=2: strict but best-known remains all-local;
+- K=24,M=2: some offloaded solutions exist, but the best-known remains all-local;
+- K=28,M=2: strict and best-known strong pilot is nondegenerate
+  (1 contact, 2 offloaded tasks);
+- K=32,M=2: the standard S45/A100 run is CVX-infeasible.
+
+Thus K=28 is the smallest tested baseline-parameter scale that is both
+strict-feasible and nondegenerate under the strong-reference pilot.
