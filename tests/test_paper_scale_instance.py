@@ -217,3 +217,36 @@ def test_spatial_profiles_preserve_baseline_and_task_attribute_stream() -> None:
             assert variant.cycles_per_bit == base_task.cycles_per_bit
             assert variant.collect_s == base_task.collect_s
             assert variant.release_s == base_task.release_s
+
+
+def test_contact_budget_sweep_keeps_instance_realization_fixed() -> None:
+    cfg = load_paper_scale_config()
+    base = build_paper_scale_instance(
+        replace(cfg, max_contacts_per_uav=3),
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+    tight = build_paper_scale_instance(
+        replace(cfg, max_contacts_per_uav=1),
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+    loose = build_paper_scale_instance(
+        replace(cfg, max_contacts_per_uav=4),
+        num_tasks=80,
+        num_uavs=5,
+        num_mecs=2,
+        scenario_seed=45,
+    )
+
+    assert tight.tasks == base.tasks == loose.tasks
+    assert tight.mecs == base.mecs == loose.mecs
+    assert tight.uavs == base.uavs == loose.uavs
+    assert tight.contact_points == base.contact_points == loose.contact_points
+    assert tight.max_contacts_per_uav == 1
+    assert base.max_contacts_per_uav == 3
+    assert loose.max_contacts_per_uav == 4
