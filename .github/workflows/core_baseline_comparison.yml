@@ -23,7 +23,7 @@ jobs:
           python-version: '3.13'
       - name: Install dependencies
         run: uv sync --dev
-      - name: Run core baseline comparison
+      - name: Run core baselines including fixed-route nearest-MEC
         run: >-
           uv run python experiments/run_core_baseline_comparison.py
           --tasks 80
@@ -35,7 +35,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: core-baseline-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          name: core-baseline-nearest-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
           path: outputs/results/baseline_core_K80_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100.json
           if-no-files-found: warn
 
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          pattern: core-baseline-S*-A*
+          pattern: core-baseline-nearest-S*-A*
           path: outputs/results/matrix
           merge-multiple: true
       - name: Aggregate results
@@ -58,5 +58,5 @@ jobs:
       - name: Upload combined result
         uses: actions/upload-artifact@v4
         with:
-          name: core-baseline-K80-E2-matrix
+          name: core-baseline-nearest-K80-E2-matrix
           path: outputs/results/core_baseline_K80_E2_S45-46-47_A100-101-102_I100_matrix.json
