@@ -56,6 +56,13 @@ def _profile_problem_config(base, profile: str):
             base,
             elite_enable_route_compute_relocate=False,
         )
+    if profile == "no-contact":
+        return replace(
+            base,
+            elite_enable_contact_relocate=False,
+            elite_enable_contact_point_replace=False,
+            elite_enable_contact_remove=False,
+        )
     raise ValueError(f"Unknown profile: {profile}")
 
 
@@ -124,7 +131,7 @@ def main() -> None:
     parser.add_argument(
         "--profiles",
         default="full,no-route",
-        help="comma-separated subset of full,no-route",
+        help="paired profiles: full plus one of no-route,no-contact",
     )
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--elite-rounds", type=int, default=2)
@@ -141,15 +148,21 @@ def main() -> None:
         for item in args.profiles.split(",")
         if item.strip()
     ]
-    invalid = set(profiles) - {"full", "no-route"}
+    valid_profiles = {"full", "no-route", "no-contact"}
+    invalid = set(profiles) - valid_profiles
     if invalid:
         raise ValueError(
             f"Unknown profiles: {sorted(invalid)}"
         )
-    if "full" not in profiles or "no-route" not in profiles:
+    ablated_profiles = [
+        profile for profile in profiles if profile != "full"
+    ]
+    if "full" not in profiles or len(ablated_profiles) != 1:
         raise ValueError(
-            "This paired ablation requires both full and no-route."
+            "Paired family ablation requires full plus exactly "
+            "one ablated profile."
         )
+    ablation_profile = ablated_profiles[0]
 
     cfg = load_paper_scale_config(args.config)
     out = (
@@ -173,6 +186,7 @@ def main() -> None:
         "elite_rounds": args.elite_rounds,
         "uavs": args.uavs,
         "shared_exploration": True,
+        "ablation_profile": ablation_profile,
     }
 
     rows: list[dict[str, Any]] = []
@@ -457,20 +471,20 @@ def main() -> None:
             )
         }
         full = by_profile["full"]
-        no_route = by_profile["no-route"]
+        ablated = by_profile[ablation_profile]
         comparable = (
             full["strict_pair"]
-            and no_route["strict_pair"]
+            and ablated["strict_pair"]
             and full["final_energy_j"] is not None
-            and no_route["final_energy_j"] is not None
+            and ablated["final_energy_j"] is not None
         )
         delta_pct = (
             100.0
             * (
-                float(no_route["final_energy_j"])
+                float(ablated["final_energy_j"])
                 - float(full["final_energy_j"])
             )
-            / max(1.0, abs(float(no_route["final_energy_j"])))
+            / max(1.0, abs(float(ablated["final_energy_j"])))
             if comparable
             else None
         )
@@ -481,8 +495,9 @@ def main() -> None:
                 "scenario_seed": scenario_seed,
                 "algorithm_seed": algorithm_seed,
                 "comparable": comparable,
+                "ablation_profile": ablation_profile,
                 "full_energy_j": full["final_energy_j"],
-                "no_route_energy_j": no_route["final_energy_j"],
+                "ablated_energy_j": ablated["final_energy_j"],
                 "full_advantage_pct": delta_pct,
             }
         )
@@ -526,13 +541,13 @@ def main() -> None:
         for row in comparable
         if row["full_advantage_pct"] is not None
     ]
-    print("\nFull vs no-route paired comparison")
+    print(f"\nFull vs {ablation_profile} paired comparison")
     if advantages:
         print(
             f"comparable={len(advantages)}/{len(paired)} "
             f"full-better={sum(v > 1e-9 for v in advantages)} "
             f"equal={sum(abs(v) <= 1e-9 for v in advantages)} "
-            f"no-route-better={sum(v < -1e-9 for v in advantages)} "
+            f"{ablation_profile}-better={sum(v < -1e-9 for v in advantages)} "
             f"mean-full-advantage={mean(advantages):.3f}% "
             f"median-full-advantage={median(advantages):.3f}%"
         )
