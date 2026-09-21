@@ -323,6 +323,38 @@ def main() -> None:
                         "elite_rounds": args.elite_rounds,
                         "base_stage1_status": base_status,
                         "hybrid_stage1_status": final_status,
+                        "base_cvx_solver": result.exploration_cvx.solver,
+                        "hybrid_cvx_solver": result.final_cvx.solver,
+                        "base_stage1_solver": (
+                            result.exploration_cvx.diagnostics.get(
+                                "stage1_solver",
+                                result.exploration_cvx.solver,
+                            )
+                        ),
+                        "hybrid_stage1_solver": (
+                            result.final_cvx.diagnostics.get(
+                                "stage1_solver",
+                                result.final_cvx.solver,
+                            )
+                        ),
+                        "base_stage1_solver_errors": list(
+                            result.exploration_cvx.diagnostics.get(
+                                "stage1_solver_errors",
+                                result.exploration_cvx.diagnostics.get(
+                                    "solver_errors",
+                                    [],
+                                ),
+                            )
+                        ),
+                        "hybrid_stage1_solver_errors": list(
+                            result.final_cvx.diagnostics.get(
+                                "stage1_solver_errors",
+                                result.final_cvx.diagnostics.get(
+                                    "solver_errors",
+                                    [],
+                                ),
+                            )
+                        ),
                         "base_cvx_feasible": (
                             result.exploration_cvx.feasible
                         ),
@@ -479,6 +511,23 @@ def main() -> None:
                     if skipped:
                         print(
                             f"  elite skipped: {skipped}"
+                        )
+                    if base_status != "optimal":
+                        base_diag = result.exploration_cvx.diagnostics
+                        stage1_solver = base_diag.get(
+                            "stage1_solver",
+                            result.exploration_cvx.solver,
+                        )
+                        solver_errors = list(
+                            base_diag.get(
+                                "stage1_solver_errors",
+                                base_diag.get("solver_errors", []),
+                            )
+                        )
+                        print(
+                            "  base CVX diagnostic: "
+                            f"solver={stage1_solver} "
+                            f"errors={solver_errors or '-'}"
                         )
 
     aggregate: list[dict[str, Any]] = []
