@@ -1114,3 +1114,67 @@ uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenari
 The new output additionally reports destroy-repair pair outcomes. The next
 decision should be based on final Stage-1 CVX energy and pair-level BEST/BETTER
 evidence, not on individual operator counts alone.
+
+
+## v0.6.0 third ablation: core still trapped, switch to hybrid exploration + elite intensification
+
+After objective-alignment and pair-level diagnostics, K=80, E=2, scenario
+seed=42, algorithm seeds 100/101/102, 100 iterations produced:
+
+| profile | mean Stage-1 CVX energy (J) | mean runtime (s) | mean screened gray-zone CVX refinements |
+|---|---:|---:|---:|
+| generic | 210810.848 | 61.15 | 25.33 |
+| core | 218614.859 | 80.09 | 49.33 |
+| full | 226440.743 | 84.76 | 56.33 |
+
+One core final state (algorithm seed 102) was `optimal_inaccurate`, so the exact
+core mean should not be treated as a final paper number. The qualitative
+conclusion is nevertheless clear: making contact/mode operators peer members of
+the RouletteWheel still degrades the search on seeds 100/101, increases gray-zone
+CVX calls, and increases runtime.
+
+Pair-level outcomes show that the problem-specific mechanisms are not useless:
+for example, random-task removal paired with contact opportunity or mode/batch
+repair repeatedly produces BEST/BETTER outcomes. The issue is therefore search
+architecture rather than absence of useful local moves.
+
+The next architecture is:
+
+[
+\boxed{
+\text{Generic ALNS exploration}
+\rightarrow
+\text{elite solution}
+\rightarrow
+\text{problem-specific Contact/Mode intensification}
+\rightarrow
+\text{Stage-1 CVX acceptance}
+}
+]
+
+A new `hybrid` profile has been added to the ablation experiment. Its main ALNS
+trajectory is intentionally identical to `generic` for the same random seed.
+Only after the generic search finishes, the best state receives at most two
+rounds of problem-specific contact opportunity and mode/batch intensification.
+
+The elite moves are shortlisted cheaply, but acceptance is based on a cached
+Stage-1 CVX oracle. Therefore an accepted elite move is monotone with respect to
+the actual fixed-discrete P1-R objective, rather than the proxy feasibility
+classification.
+
+This is the cleanest next test because it isolates the real question:
+
+> can problem-specific Contact/Offloading/Batch structure improve the best state
+> found by a strong generic ALNS, without stealing exploration budget from it?
+
+Recommended next experiment:
+
+~~~powershell
+git pull
+uv run pytest
+uv run python experiments\run_operator_ablation.py --tasks 80 --mecs 2 --scenario-seeds 42 --algorithm-seeds 100,101,102 --iterations 100 --profiles generic,hybrid
+~~~
+
+Only if hybrid shows useful improvement/equality with modest extra runtime should
+the contact/mode elite intensification be promoted into the main proposed
+algorithm. Core/full remain diagnostic ablations for now.
