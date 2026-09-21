@@ -399,6 +399,7 @@ def main() -> None:
 
                     row = {
                         "K": k,
+                        "M": len(instance.uavs),
                         "E": e,
                         "scenario_seed": scenario_seed,
                         "algorithm_seed": algorithm_seed,
