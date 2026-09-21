@@ -22,6 +22,29 @@ from uav_mec.instances import (
 )
 
 
+def _compact_list_tag(values: list[int]) -> str:
+    return "-".join(str(value) for value in values)
+
+
+def _default_output_path(
+    *,
+    task_counts: list[int],
+    mec_counts: list[int],
+    scenario_seeds: list[int],
+    algorithm_seeds: list[int],
+    iterations: int,
+) -> Path:
+    name = (
+        "hybrid_validation"
+        f"_K{_compact_list_tag(task_counts)}"
+        f"_E{_compact_list_tag(mec_counts)}"
+        f"_S{_compact_list_tag(scenario_seeds)}"
+        f"_A{_compact_list_tag(algorithm_seeds)}"
+        f"_I{iterations}.json"
+    )
+    return Path("outputs/results") / name
+
+
 def _parse_int_list(text: str) -> list[int]:
     return [
         int(item.strip())
@@ -120,6 +143,15 @@ def main() -> None:
         "--uavs",
         type=int,
         default=None,
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "optional JSON output path; if omitted, a deterministic "
+            "parameterized filename is used so validation runs do not "
+            "overwrite one another"
+        ),
     )
     args = parser.parse_args()
 
@@ -633,13 +665,30 @@ def main() -> None:
                 )
             )
 
-    out = Path(
-        "outputs/results/hybrid_validation.json"
+    out = (
+        Path(args.output)
+        if args.output is not None
+        else _default_output_path(
+            task_counts=task_counts,
+            mec_counts=mec_counts,
+            scenario_seeds=scenario_seeds,
+            algorithm_seeds=algorithm_seeds,
+            iterations=args.iterations,
+        )
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(
             {
+                "experiment": {
+                    "tasks": task_counts,
+                    "mecs": mec_counts,
+                    "scenario_seeds": scenario_seeds,
+                    "algorithm_seeds": algorithm_seeds,
+                    "iterations": args.iterations,
+                    "elite_rounds": args.elite_rounds,
+                    "uavs": args.uavs,
+                },
                 "aggregate": aggregate,
                 "rows": rows,
             },
