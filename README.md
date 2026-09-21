@@ -2244,3 +2244,37 @@ work is distributed over a larger fleet.
 The UAV-count experiment should therefore be presented primarily as a
 feasibility/pressure sensitivity plus a structural-gain sensitivity, rather than
 as a claim that energy decreases monotonically with fleet size for all M.
+
+
+## Final paper metric definitions
+
+The final paper tables use one unified metric extractor so workload, MEC-count,
+UAV-count, and baseline results do not mix incompatible definitions.
+
+For every strict Hybrid solution:
+
+- **UAV energy**: strict Stage-1 CVX optimum, the paper's primary objective;
+- **resource tie-break**: rerun the same final discrete solution with the
+  lexicographic Stage-2 solve, preserving the Stage-1 energy optimum while
+  minimizing normalized MEC CPU occupation;
+- **average delay / deadline slack / cycle and battery utilization**: evaluated
+  from that reproducible lexicographic resource allocation;
+- **offload ratio**: number of MEC-executed tasks divided by K;
+- **contacts/UAV**: total realized contact visits divided by M;
+- **route distance**: total UAV route length including realized contact detours;
+- **route detour**: final route distance relative to the original Greedy route
+  seed for the same task instance;
+- **MEC bandwidth / CPU utilization**: per-MEC allocated capacity fraction, with
+  paper summaries using the mean/max over active MECs;
+- **MEC selection distribution**: offloaded-task and contact counts per MEC;
+- **energy decomposition**: fixed flight+collection, communication/hover, and
+  local-compute shares;
+- **runtime**: ALNS+elite algorithm runtime reported separately from the
+  additional Stage-2 metric-extraction solve.
+
+This distinction is important because Stage-1 MEC CPU allocations can be
+non-unique: MEC CPU is not itself part of the UAV-energy objective. Resource
+utilization is therefore not taken from an arbitrary Stage-1 primal allocation.
+
+The unified metric pipeline writes both JSON (full per-run records) and CSV
+(grouped mean/std/median) outputs.
