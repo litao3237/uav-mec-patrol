@@ -6,10 +6,12 @@ from uav_mec.algorithms import (
     ProxyObjectiveEvaluator,
     ProblemOperatorConfig,
     ScreenedProxyObjectiveEvaluator,
+    Stage1CVXObjectiveOracle,
     UavMecALNSConfig,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
     run_uav_mec_alns,
+    run_uav_mec_hybrid_alns,
 )
 from uav_mec.algorithms.alns import (
     DestroyConfig,
@@ -313,3 +315,55 @@ def test_contact_mode_intensification_is_monotone_for_supplied_objective() -> No
     validate_solution(instance, intensified.solution)
     assert after <= before + 1e-9
     assert stats["rounds"] == 1
+
+
+class _ConstantEliteOracle:
+    def __init__(self, energy_j: float = 123.0) -> None:
+        self.energy_j = energy_j
+        self.calls = 0
+        self.cache_hits = 0
+
+    def solve(self, instance, solution):
+        self.calls += 1
+        return ResourceSolveResult(
+            status="optimal",
+            solver="FAKE",
+            is_dcp=True,
+            energy_stage1_j=self.energy_j,
+            energy_final_j=self.energy_j,
+            stage1_values={"fake": {"x": 1.0}},
+            final_values={"fake": {"x": 1.0}},
+        )
+
+    def __call__(self, instance, solution):
+        return self.solve(
+            instance,
+            solution,
+        ).energy_stage1_j
+
+
+def test_hybrid_runner_uses_generic_exploration_and_nonworsening_elite() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    config = UavMecALNSConfig(
+        iterations=2,
+        seed=19,
+        enable_problem_operators=True,
+    )
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_hybrid_alns(
+        instance,
+        initial_solution=initial,
+        config=config,
+        evaluator=evaluator,
+        elite_rounds=1,
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.exploration_cvx_energy_j == 321.0
+    assert result.final_cvx_energy_j == 321.0
+    assert result.improvement_pct == 0.0
+    assert result.exploration.operator_pair_counts
