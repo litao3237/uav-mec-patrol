@@ -69,6 +69,11 @@ def _profile_problem_config(base, profile: str):
             elite_enable_batch_merge=False,
             elite_enable_batch_split=False,
         )
+    if profile == "no-widening":
+        return replace(
+            base,
+            elite_progressive_widening=False,
+        )
     raise ValueError(f"Unknown profile: {profile}")
 
 
@@ -139,7 +144,7 @@ def main() -> None:
         default="full,no-route",
         help=(
             "paired profiles: full plus one of "
-            "no-route,no-contact,no-batch"
+            "no-route,no-contact,no-batch,no-widening"
         ),
     )
     parser.add_argument("--iterations", type=int, default=100)
@@ -157,7 +162,13 @@ def main() -> None:
         for item in args.profiles.split(",")
         if item.strip()
     ]
-    valid_profiles = {"full", "no-route", "no-contact", "no-batch"}
+    valid_profiles = {
+        "full",
+        "no-route",
+        "no-contact",
+        "no-batch",
+        "no-widening",
+    }
     invalid = set(profiles) - valid_profiles
     if invalid:
         raise ValueError(
