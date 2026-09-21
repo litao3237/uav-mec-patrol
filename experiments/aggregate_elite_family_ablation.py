@@ -61,7 +61,11 @@ def _aggregate(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return groups
 
 
-def _paired(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _paired(
+    rows: list[dict[str, Any]],
+    *,
+    ablation_profile: str,
+) -> list[dict[str, Any]]:
     paired: list[dict[str, Any]] = []
     keys = sorted(
         {
@@ -84,20 +88,20 @@ def _paired(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             and row["algorithm_seed"] == algorithm_seed
         }
         full = by_profile["full"]
-        no_route = by_profile["no-route"]
+        ablated = by_profile[ablation_profile]
         comparable = (
             full["strict_pair"]
-            and no_route["strict_pair"]
+            and ablated["strict_pair"]
             and full["final_energy_j"] is not None
-            and no_route["final_energy_j"] is not None
+            and ablated["final_energy_j"] is not None
         )
         advantage = (
             100.0
             * (
-                float(no_route["final_energy_j"])
+                float(ablated["final_energy_j"])
                 - float(full["final_energy_j"])
             )
-            / max(1.0, abs(float(no_route["final_energy_j"])))
+            / max(1.0, abs(float(ablated["final_energy_j"])))
             if comparable
             else None
         )
@@ -108,8 +112,9 @@ def _paired(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "scenario_seed": scenario_seed,
                 "algorithm_seed": algorithm_seed,
                 "comparable": comparable,
+                "ablation_profile": ablation_profile,
                 "full_energy_j": full["final_energy_j"],
-                "no_route_energy_j": no_route["final_energy_j"],
+                "ablated_energy_j": ablated["final_energy_j"],
                 "full_advantage_pct": advantage,
             }
         )
@@ -127,8 +132,22 @@ def main() -> None:
     input_dir = Path(args.input_dir)
     output = Path(args.output)
     rows, experiments = _load_rows(input_dir)
+    profiles = sorted({row["profile"] for row in rows})
+    ablated_profiles = [
+        profile for profile in profiles if profile != "full"
+    ]
+    if "full" not in profiles or len(ablated_profiles) != 1:
+        raise ValueError(
+            "Expected full plus exactly one ablated profile, got "
+            f"{profiles}"
+        )
+    ablation_profile = ablated_profiles[0]
+
     aggregate = _aggregate(rows)
-    paired = _paired(rows)
+    paired = _paired(
+        rows,
+        ablation_profile=ablation_profile,
+    )
 
     advantages = [
         float(row["full_advantage_pct"])
@@ -141,7 +160,8 @@ def main() -> None:
         "total_pairs": len(paired),
         "full_better": sum(value > 1e-9 for value in advantages),
         "equal": sum(abs(value) <= 1e-9 for value in advantages),
-        "no_route_better": sum(value < -1e-9 for value in advantages),
+        "ablation_profile": ablation_profile,
+        "ablated_better": sum(value < -1e-9 for value in advantages),
         "mean_full_advantage_pct": mean(advantages) if advantages else None,
         "median_full_advantage_pct": median(advantages) if advantages else None,
     }
