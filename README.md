@@ -17,6 +17,8 @@
 当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
+**当前阶段：主算法冻结，进入消融与主实验阶段。**
+
 ---
 
 # 1. 研究目标
@@ -107,7 +109,7 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \min_{\mathbf R}E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \]
 
-目标算法结构：
+当前冻结的论文主算法结构：
 
 \[
 \boxed{
@@ -115,22 +117,28 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \rightarrow
 \text{MEC Contact/Offloading Repair}
 \rightarrow
-\text{Problem-Specific ALNS}
+\text{Generic ALNS Exploration}
 \rightarrow
-\text{Precheck/Proxy Screening}
+\text{Elite Structural Intensification}
 \rightarrow
-\text{Elite/Gray-zone CVX Refinement}
+\text{Strict Stage-1 CVX Acceptance}
 }
 \]
+
+其中外层 Generic ALNS 使用 screened proxy 进行高效搜索；问题特定的
+Route/Contact/Offloading/Batch 结构不再作为 RouletteWheel 的同级算子抢占
+探索预算，而是在 generic elite 上进行小规模、精确接受的结构强化。
 
 角色说明：
 
 - **Greedy**：主要是初始解构造器，也可作为 Greedy-only baseline；
 - **VRP**：描述路径子问题结构，不是一种具体算法；
-- **ALNS**：外层主元启发式；
-- **ACO / GA**：可作为独立的元启发式 baseline；
-- **CVXPY / Convex**：固定离散解后的 Stage-1 correctness oracle 与 elite/final refinement；
-- **KKT**：保留用于解析结构、闭式资源关系、dual/shadow-price 分析与小规模验证，不再作为 paper-scale 每个 ALNS candidate 的默认评价器；
+- **ALNS**：外层主元启发式；当前论文主线采用 Generic ALNS exploration；
+- **Elite structural intensification**：在 generic best state 上执行 route-compute relocation、contact relocation/replacement/removal、batch merge/split/new-contact、mode/batch reassignment，并由严格 Stage-1 CVX 单调接受；
+- **ACO / GA / VRP heuristic**：仅作为后续独立 baseline 候选，不属于 Proposed Algorithm；
+- **CVXPY / Convex**：固定离散解后的 Stage-1 correctness oracle，也是 elite/final paper-facing 能耗的严格验证器；
+- **KKT**：连续资源子问题 P1-R 的已实现解析/数值求解层；用于闭式资源关系、dual/shadow-price 分析、小规模交叉验证和 fast resource approximation。paper-scale primal recovery 尚未完全稳定，因此当前不替代 CVXPY correctness oracle；
+- **Dual-guided ALNS**：属于可选增强，不是当前冻结主算法的必需组成；只有在 paper-scale dual certificate 足够稳定且消融有收益时才考虑加入；
 - **Chaos perturbation**：当前不加入，只有在初始化敏感性实验表明确有收益时再考虑。
 
 ---
@@ -415,128 +423,172 @@ runtime                 = 1.44 s
 
 ---
 
-## M6. Problem-Specific ALNS Operators
+## M6. Frozen Proposed Hybrid ALNS
 
-v0.6.0 已进入论文核心算法实现阶段。当前实现采用“问题特定 destroy + repair/intensification”方式，把路径、接触、卸载模式和 batch 结构直接嵌入 ALNS neighborhood。
+当前论文主算法已经冻结为：
 
-### Route
+\[
+\boxed{
+\text{Generic ALNS Exploration}
+\rightarrow
+\text{Problem-Specific Elite Structural Intensification}
+\rightarrow
+\text{Strict Stage-1 CVX Monotone Acceptance}
+}
+\]
 
-- [ ] **[TODO]** standalone relocate；
-- [ ] **[TODO]** swap；
-- [ ] **[TODO]** inter-route segment exchange；
-- [ ] **[VERIFY]** compute-aware insertion / relocate：基于 optimistic local-FIFO deadline pressure 选择跨 UAV/跨位置插入；
-- [ ] **[VERIFY]** deadline-critical route repair：critical removal + compute-aware insertion + MEC repair 联动。
+### Generic exploration
 
-### Contact
+- [x] random task removal；
+- [x] critical task removal；
+- [x] route-segment removal；
+- [x] cheapest insertion + MEC repair；
+- [x] regret-2 insertion + MEC repair；
+- [x] RouletteWheel adaptive selection；
+- [x] Record-to-Record Travel acceptance；
+- [x] ScreenedProxyObjectiveEvaluator；
+- [x] optimistic precheck hard reject；
+- [x] gray-zone Stage-1 CVX refinement。
 
-- [ ] **[TODO]** standalone contact insert operator；
-- [ ] **[VERIFY]** orphan contact remove：Mode/Batch reassignment 后自动清理；
-- [ ] **[VERIFY]** contact replace：保留 batch，替换 contact point；
-- [ ] **[VERIFY]** candidate-point shift：同 MEC 内候选点移动；
-- [ ] **[VERIFY]** cross-MEC contact replacement：同一 batch 可通过接触点替换切换 MEC；
-- [ ] **[TODO]** repeated same-MEC restructuring。
+### Elite structural neighborhood
 
-### Batch / Mode
+- [x] route-compute relocation；
+- [x] contact relocation；
+- [x] contact-point / cross-MEC replacement；
+- [x] contact removal；
+- [x] batch merge；
+- [x] batch split / new contact；
+- [x] task-level Local/MEC / batch reassignment；
+- [x] diversity-preserving family shortlist；
+- [x] exact positive near-miss progressive widening；
+- [x] meaningful improvement threshold；
+- [x] strict Stage-1 CVX acceptance；
+- [x] `optimal_inaccurate` candidate rejection。
 
-- [ ] **[VERIFY]** Local→MEC：重分配到同 UAV 后续已有 contact；
-- [ ] **[VERIFY]** MEC→Local；
-- [ ] **[VERIFY]** MEC / contact reassignment；
-- [ ] **[TODO]** explicit batch split operator；
-- [ ] **[TODO]** explicit batch merge operator；
-- [ ] **[VERIFY]** task-level batch reassign；
-- [ ] **[VERIFY]** MEC-batch pressure destroy；
-- [ ] **[VERIFY]** shared-MEC pressure destroy。
+多组 K=50/80/100 实验中，`route_compute_relocate` 持续是最主要的有效
+结构操作，因此下一阶段优先做该 family 的消融，而不是继续增加新算子。
 
-### Resource-aware
+### 不再作为主算法必需项的旧候选
 
-- [ ] **[TODO]** deadline dual \(\alpha_k\) guided repair；
-- [ ] **[TODO]** avg-delay dual \(\beta\) guided repair；
-- [ ] **[TODO]** bandwidth shadow price \(\lambda_e^B\)；
-- [ ] **[TODO]** MEC CPU shadow price \(\lambda_e^F\)；
-- [ ] **[VERIFY]** congestion-aware destroy：按 shared UAV-MEC pair 数优先破坏拥塞 MEC；
-- [ ] **[TODO]** dual-aware candidate pruning。
+以下模块保留为研究候选或 baseline，不再视为“主算法没写完”：
 
-### Ablation switch
+- standalone swap / inter-route segment exchange；
+- peer-level problem-specific RouletteWheel profiles（core/full 已被消融证明弱于 generic exploration）；
+- 独立 route/contact/mode local-search loop；
+- repeated same-MEC restructuring；
+- chaos initialization。
 
-`UavMecALNSConfig.enable_problem_operators` 默认开启。关闭后只保留 generic random/critical/segment destroy + cheapest/regret repair，可直接作为问题特定算子的消融基线。
+### KKT 与 dual guidance
+
+KKT **属于已实现的连续资源层**，不是被删除的模块：
+
+- [x] UAV CPU cube-root KKT；
+- [x] MEC CPU square-root KKT；
+- [x] bandwidth dual price + bisection；
+- [x] temporal/event-graph shadow-price propagation；
+- [x] stationarity/primal/dual/complementarity diagnostics；
+- [x] 小规模 KKT-CVX 高精度交叉验证；
+- [x] paper-scale feasible-seed fallback；
+- [ ] **[VERIFY]** paper-scale primal recovery / 收敛稳定性；
+- [ ] **[OPTIONAL]** dual-guided ALNS operators，仅在可靠 dual certificate 和消融收益同时成立后加入。
+
+当前论文定位：
+
+\[
+\boxed{
+\text{KKT = resource analytical solver / structural analysis}
+}
+\]
+
+\[
+\boxed{
+\text{CVXPY Stage-1 = paper-scale correctness oracle}
+}
+\]
 
 ---
 
-## M7. Local Search
+## M7. Algorithm Validation / Ablation
 
-- [ ] **[TODO]** route-only local search；
-- [ ] **[TODO]** contact-only local search；
-- [ ] **[TODO]** mode local search；
-- [ ] **[TODO]** mixed neighborhood；
-- [ ] **[TODO]** intensification after ALNS repair。
+当前重点从“继续开发主算法”切换为“证明主算法为何有效”。
+
+- [x] Generic ALNS vs peer-level core/full problem operators；
+- [x] Generic ALNS vs Hybrid elite intensification；
+- [x] shortlist widening / diversity / progressive widening 诊断；
+- [x] K=80,E=2 out-of-sample paired validation；
+- [x] K=50/80/100 workload sensitivity（E=2）；
+- [x] K=100 MEC-count sensitivity（E=2/3/4）；
+- [ ] **[NEXT]** Full Hybrid vs **w/o route-compute relocation**；
+- [ ] **[TODO]** w/o contact family；
+- [ ] **[TODO]** w/o batch family；
+- [ ] **[TODO]** w/o progressive widening；
+- [ ] **[OPTIONAL]** w/o adaptive ALNS selection。
 
 ---
 
 ## M8. Baselines
 
-- [ ] **[TODO]** Greedy-only；
-- [ ] **[TODO]** Local-only；
+主算法已经具备独立运行能力，剩余工作是构建论文对照组：
+
+- [ ] **[TODO]** Greedy + MEC repair；
+- [x] Generic ALNS（天然 baseline）；
 - [ ] **[TODO]** Route-only + resource allocation；
-- [ ] **[TODO]** nearest-MEC；
-- [ ] **[TODO]** mature VRP baseline（优先考虑 PyVRP）；
-- [ ] **[TODO]** ACO 或 GA 中至少一个；
-- [ ] **[TODO]** Proposed ALNS + KKT。
+- [ ] **[TODO]** nearest-MEC / nearest-contact heuristic；
+- [ ] **[TODO]** ACO 或 GA 至少一个独立元启发式 baseline；
+- [ ] **[OPTIONAL]** mature VRP baseline（如 PyVRP，需保证与计算/接触约束的比较公平）；
+- [x] Proposed Hybrid ALNS + exact Stage-1 resource verification。
 
 ---
 
 ## M9. Small Exact / Strong Benchmark
 
-- [ ] **[TODO]** \(K=8\sim12\) exact/near-exact benchmark；
-- [ ] **[TODO]** Gurobi / SCIP / GBD feasibility；
-- [ ] **[TODO]** optimality-gap comparison。
+- [ ] **[TODO]** K=8~12 exact / near-exact benchmark；
+- [ ] **[TODO]** 评估 SCIP / Gurobi / enumeration / decomposition 的可行实现；
+- [ ] **[TODO]** Proposed Algorithm 对 best-known 的 optimality gap。
 
 ---
 
-## M10. Non-degeneracy / Parameter Calibration
+## M10. Parameter / Non-degeneracy Validation
 
-- [ ] **[TODO]** Local-only feasibility；
+已完成主要 non-degeneracy 诊断：
+
+- [x] workload / route / deadline / avg-delay / cycle 检查；
+- [x] shared-MEC competition sweep；
+- [x] bandwidth/CPU dual 活跃性检查；
+- [x] proxy vs CVX ranking / gap 验证；
+- [x] 高负载 feasibility robustness scan；
+- [x] E=2/3/4 fixed-infrastructure sensitivity；
+- [x] MEC-count sweep task-instance invariance regression test。
+
+论文最终表格仍需整理：
+
 - [ ] **[TODO]** offload ratio；
-- [ ] **[TODO]** deadline utilization；
-- [ ] **[TODO]** avg-delay utilization；
-- [ ] **[TODO]** cycle utilization；
-- [ ] **[TODO]** battery utilization；
-- [ ] **[TODO]** MEC bandwidth / CPU utilization；
 - [ ] **[TODO]** contacts/UAV；
 - [ ] **[TODO]** MEC selection distribution；
-- [ ] **[TODO]** route detour caused by contacts；
-- [ ] **[TODO]** nearest-MEC vs resource-aware MEC；
-- [ ] **[TODO]** final cycle/deadline/avg-delay calibration。
+- [ ] **[TODO]** route detour；
+- [ ] **[TODO]** deadline slack / utilization；
+- [ ] **[TODO]** bandwidth / CPU utilization；
+- [ ] **[TODO]** runtime / convergence。
 
 ---
 
-## M11. Main Experiments
+## M11. Main Paper Experiments
 
-### Scale
+### 已形成的主实验骨架
 
-- [ ] **[TODO]** \(K=30,50,80,100\)；
-- [ ] **[TODO]** \(M=3,5,8\)；
-- [ ] **[TODO]** \(E=2,3,4\)。
+- [x] K=50/80/100 workload behavior；
+- [x] K=100, E=2/3/4 MEC-count sensitivity；
+- [x] multi-scenario / multi-algorithm-seed paired hybrid validation；
+- [x] strict-optimal filtering 和 solver-status reporting。
 
-### Metrics
+### 尚需完成
 
-- [ ] **[TODO]** total UAV energy；
-- [ ] **[TODO]** average delay；
-- [ ] **[TODO]** deadline slack；
-- [ ] **[TODO]** route distance；
-- [ ] **[TODO]** contacts；
-- [ ] **[TODO]** offload ratio；
-- [ ] **[TODO]** runtime；
-- [ ] **[TODO]** convergence；
-- [ ] **[TODO]** feasibility rate。
-
-### Ablation
-
-- [ ] **[TODO]** without contact-specific operators；
-- [ ] **[TODO]** without batch-aware repair；
-- [ ] **[TODO]** without dual guidance；
-- [ ] **[TODO]** without adaptive operator selection；
-- [ ] **[TODO]** Greedy vs random initialization；
-- [ ] **[OPTIONAL]** chaos initialization。
+- [ ] **[NEXT]** 核心 family ablation；
+- [ ] **[TODO]** baseline comparison；
+- [ ] **[TODO]** UAV 数量 M=3/5/8 sensitivity；
+- [ ] **[TODO]** 小规模 exact/near-exact benchmark；
+- [ ] **[TODO]** 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
+- [ ] **[TODO]** 最终绘图、统计与论文表格。
 
 ---
 
@@ -662,38 +714,32 @@ uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --object
 
 # 6. 当前最高优先级任务
 
-resource/evaluator 与 non-degeneracy 阶段已基本冻结，当前最高优先级切换为 **M6 Problem-Specific ALNS Operators 的正确性与消融验证**。
+主算法结构已经冻结，当前不再以“增加更多算子”为目标。
 
-执行顺序：
+优先级：
 
-1. [x] K=30/50 MEC repair 已恢复为 proxy-feasible，KKT 正确保留 feasible_seed；
-2. [x] K=30, seed=42 已完成 CVXPY oracle check，gap = 0.168%；
-3. [x] recourse gap scan 已覆盖多个 scenario seed；
-4. [x] gap scan 已覆盖 repaired 与 proxy-ALNS-best 状态；
-5. [x] 当前 6 个状态 mean gap = 0.173%，max gap = 0.274%；
-6. [x] 新版 gap scan 已确认 6/6 Stage-1 status = optimal；
-7. [x] proxy ranking scan：18 个候选，mean gap = 0.192%，max gap = 0.274%，mean Spearman = 1.0，mean pairwise order = 1.0；
-8. [x] 首轮 non-degeneracy scan 已完成：fixed-route energy 平均占比 99.72%，资源层主要影响 variable energy 与 QoS；
-9. [x] deadline / avg-delay / cycle / bandwidth / MEC CPU utilization 已完成首轮检查；
-10. [x] K=30 新版 non-degeneracy scan：shared MEC = 0/6，max pairs/MEC = 1；
-11. [x] shared-MEC scale sweep 已覆盖 K=30/50/80 与 E=2/3；
-12. [x] K=30：shared-state rate = 0%，属于轻载/无跨 UAV MEC 竞争；
-13. [x] K=50：shared-state rate = 16.7%，属于过渡负载；
-14. [x] K=80：E=2 与 E=3 均为 shared-state rate = 100%，max pairs/MEC = 4，资源竞争自然出现；
-15. [x] 当前 baseline 无需为了制造 shared MEC 而修改 deadline/B/F 等参数；
-16. [ ] **[VERIFY]** 对 K=80, E=2/3 的 shared-MEC 状态重跑新版 CVX non-degeneracy；
-17. [ ] **[VERIFY]** 新版脚本必须显示全部 6 个候选状态；旧版会静默跳过 CVX non-feasible 行，因此旧聚合值只覆盖打印出来的可行子集；
-18. [ ] **[VERIFY]** 检查 shared-MEC 本身对应的 bandwidth/CPU capacity dual 是否真正活跃，而不是只统计任意 MEC 的 active dual；
-19. [ ] **[TODO]** 参数只允许基于 non-degeneracy 与文献/物理依据校准，不通过任意权重放大资源能耗；
-20. [ ] **[TODO]** 完成后冻结 fast proxy outer search + elite/final CVX refinement；
-21. [ ] **[TODO]** 随后进入 Contact / Batch / resource-aware ALNS operators。
+1. [x] 完成 Hybrid 主算法与严格 CVX acceptance；
+2. [x] 完成 K=100,E=2/3/4 高负载 MEC-count sensitivity；
+3. [ ] **[NEXT]** `w/o route_compute_relocate` 核心消融；
+4. [ ] **[TODO]** contact / batch / progressive-widening 消融；
+5. [ ] **[TODO]** Greedy / nearest-MEC / route-only / ACO-or-GA baselines；
+6. [ ] **[TODO]** K=8~12 strong benchmark；
+7. [ ] **[TODO]** M=3/5/8 sensitivity 与最终指标汇总；
+8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
 
-暂时**不建议**运行长时间 exact-KKT ALNS。当前最需要回答的问题是：
+当前原则：
 
 \[
 \boxed{
-\text{paper-scale fixed } \mathbf D
-\text{ 下，KKT recourse 能否稳定恢复接近 CVX optimum 的 primal 解}
+\text{Freeze Proposed Algorithm}
+\rightarrow
+\text{Ablation}
+\rightarrow
+\text{Baselines}
+\rightarrow
+\text{Scale/Sensitivity}
+\rightarrow
+\text{Final Paper Tables}
 }
 \]
 
