@@ -63,6 +63,12 @@ def _profile_problem_config(base, profile: str):
             elite_enable_contact_point_replace=False,
             elite_enable_contact_remove=False,
         )
+    if profile == "no-batch":
+        return replace(
+            base,
+            elite_enable_batch_merge=False,
+            elite_enable_batch_split=False,
+        )
     raise ValueError(f"Unknown profile: {profile}")
 
 
@@ -131,7 +137,10 @@ def main() -> None:
     parser.add_argument(
         "--profiles",
         default="full,no-route",
-        help="paired profiles: full plus one of no-route,no-contact",
+        help=(
+            "paired profiles: full plus one of "
+            "no-route,no-contact,no-batch"
+        ),
     )
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--elite-rounds", type=int, default=2)
@@ -148,7 +157,7 @@ def main() -> None:
         for item in args.profiles.split(",")
         if item.strip()
     ]
-    valid_profiles = {"full", "no-route", "no-contact"}
+    valid_profiles = {"full", "no-route", "no-contact", "no-batch"}
     invalid = set(profiles) - valid_profiles
     if invalid:
         raise ValueError(
