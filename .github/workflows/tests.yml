@@ -30,5 +30,6 @@ jobs:
           experiments/aggregate_paper_metrics.py
           experiments/run_small_strong_benchmark.py
           experiments/aggregate_small_strong_benchmark.py
+          experiments/aggregate_mec_environment_sensitivity.py
       - name: Run tests
         run: uv run pytest
