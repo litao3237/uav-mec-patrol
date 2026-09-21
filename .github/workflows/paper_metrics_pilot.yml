@@ -1,0 +1,44 @@
+name: paper-metrics-pilot
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/paper_metrics_pilot.yml'
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run one paper-metrics validation
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks 50
+          --mecs 2
+          --uavs 5
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --iterations 100
+          --paper-metrics
+          --output outputs/results/paper_metrics_pilot_K50_M5_E2_S45_A100_I100.json
+      - name: Aggregate pilot metrics
+        run: >-
+          python experiments/aggregate_paper_metrics.py
+          --input-dir outputs/results
+          --output-json outputs/results/paper_metrics_pilot_aggregate.json
+          --output-csv outputs/results/paper_metrics_pilot_aggregate.csv
+      - name: Upload pilot metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-metrics-pilot
+          path: |
+            outputs/results/paper_metrics_pilot_K50_M5_E2_S45_A100_I100.json
+            outputs/results/paper_metrics_pilot_aggregate.json
+            outputs/results/paper_metrics_pilot_aggregate.csv
