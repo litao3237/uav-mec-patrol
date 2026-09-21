@@ -95,6 +95,30 @@ def _print_operator_summary(
                 f"rejected={values['rejected']}"
             )
 
+def _print_pair_summary(
+    pair_counts: dict[str, list[int]],
+    *,
+    limit: int = 10,
+) -> None:
+    ranked = sorted(
+        pair_counts.items(),
+        key=lambda item: (
+            -item[1][0],
+            -item[1][1],
+            -item[1][2],
+            item[1][3],
+            item[0],
+        ),
+    )
+    print("  Destroy-repair pair outcomes")
+    for name, values in ranked[:limit]:
+        print(
+            f"    {name}: uses={sum(values)} "
+            f"best={values[0]} better={values[1]} "
+            f"accepted={values[2]} rejected={values[3]}"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -234,6 +258,9 @@ def main() -> None:
                             "operator_counts": _operator_counts(
                                 result.raw_result
                             ),
+                            "operator_pair_counts": (
+                                result.operator_pair_counts
+                            ),
                         }
                         rows.append(row)
 
@@ -260,6 +287,9 @@ def main() -> None:
                         _print_operator_summary(
                             mode,
                             result.raw_result,
+                        )
+                        _print_pair_summary(
+                            result.operator_pair_counts,
                         )
 
     aggregate: list[dict[str, Any]] = []
