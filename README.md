@@ -587,7 +587,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] baseline comparison；
 - [x] UAV 数量 M=3/5/8 sensitivity：M=3 当前预算 0/9 strict，M=5/8 均 9/9 strict；M=8 Hybrid 6 better / 3 equal / 0 worse；
 - [ ] **[TODO]** 小规模 exact/near-exact benchmark；
-- [ ] **[TODO]** 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
+- [x] 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
 - [ ] **[TODO]** 最终绘图、统计与论文表格。
 
 ---
@@ -734,7 +734,7 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 4. [x] contact / batch / progressive-widening 消融；
 5. [x] Greedy / FR-NM / Generic ALNS / Route-GA / Proposed Hybrid baselines；
 6. [ ] **[TODO]** K=8~12 strong benchmark；
-7. [x] M=3/5/8 sensitivity；[ ] **[NEXT]** 最终指标汇总；
+7. [x] M=3/5/8 sensitivity 与最终指标汇总；
 8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
 
 当前原则：
@@ -2325,3 +2325,84 @@ setting, while MEC CPU headroom remains available on average. The increasing
 offload/contact demand with K supports the paper's focus on
 Route-Contact-Offloading coupling rather than treating communication as a
 post-processing step.
+
+
+## Final MEC-count paper-metrics table: K=100, M=5, E=2/3/4
+
+The unified metric pipeline was run with K=100, M=5, scenario seeds 45/46/47,
+algorithm seeds 100/101/102, and the frozen 100-iteration Hybrid configuration.
+
+| E | Stage-1 strict | Stage-2 strict | mean Hybrid energy (J) | mean delay (s) | mean deadline slack (s) | offload ratio | contacts/UAV | route distance (km) | active-MEC BW util. | active-MEC CPU util. | fixed-energy share |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 3/9 | 3/9 | 249008.510 | 220.135 | 122.442 | 0.167 | 1.467 | 12.362 | 1.000 | 0.594 | 0.974 |
+| 3 | 8/9 | 5/8 | 248254.117 | 227.245 | 114.610 | 0.202 | 1.440 | 12.490 | 1.000 | 0.475 | 0.976 |
+| 4 | 8/9 | 5/8 | 249309.489 | 227.642 | 113.393 | 0.208 | 1.600 | 12.469 | 1.000 | 0.378 | 0.978 |
+
+The principal effect of increasing E is improved search/resource feasibility:
+strict Stage-1 coverage rises from 3/9 at E=2 to 8/9 at E=3 and E=4. However,
+mean energy over the available strict subsets is not monotone in E and should
+not be interpreted as evidence that simply deploying more MECs always reduces
+UAV energy.
+
+The resource picture is more informative: offload ratio rises from 16.7% to
+about 20%, while mean active-MEC CPU utilization falls from 59.4% to 47.5% and
+37.8%. Active-MEC bandwidth remains essentially saturated, indicating that
+additional MEC sites primarily improve contact/resource availability and spread
+CPU load rather than eliminating the communication bottleneck.
+
+The Stage-2 strict subset is smaller for E=3 and E=4 (5/8 each); Stage-2
+non-strict runs remain valid for Stage-1 energy and discrete structural metrics
+but are excluded from delay/slack/BW/CPU tie-break averages.
+
+## Final UAV-count paper-metrics table: K=80, E=2, M=3/5/8
+
+The same unified metric pipeline was run with K=80, E=2 and M in {3,5,8}.
+
+| M | Stage-1 strict | Stage-2 strict | mean Hybrid energy (J) | mean delay (s) | mean deadline slack (s) | offload ratio | contacts/UAV | route distance (km) | active-MEC BW util. | active-MEC CPU util. | fixed-energy share |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 3 | 0/9 | 0/9 | - | - | - | - | - | - | - | - | - |
+| 5 | 9/9 | 8/9 | 226768.196 | 217.543 | 123.068 | 0.125 | 1.050 | 11.498 | 1.000 | 0.489 | 0.983 |
+| 8 | 9/9 | 8/9 | 224480.040 | 211.067 | 129.545 | 0.125 | 0.641 | 11.363 | 1.000 | 0.639 | 0.985 |
+
+At M=3, the frozen 100-iteration search does not recover a strict-feasible
+discrete structure in any of the 9 runs. This is a search/feasibility-robustness
+result, not a global proof that the mathematical M=3 problem is infeasible.
+
+Increasing M from 5 to 8 preserves a 9/9 strict rate and reduces mean Hybrid
+energy by about 1.01%. Mean delay also drops by about 6.48 s and mean deadline
+slack increases by about 6.48 s. The offload ratio stays near 12.5%, but
+contacts/UAV falls from 1.050 to 0.641 and total route distance falls slightly
+from 11.498 km to 11.363 km.
+
+Interestingly, mean active-MEC CPU utilization increases from 48.9% to 63.9%
+when M rises from 5 to 8 even though per-UAV contact burden falls. This is
+consistent with more UAVs being able to deliver offloaded batches earlier and
+more concurrently, while bandwidth remains saturated. Therefore M primarily
+changes route/service pressure and the temporal pattern of MEC demand rather
+than the overall offload fraction.
+
+## Unified interpretation of the three main sensitivity experiments
+
+The final paper-facing sensitivity evidence is now organized around three
+orthogonal system dimensions:
+
+1. **Workload K (50/80/100):** higher K increases energy, offload ratio,
+   contact frequency, route length, and MEC CPU pressure; strict feasibility
+   degrades at K=100/E=2.
+2. **MEC count E (2/3/4):** more MECs substantially improve strict feasibility
+   at K=100, distribute CPU load, and raise achievable offloading, but do not
+   yield a monotone energy trend over the strict subsets.
+3. **UAV count M (3/5/8):** too few UAVs make strict structures difficult to
+   recover under the frozen budget; increasing M to 5/8 restores robust
+   feasibility and modestly reduces energy/latency, while spreading contact
+   burden across the fleet.
+
+Across all strict resource solutions, active-MEC bandwidth is consistently near
+full utilization. This is the clearest recurring systems result: in the current
+sparse intermittent-MEC setting, communication/contact opportunity is the
+persistent bottleneck, whereas MEC CPU has more headroom and is redistributed
+by E and M.
+
+This supports the paper's core structural motivation for jointly optimizing
+Route-Contact-Offloading rather than optimizing the route first and treating
+MEC assignment/resource allocation as a post-processing step.
