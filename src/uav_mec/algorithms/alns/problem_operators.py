@@ -80,9 +80,15 @@ def _proxy_precheck_key(
 def _visit_pressure(
     state: UavMecState,
     visit_id: str,
+    *,
+    info=None,
+    proxy=None,
 ) -> tuple[float, float, int, str]:
-    info = build_event_info(state.instance, state.solution)
-    proxy = evaluate_initial_proxy(state.instance, state.solution)
+    info = info or build_event_info(state.instance, state.solution)
+    proxy = proxy or evaluate_initial_proxy(
+        state.instance,
+        state.solution,
+    )
     batch = info.batch_tasks.get(visit_id, [])
     if not batch:
         return (0.0, 0.0, 0, visit_id)
@@ -127,16 +133,21 @@ def mec_batch_pressure_removal(
             config=config,
         )
 
+    proxy = evaluate_initial_proxy(current.instance, current.solution)
     ranked = sorted(
         visits,
-        key=lambda visit_id: _visit_pressure(current, visit_id),
+        key=lambda visit_id: _visit_pressure(
+            current,
+            visit_id,
+            info=info,
+            proxy=proxy,
+        ),
         reverse=True,
     )
     pool = ranked[: min(problem.contact_target_pool, len(ranked))]
     visit_id = str(rng.choice(pool))
     batch = list(info.batch_tasks[visit_id])
 
-    proxy = evaluate_initial_proxy(current.instance, current.solution)
     batch.sort(
         key=lambda task_id: (
             proxy.reduced.deadline_violation_s[task_id]
@@ -289,9 +300,16 @@ def _best_contact_opportunity_move(
     if not state.solution.contact_visits:
         return deepcopy(state.solution)
 
+    info = build_event_info(state.instance, state.solution)
+    proxy = evaluate_initial_proxy(state.instance, state.solution)
     ranked_visits = sorted(
         state.solution.contact_visits,
-        key=lambda visit_id: _visit_pressure(state, visit_id),
+        key=lambda visit_id: _visit_pressure(
+            state,
+            visit_id,
+            info=info,
+            proxy=proxy,
+        ),
         reverse=True,
     )
     ranked_visits = ranked_visits[: config.contact_target_pool]
@@ -507,7 +525,7 @@ def _compute_pressure_for_option(
             )
             if is_local:
                 local_finish = (
-                    max(elapsed, local_finish)
+                    max(elapsed, task.release_s, local_finish)
                     + task.workload_gcycles
                     / instance.uavs[option.uav_id].local_cpu_ghz
                 )
