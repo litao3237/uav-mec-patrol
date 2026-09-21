@@ -116,6 +116,10 @@ def test_short_external_alns_run_returns_valid_best_state() -> None:
 
     validate_solution(instance, result.best_solution)
     assert result.best_objective <= result.initial_objective + 1e-9
+    assert sum(
+        sum(values)
+        for values in result.operator_pair_counts.values()
+    ) == config.iterations
 
 
 def test_destroy_operator_factories_preserve_function_names() -> None:
