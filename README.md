@@ -532,9 +532,9 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 - [x] Greedy + MEC repair：K=80,E=2 下 0/3 unique scenarios strict-feasible，仅作为初始化/可行性恢复 baseline；
 - [x] Generic ALNS：9/9 strict；Hybrid paired 8 better / 1 equal / 0 worse，mean advantage 1.378%；
-- [ ] **[TODO]** Route-only + resource allocation；
-- [ ] **[TODO]** nearest-MEC / nearest-contact heuristic；
-- [ ] **[TODO]** ACO 或 GA 至少一个独立元启发式 baseline；
+- [x] Fixed-route decomposition baseline：FR-NM（fixed route + nearest MEC + exact resource verification）；
+- [x] nearest-MEC / nearest-contact heuristic：FR-NM；
+- [x] Route-GA + deterministic MEC repair 独立元启发式 baseline；
 - [ ] **[OPTIONAL]** mature VRP baseline（如 PyVRP，需保证与计算/接触约束的比较公平）；
 - [x] Proposed Hybrid ALNS + exact Stage-1 resource verification。
 
@@ -583,9 +583,9 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 ### 尚需完成
 
-- [ ] **[NEXT]** 核心 family ablation；
-- [ ] **[TODO]** baseline comparison；
-- [ ] **[TODO]** UAV 数量 M=3/5/8 sensitivity；
+- [x] 核心 family ablation；
+- [x] baseline comparison；
+- [ ] **[NEXT]** UAV 数量 M=3/5/8 sensitivity（K=80,E=2 正式 3x3 matrix 已启动）；
 - [ ] **[TODO]** 小规模 exact/near-exact benchmark；
 - [ ] **[TODO]** 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
 - [ ] **[TODO]** 最终绘图、统计与论文表格。
