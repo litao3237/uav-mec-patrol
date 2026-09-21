@@ -20,6 +20,7 @@ from uav_mec.algorithms.alns import (
 )
 from uav_mec.algorithms.alns.problem_operators import (
     compute_aware_insertion_repair,
+    contact_mode_intensification,
     contact_opportunity_repair,
     make_problem_destroy_operators,
     make_problem_repair_operators,
@@ -286,3 +287,29 @@ def test_problem_specific_repairs_restore_complete_valid_solution() -> None:
         )
         assert not repaired.removed_tasks
         validate_solution(instance, repaired.solution)
+
+
+
+def test_contact_mode_intensification_is_monotone_for_supplied_objective() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+    before = evaluator(instance, solution)
+
+    intensified, stats = contact_mode_intensification(
+        state,
+        config=ProblemOperatorConfig(
+            contact_points_per_mec=1,
+            contact_target_pool=1,
+            critical_task_limit=3,
+            mode_candidate_limit=6,
+        ),
+        objective=evaluator,
+        max_rounds=1,
+    )
+    after = evaluator(instance, intensified.solution)
+
+    validate_solution(instance, intensified.solution)
+    assert after <= before + 1e-9
+    assert stats["rounds"] == 1
