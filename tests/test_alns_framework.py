@@ -461,3 +461,36 @@ def test_elite_route_family_can_be_disabled_for_ablation() -> None:
         )
         for move in stats["evaluated_moves"]
     )
+
+
+def test_elite_contact_family_can_be_disabled_for_ablation() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+
+    _, stats = contact_mode_intensification(
+        state,
+        config=ProblemOperatorConfig(
+            contact_points_per_mec=1,
+            contact_target_pool=1,
+            critical_task_limit=3,
+            mode_candidate_limit=6,
+            elite_shortlist_limit=12,
+            elite_enable_contact_relocate=False,
+            elite_enable_contact_point_replace=False,
+            elite_enable_contact_remove=False,
+        ),
+        objective=evaluator,
+        max_rounds=1,
+    )
+
+    forbidden_prefixes = (
+        "contact_relocate::",
+        "contact_remove::",
+    )
+    assert all(
+        not str(move["move"]).startswith(forbidden_prefixes)
+        and str(move["move"]) != "contact_point_replace"
+        for move in stats["evaluated_moves"]
+    )
