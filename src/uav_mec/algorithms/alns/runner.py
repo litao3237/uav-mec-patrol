@@ -31,6 +31,88 @@ from .problem_operators import (
 from .state import ObjectiveEvaluator, UavMecState
 
 
+
+def _filter_operator_profile(
+    destroy_operators,
+    repair_operators,
+    *,
+    enabled: bool,
+    profile: str,
+):
+    if not enabled:
+        return destroy_operators, repair_operators
+
+    valid_profiles = {"core", "full"}
+    if profile not in valid_profiles:
+        raise ValueError(
+            f"Unknown problem_operator_profile={profile!r}; "
+            f"expected one of {sorted(valid_profiles)}"
+        )
+
+    if profile == "full":
+        return destroy_operators, repair_operators
+
+    destroy_keep = {
+        "random_task_removal",
+        "critical_task_removal",
+        "shared_mec_pressure_removal",
+    }
+    repair_keep = {
+        "cheapest_insertion_mec_repair",
+        "regret2_insertion_mec_repair",
+        "contact_opportunity_repair",
+        "mode_batch_repair",
+    }
+
+    return (
+        [item for item in destroy_operators if item[0] in destroy_keep],
+        [item for item in repair_operators if item[0] in repair_keep],
+    )
+
+
+def _operator_coupling(
+    destroy_operators,
+    repair_operators,
+) -> np.ndarray:
+    """Restrict semantically weak destroy/repair pairings."""
+
+    d_names = [name for name, _ in destroy_operators]
+    r_names = [name for name, _ in repair_operators]
+    coupling = np.ones(
+        (len(d_names), len(r_names)),
+        dtype=bool,
+    )
+
+    preferred: dict[str, set[str]] = {
+        "route_segment_removal": {
+            "cheapest_insertion_mec_repair",
+            "regret2_insertion_mec_repair",
+            "compute_aware_insertion_repair",
+        },
+        "mec_batch_pressure_removal": {
+            "regret2_insertion_mec_repair",
+            "contact_opportunity_repair",
+            "mode_batch_repair",
+        },
+        "shared_mec_pressure_removal": {
+            "regret2_insertion_mec_repair",
+            "contact_opportunity_repair",
+            "mode_batch_repair",
+        },
+    }
+
+    for d_idx, d_name in enumerate(d_names):
+        allowed = preferred.get(d_name)
+        if allowed is None:
+            continue
+        coupling[d_idx, :] = [
+            r_name in allowed
+            for r_name in r_names
+        ]
+
+    return coupling
+
+
 @dataclass(frozen=True)
 class UavMecALNSConfig:
     iterations: int = 300
@@ -40,6 +122,7 @@ class UavMecALNSConfig:
         default_factory=ProblemOperatorConfig
     )
     enable_problem_operators: bool = True
+    problem_operator_profile: str = "core"
     operator_scores: tuple[float, float, float, float] = (
         25.0,
         5.0,
@@ -110,6 +193,17 @@ def run_uav_mec_alns(
             cfg.problem,
         )
 
+    destroy_operators, repair_operators = _filter_operator_profile(
+        destroy_operators,
+        repair_operators,
+        enabled=cfg.enable_problem_operators,
+        profile=cfg.problem_operator_profile,
+    )
+    op_coupling = _operator_coupling(
+        destroy_operators,
+        repair_operators,
+    )
+
     for name, operator in destroy_operators:
         engine.add_destroy_operator(operator, name=name)
     for name, operator in repair_operators:
@@ -120,6 +214,7 @@ def run_uav_mec_alns(
         decay=cfg.operator_decay,
         num_destroy=len(destroy_operators),
         num_repair=len(repair_operators),
+        op_coupling=op_coupling,
     )
     accept = RecordToRecordTravel.autofit(
         initial_objective,
