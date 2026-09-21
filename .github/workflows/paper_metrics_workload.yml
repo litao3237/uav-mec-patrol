@@ -1,0 +1,69 @@
+name: paper-metrics-workload
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/paper_metrics_workload.yml'
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        tasks: [50, 80, 100]
+        scenario: [45, 46, 47]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run workload paper metrics
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks ${{ matrix.tasks }}
+          --mecs 2
+          --uavs 5
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+          --paper-metrics
+          --output outputs/results/paper_metrics_workload_K${{ matrix.tasks }}_M5_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100.json
+      - name: Upload seed-pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-workload-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/paper_metrics_workload_K${{ matrix.tasks }}_M5_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: metrics
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: paper-workload-K*-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate workload paper metrics
+        run: >-
+          python experiments/aggregate_paper_metrics.py
+          --input-dir outputs/results/matrix
+          --output-json outputs/results/paper_metrics_workload_K50-80-100_M5_E2_matrix.json
+          --output-csv outputs/results/paper_metrics_workload_K50-80-100_M5_E2_matrix.csv
+      - name: Upload workload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-metrics-workload-K50-80-100
+          path: |
+            outputs/results/paper_metrics_workload_K50-80-100_M5_E2_matrix.json
+            outputs/results/paper_metrics_workload_K50-80-100_M5_E2_matrix.csv
