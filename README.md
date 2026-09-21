@@ -2255,7 +2255,8 @@ For every strict Hybrid solution:
 
 - **UAV energy**: strict Stage-1 CVX optimum, the paper's primary objective;
 - **resource tie-break**: rerun the same final discrete solution with the
-  lexicographic Stage-2 solve, preserving the Stage-1 energy optimum while
+  lexicographic Stage-2 solve with a 1e-5 relative Stage-1 energy guard,
+  preserving the paper-facing Stage-1 optimum to numerical tolerance while
   minimizing normalized MEC CPU occupation;
 - **average delay / deadline slack / cycle and battery utilization**: evaluated
   from that reproducible lexicographic resource allocation;
@@ -2271,6 +2272,9 @@ For every strict Hybrid solution:
   local-compute shares;
 - **runtime**: ALNS+elite algorithm runtime reported separately from the
   additional Stage-2 metric-extraction solve.
+
+The primary energy column always uses the original strict Stage-1 oracle value;
+the Stage-2 energy is never substituted for the paper's optimization objective.
 
 This distinction is important because Stage-1 MEC CPU allocations can be
 non-unique: MEC CPU is not itself part of the UAV-energy objective. Resource
