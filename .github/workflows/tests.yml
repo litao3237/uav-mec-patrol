@@ -32,6 +32,7 @@ jobs:
           experiments/aggregate_small_strong_benchmark.py
           experiments/aggregate_mec_environment_sensitivity.py
           experiments/aggregate_convergence_study.py
+          experiments/aggregate_dense_workload.py
           experiments/run_convergence_study.py
       - name: Run tests
         run: uv run pytest
