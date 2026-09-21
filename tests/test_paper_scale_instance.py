@@ -72,3 +72,23 @@ def test_scale_overrides_support_planned_sweeps() -> None:
     assert len(instance.tasks) == 80
     assert len(instance.uavs) == 8
     assert len(instance.mecs) == 4
+
+
+def test_mec_count_sweep_keeps_task_realization_fixed() -> None:
+    cfg = load_paper_scale_config()
+    instances = [
+        build_paper_scale_instance(
+            cfg,
+            num_tasks=100,
+            num_mecs=num_mecs,
+            scenario_seed=45,
+        )
+        for num_mecs in (2, 3, 4)
+    ]
+
+    reference = instances[0].tasks
+    assert instances[1].tasks == reference
+    assert instances[2].tasks == reference
+
+    assert tuple(instances[1].mecs)[:2] == tuple(instances[0].mecs)
+    assert tuple(instances[2].mecs)[:3] == tuple(instances[1].mecs)
