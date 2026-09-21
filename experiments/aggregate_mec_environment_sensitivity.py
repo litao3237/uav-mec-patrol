@@ -54,13 +54,13 @@ def _group(
         for row in subset
         if row["hybrid_stage1_status"] == "optimal"
     ]
+    metric_rows = [
+        row for row in strict if row.get("paper_metrics") is not None
+    ]
     stage2 = [
         row
-        for row in strict
-        if (
-            row.get("paper_metrics") is not None
-            and row["paper_metrics"].get("stage2_status") == "optimal"
-        )
+        for row in metric_rows
+        if row["paper_metrics"].get("stage2_status") == "optimal"
     ]
 
     energies = [
@@ -104,6 +104,38 @@ def _group(
         )
         for row in stage2
     ]
+    bandwidth_shadow = [
+        float(
+            row["paper_metrics"][
+                "mean_active_mec_bandwidth_relative_shadow"
+            ]
+        )
+        for row in metric_rows
+    ]
+    cpu_shadow = [
+        float(
+            row["paper_metrics"][
+                "mean_active_mec_cpu_relative_shadow"
+            ]
+        )
+        for row in metric_rows
+    ]
+    bandwidth_shadow_count = [
+        float(
+            row["paper_metrics"][
+                "active_mec_bandwidth_shadow_count"
+            ]
+        )
+        for row in metric_rows
+    ]
+    cpu_shadow_count = [
+        float(
+            row["paper_metrics"][
+                "active_mec_cpu_shadow_count"
+            ]
+        )
+        for row in metric_rows
+    ]
     improvements = [
         float(row["improvement_pct"])
         for row in strict
@@ -129,6 +161,12 @@ def _group(
         "deadline_slack_s": _stats(slacks),
         "active_mec_bandwidth_utilization": _stats(bandwidth),
         "active_mec_cpu_utilization": _stats(cpu),
+        "bandwidth_relative_shadow": _stats(bandwidth_shadow),
+        "cpu_relative_shadow": _stats(cpu_shadow),
+        "active_bandwidth_shadow_count": _stats(
+            bandwidth_shadow_count
+        ),
+        "active_cpu_shadow_count": _stats(cpu_shadow_count),
         "hybrid_vs_generic_gain_pct": _stats(improvements),
         "runtime_s": _stats(runtimes),
     }
@@ -151,6 +189,10 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
         "deadline_slack_mean_s",
         "bandwidth_util_mean",
         "cpu_util_mean",
+        "bandwidth_relative_shadow_mean",
+        "cpu_relative_shadow_mean",
+        "active_bandwidth_shadow_count_mean",
+        "active_cpu_shadow_count_mean",
         "hybrid_vs_generic_gain_mean_pct",
         "runtime_mean_s",
     ]
@@ -178,6 +220,18 @@ def _write_csv(path: Path, aggregate: list[dict[str, Any]]) -> None:
                     ),
                     "cpu_util_mean": (
                         group["active_mec_cpu_utilization"]["mean"]
+                    ),
+                    "bandwidth_relative_shadow_mean": (
+                        group["bandwidth_relative_shadow"]["mean"]
+                    ),
+                    "cpu_relative_shadow_mean": (
+                        group["cpu_relative_shadow"]["mean"]
+                    ),
+                    "active_bandwidth_shadow_count_mean": (
+                        group["active_bandwidth_shadow_count"]["mean"]
+                    ),
+                    "active_cpu_shadow_count_mean": (
+                        group["active_cpu_shadow_count"]["mean"]
                     ),
                     "hybrid_vs_generic_gain_mean_pct": (
                         group["hybrid_vs_generic_gain_pct"]["mean"]
@@ -232,7 +286,7 @@ def main() -> None:
 
     print(
         "scale runs strict s2 energy-J offload contacts/UAV dist-km "
-        "delay-s slack-s bw-util cpu-util gain-% runtime-s"
+        "delay-s slack-s bw-util cpu-util bw-shadow cpu-shadow gain-% runtime-s"
     )
     print("-" * 126)
     for group in aggregate:
@@ -253,6 +307,8 @@ def main() -> None:
             f"{fmt('deadline_slack_s'):<7} "
             f"{fmt('active_mec_bandwidth_utilization'):<7} "
             f"{fmt('active_mec_cpu_utilization'):<8} "
+            f"{fmt('bandwidth_relative_shadow'):<9} "
+            f"{fmt('cpu_relative_shadow'):<10} "
             f"{fmt('hybrid_vs_generic_gain_pct'):<6} "
             f"{fmt('runtime_s')}"
         )
