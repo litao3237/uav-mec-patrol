@@ -4,6 +4,7 @@ import numpy as np
 
 from uav_mec.algorithms import (
     ProxyObjectiveEvaluator,
+    ProblemOperatorConfig,
     ScreenedProxyObjectiveEvaluator,
     UavMecALNSConfig,
     build_greedy_initial_solution,
@@ -16,6 +17,15 @@ from uav_mec.algorithms.alns import (
     cheapest_insertion_repair,
     make_destroy_operators,
     random_task_removal,
+)
+from uav_mec.algorithms.alns.problem_operators import (
+    compute_aware_insertion_repair,
+    contact_opportunity_repair,
+    make_problem_destroy_operators,
+    make_problem_repair_operators,
+    mec_batch_pressure_removal,
+    mode_batch_repair,
+    shared_mec_pressure_removal,
 )
 from uav_mec.evaluation import build_event_info, validate_solution
 from uav_mec.optimization.resource import (
@@ -175,3 +185,100 @@ def test_screened_proxy_refines_precheck_feasible_proxy_gray_zone() -> None:
     assert evaluator.stats.cvx_refinements == 1
     assert evaluator.stats.feasible_calls == 1
     assert evaluator.stats.precheck_rejects == 0
+
+
+
+def test_problem_specific_operator_factories_have_expected_families() -> None:
+    destroy = make_problem_destroy_operators(
+        DestroyConfig(
+            fraction=0.2,
+            min_remove=1,
+            max_remove=3,
+        ),
+        ProblemOperatorConfig(),
+    )
+    repair = make_problem_repair_operators(
+        ProblemOperatorConfig(),
+    )
+
+    assert [name for name, _ in destroy] == [
+        "mec_batch_pressure_removal",
+        "shared_mec_pressure_removal",
+    ]
+    assert [name for name, _ in repair] == [
+        "contact_opportunity_repair",
+        "mode_batch_repair",
+        "compute_aware_insertion_repair",
+    ]
+    for _, operator in destroy + repair:
+        assert hasattr(operator, "__name__")
+        assert operator.__name__
+
+
+def test_problem_specific_destroy_operators_return_partial_states() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+    rng = np.random.default_rng(17)
+    destroy_cfg = DestroyConfig(
+        fraction=0.2,
+        min_remove=1,
+        max_remove=3,
+    )
+    problem_cfg = ProblemOperatorConfig()
+
+    batch_destroyed = mec_batch_pressure_removal(
+        state,
+        rng,
+        config=destroy_cfg,
+        problem=problem_cfg,
+    )
+    assert batch_destroyed.removed_tasks
+
+    shared_destroyed = shared_mec_pressure_removal(
+        state,
+        rng,
+        config=destroy_cfg,
+        problem=problem_cfg,
+    )
+    assert shared_destroyed.removed_tasks
+
+
+def test_problem_specific_repairs_restore_complete_valid_solution() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+    destroy_cfg = DestroyConfig(
+        fraction=0.2,
+        min_remove=2,
+        max_remove=2,
+    )
+    problem_cfg = ProblemOperatorConfig(
+        contact_points_per_mec=1,
+        contact_target_pool=1,
+        critical_task_limit=3,
+        mode_candidate_limit=6,
+        compute_option_limit=5,
+    )
+
+    repairs = (
+        contact_opportunity_repair,
+        mode_batch_repair,
+        compute_aware_insertion_repair,
+    )
+    for idx, repair in enumerate(repairs, start=1):
+        rng = np.random.default_rng(30 + idx)
+        destroyed = random_task_removal(
+            state,
+            rng,
+            config=destroy_cfg,
+        )
+        repaired = repair(
+            destroyed,
+            rng,
+            config=problem_cfg,
+        )
+        assert not repaired.removed_tasks
+        validate_solution(instance, repaired.solution)
