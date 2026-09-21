@@ -520,8 +520,8 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] K=100 MEC-count sensitivity（E=2/3/4）；
 - [x] Full Hybrid vs **w/o route-compute relocation**：9/9 strict，Full 6 better / 3 equal / 0 worse，mean paired advantage 0.709%；
 - [x] w/o contact family：9/9 strict，Full 3 better / 5 equal / 1 worse，mean paired advantage 0.302%；
-- [ ] **[NEXT]** w/o explicit batch family（batch merge + split/new-contact）；
-- [ ] **[TODO]** w/o progressive widening；
+- [x] w/o explicit batch family：9/9 strict，Full 2 better / 6 equal / 1 worse，mean paired advantage 0.009%；
+- [ ] **[NEXT]** w/o progressive widening；
 - [ ] **[OPTIONAL]** w/o adaptive ALNS selection。
 
 ---
@@ -1934,3 +1934,50 @@ The next paired ablation uses:
 `task_mode_or_batch_reassign` remains enabled because it jointly changes
 execution mode and batch assignment; disabling it here would mix explicit batch
 structure with offloading-mode ablation.
+
+
+## Elite explicit-batch ablation: marginal contribution in K=80/E=2
+
+Paired ablation on K=80, E=2, scenario seeds 45/46/47 and algorithm seeds
+100/101/102 compares the same Generic ALNS elite under:
+
+- `full`: all frozen elite structural families enabled;
+- `no-batch`: disables only explicit batch-structure moves
+  `batch_merge` and `batch_split_or_new_contact`.
+
+`task_mode_or_batch_reassign` remains enabled so that this experiment isolates
+explicit batch restructuring rather than jointly ablating offloading-mode
+reassignment.
+
+| profile | strict pairs | improved | unchanged | mean elite gain | median elite gain |
+|---|---:|---:|---:|---:|---:|
+| Full Hybrid | 9/9 | 8 | 1 | 1.378% | 1.154% |
+| w/o explicit batch family | 9/9 | 8 | 1 | 1.369% | 1.154% |
+
+Direct paired comparison:
+
+- comparable strict pairs: 9/9;
+- Full better: 2/9;
+- equal: 6/9;
+- No-Batch better: 1/9;
+- mean Full advantage: 0.009%;
+- median Full advantage: 0.000%.
+
+The positive batch effect is concentrated mainly in two runs where
+`batch_merge` is accepted after another structural move. The single
+No-Batch-better case is scenario 46 / algorithm seed 100, where disabling the
+batch family changes the second greedy elite move from a route relocation to a
+contact removal and yields a slightly lower final energy. All compared states
+remain strict Stage-1 optimal.
+
+Interpretation: explicit batch restructuring is useful in selected states but
+has little aggregate incremental effect in the current K=80/E=2 setting. It
+should therefore be presented as a supporting neighborhood rather than a
+dominant source of the Hybrid ALNS gain.
+
+## Fourth ablation definition: progressive widening
+
+The next paired ablation compares Full Hybrid against an otherwise identical
+elite search with `elite_progressive_widening=False`. This directly tests
+whether exact-CVX near-miss-triggered same-family widening contributes measurable
+solution quality beyond the default small diverse shortlist.
