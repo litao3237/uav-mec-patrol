@@ -1,0 +1,41 @@
+name: small-benchmark-scale-scout
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/small_benchmark_scale_scout.yml'
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        tasks: [20, 24, 28, 32]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Scout coupling scale
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks ${{ matrix.tasks }}
+          --uavs 2
+          --mecs 2
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --iterations 100
+          --output outputs/results/small_scale_scout_K${{ matrix.tasks }}_M2_E2_S45_A100.json
+      - name: Upload scout result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-scale-scout-K${{ matrix.tasks }}
+          path: outputs/results/small_scale_scout_K${{ matrix.tasks }}_M2_E2_S45_A100.json
+          if-no-files-found: warn
