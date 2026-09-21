@@ -1262,3 +1262,49 @@ uv run python experiments\run_hybrid_validation.py --tasks 80 --mecs 2,3 --scena
 It reports paired Stage-1 CVX energies, improvement rate, accepted structural
 moves, elite CVX calls and elite runtime. This should be the next validation
 before further neighborhood tuning.
+
+
+## Cross-scenario hybrid validation: promising mechanism, insufficient robustness
+
+Paired validation on K=80, E=2, scenario seeds 42/43/44 and algorithm seeds
+100/101/102 (100 ALNS iterations) produced 9 runs:
+
+- 8 runs had paired Stage-1-feasible generic/hybrid states;
+- 2/8 paired runs improved;
+- 6/8 were unchanged;
+- mean paired energy reduction = 0.268%;
+- median paired reduction = 0.000%;
+- all observed improvements occurred in scenario seed 42;
+- both accepted improvements were `route_compute_relocate` moves.
+
+Therefore the current evidence supports the **mechanism** (route-compute relocation
+can improve an elite solution), but does not yet support a robust cross-scenario
+performance claim.
+
+Scenario seed 43 also exposes numerical/search difficulty:
+
+- algorithm seeds 100/101 end at `optimal_inaccurate`;
+- algorithm seed 102 remains `infeasible_precheck` after 100 iterations.
+
+For exact elite acceptance, the hybrid runner now requires the exploration
+Stage-1 status to be strictly `optimal`. `optimal_inaccurate` states are
+reported but skipped by elite refinement, avoiding paper claims based on
+approximate oracle comparisons and saving unnecessary CVX work.
+
+The next diagnostic is to determine whether the no-improvement cases arise
+because:
+
+1. the current top-6 proxy shortlist misses useful route-compute candidates, or
+2. the generated neighborhood genuinely contains no improving move.
+
+`run_hybrid_validation.py` now exposes elite-budget controls and records exact
+candidate deltas. A clean next test uses the numerically stable scenario seed 44:
+
+~~~powershell
+uv run python experiments\run_hybrid_validation.py --tasks 80 --mecs 2 --scenario-seeds 44 --algorithm-seeds 100,101,102 --iterations 100 --elite-shortlist-limit 12 --elite-task-limit 6 --elite-route-options-per-task 3
+~~~
+
+If wider exact shortlists reveal improving `route_compute_relocate` moves, the
+candidate-screening budget is the bottleneck. If the best rejected candidate is
+still non-improving in all runs, the next algorithmic step should be a stronger
+joint Route-Contact neighborhood rather than a larger CVX budget.
