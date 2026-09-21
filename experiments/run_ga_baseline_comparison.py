@@ -203,7 +203,7 @@ def main() -> None:
     print(
         "K    E    scen   alg    ga-s1        generic-s1   hybrid-s1    "
         "ga-E-J          generic-E-J     hybrid-E-J      "
-        "H-vs-GA%       H-vs-Generic%  ga-evals  ga-s"
+        "H-vs-GA%       H-vs-Generic%  ga-evals  proxy-ok  proxy-viol  ga-s"
     )
     print("-" * 150)
 
@@ -339,6 +339,8 @@ def main() -> None:
                         f"{fmt(row['hybrid_advantage_vs_ga_pct']):<14} "
                         f"{fmt(row['hybrid_advantage_vs_generic_pct']):<14} "
                         f"{ga_result.evaluations:<9} "
+                        f"{str(row['ga']['proxy_feasible']):<9} "
+                        f"{int(row['ga']['proxy_score'][0]):<10} "
                         f"{ga_search_runtime_s:.2f}"
                     )
 
