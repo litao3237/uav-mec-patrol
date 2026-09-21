@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/spatial_distribution_robustness.yml'
 
+# Stage-1 shadow-price metrics enabled
 jobs:
   robustness:
     runs-on: ubuntu-latest
