@@ -379,6 +379,33 @@ def test_hybrid_runner_uses_generic_exploration_and_nonworsening_elite() -> None
 
 
 
+
+class _InaccurateStage1Solver:
+    def solve(self, instance, solution, info=None):
+        return ResourceSolveResult(
+            status="optimal_inaccurate",
+            solver="FAKE",
+            is_dcp=True,
+            energy_stage1_j=1.0,
+            energy_final_j=1.0,
+            stage1_values={"fake": {"x": 1.0}},
+            final_values={"fake": {"x": 1.0}},
+            diagnostics={
+                "stage1_status": "optimal_inaccurate",
+            },
+        )
+
+
+def test_stage1_elite_oracle_rejects_inaccurate_candidate_value() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    oracle = Stage1CVXObjectiveOracle()
+    oracle.solver = _InaccurateStage1Solver()
+
+    assert oracle(instance, solution) == float("inf")
+
+
+
 def test_hybrid_skips_elite_refinement_without_strict_stage1_optimum() -> None:
     instance = _small_instance()
     initial = _initial_solution(instance)
