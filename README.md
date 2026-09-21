@@ -1579,3 +1579,38 @@ The hybrid validation script also checkpoints its JSON after every completed
 run with `complete=false`, so later failures no longer discard expensive
 earlier workload results. A successful completion rewrites the same file with
 the aggregate and `complete=true`.
+
+
+## Workload sensitivity checkpoint: K=50/80/100 at E=2
+
+With the frozen hybrid algorithm and scenario seeds 45/46/47:
+
+| K | strict pairs / runs | strict improved | mean paired gain | median paired gain | base status issue |
+|---:|---:|---:|---:|---:|---|
+| 50 | 9/9 | 5/9 | 1.746% | 0.047% | none |
+| 80 | 9/9 | 8/9 | 1.378% | 1.154% | none |
+| 100 | 2/9 | 2/2 | 0.665% | 0.665% | 3 infeasible-precheck, 4 optimal-inaccurate |
+
+The K=100 result must not be interpreted as a directly comparable 0.665% hybrid
+gain over the full nine-run workload sample. Only two runs reached strict
+`optimal -> optimal` Stage-1 status. The dominant K=100 effect under the current
+100-iteration budget is therefore **search/solver robustness loss**, not a clean
+energy-gain trend.
+
+The three `infeasible_precheck` outcomes certify only that the final fixed
+discrete states fail optimistic lower bounds; they do not prove that the entire
+K=100 scenario instance is globally infeasible. Likewise,
+`optimal_inaccurate` is treated as a numerical-oracle failure for paper-facing
+statistics.
+
+K=50 also shows a skewed gain distribution: the mean 1.746% is driven by a few
+large improvements (including 4.952% and 8.584%), while the median is only
+0.047%. K=80 is currently the most consistently informative operating point.
+
+The validation aggregate now reports strict-pair rate and the Stage-1 status mix
+explicitly so overload/search-failure regimes are not hidden behind conditional
+energy averages.
+
+The next most informative experiment is K=100, E=3. It tests whether adding one
+MEC restores strict feasibility/numerical stability under high task load while
+holding the workload fixed.
