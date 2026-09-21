@@ -5,11 +5,20 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/elite_route_ablation.yml'
+      - 'experiments/run_elite_family_ablation.py'
+      - 'experiments/aggregate_elite_family_ablation.py'
+      - 'src/uav_mec/algorithms/alns/problem_operators.py'
 
 jobs:
   ablation:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        scenario: [45, 46, 47]
+        algorithm: [100, 101, 102]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -22,14 +31,36 @@ jobs:
           uv run python experiments/run_elite_family_ablation.py
           --tasks 80
           --mecs 2
-          --scenario-seeds 45,46,47
-          --algorithm-seeds 100,101,102
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
           --iterations 100
           --profiles full,no-route
-      - name: Upload ablation result
+      - name: Upload seed-pair result
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: elite-route-ablation-K80-E2
-          path: outputs/results/elite_family_ablation_K80_E2_S45-46-47_A100-101-102_I100.json
+          name: elite-route-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/elite_family_ablation_K80_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100.json
           if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: ablation
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: elite-route-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate seed-pair results
+        run: >-
+          python experiments/aggregate_elite_family_ablation.py
+          --input-dir outputs/results/matrix
+          --output outputs/results/elite_family_ablation_K80_E2_S45-46-47_A100-101-102_I100_matrix.json
+      - name: Upload combined result
+        uses: actions/upload-artifact@v4
+        with:
+          name: elite-route-ablation-K80-E2-matrix
+          path: outputs/results/elite_family_ablation_K80_E2_S45-46-47_A100-101-102_I100_matrix.json
