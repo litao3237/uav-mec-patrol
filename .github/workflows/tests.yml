@@ -22,5 +22,7 @@ jobs:
           experiments/run_hybrid_validation.py
           experiments/run_elite_family_ablation.py
           experiments/aggregate_elite_family_ablation.py
+          experiments/run_core_baseline_comparison.py
+          experiments/aggregate_core_baselines.py
       - name: Run tests
         run: uv run pytest
