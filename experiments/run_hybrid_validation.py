@@ -310,9 +310,14 @@ def main() -> None:
                         )
                     )
                     best_rejected = None
-                    if evaluated_moves:
+                    comparable_moves = [
+                        item
+                        for item in evaluated_moves
+                        if item["improvement_pct"] is not None
+                    ]
+                    if comparable_moves:
                         best_rejected = max(
-                            evaluated_moves,
+                            comparable_moves,
                             key=lambda item: (
                                 item["improvement_pct"]
                             ),
