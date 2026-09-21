@@ -39,6 +39,7 @@ def _solve_with_fallback(
     *,
     verbose: bool,
     preferred_solver: str | None = None,
+    excluded_solvers: set[str] | None = None,
 ) -> tuple[str | None, list[str]]:
     """Solve robustly and prefer an exact CVXPY status over an inaccurate one.
 
@@ -53,7 +54,11 @@ def _solve_with_fallback(
     is inaccurate, the final ResourceSolveResult still exposes that status.
     """
 
-    candidates = _solver_candidates()
+    candidates = [
+        solver
+        for solver in _solver_candidates()
+        if solver not in (excluded_solvers or set())
+    ]
     if preferred_solver in candidates:
         candidates.remove(preferred_solver)
         candidates.insert(0, preferred_solver)
@@ -131,6 +136,69 @@ def _numeric_group(mapping: dict[Any, Any]) -> dict[Any, float]:
     return {key: _value(var.value) for key, var in mapping.items()}
 
 
+def _sanitize_positive_group(
+    mapping: dict[Any, Any],
+    *,
+    minimum: float,
+    rel_tol: float = 1e-6,
+) -> tuple[dict[Any, float], list[str]]:
+    """Extract a positive resource group without hiding invalid solver primals.
+
+    CVXPY may occasionally return a nominal optimal/inaccurate status with a
+    tiny lower-bound violation. Values within a small numerical tolerance are
+    clipped to the modeled lower bound for reduced-form diagnostics. Material
+    violations (zero/negative, non-finite, or clearly below the bound) are
+    reported so another conic solver can be tried instead of crashing in
+    reciprocal rate/CPU calculations.
+    """
+
+    values: dict[Any, float] = {}
+    violations: list[str] = []
+    tol = rel_tol * max(1.0, abs(minimum))
+
+    for key, var in mapping.items():
+        value = _value(var.value)
+        if not np.isfinite(value):
+            violations.append(f"{key}: non-finite value={value}")
+            continue
+        if value < minimum - tol:
+            violations.append(
+                f"{key}: value={value:.12g} below minimum={minimum:.12g}"
+            )
+            continue
+        values[key] = max(minimum, value)
+
+    return values, violations
+
+
+def _stage1_resource_values(
+    model,
+) -> tuple[
+    dict[tuple[str, str], float],
+    dict[tuple[str, str], float],
+    dict[str, float],
+    list[str],
+]:
+    bandwidth, bw_violations = _sanitize_positive_group(
+        model.variables["bandwidth_mhz"],
+        minimum=1e-3,
+    )
+    mec_cpu, mec_violations = _sanitize_positive_group(
+        model.variables["mec_cpu_ghz"],
+        minimum=1e-4,
+    )
+    local_cpu, local_violations = _sanitize_positive_group(
+        model.variables["local_cpu_ghz"],
+        minimum=1e-4,
+    )
+    violations = (
+        [f"bandwidth_mhz::{item}" for item in bw_violations]
+        + [f"mec_cpu_ghz::{item}" for item in mec_violations]
+        + [f"local_cpu_ghz::{item}" for item in local_violations]
+    )
+    return bandwidth, mec_cpu, local_cpu, violations
+
+
 def _snapshot_vars(vars_dict: dict[str, dict[Any, Any]]) -> dict[str, dict[str, float]]:
     return {
         group: {str(key): _value(var.value) for key, var in mapping.items()}
@@ -183,32 +251,77 @@ def solve_resource_problem(
     if not problem1.is_dcp():
         raise RuntimeError("P1-R was expected to be DCP, but CVXPY reports is_dcp=False")
 
-    solver1, stage1_errors = _solve_with_fallback(problem1, verbose=verbose)
-    if solver1 is None:
-        return ResourceSolveResult(
-            status="solver_error",
-            solver="NONE",
-            is_dcp=problem1.is_dcp(),
-            energy_stage1_j=float("inf"),
-            energy_final_j=float("inf"),
-            diagnostics={
-                "message": "All installed conic solvers failed.",
-                "solver_errors": stage1_errors,
-            },
-        )
+    excluded_solvers: set[str] = set()
+    stage1_errors: list[str] = []
+    solver1: str | None = None
+    bandwidth_values: dict[tuple[str, str], float] = {}
+    mec_cpu_values: dict[tuple[str, str], float] = {}
+    local_cpu_values: dict[str, float] = {}
 
-    if problem1.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
-        return ResourceSolveResult(
-            status=str(problem1.status),
-            solver=solver1,
-            is_dcp=problem1.is_dcp(),
-            energy_stage1_j=float("inf"),
-            energy_final_j=float("inf"),
-            diagnostics={
-                "message": "Stage-1 problem is infeasible or otherwise non-optimal.",
-                "solver_errors": stage1_errors,
-            },
+    while True:
+        solver1, solve_errors = _solve_with_fallback(
+            problem1,
+            verbose=verbose,
+            excluded_solvers=excluded_solvers,
         )
+        stage1_errors.extend(solve_errors)
+        if solver1 is None:
+            return ResourceSolveResult(
+                status="solver_error",
+                solver="NONE",
+                is_dcp=problem1.is_dcp(),
+                energy_stage1_j=float("inf"),
+                energy_final_j=float("inf"),
+                diagnostics={
+                    "message": "All installed conic solvers failed.",
+                    "solver_errors": stage1_errors,
+                },
+            )
+
+        if problem1.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
+            return ResourceSolveResult(
+                status=str(problem1.status),
+                solver=solver1,
+                is_dcp=problem1.is_dcp(),
+                energy_stage1_j=float("inf"),
+                energy_final_j=float("inf"),
+                diagnostics={
+                    "message": "Stage-1 problem is infeasible or otherwise non-optimal.",
+                    "solver_errors": stage1_errors,
+                },
+            )
+
+        (
+            bandwidth_values,
+            mec_cpu_values,
+            local_cpu_values,
+            primal_violations,
+        ) = _stage1_resource_values(model)
+        if not primal_violations:
+            break
+
+        stage1_errors.append(
+            f"{solver1}: invalid resource primal: "
+            + "; ".join(primal_violations)
+        )
+        excluded_solvers.add(solver1)
+        if len(excluded_solvers) >= len(_solver_candidates()):
+            return ResourceSolveResult(
+                status="invalid_primal",
+                solver=solver1,
+                is_dcp=problem1.is_dcp(),
+                energy_stage1_j=float("inf"),
+                energy_final_j=float("inf"),
+                diagnostics={
+                    "message": (
+                        "Conic solvers returned non-positive or non-finite "
+                        "resource values despite modeled lower bounds."
+                    ),
+                    "stage1_status": str(problem1.status),
+                    "solver_errors": stage1_errors,
+                    "primal_violations": primal_violations,
+                },
+            )
 
     energy_star = float(problem1.value)
     stage1_values = _snapshot_vars(model.variables)
@@ -218,9 +331,9 @@ def solve_resource_problem(
         instance,
         solution,
         info,
-        bandwidth_mhz=_numeric_group(model.variables["bandwidth_mhz"]),
-        mec_cpu_ghz=_numeric_group(model.variables["mec_cpu_ghz"]),
-        local_cpu_ghz=_numeric_group(model.variables["local_cpu_ghz"]),
+        bandwidth_mhz=bandwidth_values,
+        mec_cpu_ghz=mec_cpu_values,
+        local_cpu_ghz=local_cpu_values,
     )
     stage1_return_times = {
         u: _value(expr.value if hasattr(expr, "value") else expr)
