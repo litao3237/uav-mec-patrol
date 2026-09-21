@@ -48,6 +48,7 @@ class ProblemOperatorConfig:
     elite_task_limit: int = 4
     elite_positions_per_contact: int = 2
     elite_points_per_mec: int = 1
+    elite_route_options_per_task: int = 2
 
 
 def _proxy_precheck_key(
@@ -940,6 +941,121 @@ def _contact_removal_candidates(
     return candidates
 
 
+def _route_removal_saving(
+    state: UavMecState,
+    task_id: str,
+) -> float:
+    solution = state.solution
+    owner = next(
+        uav_id
+        for uav_id, route in solution.routes.items()
+        if task_id in route.task_ids()
+    )
+    route = solution.routes[owner]
+    idx = next(
+        idx
+        for idx, stop in enumerate(route.stops)
+        if stop.kind is StopType.TASK
+        and stop.ref_id == task_id
+    )
+    prev_xy = stop_xy(
+        state.instance,
+        solution,
+        route.stops[idx - 1],
+    )
+    task_xy = stop_xy(
+        state.instance,
+        solution,
+        route.stops[idx],
+    )
+    next_xy = stop_xy(
+        state.instance,
+        solution,
+        route.stops[idx + 1],
+    )
+    return (
+        distance(prev_xy, task_xy)
+        + distance(task_xy, next_xy)
+        - distance(prev_xy, next_xy)
+    )
+
+
+def _elite_route_tasks(
+    state: UavMecState,
+    *,
+    limit: int,
+) -> list[str]:
+    critical = _critical_tasks_for_mode_move(
+        state,
+        limit=limit,
+    )
+    distance_ranked = sorted(
+        state.instance.tasks,
+        key=lambda task_id: (
+            _route_removal_saving(state, task_id),
+            task_id,
+        ),
+        reverse=True,
+    )[:limit]
+
+    result: list[str] = []
+    for task_id in critical + distance_ranked:
+        if task_id not in result:
+            result.append(task_id)
+        if len(result) >= 2 * limit:
+            break
+    return result
+
+
+def _route_compute_relocate_candidates(
+    state: UavMecState,
+    *,
+    config: ProblemOperatorConfig,
+) -> list[tuple[str, DiscreteSolution]]:
+    candidates: list[tuple[str, DiscreteSolution]] = []
+
+    for task_id in _elite_route_tasks(
+        state,
+        limit=config.elite_task_limit,
+    ):
+        destroyed = _destroy_tasks(
+            state,
+            [task_id],
+        )
+        options = _options_for_task(
+            destroyed,
+            task_id,
+        )
+        for option in options[
+            : config.elite_route_options_per_task
+        ]:
+            candidate_state = destroyed.copy()
+            _apply_local_insertion(
+                candidate_state,
+                task_id,
+                option,
+            )
+            try:
+                candidate_state = _finish_repair(
+                    candidate_state
+                )
+            except ValueError:
+                continue
+
+            if candidate_state.solution == state.solution:
+                continue
+            candidates.append(
+                (
+                    "route_compute_relocate::"
+                    f"{task_id}->{option.uav_id}"
+                    f"@{option.position}",
+                    candidate_state.solution,
+                )
+            )
+
+    return candidates
+
+
 def _structural_elite_candidates(
     state: UavMecState,
     *,
@@ -960,6 +1076,12 @@ def _structural_elite_candidates(
 
     candidates.extend(_batch_merge_candidates(state))
     candidates.extend(_contact_removal_candidates(state))
+    candidates.extend(
+        _route_compute_relocate_candidates(
+            state,
+            config=config,
+        )
+    )
 
     critical = _critical_tasks_for_mode_move(
         state,
