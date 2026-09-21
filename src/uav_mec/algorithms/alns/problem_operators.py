@@ -1238,18 +1238,23 @@ def contact_mode_intensification(
             stats["candidates_evaluated"] = (
                 int(stats["candidates_evaluated"]) + 1
             )
+            finite_candidate = np.isfinite(candidate_value)
             improvement_pct = (
                 100.0
                 * (round_base_value - candidate_value)
                 / max(1.0, abs(round_base_value))
-                if np.isfinite(candidate_value)
-                else float("-inf")
+                if finite_candidate
+                else None
             )
             evaluated_moves.append(
                 {
                     "round": int(stats["rounds"]),
                     "move": label,
-                    "objective": candidate_value,
+                    "objective": (
+                        candidate_value
+                        if finite_candidate
+                        else None
+                    ),
                     "improvement_pct": improvement_pct,
                 }
             )
