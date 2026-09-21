@@ -1,0 +1,70 @@
+name: spatial-distribution-robustness
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/spatial_distribution_robustness.yml'
+
+jobs:
+  robustness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        profile: [uniform, clustered, boundary]
+        scenario: [45, 46, 47]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run spatial robustness
+        run: >-
+          uv run python experiments/run_hybrid_validation.py
+          --tasks 80
+          --mecs 2
+          --uavs 5
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+          --task-spatial-profile ${{ matrix.profile }}
+          --paper-metrics
+          --output outputs/results/spatial_K80_M5_E2_${{ matrix.profile }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+      - name: Upload pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spatial-${{ matrix.profile }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/spatial_K80_M5_E2_${{ matrix.profile }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: robustness
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: spatial-*-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate spatial robustness
+        run: >-
+          python experiments/aggregate_spatial_robustness.py
+          --input-dir outputs/results/matrix
+          --output-json outputs/results/spatial_robustness_K80_M5_E2.json
+          --output-csv outputs/results/spatial_robustness_K80_M5_E2.csv
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: spatial-robustness-K80-M5-E2
+          path: |
+            outputs/results/spatial_robustness_K80_M5_E2.json
+            outputs/results/spatial_robustness_K80_M5_E2.csv
