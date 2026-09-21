@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from uav_mec.algorithms import (
+    build_fixed_route_nearest_mec_solution,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
     evaluate_initial_proxy,
@@ -124,3 +125,51 @@ def test_kkt_never_discards_a_constructive_feasible_seed() -> None:
 
     assert result.feasible
     assert result.diagnostics.get("initial_seed_feasible") is True
+
+
+def test_fixed_route_nearest_mec_preserves_routes_and_uses_nearest_mec() -> None:
+    cfg = load_paper_scale_config()
+    instance = build_paper_scale_instance(
+        cfg,
+        num_tasks=30,
+        num_mecs=2,
+        scenario_seed=42,
+    )
+    base = build_greedy_initial_solution(instance)
+    baseline_task_routes = {
+        uav_id: route.task_ids()
+        for uav_id, route in base.routes.items()
+    }
+
+    solution = build_fixed_route_nearest_mec_solution(
+        instance,
+        base_solution=base,
+    )
+    validate_solution(instance, solution)
+
+    assert {
+        uav_id: route.task_ids()
+        for uav_id, route in solution.routes.items()
+    } == baseline_task_routes
+
+    offloaded = 0
+    for task_id, decision in solution.task_decisions.items():
+        if decision.mode is not ExecutionMode.OFFLOAD:
+            continue
+        offloaded += 1
+        visit = solution.contact_visits[decision.contact_visit_id]
+        assigned_mec = instance.contact_points[visit.point_id].mec_id
+        task = instance.tasks[task_id]
+        nearest_mec = min(
+            instance.mecs,
+            key=lambda mec_id: (
+                (
+                    (task.x - instance.mecs[mec_id].x) ** 2
+                    + (task.y - instance.mecs[mec_id].y) ** 2
+                ),
+                mec_id,
+            ),
+        )
+        assert assigned_mec == nearest_mec
+
+    assert offloaded > 0
