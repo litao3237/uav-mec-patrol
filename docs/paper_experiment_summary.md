@@ -459,3 +459,53 @@ K=80,\quad M=5,\quad E=2
 - clustered/boundary shift 会降低 strict-feasibility robustness，说明空间分布本身是重要难度来源；
 - clustered 情况虽然路线更短，但 offload ratio 显著上升且 bandwidth shadow 更高，表明“几何距离更短”并不等价于“通信/计算耦合更弱”；
 - 因此后续论文可以把这组实验定位为 **out-of-distribution spatial robustness**。
+
+
+---
+
+# 补充实验：Per-UAV Contact-Budget Sensitivity
+
+为直接验证“间歇 MEC / Contact Opportunity”这一核心机制，固定：
+
+\[
+K=80,\quad M=5,\quad E=2
+\]
+
+并保持任务、deadline、UAV、MEC、contact candidate geometry、scenario seeds
+和 algorithm seeds 不变，仅改变每架 UAV 在一个周期内允许的最大 contact visits：
+
+\[
+C_{\max}\in\{1,2,3,4\}
+\]
+
+| \(C_{\max}\) | Stage-1 Strict | Stage-2 Strict | Mean Energy on Strict Subset (J) | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow | CPU Relative Shadow | Mean Hybrid Gain | Runtime (s) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 6/9 | 2/6 | 239095.092 | 12.5% | 0.733 | 12.180 | 0.004 | 0.000 | 1.155% | 36.967 |
+| 2 | 7/9 | 5/7 | 234636.497 | 12.5% | 1.029 | 11.938 | 0.004 | 0.000 | 0.213% | 50.179 |
+| 3 | **9/9** | 8/9 | **226768.196** | 12.2% | 1.044 | **11.494** | 0.005 | 0.000 | 1.378% | 45.932 |
+| 4 | **9/9** | 6/9 | 227632.234 | 13.5% | 1.222 | 11.561 | 0.004 | 0.001 | 0.987% | 78.473 |
+
+主要结论：
+
+1. 当 \(C_{\max}=1\) 时，strict feasibility 仅为 6/9；提高到 2 后为 7/9；
+2. 当 \(C_{\max}=3\) 时恢复到 9/9 strict，并且 strict-subset mean energy
+   相比 \(C_{\max}=1\) 下降约 5.16%；
+3. 继续放宽到 \(C_{\max}=4\) 后 strict rate 仍为 9/9，但平均能耗并未继续下降，
+   runtime 反而明显增加；
+4. 因此 contact opportunity 对高负载系统存在明显的“受限—充足”区间：
+   **过少 contact 会缩小可行域并推高能耗，而在达到足够接触机会之后，继续增加
+   contact budget 的边际收益很小。**
+5. 这组实验比 coverage-radius sweep 更直接，因为它不改变 MEC 几何或通信距离，
+   只改变离散 contact opportunity budget。
+
+论文中可以用这组实验直接支撑：
+
+\[
+\boxed{
+\text{intermittent contact availability}
+\text{ directly affects feasibility and energy quality}
+}
+\]
+
+但不应把 \(C_{\max}=4\) 能耗略高于 \(C_{\max}=3\) 解释成“更多 contact 有害”；
+Hybrid 是有限预算启发式搜索，额外 action space 同时也会扩大搜索空间。
