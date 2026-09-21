@@ -1308,3 +1308,43 @@ If wider exact shortlists reveal improving `route_compute_relocate` moves, the
 candidate-screening budget is the bottleneck. If the best rejected candidate is
 still non-improving in all runs, the next algorithmic step should be a stronger
 joint Route-Contact neighborhood rather than a larger CVX budget.
+
+
+## Wide-shortlist seed-44 diagnostic: screening is part of the bottleneck
+
+For K=80, E=2, scenario seed=44, algorithm seeds 100/101/102, the elite budget
+was widened to:
+
+- shortlist limit: 12;
+- elite task limit: 6;
+- route options per task: 3.
+
+Results:
+
+- seed 100: 210916.901 -> 210734.204 J (0.087% reduction), accepting
+  `route_compute_relocate::S30->U4@19` followed by
+  `batch_merge::G_U1_2->G_U1_1`;
+- seeds 101/102 reported structurally accepted new-contact/batch-split moves but
+  no meaningful change at the printed energy precision;
+- aggregate mean gain: 0.029%;
+- mean elite CVX calls: 22.67;
+- mean elite runtime: 22.95 s.
+
+This shows that the original top-6 global proxy shortlist can indeed miss an
+improving structural move. However, simply doubling the exact-CVX budget is too
+expensive for the small average gain.
+
+Two refinements are therefore introduced instead of making 12 the default:
+
+1. **diversity-preserving elite shortlist**: the top-k budget now preserves a
+   quota from route relocate, contact, contact removal, batch merge, batch
+   split/new contact, and mode/batch families before filling remaining slots by
+   global proxy rank;
+2. **meaningful improvement threshold**: exact elite moves must improve Stage-1
+   energy by at least max(1 J, 1e-4 relative), preventing solver-level numerical
+   noise from being recorded as a structural improvement.
+
+The default shortlist remains small. The next test should rerun scenario seed 44
+with the default elite budget (no explicit shortlist widening) and check whether
+family-diverse screening recovers the route-compute improvement with much fewer
+CVX calls.
