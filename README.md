@@ -2065,3 +2065,33 @@ Therefore the paper should use Generic ALNS as the principal algorithmic energy
 baseline for this setting, while Greedy+MEC repair is reported mainly for
 initialization/feasibility comparison. Additional independent feasible baselines
 are still required for the final paper.
+
+
+## Fixed-route nearest-MEC baseline: infeasible under K=80/E=2
+
+A deterministic **Fixed-Route Nearest-MEC Greedy Heuristic (FR-NM)** was added
+as a decomposition baseline. It freezes the Greedy task-to-UAV assignment and
+task visit order, then only inserts/reuses contacts at the geometrically nearest
+MEC and switches selected tasks from Local to MEC execution.
+
+The implementation is regression-tested to preserve every UAV's task sequence
+and to offload each selected task only to its nearest MEC.
+
+On K=80, E=2, scenario seeds 45/46/47:
+
+- scenario 45: `infeasible_precheck`;
+- scenario 46: `infeasible_precheck`;
+- scenario 47: `infeasible_precheck`.
+
+Thus FR-NM has **0/3 strict-feasible unique scenarios** in this high-load sparse-MEC
+setting. No energy-reduction percentage against Hybrid is reported because there
+is no strict feasible FR-NM energy to compare.
+
+Interpretation: nearest-MEC offloading on a frozen Greedy route is insufficient
+to recover feasibility. This supports the paper's structural motivation that
+route assignment/order must participate in the coupled Route-Contact-Offloading
+optimization rather than being optimized once and then held fixed.
+
+The result should be reported as a feasibility/decomposition baseline, not as a
+competitive energy baseline. A separate independent feasible metaheuristic
+baseline is still required.
