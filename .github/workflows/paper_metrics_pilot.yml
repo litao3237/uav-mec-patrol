@@ -17,7 +17,7 @@ jobs:
           python-version: '3.13'
       - name: Install dependencies
         run: uv sync --dev
-      - name: Run one paper-metrics validation
+      - name: Run one paper-metrics validation with stable Stage-2 tie break
         run: >-
           uv run python experiments/run_hybrid_validation.py
           --tasks 50
