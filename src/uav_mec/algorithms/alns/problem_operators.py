@@ -50,12 +50,14 @@ def _proxy_precheck_key(
     state: UavMecState,
     solution: DiscreteSolution,
 ) -> tuple[float, ...]:
-    """Cheap lexicographic key that never calls the full outer evaluator.
+    """Cheap shortlist key aligned with the screened outer evaluator.
 
-    Optimistic-precheck infeasibility is ranked worst. Inside the precheck
-    feasible region we retain the proxy's violation-first score so operators can
-    improve a gray-zone state without assuming proxy infeasibility is a proof of
-    true P1-R infeasibility.
+    Optimistic-precheck failure remains a hard structural signal. Once a
+    candidate passes that screen, proxy constraint violations are not ranked
+    ahead of energy, because high-load experiments showed that a proxy
+    violation can still be Stage-1 CVX feasible. The proxy is therefore used
+    only to shortlist a promising local move; the selected move is checked
+    against the injected outer evaluator before intensification accepts it.
     """
 
     info = build_event_info(state.instance, solution)
@@ -69,13 +71,37 @@ def _proxy_precheck_key(
     return (
         0.0 if precheck.feasible else 1.0,
         float(len(precheck.reasons)),
+        score.total_energy_j,
         float(score.violated_constraints),
         score.max_normalized_violation,
         score.sum_normalized_violation,
-        score.total_energy_j,
         score.total_distance_m,
     )
 
+
+def _aligned_intensification_choice(
+    state: UavMecState,
+    baseline: DiscreteSolution,
+    candidate: DiscreteSolution,
+    *,
+    tolerance: float = 1e-12,
+) -> DiscreteSolution:
+    """Keep an intensification move only when the outer evaluator agrees."""
+
+    baseline_obj = float(
+        state.evaluator(state.instance, baseline)
+    )
+    candidate_obj = float(
+        state.evaluator(state.instance, candidate)
+    )
+    scale = max(
+        1.0,
+        abs(baseline_obj),
+        abs(candidate_obj),
+    )
+    if candidate_obj < baseline_obj - tolerance * scale:
+        return candidate
+    return baseline
 
 def _visit_pressure(
     state: UavMecState,
@@ -349,9 +375,15 @@ def contact_opportunity_repair(
     """Route repair followed by contact-point/MEC replacement intensification."""
 
     repaired = cheapest_insertion_repair(destroyed, rng)
-    repaired.solution = _best_contact_opportunity_move(
+    baseline = deepcopy(repaired.solution)
+    candidate = _best_contact_opportunity_move(
         repaired,
         config=config,
+    )
+    repaired.solution = _aligned_intensification_choice(
+        repaired,
+        baseline,
+        candidate,
     )
     validate_solution(repaired.instance, repaired.solution)
     repaired.invalidate()
@@ -478,9 +510,15 @@ def mode_batch_repair(
     """Regret route repair followed by Local/MEC and batch reassignment."""
 
     repaired = regret2_insertion_repair(destroyed, rng)
-    repaired.solution = _best_mode_batch_move(
+    baseline = deepcopy(repaired.solution)
+    candidate = _best_mode_batch_move(
         repaired,
         config=config,
+    )
+    repaired.solution = _aligned_intensification_choice(
+        repaired,
+        baseline,
+        candidate,
     )
     validate_solution(repaired.instance, repaired.solution)
     repaired.invalidate()
@@ -581,9 +619,15 @@ def compute_aware_insertion_repair(
         _apply_local_insertion(repaired, task_id, option)
 
     repaired = _finish_repair(repaired)
-    repaired.solution = _best_mode_batch_move(
+    baseline = deepcopy(repaired.solution)
+    candidate = _best_mode_batch_move(
         repaired,
         config=config,
+    )
+    repaired.solution = _aligned_intensification_choice(
+        repaired,
+        baseline,
+        candidate,
     )
     validate_solution(repaired.instance, repaired.solution)
     repaired.invalidate()
