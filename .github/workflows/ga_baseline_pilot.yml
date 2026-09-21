@@ -30,12 +30,12 @@ jobs:
           --scenario-seeds ${{ matrix.scenario }}
           --algorithm-seeds 100
           --iterations 100
-          --ga-population 16
-          --ga-generations 12
+          --ga-population 24
+          --ga-generations 40
       - name: Upload pilot result
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ga-pilot-S${{ matrix.scenario }}
-          path: outputs/results/ga_baseline_K80_E2_S${{ matrix.scenario }}_A100_I100_P16_G12.json
+          path: outputs/results/ga_baseline_K80_E2_S${{ matrix.scenario }}_A100_I100_P24_G40.json
           if-no-files-found: warn
