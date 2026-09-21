@@ -107,6 +107,11 @@ def main() -> None:
     parser.add_argument("--mecs", default="2")
     parser.add_argument("--scenario-seeds", default="42,43,44")
     parser.add_argument("--algorithm-seeds", default="100")
+    parser.add_argument(
+        "--profiles",
+        default="generic,core,full",
+        help="comma-separated subset of generic,core,full",
+    )
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--uavs", type=int, default=None)
     args = parser.parse_args()
@@ -116,6 +121,16 @@ def main() -> None:
     mec_counts = _parse_int_list(args.mecs)
     scenario_seeds = _parse_int_list(args.scenario_seeds)
     algorithm_seeds = _parse_int_list(args.algorithm_seeds)
+    profiles = [
+        item.strip()
+        for item in args.profiles.split(",")
+        if item.strip()
+    ]
+    invalid_profiles = set(profiles) - {"generic", "core", "full"}
+    if invalid_profiles:
+        raise ValueError(
+            f"Unknown profiles: {sorted(invalid_profiles)}"
+        )
 
     rows: list[dict[str, Any]] = []
 
@@ -143,15 +158,18 @@ def main() -> None:
                 )
 
                 for algorithm_seed in algorithm_seeds:
-                    for mode, enabled in (
-                        ("generic", False),
-                        ("proposed", True),
-                    ):
+                    for mode in profiles:
+                        enabled = mode != "generic"
                         evaluator = ScreenedProxyObjectiveEvaluator()
                         config = UavMecALNSConfig(
                             iterations=args.iterations,
                             seed=algorithm_seed,
                             enable_problem_operators=enabled,
+                            problem_operator_profile=(
+                                "core"
+                                if mode == "generic"
+                                else mode
+                            ),
                         )
 
                         t0 = perf_counter()
@@ -247,7 +265,7 @@ def main() -> None:
     aggregate: list[dict[str, Any]] = []
     for k in task_counts:
         for e in mec_counts:
-            for mode in ("generic", "proposed"):
+            for mode in profiles:
                 subset = [
                     row
                     for row in rows
