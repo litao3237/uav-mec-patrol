@@ -1,0 +1,41 @@
+name: ga-baseline-pilot
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/ga_baseline_pilot.yml'
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [45, 46, 47]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run GA baseline pilot
+        run: >-
+          uv run python experiments/run_ga_baseline_comparison.py
+          --tasks 80
+          --mecs 2
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds 100
+          --iterations 100
+          --ga-population 16
+          --ga-generations 12
+      - name: Upload pilot result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-pilot-S${{ matrix.scenario }}
+          path: outputs/results/ga_baseline_K80_E2_S${{ matrix.scenario }}_A100_I100_P16_G12.json
+          if-no-files-found: warn
