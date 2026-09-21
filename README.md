@@ -1444,3 +1444,53 @@ cross-load validation of the frozen hybrid algorithm.
 
 The paired validation script now also aggregates strict-optimal pairs, accepted
 move families, widening frequency, exact-CVX budget and elite runtime overhead.
+
+
+## Out-of-sample scenario 45/46/47 validation: hybrid mechanism is now robust
+
+K=80, E=2, scenario seeds 45/46/47, algorithm seeds 100/101/102,
+100 iterations, frozen adaptive elite-screening policy:
+
+- 9/9 exploration baselines reached Stage-1 `optimal`;
+- 8/9 hybrid runs reported a positive reduction before strict-final filtering;
+- one run (scenario 45, algorithm seed 101) ended at
+  `optimal_inaccurate` after elite refinement and must not be used as an
+  exact-oracle paper datapoint;
+- among the remaining 8 strict `optimal -> optimal` pairs, 7 improved and
+  1 was unchanged;
+- strict-pair mean of the per-run reductions: about 1.514%;
+- strict-pair median reduction: about 1.223%;
+- strict mean energy: 229858.489 -> 226262.535 J.
+
+Accepted strict-optimal move families were diverse but route-compute relocation
+dominated:
+
+- `route_compute_relocate`: 7 accepted moves;
+- `batch_merge`: 2;
+- `contact_remove`: 2;
+- `contact_point_replace`: 1;
+- `contact_relocate`: 1.
+
+This is much stronger evidence than the earlier scenario-42/44 diagnostics:
+the proposed elite phase is no longer improving only one tuned scenario, and
+the dominant accepted move remains the intended computing-aware route
+relocation.
+
+### Correctness hardening after this validation
+
+The scenario-45/algorithm-101 `optimal_inaccurate` result exposed one remaining
+oracle bug: the elite oracle rejected inaccurate *baselines* but still returned
+the energy of an `optimal_inaccurate` *candidate* as a finite objective.
+
+This is now fixed. `Stage1CVXObjectiveOracle.__call__` returns infinity unless
+the candidate Stage-1 status is strictly `optimal`. Therefore an inaccurate
+candidate cannot be accepted by the elite search.
+
+The paired validation aggregate is also changed so its primary reported energy,
+improvement, and improved/unchanged counts use only strict
+`optimal -> optimal` pairs. Feasible-but-inaccurate rows remain available in
+JSON as diagnostics, but no longer contaminate the paper-facing aggregate.
+
+The next verification should rerun only the affected scenario-45 algorithm seed
+101, then proceed to cross-load validation rather than further tuning the
+K=80/E=2 neighborhood.
