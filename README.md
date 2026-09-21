@@ -1614,3 +1614,61 @@ energy averages.
 The next most informative experiment is K=100, E=3. It tests whether adding one
 MEC restores strict feasibility/numerical stability under high task load while
 holding the workload fixed.
+
+
+## High-load MEC-count checkpoint: K=100, E=3 partially restores robustness
+
+With the frozen hybrid algorithm, scenario seeds 45/46/47, algorithm seeds
+100/101/102, and 100 ALNS iterations:
+
+| E | strict pairs / runs | strict rate | strict improved | strict unchanged | infeasible-precheck | optimal-inaccurate | strict mean gain | strict median gain |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 2/9 | 0.222 | 2/2 | 0/2 | 3 | 4 | 0.665% | 0.665% |
+| 3 | 6/9 | 0.667 | 5/6 | 1/6 | 1 | 2 | 0.562% | 0.255% |
+
+Adding the third MEC therefore raises the strict-pair rate from 22.2% to 66.7%
+and reduces non-strict baseline outcomes from seven runs to three. This is a
+clear **partial robustness recovery**, but it is not yet a full recovery.
+
+For E=3, the six strict runs contain five meaningful improvements and one
+unchanged run. Accepted structural moves remain dominated by the intended
+computing-aware route neighborhood:
+
+- `route_compute_relocate`: 5 accepted moves;
+- `batch_merge`: 3;
+- `contact_point_replace`: 1.
+
+The three non-strict E=3 runs are:
+
+- scenario 45 / algorithm 100: `optimal_inaccurate`;
+- scenario 46 / algorithm 101: `optimal_inaccurate`;
+- scenario 46 / algorithm 102: `infeasible_precheck`.
+
+Crucially, scenarios 45 and 46 also have other algorithm seeds that reach strict
+`optimal -> optimal` status. Thus these failures cannot be interpreted as
+evidence that the corresponding K=100/E=3 scenario instance is globally
+infeasible. They are consistent with **search-trajectory and numerical-oracle
+sensitivity at the current 100-iteration budget**.
+
+The E=2 and E=3 conditional gain means must not be compared as if they covered
+the same population: 0.665% for E=2 is based on only 2 strict pairs, whereas
+0.562% for E=3 is based on 6 strict pairs. The robust conclusion at this stage is
+about **strict feasibility/numerical stability**, not a monotone energy-gain
+trend with MEC count.
+
+### Next diagnostic
+
+Before changing the physical MEC count again, rerun only the three failed E=3
+seed pairs with a larger search budget. This isolates search-budget sensitivity
+without paying for another full nine-run sweep:
+
+~~~powershell
+uv run python experiments\run_hybrid_validation.py --tasks 100 --mecs 3 --scenario-seeds 45 --algorithm-seeds 100 --iterations 200
+uv run python experiments\run_hybrid_validation.py --tasks 100 --mecs 3 --scenario-seeds 46 --algorithm-seeds 101 --iterations 200
+uv run python experiments\run_hybrid_validation.py --tasks 100 --mecs 3 --scenario-seeds 46 --algorithm-seeds 102 --iterations 200
+~~~
+
+If these runs recover strict Stage-1 status, the remaining E=3 failures are
+primarily a search-budget issue. If they remain non-strict, the next full
+physical-resource sensitivity point should be K=100, E=4 at the frozen
+100-iteration budget.
