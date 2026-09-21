@@ -1,0 +1,64 @@
+name: ga-baseline-light-matrix
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/ga_baseline_light_matrix.yml'
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        scenario: [45, 46, 47]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run K50 GA baseline comparison
+        run: >-
+          uv run python experiments/run_ga_baseline_comparison.py
+          --tasks 50
+          --mecs 2
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+          --ga-population 24
+          --ga-generations 40
+      - name: Upload seed-pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-light-matrix-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/ga_baseline_K50_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100_P24_G40.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: compare
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ga-light-matrix-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate GA matrix
+        run: >-
+          python experiments/aggregate_ga_baselines.py
+          --input-dir outputs/results/matrix
+          --output outputs/results/ga_baseline_K50_E2_S45-46-47_A100-101-102_I100_P24_G40_matrix.json
+      - name: Upload combined result
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-baseline-K50-E2-matrix
+          path: outputs/results/ga_baseline_K50_E2_S45-46-47_A100-101-102_I100_P24_G40_matrix.json
