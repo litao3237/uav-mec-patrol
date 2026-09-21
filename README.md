@@ -2538,9 +2538,11 @@ experiment.
 - [x] **Spatial-distribution robustness**：uniform / clustered /
   boundary-biased；strict rate 分别为 9/9、7/9、6/9，用于检验 spatial
   distribution shift；
-- [ ] **[RUNNING]** **Per-UAV contact-budget sensitivity**：
-  \(C_{\max}=1/2/3/4\)，固定任务、几何、MEC、UAV 与 seeds，用作最直接的
-  Contact Opportunity 约束实验。
+- [x] **Per-UAV contact-budget sensitivity**：
+  \(C_{\max}=1/2/3/4\)，strict rate = 6/9, 7/9, 9/9, 9/9；
+  strict-subset mean energy = 239095.092, 234636.497, 226768.196, 227632.234 J。
+  结果表明 contact opportunity 从受限状态放宽到充足状态会明显改善可行性与能耗，
+  而继续扩展 action space 的边际收益很小。
 
 ### Resource-bottleneck metric correction
 
@@ -2565,3 +2567,21 @@ Stage-2 仅最小化 normalized MEC CPU occupation，并不最小化 bandwidth�
 \]
 
 表征按比例放宽资源容量时对 Stage-1 最优 UAV energy 的局部边际价值。
+
+
+### Contact-budget result interpretation
+
+At \(K=80,M=5,E=2\), the direct contact-opportunity sweep gives:
+
+| Cmax | strict | mean strict-subset energy (J) | contacts/UAV |
+|---:|---:|---:|---:|
+| 1 | 6/9 | 239095.092 | 0.733 |
+| 2 | 7/9 | 234636.497 | 1.029 |
+| 3 | 9/9 | 226768.196 | 1.044 |
+| 4 | 9/9 | 227632.234 | 1.222 |
+
+The primary supported claim is a feasibility/energy threshold: too few contact
+opportunities restrict the feasible search region, while increasing the budget
+to the baseline Cmax=3 restores 9/9 strict feasibility and lowers conditional
+energy. Cmax=4 does not produce a further monotone energy reduction under the
+frozen search budget, so no claim of monotonic benefit is made.
