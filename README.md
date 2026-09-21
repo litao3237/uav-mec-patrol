@@ -521,7 +521,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] Full Hybrid vs **w/o route-compute relocation**：9/9 strict，Full 6 better / 3 equal / 0 worse，mean paired advantage 0.709%；
 - [x] w/o contact family：9/9 strict，Full 3 better / 5 equal / 1 worse，mean paired advantage 0.302%；
 - [x] w/o explicit batch family：9/9 strict，Full 2 better / 6 equal / 1 worse，mean paired advantage 0.009%；
-- [ ] **[NEXT]** w/o progressive widening；
+- [x] w/o progressive widening：9/9 strict，0 better / 9 equal / 0 worse，mean paired advantage 0.000%；
 - [ ] **[OPTIONAL]** w/o adaptive ALNS selection。
 
 ---
@@ -731,8 +731,8 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 1. [x] 完成 Hybrid 主算法与严格 CVX acceptance；
 2. [x] 完成 K=100,E=2/3/4 高负载 MEC-count sensitivity；
 3. [x] `w/o route_compute_relocate` 核心消融；
-4. [ ] **[NEXT]** contact / batch / progressive-widening 消融；
-5. [ ] **[TODO]** Greedy / nearest-MEC / route-only / ACO-or-GA baselines；
+4. [x] contact / batch / progressive-widening 消融；
+5. [ ] **[NEXT]** Greedy / nearest-MEC / route-only / ACO-or-GA baselines；
 6. [ ] **[TODO]** K=8~12 strong benchmark；
 7. [ ] **[TODO]** M=3/5/8 sensitivity 与最终指标汇总；
 8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
@@ -1981,3 +1981,34 @@ The next paired ablation compares Full Hybrid against an otherwise identical
 elite search with `elite_progressive_widening=False`. This directly tests
 whether exact-CVX near-miss-triggered same-family widening contributes measurable
 solution quality beyond the default small diverse shortlist.
+
+
+## Elite progressive-widening ablation: no measurable gain in K=80/E=2
+
+Paired ablation on K=80, E=2, scenario seeds 45/46/47 and algorithm seeds
+100/101/102 compares Full Hybrid against an otherwise identical elite search
+with `elite_progressive_widening=False`.
+
+| profile | strict pairs | improved | unchanged | mean elite gain | median elite gain | mean elite CVX calls |
+|---|---:|---:|---:|---:|---:|---:|
+| Full Hybrid | 9/9 | 8 | 1 | 1.378% | 1.154% | 11.67 |
+| w/o progressive widening | 9/9 | 8 | 1 | 1.378% | 1.154% | 11.67 |
+
+Direct paired comparison:
+
+- comparable strict pairs: 9/9;
+- Full better: 0/9;
+- equal: 9/9;
+- No-Widening better: 0/9;
+- mean Full advantage: 0.000%;
+- median Full advantage: 0.000%.
+
+Therefore progressive widening provides no measurable solution-quality benefit in
+the K=80/E=2 core ablation setting. It should not be presented as a principal
+source of the Hybrid ALNS gain.
+
+However, progressive widening remains useful as a rare adaptive fallback:
+previous K=100/E=4 validation observed one near-miss-triggered widening event.
+Because the mechanism is dormant when the trigger is not met, it can be retained
+in the implementation as a robustness safeguard while being demoted from the
+paper's core contribution claims.
