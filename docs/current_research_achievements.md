@@ -871,13 +871,7 @@ runtime：
 
 # 14. 当前最重要的系统层发现
 
-多个实验反复出现：
-
-\[
-\boxed{\text{Active MEC bandwidth utilization}\approx100\%}
-\]
-
-而 MEC CPU 通常仍有明显余量。
+多个实验中，CPU-minimizing Stage-2 解经常出现较高的 MEC bandwidth allocation；但 Stage-2 并未最小化 bandwidth，因此该利用率只能作为描述性指标，不能单独证明带宽约束是瓶颈。
 
 例如 workload：
 
