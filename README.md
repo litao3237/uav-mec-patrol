@@ -1542,3 +1542,40 @@ outputs/results/hybrid_validation_K80_E3_S45-46-47_A100-101-102_I100.json
 
 An explicit `--output` path can still be supplied. The JSON also records the
 experiment arguments so later cross-load aggregation remains reproducible.
+
+
+## Workload sweep robustness: K=50 result and K=100 CVX primal guard
+
+The first K=50, E=2 workload validation over scenario seeds 45/46/47 and
+algorithm seeds 100/101/102 completed with 9/9 strict optimal pairs:
+
+- 5/9 improved and 4/9 were unchanged;
+- mean paired gain: 1.746%;
+- median paired gain: 0.047%;
+- accepted moves were dominated by `route_compute_relocate` (8), with one
+  `batch_merge`.
+
+The large gap between mean and median shows that K=50 currently has a
+heterogeneous/outlier-driven gain distribution; it should not be summarized as
+"light load always gives larger/smaller gain" without more seeds.
+
+The first K=100, E=2 run exposed a solver robustness bug during a gray-zone CVX
+refinement. CVXPY returned a nominal Stage-1 solution whose bandwidth primal
+violated the modeled positive lower bound strongly enough that reduced
+post-evaluation raised `ValueError: bandwidth_mhz must be positive`.
+
+The CVX solver now:
+
+1. validates bandwidth, MEC CPU, and local CPU primal values before reciprocal
+   reduced-form evaluation;
+2. clips only tiny numerical lower-bound violations;
+3. retries another installed conic solver for material/non-finite primal
+   violations;
+4. returns a non-feasible `invalid_primal` result if all solver candidates
+   produce unusable resource primals, allowing the screened ALNS evaluator to
+   penalize the state instead of terminating the experiment.
+
+The hybrid validation script also checkpoints its JSON after every completed
+run with `complete=false`, so later failures no longer discard expensive
+earlier workload results. A successful completion rewrites the same file with
+the aggregate and `complete=true`.
