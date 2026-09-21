@@ -65,6 +65,15 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--operator-profile",
+        choices=("core", "full"),
+        default="core",
+        help=(
+            "problem-specific operator profile used when problem operators "
+            "are enabled"
+        ),
+    )
+    parser.add_argument(
         "--objective",
         choices=("proxy", "screened", "kkt"),
         default="proxy",
@@ -114,6 +123,7 @@ def main() -> None:
             seed=cfg.algorithm_seed,
             destroy=DestroyConfig(),
             enable_problem_operators=not args.disable_problem_operators,
+            problem_operator_profile=args.operator_profile,
         )
 
         t0 = perf_counter()
@@ -178,6 +188,7 @@ def main() -> None:
             "problem_operators_enabled": (
                 not args.disable_problem_operators
             ),
+            "problem_operator_profile": args.operator_profile,
             "initial_objective": result.initial_objective,
             "best_objective": result.best_objective,
             "improvement_pct": improvement,
