@@ -518,7 +518,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] K=80,E=2 out-of-sample paired validation；
 - [x] K=50/80/100 workload sensitivity（E=2）；
 - [x] K=100 MEC-count sensitivity（E=2/3/4）；
-- [ ] **[NEXT]** Full Hybrid vs **w/o route-compute relocation**；
+- [ ] **[NEXT]** Full Hybrid vs **w/o route-compute relocation**（开关与 paired 脚本已实现，待运行）；
 - [ ] **[TODO]** w/o contact family；
 - [ ] **[TODO]** w/o batch family；
 - [ ] **[TODO]** w/o progressive widening；
@@ -709,6 +709,16 @@ ALNS proxy：
 ~~~powershell
 uv run python experiments\run_alns_sanity.py --tasks 30 --iterations 30 --objective proxy
 ~~~
+
+核心 elite-family 消融（共享同一 generic exploration）：
+
+~~~powershell
+uv run python experiments\run_elite_family_ablation.py --tasks 80 --mecs 2 --scenario-seeds 45,46,47 --algorithm-seeds 100,101,102 --iterations 100 --profiles full,no-route
+~~~
+
+该脚本对每个 scenario/algorithm seed 只运行一次 Generic ALNS，然后从同一
+exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
+因此用于隔离 `route_compute_relocate` family 的增量作用。
 
 ---
 
