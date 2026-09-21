@@ -1348,3 +1348,48 @@ The default shortlist remains small. The next test should rerun scenario seed 44
 with the default elite budget (no explicit shortlist widening) and check whether
 family-diverse screening recovers the route-compute improvement with much fewer
 CVX calls.
+
+
+## Default diverse-shortlist seed-44 rerun: route family needs targeted widening
+
+With the family-diverse default elite budget restored (roughly 6 exact candidates
+per round), K=80, E=2, scenario seed=44, algorithm seeds 100/101/102 produced:
+
+- seed 100: no accepted move; best exact candidate was
+  `route_compute_relocate::S72->U1@19` with only 0.007% improvement;
+- seed 101: best exact candidate was a new-contact/batch-split move with
+  approximately zero improvement;
+- seed 102: best exact candidate was slightly non-improving;
+- aggregate mean gain returned to 0.000%;
+- mean elite CVX calls dropped from the wide-budget 22.67 to 6.67.
+
+Combined with the previous wide-budget result, this isolates the bottleneck:
+family diversity prevents whole-family starvation, but **one route-family
+representative is still insufficient**. The useful seed-100 move
+`route_compute_relocate::S30->U4@19` appears only when the route candidate
+generation/ranking is widened.
+
+The next refinement is **exact near-miss progressive widening**:
+
+1. evaluate the small family-diverse shortlist first;
+2. if no move clears the meaningful acceptance threshold, inspect the exact-CVX
+   best candidate;
+3. only when that candidate is a positive near miss (default trigger about
+   0.002% relative improvement), widen the *same structural family*;
+4. expand task/route-option generation for that family and evaluate only a few
+   additional exact candidates;
+5. clearly flat or non-improving states do not pay the wider CVX cost.
+
+This should make seed 100 widen the route family because its 0.007% candidate is
+promising, while seeds 101/102 should normally stay on the cheap path.
+
+Recommended verification:
+
+~~~powershell
+git pull
+uv run pytest
+uv run python experiments\run_hybrid_validation.py --tasks 80 --mecs 2 --scenario-seeds 44 --algorithm-seeds 100,101,102 --iterations 100
+~~~
+
+The output now reports `progressive widening` diagnostics and the number of
+additional exact candidates evaluated.
