@@ -40,6 +40,61 @@ def _solution_summary(instance, solution) -> dict[str, Any]:
     }
 
 
+
+def _operator_counts(raw_result) -> dict[str, dict[str, list[int]]]:
+    stats = raw_result.statistics
+    return {
+        "destroy": {
+            name: list(counts)
+            for name, counts in stats.destroy_operator_counts.items()
+        },
+        "repair": {
+            name: list(counts)
+            for name, counts in stats.repair_operator_counts.items()
+        },
+    }
+
+
+def _count_summary(counts: dict[str, list[int]]) -> dict[str, dict[str, int]]:
+    return {
+        name: {
+            "best": int(values[0]),
+            "better": int(values[1]),
+            "accepted": int(values[2]),
+            "rejected": int(values[3]),
+            "uses": int(sum(values)),
+        }
+        for name, values in counts.items()
+    }
+
+
+def _print_operator_summary(
+    mode: str,
+    raw_result,
+) -> None:
+    counts = _operator_counts(raw_result)
+    print(f"  Operator outcomes [{mode}]")
+    for family in ("destroy", "repair"):
+        summary = _count_summary(counts[family])
+        items = sorted(
+            summary.items(),
+            key=lambda item: (
+                -item[1]["best"],
+                -item[1]["better"],
+                -item[1]["accepted"],
+                item[1]["rejected"],
+                item[0],
+            ),
+        )
+        print(f"    {family}:")
+        for name, values in items:
+            print(
+                f"      {name}: uses={values['uses']} "
+                f"best={values['best']} better={values['better']} "
+                f"accepted={values['accepted']} "
+                f"rejected={values['rejected']}"
+            )
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -158,6 +213,9 @@ def main() -> None:
                                 evaluator.stats.cvx_refinements
                             ),
                             "solution": summary,
+                            "operator_counts": _operator_counts(
+                                result.raw_result
+                            ),
                         }
                         rows.append(row)
 
@@ -180,6 +238,10 @@ def main() -> None:
                             f"{evaluator.stats.cvx_refinements:<9} "
                             f"{evaluator.stats.precheck_rejects:<9} "
                             f"{runtime_s:.2f}"
+                        )
+                        _print_operator_summary(
+                            mode,
+                            result.raw_result,
                         )
 
     aggregate: list[dict[str, Any]] = []
