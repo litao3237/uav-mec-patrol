@@ -59,7 +59,31 @@ class _TimeScaledRecordToRecordTravel:
         self.end_threshold = end_gap * init_obj
         self.max_runtime_s = max_runtime_s
         self._started: float | None = started_at
+        self._elapsed_offset_s = 0.0
+        self.elapsed_s = 0.0
         self.last_threshold = self.start_threshold
+
+    def checkpoint_copy(self) -> "_TimeScaledRecordToRecordTravel":
+        """Return a paused copy whose logical cooling progress is preserved.
+
+        Wall-clock time spent between paired fork arms must not advance the
+        acceptance schedule. The returned criterion resumes from the exact
+        logical elapsed search time when it is called again.
+        """
+
+        copied = deepcopy(self)
+        now = perf_counter()
+        elapsed = self._elapsed_offset_s
+        if self._started is not None:
+            elapsed += max(0.0, now - self._started)
+
+        copied._elapsed_offset_s = min(
+            copied.max_runtime_s,
+            elapsed,
+        )
+        copied.elapsed_s = copied._elapsed_offset_s
+        copied._started = None
+        return copied
 
     def __call__(self, rng, best, current, candidate) -> bool:
         del rng, current
@@ -67,7 +91,11 @@ class _TimeScaledRecordToRecordTravel:
         if self._started is None:
             self._started = now
 
-        elapsed = max(0.0, now - self._started)
+        elapsed = (
+            self._elapsed_offset_s
+            + max(0.0, now - self._started)
+        )
+        self.elapsed_s = elapsed
         progress = min(1.0, elapsed / self.max_runtime_s)
         threshold = (
             self.start_threshold
