@@ -12,7 +12,7 @@ METHODS = (
     "legacy_b_alns",
     "legacy_esi",
     "time_b_alns",
-    "budget_aware_terminal_first_v5",
+    "terminal_first_esi_v4",
     "budget_aware_terminal_first_v5",
 )
 EXPECTED_K = (50, 80)
