@@ -1,11 +1,11 @@
 K,method,strict_count,total_count,independence_unit,mean_energy_j,median_energy_j,notes
-50,GR-MR,2,3,unique_scenario,230637.624579,,deterministic baseline
-50,FTR-NM,3,3,unique_scenario,229613.101520,229866.962865,deterministic baseline
-50,RGA-MR,9,9,stochastic_run,235438.000054,227768.557936,P24 G40; not compute-budget matched to ALNS
-50,B-ALNS,9,9,stochastic_run,170323.585797,172689.240129,
-50,ESI-ALNS,9,9,stochastic_run,167015.349815,170279.206646,
-80,GR-MR,0,3,unique_scenario,,,no strict solution
-80,FTR-NM,0,3,unique_scenario,,,no strict solution
-80,RGA-MR,0,3,pilot_scenario,,,K80 P24 G40 A100 pilot; all three precheck infeasible
-80,B-ALNS,9,9,stochastic_run,230038.322851,227529.698302,
-80,ESI-ALNS,9,9,stochastic_run,226768.195610,225479.779368,
+50,GR-MR,7,8,unique_scenario,226449.278579,227768.557936,deterministic baseline; 8 independent scenarios S45-S52
+50,FTR-NM,8,8,unique_scenario,227825.225196,227281.171063,deterministic baseline; 8 independent scenarios S45-S52
+50,RGA-MR,24,24,stochastic_run,227955.556759,227001.501991,P24 G40; 8 scenarios x 3 algorithm seeds; not compute-budget matched to B-ALNS
+50,B-ALNS,24,24,stochastic_run,165966.950451,166786.001566,8 scenarios x 3 algorithm seeds
+50,ESI-ALNS,24,24,stochastic_run,163189.844467,165558.601828,8 scenarios x 3 algorithm seeds; 14 better and 10 equal vs B-ALNS
+80,GR-MR,1,8,unique_scenario,262762.348539,262762.348539,strict only on one independent scenario; conditional energy only
+80,FTR-NM,1,8,unique_scenario,258429.808986,258429.808986,strict only on one independent scenario; conditional energy only
+80,RGA-MR,3,24,stochastic_run,261422.996511,262762.348539,P24 G40; all 3 strict runs occur in scenario 49; conditional energy only
+80,B-ALNS,21,24,stochastic_run,226006.073724,225566.334791,8 scenarios x 3 algorithm seeds; failures S49/A100 and S52/A100,A102
+80,ESI-ALNS,21,24,stochastic_run,224416.885619,225479.779368,8 scenarios x 3 algorithm seeds; 17 better and 4 equal on 21 common-strict pairs
