@@ -44,6 +44,16 @@ class UavMecALNSSegmentResult:
     runtime_s: float
     total_iterations: int
     operator_pair_counts: dict[str, list[int]]
+    exact_cvx_calls: int = 0
+    exact_cvx_accepted: int = 0
+
+    @property
+    def exact_cvx_accepted_hit_rate(self) -> float:
+        return (
+            self.exact_cvx_accepted / self.exact_cvx_calls
+            if self.exact_cvx_calls > 0
+            else 0.0
+        )
 
 
 @dataclass
@@ -226,6 +236,8 @@ class UavMecALNSSession:
 
         started = perf_counter()
         segment_iterations = 0
+        exact_cvx_calls = 0
+        exact_cvx_accepted = 0
 
         while True:
             elapsed = perf_counter() - started
@@ -257,6 +269,11 @@ class UavMecALNSSession:
                 self.rng,
             )
 
+            stats = getattr(self.evaluator, "stats", None)
+            cvx_before = int(
+                getattr(stats, "cvx_refinements", 0)
+            )
+
             self.best_state, self.current_state, outcome = (
                 _evaluate_candidate(
                     self.rng,
@@ -266,6 +283,15 @@ class UavMecALNSSession:
                     candidate,
                 )
             )
+            stats = getattr(self.evaluator, "stats", None)
+            cvx_after = int(
+                getattr(stats, "cvx_refinements", 0)
+            )
+            cvx_delta = max(0, cvx_after - cvx_before)
+            exact_cvx_calls += cvx_delta
+            if cvx_delta > 0 and outcome is not Outcome.REJECT:
+                exact_cvx_accepted += cvx_delta
+
             self.selector.update(
                 candidate,
                 d_idx,
@@ -306,6 +332,8 @@ class UavMecALNSSession:
             runtime_s=runtime_s,
             total_iterations=self.iterations_completed,
             operator_pair_counts=self.selector.pair_counts,
+            exact_cvx_calls=exact_cvx_calls,
+            exact_cvx_accepted=exact_cvx_accepted,
         )
 
     def checkpoint(self) -> UavMecALNSCheckpoint:
