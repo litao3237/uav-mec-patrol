@@ -1,3 +1,8 @@
+from .terminal_recovery import (
+    TerminalRecoveryESIConfig,
+    TerminalRecoveryESIResult,
+    run_uav_mec_terminal_recovery_esi_alns,
+)
 from .continuous import (
     ContinuousESIConfig,
     ContinuousESIResult,
@@ -49,6 +54,8 @@ __all__ = [
     "AdaptiveESIResult",
     "ContinuousESIConfig",
     "ContinuousESIResult",
+    "TerminalRecoveryESIConfig",
+    "TerminalRecoveryESIResult",
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "KKTObjectiveEvaluator",
@@ -73,6 +80,7 @@ __all__ = [
     "shared_mec_pressure_removal",
     "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_continuous_esi_alns",
+    "run_uav_mec_terminal_recovery_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
     "solution_signature",
