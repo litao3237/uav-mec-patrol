@@ -181,6 +181,60 @@ reported as 9/9 universally strict. The correct main-comparison result is
 **21/24 strict over 8 independent scenarios x 3 repetitions**.
 
 
+### 5.3 Matched-runtime fairness comparison
+
+A separate wall-clock experiment uses the same 8 independent scenarios and
+three nested algorithm repetitions, with the protocol frozen in
+`docs/compute_budget_protocol.md`. Full results are recorded in
+`docs/matched_runtime_results.md`.
+
+The **primary** fairness point uses 15 s at K=50 and 45 s at K=80.
+
+| K | Method | Strict | Mean strict energy (J) | Mean search runtime (s) |
+|---:|---|---:|---:|---:|
+| 50 | RGA-MR | 22/24 | 227377.426 | 15.891 |
+| 50 | B-ALNS | 24/24 | **162840.509** | 15.056 |
+| 50 | ESI-ALNS | 24/24 | 163305.576 | 14.539 |
+| 80 | RGA-MR | 3/24 | 262762.349 | 47.101 |
+| 80 | B-ALNS | 23/24 | 223868.579 | 45.795 |
+| 80 | ESI-ALNS | 23/24 | **222376.257** | 44.956 |
+
+For ESI-ALNS versus B-ALNS:
+
+- K=50 / 15 s: 7 better, 9 equal, 8 worse on 24 common-strict pairs;
+  scenario-level mean advantage = **-0.385%**, bootstrap 95% interval roughly
+  [-1.61%, +0.59%];
+- K=80 / 45 s: 8 better, 5 equal, 9 worse on 22 common-strict pairs;
+  scenario-level mean advantage = **+0.387%**, bootstrap 95% interval roughly
+  [-0.16%, +1.01%].
+
+Therefore the matched-runtime experiment **does not support a claim of
+same-time ESI-ALNS superiority over B-ALNS**. The two methods have broadly
+comparable quality under a common wall-clock cap.
+
+This does not invalidate the fixed-exploration ESI ablation. The two
+experiments answer different questions:
+
+1. fixed B-ALNS exploration + ESI post-refinement: ESI is monotone and produces
+   the measured +1.549% (K=50) and +0.673% (K=80) incremental gains;
+2. same total wall-clock cap, allowing B-ALNS to spend that time on additional
+   generic exploration: the ESI/B-ALNS difference is small and mixed.
+
+The paper must present ESI as a problem-specific monotone intensification
+mechanism that buys extra quality for a modest oracle budget, not as an
+unqualified computationally dominant replacement for B-ALNS.
+
+RGA-MR remains substantially weaker: at K=50 ESI is lower-energy in every
+common-strict comparison with about 28.54% mean paired advantage, while at K=80
+RGA-MR is strict in only 3/24 runs.
+
+The repaired cross-method Stage-2 pipeline also completed without crashing.
+Primary 1x Stage-2 strict coverage is 19/24 (RGA-MR), 19/24 (B-ALNS), and 22/24
+(ESI-ALNS) at K=50; and 3/24, 18/24, and 19/24 respectively at K=80. Missing
+Stage-2 records are explicit `optimal_inaccurate`/diagnostic exclusions and do
+not invalidate strict Stage-1 energy results.
+
+
 ---
 
 ## 6. Elite-family ablation
@@ -338,12 +392,16 @@ The planned experiment set is now complete:
 - workload sensitivity: complete;
 - MEC-count sensitivity: complete;
 - UAV-count sensitivity: complete;
-- baseline comparison: complete;
+- 8-scenario baseline comparison: complete;
+- matched-runtime fairness comparison: complete;
+- cross-method Stage-2/QoS extraction: complete with explicit strict-subset
+  exclusions for non-strict Stage-2 solves;
 - elite-family ablation: complete;
 - reduced-scale best-known strong benchmark: complete.
 
-The remaining work is presentation: final figures, compact paper tables, and
-integration into the manuscript.
+The remaining work is primarily presentation and manuscript integration. Any
+further computation should target a clearly identified reviewer-risk question
+rather than extending the experiment matrix by default.
 
 
 ---
