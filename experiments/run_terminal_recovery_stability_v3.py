@@ -7,6 +7,8 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+import numpy as np
+
 from uav_mec.algorithms import (
     ContinuousESIConfig,
     ScreenedProxyObjectiveEvaluator,
@@ -34,6 +36,14 @@ METHODS = (
     "continuous_esi_v2",
     "terminal_recovery_esi_v3",
 )
+
+
+def _json_default(value):
+    if isinstance(value, np.generic):
+        return value.item()
+    raise TypeError(
+        f"Object of type {type(value).__name__} is not JSON serializable"
+    )
 
 
 def _stage1_status(result) -> str:
@@ -415,7 +425,12 @@ def main() -> None:
         },
     }
     output.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False),
+        json.dumps(
+            payload,
+            indent=2,
+            ensure_ascii=False,
+            default=_json_default,
+        ),
         encoding="utf-8",
     )
 
