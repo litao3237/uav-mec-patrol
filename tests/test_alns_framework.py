@@ -5,6 +5,7 @@ import numpy as np
 from uav_mec.algorithms import (
     AdaptiveESIConfig,
     ContinuousESIConfig,
+    TerminalRecoveryESIConfig,
     GARouteConfig,
     ProxyObjectiveEvaluator,
     ProblemOperatorConfig,
@@ -16,6 +17,7 @@ from uav_mec.algorithms import (
     run_route_ga,
     run_uav_mec_adaptive_esi_alns,
     run_uav_mec_continuous_esi_alns,
+    run_uav_mec_terminal_recovery_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
@@ -40,9 +42,11 @@ from uav_mec.algorithms.alns.problem_operators import (
     mec_batch_pressure_removal,
     mode_batch_repair,
     shared_mec_pressure_removal,
+    strict_neighbor_recovery,
 )
 from uav_mec.evaluation import build_event_info, validate_solution
 from uav_mec.optimization.resource import (
+    CVXResourceSolver,
     ResourceSolveResult,
     fast_feasibility_precheck,
 )
@@ -777,3 +781,85 @@ def test_continuous_esi_returns_strict_final_with_fake_oracle() -> None:
     assert result.oracle_calls >= 1
     assert result.total_runtime_s >= 0.0
     assert result.exploration.stop_reason == "search_deadline"
+
+
+
+def test_strict_neighbor_recovery_can_recover_from_nonstrict_base() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    evaluator = ProxyObjectiveEvaluator()
+    state = UavMecState(instance, solution, evaluator)
+
+    recovered, stats = strict_neighbor_recovery(
+        state,
+        config=ProblemOperatorConfig(
+            contact_points_per_mec=1,
+            contact_target_pool=1,
+            critical_task_limit=3,
+            mode_candidate_limit=6,
+        ),
+        objective=lambda _instance, _solution: 123.0,
+        max_runtime_s=1.0,
+    )
+
+    validate_solution(instance, recovered.solution)
+    assert stats["candidates_available"] >= 1
+    assert stats["recovered"] is True
+    assert stats["objective"] == 123.0
+
+
+def test_recovery_cvx_profile_solves_small_instance() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    info = build_event_info(instance, solution)
+    solver = CVXResourceSolver(
+        run_stage2=False,
+        solver_profile="recovery",
+    )
+
+    result = solver.solve(instance, solution, info)
+
+    assert result.feasible
+    assert result.diagnostics["solver_profile"] == "recovery"
+    assert result.diagnostics["stage1_status"] in {
+        "optimal",
+        "optimal_inaccurate",
+    }
+
+
+def test_terminal_recovery_prefers_already_strict_terminal() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_terminal_recovery_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=59,
+        ),
+        terminal=TerminalRecoveryESIConfig(
+            total_runtime_s=0.10,
+            recovery_reserve_fraction=0.10,
+            inner_final_cert_reserve_fraction=0.05,
+            min_structural_recovery_runtime_s=0.0,
+        ),
+        continuous_config=ContinuousESIConfig(
+            total_runtime_s=0.09,
+            final_cert_reserve_fraction=0.05,
+            stagnation_fraction=0.20,
+            min_exploration_fraction=0.10,
+            elite_pool_fraction=0.10,
+            elite_burst_fraction=0.04,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        search_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.selection == "terminal_already_strict"
+    assert result.final_energy_j == 321.0
+    assert result.fallback_used is False
+    assert result.high_accuracy_attempted is False
