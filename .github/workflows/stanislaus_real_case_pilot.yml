@@ -7,6 +7,7 @@ on:
       - '.github/workflows/stanislaus_real_case_pilot.yml'
 
 # calibrated real-AOI pilot
+# six-km nested-load pilot
 jobs:
   pilot:
     runs-on: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
           --task-radius-km 12
           --mec-radius-km 35
           --output outputs/results/stanislaus_real_case_snapshot.json
-      - name: Run real-geography pilot
+      - name: Run real-geography K50 pilot
         run: >-
           uv run python experiments/run_real_geography_case.py
           --snapshot outputs/results/stanislaus_real_case_snapshot.json
@@ -34,11 +35,23 @@ jobs:
           --scenario-seeds 45
           --algorithm-seeds 100
           --iterations 100
-          --output outputs/results/stanislaus_real_case_pilot.json
+          --output outputs/results/stanislaus_real_case_K50_pilot.json
+      - name: Run real-geography K80 pilot
+        run: >-
+          uv run python experiments/run_real_geography_case.py
+          --snapshot outputs/results/stanislaus_real_case_snapshot.json
+          --config configs/real_stanislaus.yaml
+          --tasks 80
+          --uavs 5
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --iterations 100
+          --output outputs/results/stanislaus_real_case_K80_pilot.json
       - name: Upload pilot
         uses: actions/upload-artifact@v4
         with:
           name: stanislaus-real-case-pilot
           path: |
             outputs/results/stanislaus_real_case_snapshot.json
-            outputs/results/stanislaus_real_case_pilot.json
+            outputs/results/stanislaus_real_case_K50_pilot.json
+            outputs/results/stanislaus_real_case_K80_pilot.json
