@@ -200,8 +200,12 @@ quad [J/CVX].
 - [x] 开发集结论具有明显负载分层：K=50 的 Energy-Guided ESI 相对 continued B-ALNS 场景级 mean ΔE 差为 -205.0 J，场景 better/equal/worse = 1/2/5；场景级 J/s 差为 -24.8 J/s，3/1/4。K=80 在 19/24 strict checkpoint 上，Energy-Guided ESI 相对 continued B-ALNS 场景级 mean ΔE 差为 +1149.9 J，5/1/2；场景级 J/s 差为 +206.7 J/s，6/1/1；
 - [x] K=50 strict checkpoint = 24/24；K=80 strict checkpoint = 19/24。K=80 缺失的 5 个 pair 来自 prefix 后的 `optimal_inaccurate` / `infeasible(_precheck)`，因此 K=80 的边际价值结论只适用于 shared strict checkpoint 子集；
 - [x] continued B-ALNS 最终报告已修正为保留已知 exact checkpoint incumbent；该修正只消除 post-hoc exact-energy 负增益，不改变搜索轨迹。开发集按此口径，B-ALNS mean ΔE 为 K=50 1010.8 J、K=80 2130.6 J；Energy-Guided ESI 分别为 805.8 J、3225.7 J；
-- [ ] **[VERIFY]** 修正后的 smoke 通过后冻结 v7 参数，并进入新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
-- [ ] **[TODO]** 若 paired fork 仍不能证明 ESI 的单位时间收益优于 continued B-ALNS，则不再继续增加 ESI 复杂度，论文回到“固定 exploration 后的严格后强化机制”这一较窄主张。
+- [x] 修正后的 smoke 已通过，v7 参数随后冻结并进入全新 unseen block S101–108；S93–100 未重复用作 unseen；
+- [x] unseen run `35745071473` 已完成，16/16 scenario parts 与 aggregate 全部成功。K=50 checkpoint strict 24/24；K=80 checkpoint strict 21/24，非 strict 三组为 S103/A101=`optimal_inaccurate`、S104/A101/A102=`infeasible_precheck`；
+- [x] K=50 unseen：continued B-ALNS mean ΔE = 634.4 J、207.2 J/s；Energy-Guided ESI = 994.6 J、315.9 J/s。但按 8 个独立场景汇总，ESI 相对 B-ALNS 的 ΔE 为 3 better / 2 equal / 3 worse，J/s 同样 3/2/3，未形成稳定优势；
+- [x] K=80 unseen：continued B-ALNS mean ΔE = 3547.7 J、383.5 J/s、1290.4 J/CVX；Energy-Guided ESI = 2748.6 J、356.2 J/s、364.8 J/CVX。按 8 个独立场景汇总，ESI 相对 B-ALNS 的 ΔE 为 3 better / 0 equal / 5 worse，场景级平均差 -1475.7 J；J/s 也是 3/0/5，平均差 -103.0 J/s；
+- [x] 因此 v7 的开发集 K=80 正信号（5/1/2 场景 ΔE、6/1/1 场景 J/s）没有在 unseen S101–108 复现。**v7 不晋升，停止继续增加 ESI 复杂度。**
+- [x] 论文最终主张收窄为：ESI 是在固定 exploration 后、由 strict Stage-1 CVX 单调接受保证不劣于 exploration incumbent 的问题特定后强化机制；现有证据不支持“相同追加 wall-clock 下 ESI 稳定优于 continued B-ALNS”或“全负载同时间效率更高”的主张。
 
 v7 的计时口径固定为：checkpoint 的 strict Stage-1 验证和每条 arm 的最终 correctness verification 属于共同测量开销，不计入 branch wall-clock；算法在 branch 内主动触发的 exact Stage-1 CVX（B-ALNS gray-zone refinement 或 ESI candidate acceptance）计入该 arm 的计算成本与 J/CVX。
 
