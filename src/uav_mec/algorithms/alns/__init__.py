@@ -1,3 +1,8 @@
+from .budget_aware_terminal_first import (
+    BudgetAwareTerminalFirstConfig,
+    BudgetAwareTerminalFirstResult,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
+)
 from .terminal_first import (
     TerminalFirstESIConfig,
     TerminalFirstESIResult,
@@ -55,6 +60,8 @@ from .runner import (
 from .state import UavMecState
 
 __all__ = [
+    "BudgetAwareTerminalFirstConfig",
+    "BudgetAwareTerminalFirstResult",
     "AdaptiveESIConfig",
     "AdaptiveESIResult",
     "ContinuousESIConfig",
@@ -85,6 +92,7 @@ __all__ = [
     "regret2_insertion_repair",
     "route_segment_removal",
     "shared_mec_pressure_removal",
+    "run_uav_mec_budget_aware_terminal_first_esi_alns",
     "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_continuous_esi_alns",
     "run_uav_mec_terminal_first_esi_alns",
