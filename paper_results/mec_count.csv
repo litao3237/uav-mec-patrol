@@ -1,0 +1,4 @@
+num_mecs,runs,stage1_strict,stage2_strict,energy_mean_j,delay_mean_s,deadline_slack_mean_s,offload_ratio_mean,contacts_per_uav_mean,route_distance_km_mean,bandwidth_util_mean,cpu_util_mean,fixed_energy_share_mean,runtime_mean_s
+2,9,3,3,249008.510,220.135,122.442,0.167,1.467,12.362,1.000,0.594,0.974,69.303
+3,9,8,5,248254.117,227.245,114.610,0.202,1.440,12.490,1.000,0.475,0.976,77.239
+4,9,8,5,249309.489,227.642,113.393,0.208,1.600,12.469,1.000,0.378,0.978,93.841
