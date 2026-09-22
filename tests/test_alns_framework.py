@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from uav_mec.algorithms import (
+    AdaptiveESIConfig,
     GARouteConfig,
     ProxyObjectiveEvaluator,
     ProblemOperatorConfig,
@@ -12,15 +13,21 @@ from uav_mec.algorithms import (
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
     run_route_ga,
+    run_uav_mec_adaptive_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
+import uav_mec.algorithms.alns.runner as runner_module
 from uav_mec.algorithms.alns import (
     DestroyConfig,
     UavMecState,
     cheapest_insertion_repair,
     make_destroy_operators,
     random_task_removal,
+)
+from uav_mec.algorithms.alns.runner import (
+    _MaxRuntimeOrStagnation,
+    _TimeScaledRecordToRecordTravel,
 )
 from uav_mec.algorithms.alns.problem_operators import (
     compute_aware_insertion_repair,
@@ -615,3 +622,86 @@ def test_hybrid_zero_elite_budget_skips_structural_candidates() -> None:
     assert result.best_solution == result.exploration.best_solution
     assert result.elite_stats["candidates_evaluated"] == 0
     assert result.elite_stats["budget_exhausted"] is True
+
+
+
+class _ObjectiveOnlyState:
+    def __init__(self, value: float) -> None:
+        self.value = value
+
+    def objective(self) -> float:
+        return self.value
+
+
+def test_time_scaled_rrt_follows_elapsed_runtime(monkeypatch) -> None:
+    times = iter([0.0, 5.0])
+    monkeypatch.setattr(
+        runner_module,
+        "perf_counter",
+        lambda: next(times),
+    )
+    criterion = _TimeScaledRecordToRecordTravel(
+        init_obj=1000.0,
+        start_gap=0.02,
+        end_gap=0.0,
+        max_runtime_s=10.0,
+    )
+    best = _ObjectiveOnlyState(1000.0)
+    candidate = _ObjectiveOnlyState(1015.0)
+
+    assert criterion(None, best, best, candidate) is True
+    assert criterion.last_threshold == 20.0
+    assert criterion(None, best, best, candidate) is False
+    assert criterion.last_threshold == 10.0
+
+
+def test_runtime_stagnation_stop_tracks_best_improvement(
+    monkeypatch,
+) -> None:
+    times = iter([0.0, 1.0, 3.0])
+    monkeypatch.setattr(
+        runner_module,
+        "perf_counter",
+        lambda: next(times),
+    )
+    stop = _MaxRuntimeOrStagnation(
+        10.0,
+        stagnation_runtime_s=1.5,
+        min_runtime_s=0.0,
+    )
+
+    assert stop(None, _ObjectiveOnlyState(100.0), None) is False
+    assert stop(None, _ObjectiveOnlyState(90.0), None) is False
+    assert stop(None, _ObjectiveOnlyState(90.0), None) is True
+    assert stop.stop_reason == "stagnation"
+    assert stop.last_improvement_elapsed_s == 1.0
+
+
+def test_adaptive_esi_returns_strict_incumbent_with_fake_oracle() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_adaptive_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=43,
+        ),
+        adaptive=AdaptiveESIConfig(
+            total_runtime_s=0.05,
+            stagnation_runtime_s=0.005,
+            min_exploration_runtime_s=0.0,
+            elite_burst_runtime_s=0.01,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.strict_incumbent_found is True
+    assert result.final_energy_j == 321.0
+    assert result.strict_incumbent_updates >= 1
+    assert result.phase_records
