@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/stanislaus_real_case_pilot.yml'
 
+# calibrated real-AOI pilot
 jobs:
   pilot:
     runs-on: ubuntu-latest
