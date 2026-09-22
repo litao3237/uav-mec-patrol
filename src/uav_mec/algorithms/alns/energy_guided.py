@@ -564,7 +564,7 @@ def _solution_signature(solution: DiscreteSolution) -> tuple[Any, ...]:
         tuple(
             (
                 uav_id,
-                solution.routes[uav_id].labels(),
+                tuple(solution.routes[uav_id].labels()),
             )
             for uav_id in sorted(solution.routes)
         ),
