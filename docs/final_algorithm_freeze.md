@@ -4,7 +4,11 @@
 >
 > Paper-facing branch target: `develop`.
 >
+> Frozen paper-facing baseline commit: `ed2f185b6ebc150fbaaaef35f77b8c0305cc5238`.
+>
 > Experimental provenance branch: `experiment/paired-checkpoint-fork-v7`.
+>
+> v7 validation/documentation head at freeze: `792d49de7a268429269283b96552caab2ca1a095`.
 
 ## 1. Final paper-facing algorithm
 
