@@ -1,0 +1,22 @@
+name: adaptive-esi-full-tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/adaptive-esi-stability
+    paths:
+      - '.github/workflows/adaptive_esi_full_tests.yml'
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run full test suite
+        run: uv run pytest
