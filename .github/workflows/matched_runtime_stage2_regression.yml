@@ -1,0 +1,41 @@
+name: matched-runtime-stage2-regression
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/matched_runtime_stage2_regression.yml'
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Reproduce former failing case
+        run: >-
+          uv run python experiments/run_matched_runtime_comparison.py
+          --tasks 80
+          --mecs 2
+          --uavs 5
+          --scenario-seeds 46
+          --algorithm-seeds 102
+          --time-budget-s 45
+          --esi-exploration-budget-s 38
+          --esi-elite-budget-s 7
+          --rrt-iterations 100
+          --budget-factor 1
+          --paper-metrics
+          --output outputs/results/matched_runtime_regression_K80_S46_A102_F1.json
+      - name: Upload regression result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matched-runtime-regression-K80-S46-A102-F1
+          path: outputs/results/matched_runtime_regression_K80_S46_A102_F1.json
+          if-no-files-found: warn
