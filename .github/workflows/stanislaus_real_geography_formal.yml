@@ -1,0 +1,44 @@
+name: stanislaus-real-geography-formal
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/stanislaus_real_geography_formal.yml'
+
+jobs:
+  real-case:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Fetch official USFS GIS snapshot
+        run: >-
+          uv run python experiments/prepare_stanislaus_real_case.py
+          --task-radius-km 12
+          --mec-radius-km 35
+          --output outputs/results/stanislaus_real_case_snapshot.json
+      - name: Run formal real-geography matrix
+        run: >-
+          uv run python experiments/run_real_geography_case.py
+          --snapshot outputs/results/stanislaus_real_case_snapshot.json
+          --config configs/real_stanislaus.yaml
+          --tasks 59
+          --uavs 5
+          --scenario-seeds 45,46,47
+          --algorithm-seeds 100,101,102
+          --iterations 100
+          --elite-rounds 2
+          --output outputs/results/stanislaus_real_case_K59_M5_E2_S45-46-47_A100-101-102.json
+      - name: Upload formal real-case results
+        uses: actions/upload-artifact@v4
+        with:
+          name: stanislaus-real-geography-K59-formal
+          path: |
+            outputs/results/stanislaus_real_case_snapshot.json
+            outputs/results/stanislaus_real_case_K59_M5_E2_S45-46-47_A100-101-102.json
