@@ -3,6 +3,8 @@
 > 适用算法：最终冻结的 ESI-ALNS。
 >
 > 正文只呈现论文所需证据；v5–v7 的预算公平性与 paired-checkpoint 研发过程仅作为内部审计和必要时的补充材料来源，不进入主文算法叙事。
+>
+> **Data validation:** GitHub Actions run `35749187944` passed after separating the 3×3 dense-workload interface from the formal 8×3 main-comparison interface. Final paired counts are K=50: 14/10/0 over 24 pairs and K=80: 17/4/0 over 21 common-strict pairs.
 
 ## 1. 正文实验叙事顺序
 
