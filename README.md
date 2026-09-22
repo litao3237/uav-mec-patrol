@@ -22,9 +22,190 @@
 当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
-**当前阶段：已有实验和 Fig. 3–13、Fig. S1–S2 已整理完成；五方法主比较已扩展到 8 个独立场景 × 3 次算法重复。当前主要剩余证据缺口是计算预算/计时口径公平性，以及跨方法详细 QoS/资源指标的统一采集。**
+**当前阶段（2026-09-22）：五方法 8×3 主比较已完成；固定迭代下 ESI 对 B-ALNS 的后强化增益成立，但等时间实验表明原 ESI 与继续运行 B-ALNS 基本持平。v5 已验证“动态认证预算”能消除固定 10% reserve 的浪费；v6 Energy-Guided ESI 在开发集上提高了 J/CVX 与 J/s，但 S93–100 unseen hold-out 在完成 47/48 组后已提前终止，整体 same-time 增益未达到预注册晋升标准。当前工作已切换到 `experiment/paired-checkpoint-fork-v7`，下一步不再比较两条独立时间轨迹，而是从同一个 B-ALNS checkpoint 分叉，直接比较继续 B-ALNS、旧 ESI 与 Energy-Guided ESI 的边际节能效率。**
 
 下文历史记录中的“完成”表示对应设置和当时清单已经执行，不表示所有方法、所有指标与所有场景均已覆盖。当前实验范围、结论边界和后续优先级以本节核查及第 6 节为准。
+
+
+## 0.2 新会话继续入口：算法稳定性与 same-time 实验进展
+
+> 如果从新会话继续本项目，优先读取本节，再阅读
+> `docs/budget_utilization_v5_results.md`、
+> `docs/energy_guided_esi_v6_dev_round2_results.md` 和
+> `docs/energy_guided_esi_v6_holdout_early_terminated.md`。
+
+### 当前分支与保护原则
+
+- 论文/主开发分支 `develop` **保持不动**，尚未把 v1–v6 实验性稳定性改造合并进去；
+- 当前新实验分支：`experiment/paired-checkpoint-fork-v7`；
+- v7 分支从 v6 结果记录提交
+  `a662238d1a70941f78c85a6a8aaedf4c10e64f8a` 创建；
+- 在 v7 结论出来以前，不修改论文主算法的正式命名：
+  - B-ALNS = Base ALNS，内部 backbone / ablation baseline；
+  - ESI-ALNS = Adaptive Large Neighborhood Search with Elite Structural Intensification，本文方法；
+  - GR-MR / FTR-NM / RGA-MR 为外部基线。
+
+### 为什么从 v1 一直改到 v6
+
+原始 `develop` 的固定 100-iteration 实验表明 ESI 是有效的“后强化”：
+
+- K=50：ESI vs B-ALNS，14/24 better、10/24 equal、0 worse，平均约 1.55%；
+- K=80：共同 strict 的 21 组中，17 better、4 equal、0 worse，平均约 0.67%。
+
+但这个比较给了 ESI **额外计算时间**。当改成相同 wall-clock budget 后，ESI 与“继续运行 B-ALNS”基本持平，因此后续 v1–v6 都围绕“能否让 ESI 的单位时间收益真正高于继续 ALNS”展开。
+
+### v1–v5 结论
+
+- **v1**：ALNS → ESI → ALNS 重启；会破坏 operator learning / RNG 轨迹，放弃。
+- **v2 Continuous ESI**：保留同一 ALNS engine，strict 稳定性改善，但 strict incumbent 默认回退会使 K=80 能耗偏保守。
+- **v3 Terminal Recovery**：terminal-first 思路有效，但 high-accuracy SCS recovery 在 K=80 为 0/4 成功，并制造长尾，放弃。
+- **v4 Terminal-First**：删除昂贵 recovery 后工程上更干净，但 same-time 能耗相对 v2 基本持平，没有形成算法增益。
+- **v5 Budget-Aware Reserve**：**通过预注册预算利用率标准**。初始 reserve=3%T；若当前运行已观察到慢 Stage-1 solve，则
+  [
+  R(t)=min(0.08T,max(0.03T,2max_j c_j)).
+  ]
+  v5 相比固定 10% reserve 释放了约 1–3 s 搜索时间；K=80 strict 为 19/24，平均 overrun 0.733 s。  
+  结论：动态 reserve 是有效的工程改进，但 v5 与 Time-B-ALNS 的同时间能耗仍基本持平。
+
+### v6 Energy-Guided ESI
+
+v6 不再调 reserve，而是重设计 ESI：
+
+1. 用 exact Stage-1 解构造 task/contact energy hotspot；
+2. 引入小权重 deadline/cycle dual 作为热点排序修正；
+3. 直接构造 Route + UAV assignment + Offload + Contact/Batch 的联合候选；
+4. cheap proxy 先筛选，再把 exact Stage-1 CVX shortlist 压到最多 3 个；
+5. 当没有正 proxy-gain 候选时，最多允许 1 个 high-hotspot exploratory fallback。
+
+开发阶段（S85–88、S89–92）曾观察到：
+
+- K=80 exact CVX 次数下降；
+- accepted-CVX hit rate 与 J/s 提升；
+- 相对 Time-B-ALNS 的同时间场景均值一度约 +0.3%～+0.8%；
+- 联合 `Route+Offload+New Contact` move 被真实接受。
+
+因此冻结参数并进入 S93–100 unseen hold-out。
+
+### v6 unseen hold-out 最终状态
+
+正式 run：`35734227589`。  
+冻结算法提交：`b56aca30280da4c5423435d188e9505a9155f327`。
+
+目标为 48 个 seed-pair；最终：
+
+- K=50：24/24 完成；
+- K=80：23/24 完成；
+- 唯一缺失：K=80 / S100 / A102；
+- 缺失 job 卡在 GitHub runner 的 `uv sync`，实验本身尚未启动；
+- 其余算法 job 均未失败；
+- 根据已完成 47 组，v6 已经很难满足冻结 promotion 条件，因此停止继续消耗 CI，run 标记为 cancelled，aggregate 未执行。
+
+47/48 诊断结果：
+
+- K=50：v6 vs v5 场景级均值约 **-0.039%**；
+- K=50：v6 vs Time-B 约 **-0.227%**，仍在预设 -0.25% 容忍线内；
+- K=80：v6 vs v5 约 **-0.646%**；
+- K=80：v6 vs Time-B 约 **-0.082%**，未达到预设 +0.25% 门槛。
+
+因此：
+
+[
+oxed{	ext{v6 不晋升为论文正式算法}}
+]
+
+但这不等于 energy-guided move 本身无效。异常样本诊断显示：
+
+- K=50/S94/A101：v6 没有 ESI improvement，但 B-ALNS 时间轨迹只完成约 45 iter，而 v5 约 55 iter，主要是 wall-clock / solver 顺序噪声；
+- K=80/S100/A101：v6 接受两个 strict coupled offload move，ESI 本身直接降低约 **5141 J**，但进入 ESI 前的 ALNS 搜索轨迹已经显著更差。
+
+因此当前最大的实验混杂因素不是“move 一定无效”，而是：
+
+[
+oxed{	ext{独立 time-bounded ALNS 轨迹差异会淹没 ESI 的边际贡献}}
+]
+
+### v7：Paired Checkpoint Fork —— 当前下一步
+
+v7 的科学问题改为：
+
+> 给定**完全相同的 B-ALNS 搜索状态**和**完全相同的追加计算预算**，下一秒用于继续 B-ALNS，还是用于 ESI，更能降低 strict Stage-1 UAV energy？
+
+冻结实验结构拟定为：
+
+[
+	ext{B-ALNS prefix }(0.8T)
+ightarrow
+	ext{同一 strict checkpoint}
+ightarrow
+egin{cases}
+	ext{继续 B-ALNS }(0.2T),\
+	ext{Legacy ESI }(0.2T),\
+	ext{Energy-Guided ESI }(0.2T).
+end{cases}
+]
+
+其中：
+
+- K=50：总搜索预算 15 s，prefix 12 s，branch 3 s；
+- K=80：总搜索预算 45 s，prefix 36 s，branch 9 s；
+- 三条支路必须共享同一个 checkpoint；
+- B-ALNS continuation 必须保留：
+  - current state；
+  - historical best；
+  - Roulette Wheel operator weights；
+  - RNG state；
+  - RRT 的逻辑进度；
+- ESI 两条支路都从 checkpoint 的同一个 strict solution 开始；
+- 所有支路最终都由同一 Stage-1 CVX correctness oracle 评估。
+
+主要指标改为边际收益：
+
+[
+eta_t=
+rac{E_{mathrm{checkpoint}}-E_{mathrm{arm}}}
+{Delta T}
+quad [J/s]
+]
+
+以及：
+
+[
+eta_{mathrm{CVX}}=
+rac{E_{mathrm{checkpoint}}-E_{mathrm{arm}}}
+{N_{mathrm{exact CVX}}}
+quad [J/CVX].
+]
+
+同时报告：
+
+- branch strict rate；
+- (Delta E)；
+- J/s；
+- J/CVX；
+- exact-CVX accepted hit rate；
+- continuation ALNS iteration 数；
+- accepted ESI move family。
+
+**当前 v7 代码状态：**
+
+- [x] 新分支 `experiment/paired-checkpoint-fork-v7` 已创建；
+- [ ] **[IN PROGRESS]** 实现可续跑 ALNS session/checkpoint；不能简单调用两次现有 `run_uav_mec_alns()`，因为那会重置 selector 权重和 RNG；
+- [ ] **[TODO]** 增加 paired-fork 单元测试；
+- [ ] **[TODO]** 先用已观察开发场景做机制验证；
+- [ ] **[TODO]** 机制冻结后才选择新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
+- [ ] **[TODO]** 若 paired fork 仍不能证明 ESI 的单位时间收益优于 continued B-ALNS，则不再继续增加 ESI 复杂度，论文回到“固定 exploration 后的严格后强化机制”这一较窄主张。
+
+### 新会话应从这里开始
+
+新会话不要继续调 v5 reserve，也不要补跑 v6 的 S100/A102。直接继续：
+
+1. 在 `experiment/paired-checkpoint-fork-v7` 完成 resumable ALNS checkpoint/session；
+2. 验证 checkpoint 复制后 continuation 在相同 RNG/weights 下可复现；
+3. 实现三臂 fork：continued B-ALNS / Legacy ESI / Energy-Guided ESI；
+4. 先做开发集 paired marginal-value 实验；
+5. 只有机制通过后再冻结新的 unseen scenario block。
+
+---
 
 <a id="experiment-evidence-audit"></a>
 
