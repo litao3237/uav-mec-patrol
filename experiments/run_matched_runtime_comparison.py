@@ -78,13 +78,22 @@ def _extract_paper_metrics(
     result = solver.solve(instance, solution, info)
     runtime_s = perf_counter() - started
     status = _stage1_status(result)
-    if not result.feasible or status != "optimal":
+    stage2_status = str(
+        result.diagnostics.get("stage2_status", "unknown")
+    )
+    if (
+        not result.feasible
+        or status != "optimal"
+        or stage2_status != "optimal"
+    ):
         return (
             None,
             (
                 "metrics_recompute_not_strict: "
                 f"stage1={status}, "
-                f"stage2={result.diagnostics.get('stage2_status')}"
+                f"stage2={stage2_status}, "
+                "stage2_errors="
+                f"{result.diagnostics.get('stage2_solver_errors', [])}"
             ),
             runtime_s,
         )
@@ -101,17 +110,28 @@ def _extract_paper_metrics(
             runtime_s,
         )
 
-    return (
-        build_paper_metrics(
+    try:
+        metrics = build_paper_metrics(
             instance,
             solution,
             result,
             info=info,
             reference_distance_m=reference_distance_m,
-        ),
-        None,
-        runtime_s,
-    )
+        )
+    except (ValueError, FloatingPointError, KeyError) as exc:
+        return (
+            None,
+            (
+                "paper_metrics_build_failed: "
+                f"{type(exc).__name__}: {exc}; "
+                f"stage2={stage2_status}; "
+                "stage2_errors="
+                f"{result.diagnostics.get('stage2_solver_errors', [])}"
+            ),
+            runtime_s,
+        )
+
+    return metrics, None, runtime_s
 
 
 def _finalize_method(
