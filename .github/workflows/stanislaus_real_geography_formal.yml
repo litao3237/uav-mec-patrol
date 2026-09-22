@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/stanislaus_real_geography_formal.yml'
 
+# pinned USFS snapshot for reproducibility
 jobs:
   real-case:
     runs-on: ubuntu-latest
@@ -17,16 +18,10 @@ jobs:
           python-version: '3.13'
       - name: Install dependencies
         run: uv sync --dev
-      - name: Fetch official USFS GIS snapshot
-        run: >-
-          uv run python experiments/prepare_stanislaus_real_case.py
-          --task-radius-km 12
-          --mec-radius-km 35
-          --output outputs/results/stanislaus_real_case_snapshot.json
       - name: Run formal real-geography matrix
         run: >-
           uv run python experiments/run_real_geography_case.py
-          --snapshot outputs/results/stanislaus_real_case_snapshot.json
+          --snapshot data/real_case/stanislaus/usfs_fire_occurrences_selected59_2026-09-22.json
           --config configs/real_stanislaus.yaml
           --tasks 59
           --uavs 5
@@ -40,5 +35,5 @@ jobs:
         with:
           name: stanislaus-real-geography-K59-formal
           path: |
-            outputs/results/stanislaus_real_case_snapshot.json
+            data/real_case/stanislaus/usfs_fire_occurrences_selected59_2026-09-22.json
             outputs/results/stanislaus_real_case_K59_M5_E2_S45-46-47_A100-101-102.json
