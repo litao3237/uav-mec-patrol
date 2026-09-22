@@ -3,6 +3,8 @@
 from .alns import (
     AdaptiveESIConfig,
     AdaptiveESIResult,
+    ContinuousESIConfig,
+    ContinuousESIResult,
     DestroyConfig,
     HybridUavMecALNSResult,
     KKTObjectiveEvaluator,
@@ -13,6 +15,7 @@ from .alns import (
     UavMecALNSConfig,
     UavMecALNSResult,
     run_uav_mec_adaptive_esi_alns,
+    run_uav_mec_continuous_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
@@ -34,6 +37,8 @@ from .initial import (
 __all__ = [
     "AdaptiveESIConfig",
     "AdaptiveESIResult",
+    "ContinuousESIConfig",
+    "ContinuousESIResult",
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "GreedyInitialConfig",
@@ -56,6 +61,7 @@ __all__ = [
     "evaluate_initial_proxy",
     "run_route_ga",
     "run_uav_mec_adaptive_esi_alns",
+    "run_uav_mec_continuous_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
 ]
