@@ -1,0 +1,89 @@
+name: matched-runtime-main-comparison
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/matched_runtime_main_comparison.yml'
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        tasks: [50, 80]
+        scenario: [45, 46, 47, 48, 49, 50, 51, 52]
+        algorithm: [100, 101, 102]
+        factor: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run matched-runtime comparison
+        shell: bash
+        run: |
+          if [ "${{ matrix.tasks }}" = "50" ]; then
+            BASE_TOTAL=15
+            BASE_EXPLORE=11
+            BASE_ELITE=4
+          else
+            BASE_TOTAL=45
+            BASE_EXPLORE=38
+            BASE_ELITE=7
+          fi
+
+          FACTOR=${{ matrix.factor }}
+          TOTAL=$((BASE_TOTAL * FACTOR))
+          EXPLORE=$((BASE_EXPLORE * FACTOR))
+          ELITE=$((BASE_ELITE * FACTOR))
+          RRT=$((100 * FACTOR))
+
+          EXTRA=""
+          if [ "${{ matrix.algorithm }}" = "100" ] && [ "$FACTOR" = "1" ]; then
+            EXTRA="--include-deterministic"
+          fi
+
+          uv run python experiments/run_matched_runtime_comparison.py             --tasks ${{ matrix.tasks }}             --mecs 2             --uavs 5             --scenario-seeds ${{ matrix.scenario }}             --algorithm-seeds ${{ matrix.algorithm }}             --time-budget-s "$TOTAL"             --esi-exploration-budget-s "$EXPLORE"             --esi-elite-budget-s "$ELITE"             --rrt-iterations "$RRT"             --budget-factor "$FACTOR"             --paper-metrics             $EXTRA             --output outputs/results/matched_runtime_K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_F${{ matrix.factor }}.json
+      - name: Upload seed-pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matched-runtime-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}-F${{ matrix.factor }}
+          path: outputs/results/matched_runtime_K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_F${{ matrix.factor }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: compare
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: matched-runtime-K*-S*-A*-F*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate matched-runtime comparison
+        run: >-
+          python experiments/aggregate_matched_runtime.py
+          --input-dir outputs/results/matrix
+          --output-json outputs/results/matched_runtime_K50-80_S45-52_A100-102_F1-2.json
+          --output-csv outputs/results/matched_runtime_K50-80_S45-52_A100-102_F1-2.csv
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: matched-runtime-main-aggregate
+          path: |
+            outputs/results/matched_runtime_K50-80_S45-52_A100-102_F1-2.json
+            outputs/results/matched_runtime_K50-80_S45-52_A100-102_F1-2.csv
