@@ -1,0 +1,30 @@
+name: stanislaus-real-case-scout
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/stanislaus_real_case_scout.yml'
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Scout official USFS GIS data
+        run: >-
+          uv run python experiments/prepare_stanislaus_real_case.py
+          --task-radius-km 12
+          --mec-radius-km 35
+          --output outputs/results/stanislaus_real_case_scout.json
+      - name: Upload scout snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: stanislaus-real-case-scout
+          path: outputs/results/stanislaus_real_case_scout.json
