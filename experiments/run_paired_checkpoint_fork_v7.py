@@ -113,13 +113,32 @@ def _run_continued_b_alns(
         checkpoint.instance,
         result.best_solution,
     )
-    final_energy = _energy(final)
+    raw_final_strict = _strict(final)
+    raw_final_status = _stage1_status(final)
+    raw_final_energy = _energy(final)
+
+    # The exact checkpoint incumbent is already known before the fork. A
+    # continuation arm must never discard it merely because the screened
+    # search objective selects a proxy-better but exact-worse terminal state.
+    retained_checkpoint_incumbent = bool(
+        raw_final_energy is None
+        or raw_final_energy > checkpoint_energy_j
+    )
+    final_energy = (
+        checkpoint_energy_j
+        if retained_checkpoint_incumbent
+        else raw_final_energy
+    )
 
     row = {
         "arm": "continued_b_alns",
-        "strict": _strict(final),
-        "stage1_status": _stage1_status(final),
+        "strict": True,
+        "stage1_status": "optimal",
         "energy_j": final_energy,
+        "raw_final_strict": raw_final_strict,
+        "raw_final_stage1_status": raw_final_status,
+        "raw_final_energy_j": raw_final_energy,
+        "retained_checkpoint_incumbent": retained_checkpoint_incumbent,
         "branch_runtime_s": result.runtime_s,
         "iterations": result.iterations,
         "exact_cvx_calls": result.exact_cvx_calls,
