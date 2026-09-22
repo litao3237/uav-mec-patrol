@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from time import perf_counter
 from typing import Any
 
 import numpy as np
@@ -43,6 +44,7 @@ class GARouteConfig:
     assignment_mutation_rate: float = 0.04
     order_swap_rate: float = 0.04
     random_initial_fraction: float = 0.20
+    max_runtime_s: float | None = None
 
 
 @dataclass
@@ -89,6 +91,8 @@ def _validate_config(config: GARouteConfig) -> None:
         raise ValueError("invalid tournament_size")
     if not 1 <= config.elite_count < config.population_size:
         raise ValueError("invalid elite_count")
+    if config.max_runtime_s is not None and config.max_runtime_s < 0:
+        raise ValueError("max_runtime_s must be non-negative")
     for name, value in (
         ("crossover_rate", config.crossover_rate),
         ("assignment_mutation_rate", config.assignment_mutation_rate),
@@ -343,6 +347,7 @@ def run_route_ga(
     cfg = config or GARouteConfig()
     _validate_config(cfg)
     rng = np.random.default_rng(seed)
+    search_started = perf_counter()
 
     task_ids = _task_ids(instance)
     uav_ids = _uav_ids(instance)
@@ -401,8 +406,14 @@ def run_route_ga(
 
     population = evaluate_population(chromosomes)
     history = [population[0].fitness]
+    completed_generations = 0
 
     for _generation in range(cfg.generations):
+        if (
+            cfg.max_runtime_s is not None
+            and perf_counter() - search_started >= cfg.max_runtime_s
+        ):
+            break
         next_chromosomes = [
             item.chromosome.copy()
             for item in population[: cfg.elite_count]
@@ -443,6 +454,13 @@ def run_route_ga(
 
         population = evaluate_population(next_chromosomes)
         history.append(population[0].fitness)
+        completed_generations += 1
+
+        if (
+            cfg.max_runtime_s is not None
+            and perf_counter() - search_started >= cfg.max_runtime_s
+        ):
+            break
 
     best = population[0]
     best_solution = best.solution
@@ -451,7 +469,7 @@ def run_route_ga(
             "builder": "route_ga_with_mec_repair",
             "ga_seed": seed,
             "ga_population_size": cfg.population_size,
-            "ga_generations": cfg.generations,
+            "ga_generations": completed_generations,
             "ga_evaluations": evaluations,
             "ga_cache_hits": cache_hits,
             "ga_best_proxy_score": best.fitness,
@@ -461,7 +479,7 @@ def run_route_ga(
     return GARouteResult(
         best_solution=best_solution,
         best_proxy=best.proxy,
-        generations=cfg.generations,
+        generations=completed_generations,
         evaluations=evaluations,
         cache_hits=cache_hits,
         history_best_score=history,
@@ -474,5 +492,7 @@ def run_route_ga(
                 cfg.assignment_mutation_rate
             ),
             "order_swap_rate": cfg.order_swap_rate,
+            "max_runtime_s": cfg.max_runtime_s,
+            "search_runtime_s": perf_counter() - search_started,
         },
     )
