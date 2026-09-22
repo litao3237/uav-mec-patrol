@@ -1,9 +1,11 @@
 # Paper Experiment Summary
 
 This file consolidates the paper-facing experimental evidence for the frozen
-ESI-ALNS ALNS. Unless noted otherwise, paper-scale runs use scenario
-seeds 45/46/47, algorithm seeds 100/101/102, and a frozen ALNS budget of 100
-iterations.
+ESI-ALNS. The main baseline comparison now uses **8 independent scenario
+instances (seeds 45--52) x 3 algorithm repetitions (seeds 100/101/102)** with a
+frozen ALNS budget of 100 iterations. Earlier sensitivity/ablation experiments
+that have not yet been expanded retain their original 3-scenario setting
+(seeds 45/46/47).
 
 The primary objective is total UAV energy. A result is counted as a strict
 resource optimum only when the Stage-1 CVX status is exactly `optimal`.
@@ -37,7 +39,7 @@ verified by CVXPY. CVXPY remains the paper-scale correctness oracle.
 
 Setting: (M=5), (E=2), (Kin{50,80,100}).
 
-| K | Stage-1 strict | Stage-2 strict | Mean Hybrid energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
+| K | Stage-1 strict | Stage-2 strict | Mean ESI-ALNS energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 50 | 9/9 | 8/9 | 167015.350 | 204.607 | 132.680 | 0.080 | 0.533 | 8.655 | 1.000 | 0.441 | 0.992 |
 | 80 | 9/9 | 8/9 | 226768.196 | 217.543 | 123.068 | 0.122 | 1.044 | 11.494 | 1.000 | 0.489 | 0.983 |
@@ -59,7 +61,7 @@ Interpretation:
 
 Setting: (K=100), (M=5), (Ein{2,3,4}).
 
-| E | Stage-1 strict | Stage-2 strict | Mean Hybrid energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
+| E | Stage-1 strict | Stage-2 strict | Mean ESI-ALNS energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 2 | 3/9 | 3/9 | 249008.510 | 220.135 | 122.442 | 0.167 | 1.467 | 12.362 | 1.000 | 0.594 | 0.974 |
 | 3 | 8/9 | 5/8 | 248254.117 | 227.245 | 114.610 | 0.202 | 1.440 | 12.490 | 1.000 | 0.475 | 0.976 |
@@ -82,7 +84,7 @@ Interpretation:
 
 Setting: (K=80), (E=2), (Min{3,5,8}).
 
-| M | Stage-1 strict | Stage-2 strict | Mean Hybrid energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
+| M | Stage-1 strict | Stage-2 strict | Mean ESI-ALNS energy (J) | Mean delay (s) | Mean deadline slack (s) | Offload ratio | Contacts/UAV | Route distance (km) | Active-MEC BW util. | Active-MEC CPU util. | Fixed-energy share |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 3 | 0/9 | 0/9 | - | - | - | - | - | - | - | - | - |
 | 5 | 9/9 | 8/9 | 226768.196 | 217.543 | 123.068 | 0.125 | 1.050 | 11.498 | 1.000 | 0.489 | 0.983 |
@@ -93,7 +95,7 @@ Interpretation:
 - M=3 does not recover a strict-feasible terminal structure under the frozen
   100-iteration budget; this is not a proof of global mathematical infeasibility;
 - M=5 and M=8 are both 9/9 strict Stage-1;
-- moving from M=5 to M=8 reduces mean Hybrid energy by about 1.01%, reduces
+- moving from M=5 to M=8 reduces mean ESI-ALNS energy by about 1.01%, reduces
   delay, increases deadline slack, and lowers contacts per UAV;
 - the offload fraction stays nearly constant, so the main effect of additional
   UAVs is reduced route/service pressure and redistribution of contact work.
@@ -102,57 +104,82 @@ Interpretation:
 
 ## 5. Baseline comparison
 
+The main comparison has been expanded to **8 independent scenarios x 3
+algorithm repetitions**. The 24 stochastic runs are nested within 8 independent
+scenario instances and must not be described as 24 independent scenarios.
+Deterministic GR-MR and FTR-NM are counted once per scenario.
+
 ### 5.1 Moderate-load energy-quality comparison
 
-Setting: (K=50,E=2).
+Setting: (K=50,M=5,E=2), scenario seeds 45--52, algorithm seeds 100/101/102.
 
 | Method | Strict feasibility | Mean energy (J) | Median energy (J) |
 |---|---:|---:|---:|
-| GR-MR | 2/3 unique scenarios | 230637.625 | 230637.625 |
-| Fixed-Task-Route Nearest-MEC (FTR-NM) | 3/3 unique scenarios | 229613.102 | 229866.963 |
-| RGA-MR | 9/9 | 235438.000 | 227768.558 |
-| B-ALNS | 9/9 | 170323.586 | 172689.240 |
-| ESI-ALNS | 9/9 | **167015.350** | **170279.207** |
+| GR-MR | 7/8 unique scenarios | 226449.279 | 227768.558 |
+| FTR-NM | 8/8 unique scenarios | 227825.225 | 227281.171 |
+| RGA-MR | 24/24 | 227955.557 | 227001.502 |
+| B-ALNS | 24/24 | 165966.950 | 166786.002 |
+| ESI-ALNS | 24/24 | **163189.844** | **165558.602** |
 
-Paired comparisons:
+Paired ESI-ALNS comparisons:
 
-- Hybrid vs FTR-NM: 9/9 Hybrid better; mean paired advantage 27.297%; median
-  26.629%.
-- Hybrid vs Route-GA: 9/9 Hybrid better; mean paired advantage 28.884%; median
-  28.771%.
-- Hybrid vs B-ALNS: 5/9 better, 4/9 equal, 0/9 worse; mean 1.803%;
-  median 0.047%.
+- versus FTR-NM: ESI-ALNS is lower in all 24 nested comparisons (all 8
+  independent scenarios); mean paired advantage 28.378%, median 27.424%;
+- versus RGA-MR: 24/24 lower; mean paired advantage 28.341%, median 28.248%;
+- versus B-ALNS: 14/24 lower, 10/24 equal, 0/24 worse; mean paired advantage
+  1.549%, run-level median 0.079%.
 
-The deterministic Greedy/FTR-NM methods are counted by unique scenarios rather
-than repeated algorithm seeds.
+After averaging the three algorithm repetitions inside each independent
+scenario, the ESI-ALNS-vs-B-ALNS gain is positive in 7/8 scenarios and zero in
+scenario 46. The mean of the eight scenario-level gains is 1.549% and the
+scenario-level median is about 1.187%. Thus the gain is heterogeneous rather
+than uniformly large, but it is no longer confined to the original three
+scenarios.
 
 ### 5.2 High-load feasibility robustness
 
-Setting: (K=80,E=2).
+Setting: (K=80,M=5,E=2), scenario seeds 45--52, algorithm seeds 100/101/102.
 
-| Method | Strict feasibility |
-|---|---:|
-| GR-MR | 0/3 unique scenarios |
-| FTR-NM | 0/3 unique scenarios |
-| Route-GA + MEC repair | 0/3 in high-budget pilot |
-| B-ALNS | 9/9 |
-| ESI-ALNS | 9/9 |
+| Method | Strict feasibility | Interpretation |
+|---|---:|---|
+| GR-MR | 1/8 unique scenarios | deterministic construction rarely recovers a strict solution |
+| FTR-NM | 1/8 unique scenarios | fixed task route + nearest-MEC repair rarely recovers a strict solution |
+| RGA-MR | 3/24 | all three strict runs occur in scenario 49 |
+| B-ALNS | 21/24 | strict in every scenario at least once |
+| ESI-ALNS | 21/24 | same strict set as B-ALNS; ESI is an energy intensification stage |
 
-For the Route-GA high-budget pilot, about 903-904 distinct route structures were
-evaluated per scenario and the best proxy states still retained 6/4/4
-constraint violations. This supports the conclusion that the high-load result
-is not merely caused by an intentionally undersized GA budget.
+The three non-strict B-ALNS/ESI-ALNS runs are:
 
-For Hybrid vs B-ALNS at K=80/E=2:
+- scenario 49 / algorithm seed 100: `optimal_inaccurate`;
+- scenario 52 / algorithm seed 100: `infeasible_precheck`;
+- scenario 52 / algorithm seed 102: `infeasible_precheck`.
 
-- 8/9 improved;
-- 1/9 unchanged;
-- 0/9 worse;
-- mean paired gain 1.378%;
-- median paired gain 1.154%.
+Thus 6/8 independent scenarios are strict in all three repetitions, while
+scenarios 49 and 52 are partially strict. No independent scenario has zero
+strict B-ALNS/ESI-ALNS repetitions.
 
-This is the cleanest setting for demonstrating the incremental value of the
-problem-specific elite structural intensification.
+On the 21 common-strict B-ALNS/ESI-ALNS pairs:
+
+- ESI-ALNS better: 17/21;
+- equal: 4/21;
+- worse: 0/21;
+- mean paired energy reduction: 0.673%;
+- median paired reduction: 0.197%;
+- mean strict energy: 226006.074 J -> 224416.886 J.
+
+The scenario-averaged ESI improvement is positive in all eight scenarios when
+computed over their available strict repetitions, although scenarios 49 and 52
+have incomplete strict coverage and must be interpreted conditionally.
+
+RGA-MR has only 3/24 strict runs, and only two of those are simultaneously
+strict with ESI-ALNS. Therefore its K=80 conditional energy difference is not
+used as a broad energy-quality claim; K=80 primarily demonstrates feasibility
+robustness. The clean RGA-MR energy comparison remains K=50.
+
+The expanded result changes the earlier 3-scenario statement: K=80 is no longer
+reported as 9/9 universally strict. The correct main-comparison result is
+**21/24 strict over 8 independent scenarios x 3 repetitions**.
+
 
 ---
 
@@ -333,7 +360,7 @@ K\in\{30,40,50,60,70,80\},\quad M=5,\quad E=2
 
 每个 K 使用 scenario seeds 45/46/47 与 algorithm seeds 100/101/102，共 9 runs。
 
-| K | Generic strict | Hybrid strict | Generic Mean Energy (J) | Hybrid Mean Energy (J) | Mean Hybrid Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | Runtime (s) |
+| K | Generic strict | ESI-ALNS strict | Generic Mean Energy (J) | Hybrid Mean Energy (J) | Mean ESI-ALNS Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | Runtime (s) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 30 | 9/9 | 9/9 | 122917.377 | 122914.052 | 0.003% | 5.9% | 0.267 | 6.465 | 3.611 |
 | 40 | 9/9 | 9/9 | 135783.361 | 135693.420 | 0.066% | 8.9% | 0.378 | 7.034 | 5.491 |
@@ -445,7 +472,7 @@ K=80,\quad M=5,\quad E=2
 - clustered；
 - boundary-biased。
 
-| Spatial Profile | Stage-1 Strict | Mean Energy on Strict Subset (J) | Mean Hybrid Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow |
+| Spatial Profile | Stage-1 Strict | Mean Energy on Strict Subset (J) | Mean ESI-ALNS Gain | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | uniform | **9/9** | 226768.196 | 1.378% | 12.2% | 1.044 | 11.494 | 0.005 |
 | clustered | 7/9 | 146764.392 | 0.200% | 27.5% | 0.971 | 6.981 | **0.013** |
@@ -478,7 +505,7 @@ K=80,\quad M=5,\quad E=2
 C_{\max}\in\{1,2,3,4\}
 \]
 
-| \(C_{\max}\) | Stage-1 Strict | Stage-2 Strict | Mean Energy on Strict Subset (J) | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow | CPU Relative Shadow | Mean Hybrid Gain | Runtime (s) |
+| \(C_{\max}\) | Stage-1 Strict | Stage-2 Strict | Mean Energy on Strict Subset (J) | Offload Ratio | Contacts/UAV | Route Distance (km) | BW Relative Shadow | CPU Relative Shadow | Mean ESI-ALNS Gain | Runtime (s) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 1 | 6/9 | 2/6 | 239095.092 | 12.5% | 0.733 | 12.180 | 0.004 | 0.000 | 1.155% | 36.967 |
 | 2 | 7/9 | 5/7 | 234636.497 | 12.5% | 1.029 | 11.938 | 0.004 | 0.000 | 0.213% | 50.179 |
@@ -565,7 +592,7 @@ For Hybrid versus Generic on the eight common-strict pairs:
 - mean paired Hybrid advantage: **0.543%**;
 - median paired advantage: 0%.
 
-Hybrid strict-run summaries:
+ESI-ALNS strict-run summaries:
 
 - Stage-2 strict: 8/8;
 - mean route distance: 48.154 km;
