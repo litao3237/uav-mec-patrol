@@ -341,6 +341,12 @@ class _ContinuousESIController:
             deepcopy(best.solution),
             self.evaluator,
         )
+        oracle_calls_before = int(
+            getattr(self.oracle, "calls", 0)
+        )
+        oracle_runtime_count_before = len(
+            getattr(self.oracle, "solve_runtimes_s", [])
+        )
         elite_started = perf_counter()
         intensified, elite_stats = self.elite_intensifier(
             state,
@@ -351,6 +357,50 @@ class _ContinuousESIController:
         )
         elite_runtime_s = perf_counter() - elite_started
         self.elite_runtime_s += elite_runtime_s
+
+        exact_calls_delta = max(
+            0,
+            int(getattr(self.oracle, "calls", 0))
+            - oracle_calls_before,
+        )
+        solve_runtimes = list(
+            getattr(self.oracle, "solve_runtimes_s", [])
+        )
+        exact_runtime_delta = float(
+            sum(
+                solve_runtimes[
+                    oracle_runtime_count_before:
+                ]
+            )
+        )
+        elite_stats.setdefault(
+            "exact_cvx_calls",
+            exact_calls_delta,
+        )
+        if float(
+            elite_stats.get("exact_runtime_s", 0.0)
+        ) <= 0.0:
+            elite_stats["exact_runtime_s"] = (
+                exact_runtime_delta
+            )
+        elite_stats.setdefault(
+            "exact_improvement_j",
+            sum(
+                float(move.get("improvement_j", 0.0))
+                for move in elite_stats.get(
+                    "accepted_moves",
+                    [],
+                )
+            ),
+        )
+        if "strict_candidates" not in elite_stats:
+            elite_stats["strict_candidates"] = sum(
+                move.get("objective") is not None
+                for move in elite_stats.get(
+                    "evaluated_moves",
+                    [],
+                )
+            )
 
         result_started = perf_counter()
         elite_result = self.oracle.solve(
