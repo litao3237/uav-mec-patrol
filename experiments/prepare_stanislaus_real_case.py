@@ -313,6 +313,21 @@ def main() -> None:
     print(
         f"fire_occurrences_within_{args.task_radius_km:g}km={len(fires)}"
     )
+    for radius_km in (2, 4, 6, 8, 10, 12):
+        count = sum(
+            item["distance_from_depot_m"] <= radius_km * 1000.0
+            for item in fires
+        )
+        print(f"fire_count_within_km radius={radius_km} count={count}")
+    for radius_km in (5, 10, 15, 20, 30, 35):
+        count = sum(
+            item["distance_from_depot_m"] <= radius_km * 1000.0
+            for item in filtered_communications
+        )
+        print(
+            f"communication_count_within_km "
+            f"radius={radius_km} count={count}"
+        )
     years = [
         int(item["fire_year"])
         for item in fires
