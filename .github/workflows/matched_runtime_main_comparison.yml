@@ -1,4 +1,5 @@
 name: matched-runtime-main-comparison
+# Protocol revision: Stage-2 primal validation + strict 96-pair coverage.
 
 concurrency:
   group: matched-runtime-main-comparison
