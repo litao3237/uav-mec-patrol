@@ -1,0 +1,5 @@
+scenario,best_known_energy_j,best_known_contacts,best_known_offloaded,strong_hits,strong_runs,standard_strict,standard_runs,standard_gap_mean_pct,standard_gap_median_pct
+45,97905.087437,1,2,4,12,3,3,9.695225,8.609939
+46,99503.124192,2,2,5,12,3,3,0.070572,0.070572
+47,103608.196273,1,1,1,12,3,3,8.136903,9.203351
+aggregate,,,,10,36,9,9,5.967567,8.609939
