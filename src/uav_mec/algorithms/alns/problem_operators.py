@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from functools import partial, update_wrapper
+from time import perf_counter
 
 import numpy as np
 
@@ -1333,6 +1334,7 @@ def contact_mode_intensification(
     objective,
     max_rounds: int = 2,
     tolerance: float = 1e-12,
+    max_runtime_s: float | None = None,
 ) -> tuple[UavMecState, dict[str, object]]:
     """Exact-oracle elite intensification over structural MEC neighborhoods.
 
@@ -1342,6 +1344,16 @@ def contact_mode_intensification(
     reassignment candidates. Cheap proxy/precheck logic builds the shortlist;
     the supplied objective oracle decides every accepted move.
     """
+
+    if max_runtime_s is not None and max_runtime_s < 0:
+        raise ValueError("max_runtime_s must be non-negative")
+
+    started = perf_counter()
+    deadline = (
+        None
+        if max_runtime_s is None
+        else started + max_runtime_s
+    )
 
     current = state.copy()
     stats: dict[str, object] = {
@@ -1353,7 +1365,19 @@ def contact_mode_intensification(
         "widenings": 0,
         "widened_candidates_evaluated": 0,
         "widened_families": [],
+        "budget_exhausted": False,
+        "max_runtime_s": max_runtime_s,
+        "runtime_s": 0.0,
     }
+
+    def time_exhausted() -> bool:
+        exhausted = (
+            deadline is not None
+            and perf_counter() >= deadline
+        )
+        if exhausted:
+            stats["budget_exhausted"] = True
+        return exhausted
 
     def value(solution: DiscreteSolution) -> float:
         return float(objective(current.instance, solution))
@@ -1361,6 +1385,8 @@ def contact_mode_intensification(
     current_value = value(current.solution)
 
     for _ in range(max_rounds):
+        if time_exhausted():
+            break
         stats["rounds"] = int(stats["rounds"]) + 1
         shortlist = _structural_elite_candidates(
             current,
@@ -1382,8 +1408,10 @@ def contact_mode_intensification(
             candidate: DiscreteSolution,
             *,
             widened: bool = False,
-        ) -> None:
+        ) -> bool:
             nonlocal best_value, best_label, best_solution
+            if time_exhausted():
+                return False
             candidate_value = value(candidate)
             stats["candidates_evaluated"] = (
                 int(stats["candidates_evaluated"]) + 1
@@ -1436,9 +1464,11 @@ def contact_mode_intensification(
                 best_value = candidate_value
                 best_label = label
                 best_solution = candidate
+            return True
 
         for label, candidate in shortlist:
-            evaluate_candidate(label, candidate)
+            if not evaluate_candidate(label, candidate):
+                break
 
         # Progressive widening is only triggered by an exact-CVX positive
         # near miss. This preserves the cheap default budget on clearly flat
@@ -1447,6 +1477,7 @@ def contact_mode_intensification(
         # acceptance threshold.
         if (
             best_solution is None
+            and not time_exhausted()
             and config.elite_progressive_widening
         ):
             round_moves = [
@@ -1521,11 +1552,12 @@ def contact_mode_intensification(
                         )
                         stats["widened_families"] = widened_families
                         for label, candidate in extras:
-                            evaluate_candidate(
+                            if not evaluate_candidate(
                                 label,
                                 candidate,
                                 widened=True,
-                            )
+                            ):
+                                break
 
         stats["evaluated_moves"] = evaluated_moves
 
@@ -1556,6 +1588,7 @@ def contact_mode_intensification(
         )
         stats["accepted_moves"] = accepted_moves
 
+    stats["runtime_s"] = perf_counter() - started
     validate_solution(current.instance, current.solution)
     current.invalidate()
     return current, stats
