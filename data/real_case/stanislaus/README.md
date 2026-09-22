@@ -27,3 +27,12 @@ Important interpretation:
   location, not as a claim that a sensor is physically installed there;
 - this experiment is a real-geography/GIS-driven case study, not a field-flight
   experiment.
+
+## Pinned formal snapshot
+
+The formal K=59 case uses
+`usfs_fire_occurrences_selected59_2026-09-22.json`.
+It pins the exact 59 unique USFS historical fire-occurrence coordinates
+used by the formal 2026-09-22 experiment, so future reruns do not depend
+on changes to the live ArcGIS service. The live scout workflow remains
+available for provenance checks and future dataset refreshes.
