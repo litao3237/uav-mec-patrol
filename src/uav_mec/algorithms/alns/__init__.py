@@ -1,3 +1,8 @@
+from .continuous import (
+    ContinuousESIConfig,
+    ContinuousESIResult,
+    run_uav_mec_continuous_esi_alns,
+)
 from .adaptive import (
     AdaptiveESIConfig,
     AdaptiveESIResult,
@@ -42,6 +47,8 @@ from .state import UavMecState
 __all__ = [
     "AdaptiveESIConfig",
     "AdaptiveESIResult",
+    "ContinuousESIConfig",
+    "ContinuousESIResult",
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "KKTObjectiveEvaluator",
@@ -65,6 +72,7 @@ __all__ = [
     "route_segment_removal",
     "shared_mec_pressure_removal",
     "run_uav_mec_adaptive_esi_alns",
+    "run_uav_mec_continuous_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
     "solution_signature",
