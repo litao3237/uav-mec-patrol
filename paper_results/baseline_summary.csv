@@ -1,11 +1,11 @@
 K,method,strict_count,total_count,independence_unit,mean_energy_j,median_energy_j,notes
-50,Greedy+MEC Repair,2,3,unique_scenario,230637.624579,,deterministic baseline
-50,FR-NM,3,3,unique_scenario,229613.101520,229866.962865,deterministic baseline
-50,GA Route Search+Repair,9,9,stochastic_run,235438.000054,227768.557936,P24 G40; not compute-budget matched to ALNS
-50,Generic ALNS,9,9,stochastic_run,170323.585797,172689.240129,
-50,Proposed Hybrid,9,9,stochastic_run,167015.349815,170279.206646,
-80,Greedy+MEC Repair,0,3,unique_scenario,,,no strict solution
-80,FR-NM,0,3,unique_scenario,,,no strict solution
-80,GA Route Search+Repair,0,3,pilot_scenario,,,K80 P24 G40 A100 pilot; all three precheck infeasible
-80,Generic ALNS,9,9,stochastic_run,230038.322851,227529.698302,
-80,Proposed Hybrid,9,9,stochastic_run,226768.195610,225479.779368,
+50,GR-MR,2,3,unique_scenario,230637.624579,,deterministic baseline
+50,FTR-NM,3,3,unique_scenario,229613.101520,229866.962865,deterministic baseline
+50,RGA-MR,9,9,stochastic_run,235438.000054,227768.557936,P24 G40; not compute-budget matched to ALNS
+50,B-ALNS,9,9,stochastic_run,170323.585797,172689.240129,
+50,ESI-ALNS,9,9,stochastic_run,167015.349815,170279.206646,
+80,GR-MR,0,3,unique_scenario,,,no strict solution
+80,FTR-NM,0,3,unique_scenario,,,no strict solution
+80,RGA-MR,0,3,pilot_scenario,,,K80 P24 G40 A100 pilot; all three precheck infeasible
+80,B-ALNS,9,9,stochastic_run,230038.322851,227529.698302,
+80,ESI-ALNS,9,9,stochastic_run,226768.195610,225479.779368,
