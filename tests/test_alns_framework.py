@@ -695,6 +695,7 @@ def test_adaptive_esi_returns_strict_incumbent_with_fake_oracle() -> None:
             min_exploration_runtime_s=0.0,
             elite_burst_runtime_s=0.01,
             max_elite_triggers=1,
+            min_remaining_runtime_s=0.0,
         ),
         evaluator=ProxyObjectiveEvaluator(),
         elite_oracle=oracle,
