@@ -15,9 +15,20 @@ from .problem import build_resource_model
 from .result import ResourceSolveResult
 
 
-def _solver_candidates() -> list[str]:
+def _solver_candidates(
+    solver_profile: str = "default",
+) -> list[str]:
     installed = set(cp.installed_solvers())
-    preferred = ("CLARABEL", "SCS", "ECOS")
+    if solver_profile == "default":
+        preferred = ("CLARABEL", "SCS", "ECOS")
+    elif solver_profile == "recovery":
+        # A fresh high-accuracy SCS attempt is useful when the default
+        # Clarabel/SCS chain ended at OPTIMAL_INACCURATE.
+        preferred = ("SCS", "CLARABEL", "ECOS")
+    else:
+        raise ValueError(
+            f"Unknown solver_profile={solver_profile!r}"
+        )
     candidates = [solver for solver in preferred if solver in installed]
     if not candidates:
         raise RuntimeError(
@@ -27,10 +38,27 @@ def _solver_candidates() -> list[str]:
     return candidates
 
 
-def _solver_kwargs(solver: str, verbose: bool) -> dict[str, Any]:
+def _solver_kwargs(
+    solver: str,
+    verbose: bool,
+    solver_profile: str = "default",
+) -> dict[str, Any]:
     kwargs: dict[str, Any] = {"verbose": verbose}
     if solver == "SCS":
-        kwargs.update({"eps": 1e-6, "max_iters": 100000})
+        if solver_profile == "recovery":
+            kwargs.update(
+                {
+                    "eps": 2e-7,
+                    "max_iters": 300000,
+                }
+            )
+        else:
+            kwargs.update(
+                {
+                    "eps": 1e-6,
+                    "max_iters": 100000,
+                }
+            )
     return kwargs
 
 
@@ -40,6 +68,7 @@ def _solve_with_fallback(
     verbose: bool,
     preferred_solver: str | None = None,
     excluded_solvers: set[str] | None = None,
+    solver_profile: str = "default",
 ) -> tuple[str | None, list[str]]:
     """Solve robustly and prefer an exact CVXPY status over an inaccurate one.
 
@@ -56,7 +85,7 @@ def _solve_with_fallback(
 
     candidates = [
         solver
-        for solver in _solver_candidates()
+        for solver in _solver_candidates(solver_profile)
         if solver not in (excluded_solvers or set())
     ]
     if preferred_solver in candidates:
@@ -82,7 +111,11 @@ def _solve_with_fallback(
                 )
                 problem.solve(
                     solver=solver,
-                    **_solver_kwargs(solver, verbose),
+                    **_solver_kwargs(
+                        solver,
+                        verbose,
+                        solver_profile,
+                    ),
                 )
         except cp.error.SolverError as exc:
             errors.append(f"{solver}: {exc}")
@@ -111,7 +144,11 @@ def _solve_with_fallback(
                 )
                 problem.solve(
                     solver=inaccurate_solver,
-                    **_solver_kwargs(inaccurate_solver, verbose),
+                    **_solver_kwargs(
+                        inaccurate_solver,
+                        verbose,
+                        solver_profile,
+                    ),
                 )
         except cp.error.SolverError as exc:
             errors.append(
@@ -226,6 +263,7 @@ def solve_resource_problem(
     verbose: bool = False,
     energy_tol_rel: float = 1e-6,
     run_stage2: bool = True,
+    solver_profile: str = "default",
 ) -> ResourceSolveResult:
     info = info or build_event_info(instance, solution)
 
@@ -263,6 +301,7 @@ def solve_resource_problem(
             problem1,
             verbose=verbose,
             excluded_solvers=excluded_solvers,
+            solver_profile=solver_profile,
         )
         stage1_errors.extend(solve_errors)
         if solver1 is None:
@@ -305,7 +344,9 @@ def solve_resource_problem(
             + "; ".join(primal_violations)
         )
         excluded_solvers.add(solver1)
-        if len(excluded_solvers) >= len(_solver_candidates()):
+        if len(excluded_solvers) >= len(
+            _solver_candidates(solver_profile)
+        ):
             return ResourceSolveResult(
                 status="invalid_primal",
                 solver=solver1,
@@ -369,6 +410,7 @@ def solve_resource_problem(
                 verbose=verbose,
                 preferred_solver=solver1,
                 excluded_solvers=stage2_excluded,
+                solver_profile=solver_profile,
             )
             stage2_errors.extend(solve_errors)
 
@@ -396,7 +438,9 @@ def solve_resource_problem(
                     + "; ".join(stage2_primal_violations)
                 )
                 stage2_excluded.add(solver2)
-                if len(stage2_excluded) >= len(_solver_candidates()):
+                if len(stage2_excluded) >= len(
+                    _solver_candidates(solver_profile)
+                ):
                     stage2_status = "invalid_primal"
                     break
                 continue
@@ -461,6 +505,7 @@ def solve_resource_problem(
         },
         "problem1_is_dcp": problem1.is_dcp(),
         "problem1_is_dpp": problem1.is_dpp(),
+        "solver_profile": solver_profile,
     }
 
     return ResourceSolveResult(
