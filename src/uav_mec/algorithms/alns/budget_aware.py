@@ -213,6 +213,7 @@ def run_uav_mec_budget_aware_terminal_first_alns(
     config: UavMecALNSConfig | None = None,
     evaluator: ObjectiveEvaluator | None = None,
     elite_oracle: Stage1CVXObjectiveOracle | None = None,
+    elite_intensifier=None,
 ) -> BudgetAwareTerminalFirstResult:
     """Run terminal-first ESI with adaptive final-certification reserve."""
 
@@ -257,18 +258,24 @@ def run_uav_mec_budget_aware_terminal_first_alns(
         started_at=started,
     )
 
-    controller = _BudgetAwareESIController(
-        instance=instance,
-        evaluator=objective_evaluator,
-        problem_config=base_cfg.problem,
-        oracle=oracle,
-        policy=continuous,
-        started_at=started,
-        search_deadline_at=(
+    controller_kwargs = {
+        "instance": instance,
+        "evaluator": objective_evaluator,
+        "problem_config": base_cfg.problem,
+        "oracle": oracle,
+        "policy": continuous,
+        "started_at": started,
+        "search_deadline_at": (
             hard_deadline_at - initial_reserve_s
         ),
-        budget_policy=budget_aware,
-        hard_deadline_at=hard_deadline_at,
+        "budget_policy": budget_aware,
+        "hard_deadline_at": hard_deadline_at,
+    }
+    if elite_intensifier is not None:
+        controller_kwargs["elite_intensifier"] = elite_intensifier
+
+    controller = _BudgetAwareESIController(
+        **controller_kwargs
     )
 
     exploration_cfg = replace(
