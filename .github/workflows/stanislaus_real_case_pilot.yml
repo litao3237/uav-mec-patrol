@@ -1,0 +1,43 @@
+name: stanislaus-real-case-pilot
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/stanislaus_real_case_pilot.yml'
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Fetch official USFS GIS snapshot
+        run: >-
+          uv run python experiments/prepare_stanislaus_real_case.py
+          --task-radius-km 12
+          --mec-radius-km 35
+          --output outputs/results/stanislaus_real_case_snapshot.json
+      - name: Run real-geography pilot
+        run: >-
+          uv run python experiments/run_real_geography_case.py
+          --snapshot outputs/results/stanislaus_real_case_snapshot.json
+          --config configs/real_stanislaus.yaml
+          --tasks 50
+          --uavs 5
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --iterations 100
+          --output outputs/results/stanislaus_real_case_pilot.json
+      - name: Upload pilot
+        uses: actions/upload-artifact@v4
+        with:
+          name: stanislaus-real-case-pilot
+          path: |
+            outputs/results/stanislaus_real_case_snapshot.json
+            outputs/results/stanislaus_real_case_pilot.json
