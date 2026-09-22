@@ -1,0 +1,100 @@
+name: energy-guided-esi-v6-dev2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/energy-guided-esi-v6
+    paths:
+      - 'src/uav_mec/algorithms/alns/**'
+      - 'src/uav_mec/algorithms/__init__.py'
+      - 'tests/test_alns_framework.py'
+      - 'experiments/run_energy_guided_esi_v6_dev2.py'
+      - 'experiments/aggregate_energy_guided_esi_v6_dev2.py'
+      - 'docs/energy_guided_esi_v6_dev_round1_results.md'
+      - '.github/workflows/energy_guided_esi_v6_dev2.yml'
+
+concurrency:
+  group: energy-guided-esi-v6-dev2
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Ruff undefined-name check
+        run: >-
+          uvx ruff check --select F821
+          src/uav_mec/algorithms/alns/energy_guided.py
+          src/uav_mec/algorithms/alns/continuous.py
+          src/uav_mec/algorithms/alns/budget_aware.py
+          src/uav_mec/algorithms/alns/hybrid.py
+          experiments/run_energy_guided_esi_v6_dev2.py
+          experiments/aggregate_energy_guided_esi_v6_dev2.py
+          tests/test_alns_framework.py
+      - name: Focused ALNS tests
+        run: uv run pytest tests/test_alns_framework.py -q
+      - name: Full test suite
+        run: uv run pytest -q
+
+  compare:
+    needs: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        tasks: [50, 80]
+        scenario: [89, 90, 91, 92]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run development matrix
+        shell: bash
+        run: |
+          if [ "${{ matrix.tasks }}" = "50" ]; then
+            TOTAL=15
+          else
+            TOTAL=45
+          fi
+          uv run python experiments/run_energy_guided_esi_v6_dev2.py             --tasks ${{ matrix.tasks }}             --mecs 2             --uavs 5             --scenario-seed ${{ matrix.scenario }}             --algorithm-seed ${{ matrix.algorithm }}             --time-budget-s "$TOTAL"             --output outputs/results/energy_v6_dev2_K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+      - name: Upload development result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: energy-v6-dev2-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/energy_v6_dev2_K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.algorithm }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    needs: compare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: energy-v6-dev2-K*-S*-A*
+          path: outputs/results/matrix
+          merge-multiple: true
+      - name: Aggregate development matrix
+        run: >-
+          python experiments/aggregate_energy_guided_esi_v6_dev2.py
+          --input-dir outputs/results/matrix
+          --output outputs/results/energy_guided_esi_v6_dev2_K50-80_S89-92_A100-102.json
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: energy-guided-esi-v6-dev2-aggregate
+          path: outputs/results/energy_guided_esi_v6_dev2_K50-80_S89-92_A100-102.json
