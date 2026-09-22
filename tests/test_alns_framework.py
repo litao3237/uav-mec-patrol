@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from uav_mec.algorithms import (
+    GARouteConfig,
     ProxyObjectiveEvaluator,
     ProblemOperatorConfig,
     ScreenedProxyObjectiveEvaluator,
@@ -10,6 +11,7 @@ from uav_mec.algorithms import (
     UavMecALNSConfig,
     build_greedy_initial_solution,
     build_mec_assisted_initial_solution,
+    run_route_ga,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
@@ -550,3 +552,66 @@ def test_elite_progressive_widening_can_be_disabled_for_ablation() -> None:
     assert stats["widenings"] == 0
     assert stats["widened_candidates_evaluated"] == 0
     assert stats["widened_families"] == []
+
+
+
+def test_alns_wall_clock_budget_can_stop_before_first_iteration() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    result = run_uav_mec_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=4,
+            seed=31,
+            max_runtime_s=0.0,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert sum(
+        sum(values)
+        for values in result.operator_pair_counts.values()
+    ) == 0
+
+
+def test_route_ga_wall_clock_budget_returns_initial_population_best() -> None:
+    instance = _small_instance()
+    result = run_route_ga(
+        instance,
+        seed=37,
+        config=GARouteConfig(
+            population_size=6,
+            generations=10,
+            max_runtime_s=0.0,
+        ),
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.generations == 0
+    assert result.evaluations > 0
+
+
+def test_hybrid_zero_elite_budget_skips_structural_candidates() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_hybrid_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=1,
+            seed=41,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_rounds=2,
+        elite_oracle=oracle,
+        elite_max_runtime_s=0.0,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.best_solution == result.exploration.best_solution
+    assert result.elite_stats["candidates_evaluated"] == 0
+    assert result.elite_stats["budget_exhausted"] is True
