@@ -62,6 +62,11 @@ from .runner import (
     UavMecALNSResult,
     run_uav_mec_alns,
 )
+from .session import (
+    UavMecALNSCheckpoint,
+    UavMecALNSSegmentResult,
+    UavMecALNSSession,
+)
 from .state import UavMecState
 
 __all__ = [
@@ -83,8 +88,11 @@ __all__ = [
     "ProblemOperatorConfig",
     "ScreenedProxyObjectiveEvaluator",
     "Stage1CVXObjectiveOracle",
+    "UavMecALNSCheckpoint",
     "UavMecALNSConfig",
     "UavMecALNSResult",
+    "UavMecALNSSegmentResult",
+    "UavMecALNSSession",
     "UavMecState",
     "cheapest_insertion_repair",
     "compute_aware_insertion_repair",
