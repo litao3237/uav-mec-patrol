@@ -1,5 +1,9 @@
 name: matched-runtime-main-comparison
 
+concurrency:
+  group: matched-runtime-main-comparison
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   push:
@@ -21,8 +25,6 @@ jobs:
         factor: [1, 2]
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: develop
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: '3.13'
@@ -67,8 +69,6 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: develop
       - uses: actions/download-artifact@v4
         with:
           pattern: matched-runtime-K*-S*-A*-F*
