@@ -6,7 +6,7 @@ from time import perf_counter
 from typing import Any
 
 import numpy as np
-from alns import Outcome
+from alns.Outcome import Outcome
 from alns.accept import RecordToRecordTravel
 
 from uav_mec.algorithms.initial import (
