@@ -1,0 +1,15 @@
+record_type,method_or_metric,strict_count,total_count,mean_energy_j,median_energy_j,value,notes
+method,Greedy+MEC Repair,0,3,,,,deterministic unique scenarios
+method,FR-NM,0,3,,,,deterministic unique scenarios
+method,Generic ALNS,8,9,883683.620739,883325.287615,,stochastic runs
+method,Proposed Hybrid,8,9,878690.612793,873289.247792,,stochastic runs
+paired,Hybrid better vs Generic,2,8,,,2,common-strict pairs
+paired,Hybrid equal vs Generic,6,8,,,6,common-strict pairs
+paired,Generic better vs Hybrid,0,8,,,0,common-strict pairs
+paired,Mean Hybrid advantage vs Generic,,,,,0.543041,percent
+metric,Stage-2 strict,8,8,,,8,Hybrid strict runs
+metric,Mean route distance km,,,,,48.154111,Hybrid strict runs
+metric,Mean delay s,,,,,646.163682,Hybrid strict runs
+metric,Mean deadline slack s,,,,,446.796249,Hybrid strict runs
+metric,Mean offload ratio,,,,,0.002119,Hybrid strict runs
+metric,Mean contacts per UAV,,,,,0.025000,Hybrid strict runs
