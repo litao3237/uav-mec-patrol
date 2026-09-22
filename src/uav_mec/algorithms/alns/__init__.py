@@ -1,3 +1,8 @@
+from .energy_guided import (
+    EnergyGuidedESIConfig,
+    energy_guided_intensification,
+    make_energy_guided_intensifier,
+)
 from .budget_aware import (
     BudgetAwareTerminalFirstConfig,
     BudgetAwareTerminalFirstResult,
@@ -71,6 +76,7 @@ __all__ = [
     "TerminalRecoveryESIConfig",
     "TerminalRecoveryESIResult",
     "DestroyConfig",
+    "EnergyGuidedESIConfig",
     "HybridUavMecALNSResult",
     "KKTObjectiveEvaluator",
     "ProxyObjectiveEvaluator",
@@ -99,5 +105,7 @@ __all__ = [
     "run_uav_mec_terminal_recovery_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
+    "energy_guided_intensification",
+    "make_energy_guided_intensifier",
     "solution_signature",
 ]
