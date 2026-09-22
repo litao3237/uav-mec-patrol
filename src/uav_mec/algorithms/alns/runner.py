@@ -8,7 +8,7 @@ import numpy as np
 from alns import ALNS
 from alns.accept import RecordToRecordTravel
 from alns.select import RouletteWheel
-from alns.stop import MaxIterations
+from alns.stop import MaxIterations, MaxRuntime
 
 from uav_mec.algorithms.initial import (
     build_greedy_initial_solution,
@@ -172,6 +172,7 @@ class UavMecALNSConfig:
     operator_decay: float = 0.8
     rrt_start_gap: float = 0.02
     rrt_end_gap: float = 0.0
+    max_runtime_s: float | None = None
 
 
 @dataclass
@@ -202,6 +203,8 @@ def run_uav_mec_alns(
     cfg = config or UavMecALNSConfig()
     if cfg.iterations <= 0:
         raise ValueError("ALNS iterations must be positive")
+    if cfg.max_runtime_s is not None and cfg.max_runtime_s < 0:
+        raise ValueError("ALNS max_runtime_s must be non-negative")
 
     if initial_solution is None:
         route_seed = build_greedy_initial_solution(instance)
@@ -269,7 +272,11 @@ def run_uav_mec_alns(
         cfg.rrt_end_gap,
         cfg.iterations,
     )
-    stop = MaxIterations(cfg.iterations)
+    stop = (
+        MaxRuntime(cfg.max_runtime_s)
+        if cfg.max_runtime_s is not None
+        else MaxIterations(cfg.iterations)
+    )
 
     raw_result = engine.iterate(
         initial_state,
