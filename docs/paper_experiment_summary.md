@@ -509,3 +509,79 @@ C_{\max}\in\{1,2,3,4\}
 
 但不应把 \(C_{\max}=4\) 能耗略高于 \(C_{\max}=3\) 解释成“更多 contact 有害”；
 Hybrid 是有限预算启发式搜索，额外 action space 同时也会扩大搜索空间。
+
+
+---
+
+## 11. GIS-driven Real-Geography Case Study: Stanislaus National Forest
+
+A GIS-driven external-geography validation is constructed around the Groveland
+Ranger District of Stanislaus National Forest, California.
+
+The case uses USDA Forest Service historical FireOccurrence point records as
+prospective fixed monitoring-node locations. The Groveland Ranger District
+Office is the UAV depot and one modeled infrastructure/edge anchor; Smith Peak
+Lookout is the second real facility anchor. Latitude/longitude records are
+projected to local metric coordinates before entering the unchanged UAV-MEC
+optimizer.
+
+The model interpretation is intentionally limited: the real facility
+coordinates are geographic anchors for modeled MEC deployment and do not imply
+that the assumed MEC hardware is physically deployed there. Historical
+fire-occurrence coordinates are prospective monitoring-node locations, not
+claims of existing sensor installations.
+
+For reproducibility, the formal experiment uses the pinned snapshot
+\`data/real_case/stanislaus/usfs_fire_occurrences_selected59_2026-09-22.json\`,
+containing 59 unique historical USFS fire-occurrence coordinates from 1992--2024.
+
+### Formal setting
+
+- \(K=59\), \(M=5\), \(E=2\);
+- scenario seeds 45/46/47;
+- algorithm seeds 100/101/102;
+- 100 Hybrid iterations, 2 elite rounds;
+- patrol cycle 2400 s;
+- average-delay budget 1000 s;
+- per-UAV energy budget 500 kJ;
+- projected task/facility extent about 7.78 km x 5.02 km.
+
+Absolute energy is not compared directly with the synthetic 1-km-scale cases.
+
+### Formal results
+
+| Method | Strict feasibility | Mean energy over strict solutions |
+|---|---:|---:|
+| Greedy + MEC Repair | 0/3 unique scenarios | - |
+| FR-NM | 0/3 unique scenarios | - |
+| Generic ALNS | **8/9** | 883683.621 J |
+| Proposed Hybrid | **8/9** | **878690.613 J** |
+
+For Hybrid versus Generic on the eight common-strict pairs:
+
+- Hybrid better: 2;
+- equal: 6;
+- Generic better: 0;
+- mean paired Hybrid advantage: **0.543%**;
+- median paired advantage: 0%.
+
+Hybrid strict-run summaries:
+
+- Stage-2 strict: 8/8;
+- mean route distance: 48.154 km;
+- mean delay: 646.164 s;
+- mean deadline slack: 446.796 s;
+- mean offload ratio: 0.212%;
+- mean contacts/UAV: 0.025.
+
+Only one strict run retains an actual MEC contact/offloaded task; most strict
+solutions are all-local. The experiment therefore provides external geography
+robustness evidence, not evidence of frequent MEC use.
+
+Supported conclusion: the search framework remains effective on a real
+historical-fire spatial distribution whose geometry differs strongly from the
+synthetic square map. Controlled contact-budget and bandwidth experiments remain
+the primary evidence for the Route--Contact--Offloading mechanism itself.
+
+This is a GIS-driven real-geography case study, not a field UAV flight
+experiment.
