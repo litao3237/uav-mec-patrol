@@ -1,0 +1,6 @@
+variant,strict_count,total_count,improved_vs_generic_count,mean_gain_vs_generic_pct,full_better,full_equal,ablated_better,mean_full_advantage_pct
+Full Hybrid,9,9,8,1.377763886,,,,
+w/o Route,9,9,6,0.674878942,6,3,0,0.709
+w/o Contact,9,9,7,1.077111638,3,5,1,0.302
+w/o Explicit Batch,9,9,8,1.368964529,2,6,1,0.009
+w/o Progressive Widening,9,9,8,1.377763886,0,9,0,0.000
