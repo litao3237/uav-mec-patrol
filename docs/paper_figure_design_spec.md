@@ -259,7 +259,7 @@ MEC 旁可用：
 
 \[
 \boxed{
-\text{Generic ALNS Exploration}
+\text{B-ALNS Exploration}
 +
 \text{Problem-Specific Elite Intensification}
 +
@@ -290,7 +290,7 @@ MEC 旁可用：
 1. Problem Instance
 2. Greedy Route Seed
 3. MEC Contact / Offloading Repair
-4. Generic ALNS Exploration
+4. B-ALNS Exploration
 5. Exploration Best
 6. Strict Stage-1 CVX
 7. Elite Structural Intensification
@@ -304,7 +304,7 @@ MEC 旁可用：
 
 ---
 
-## 4.3 Generic ALNS 模块内部
+## 4.3 B-ALNS 模块内部
 
 作为一个大框：
 
@@ -535,8 +535,8 @@ y：
 
 两条线：
 
-- Generic ALNS
-- Proposed Hybrid
+- B-ALNS
+- ESI-ALNS
 
 使用 mean ± std。
 
@@ -611,10 +611,10 @@ K\uparrow
 
 横轴：
 
-- FR-NM
+- FTR-NM
 - Route-GA
-- Generic ALNS
-- Proposed Hybrid
+- B-ALNS
+- ESI-ALNS
 
 纵轴：
 
@@ -637,7 +637,7 @@ Greedy 可单独标注 strict coverage，因为只有 2/3 unique scenarios stric
 **bar chart**
 
 - Greedy
-- FR-NM
+- FTR-NM
 - Route-GA
 - Generic
 - Hybrid
@@ -677,11 +677,11 @@ K=80
 
 左：
 
-Generic ALNS
+B-ALNS
 
 右：
 
-Proposed Hybrid
+ESI-ALNS
 
 每条线连接同一 pair。
 
@@ -1091,7 +1091,7 @@ vs
 bar chart：
 
 - Greedy: 0/3
-- FR-NM: 0/3
+- FTR-NM: 0/3
 - Generic: 8/9
 - Hybrid: 8/9
 
@@ -1310,7 +1310,7 @@ strict 只表示：
 
 ## 21.6 Deterministic baseline
 
-Greedy / FR-NM 是 deterministic。
+Greedy / FTR-NM 是 deterministic。
 
 因此：
 
