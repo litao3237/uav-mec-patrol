@@ -91,6 +91,18 @@ class ExperimentData:
     def dense_rows(self,k:int) -> list[dict]:
         return sorted([r for r in self.raw['dense']['rows'] if r['K']==k],key=lambda r:(r['scenario_seed'],r['algorithm_seed']))
 
+    def dense_pairs(self,k:int) -> list[dict]:
+        return [
+            {
+                'scenario_seed':r['scenario_seed'],
+                'algorithm_seed':r['algorithm_seed'],
+                'generic_j':r['base_cvx_energy_j'],
+                'hybrid_j':r['hybrid_cvx_energy_j'],
+            }
+            for r in self.dense_rows(k)
+            if dense_strict(r,'generic') and dense_strict(r,'hybrid')
+        ]
+
     def main_rows(self,k:int) -> list[dict[str,str]]:
         return sorted(
             [r for r in self.main8x3 if int(r['K'])==k],
@@ -148,7 +160,7 @@ class ExperimentData:
             k=int(summary['K']); rows=self.dense_rows(k)
             g=[r for r in rows if dense_strict(r,'generic')]
             h=[r for r in rows if dense_strict(r,'hybrid')]
-            pairs=self.pairs(k)
+            pairs=self.dense_pairs(k)
             metrics={'runs':len(rows),'generic_strict':len(g),'hybrid_strict':len(h),
                 'generic_energy_mean_j':mean(r['base_cvx_energy_j'] for r in g),
                 'hybrid_energy_mean_j':mean(r['hybrid_cvx_energy_j'] for r in h),
