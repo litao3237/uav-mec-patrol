@@ -56,6 +56,7 @@ class EnergyGuidedESIConfig:
     contact_hotspot_limit: int = 2
     proxy_pool_limit: int = 10
     cvx_shortlist_limit: int = 3
+    exploratory_fallback_limit: int = 1
     fallback_structural_limit: int = 2
     deadline_dual_weight: float = 0.10
     cycle_dual_weight: float = 0.05
@@ -696,7 +697,10 @@ def _screen_candidates(
     # Proxy allocation can be conservative. When fewer than k positive-gain
     # candidates survive, fill remaining exact slots with high-hotspot,
     # precheck-feasible candidates instead of forcing a false negative.
-    if len(selected) < guidance.cvx_shortlist_limit:
+    if (
+        len(selected) < guidance.cvx_shortlist_limit
+        and guidance.exploratory_fallback_limit > 0
+    ):
         remaining = [
             item
             for item in pool
@@ -709,11 +713,11 @@ def _screen_candidates(
             ),
             reverse=True,
         )
-        selected.extend(
-            remaining[
-                : guidance.cvx_shortlist_limit - len(selected)
-            ]
+        fill = min(
+            guidance.exploratory_fallback_limit,
+            guidance.cvx_shortlist_limit - len(selected),
         )
+        selected.extend(remaining[:fill])
 
     return (
         [candidate for _, candidate, _ in selected],
