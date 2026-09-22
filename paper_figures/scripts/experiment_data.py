@@ -71,6 +71,9 @@ class ExperimentData:
                 raise ValueError(f'正式数据快照已改变：{name}')
             self.raw[name]=json.loads(path.read_text(encoding='utf-8'))
         self.tables={p.stem:load_csv(p.stem) for p in (ROOT/'paper_results').glob('*.csv')}
+        with (DATA/'main_baseline_8x3.csv').open(encoding='utf-8',newline='') as file:
+            self.main8x3=list(csv.DictReader(file))
+        unique(self.main8x3,('K','scenario_seed','algorithm_seed'))
         self.checks=[]
         for name in ('dense','baseline','ga','geography'):
             unique(self.raw[name]['rows'],('K','scenario_seed','algorithm_seed') if name=='dense' else ('scenario_seed','algorithm_seed'))
@@ -88,6 +91,12 @@ class ExperimentData:
     def dense_rows(self,k:int) -> list[dict]:
         return sorted([r for r in self.raw['dense']['rows'] if r['K']==k],key=lambda r:(r['scenario_seed'],r['algorithm_seed']))
 
+    def main_rows(self,k:int) -> list[dict[str,str]]:
+        return sorted(
+            [r for r in self.main8x3 if int(r['K'])==k],
+            key=lambda r:(int(r['scenario_seed']),int(r['algorithm_seed']))
+        )
+
     def pairs(self,k:int|None=None) -> list[dict]:
         if k is None:
             source=self.raw['geography']['rows']
@@ -95,15 +104,43 @@ class ExperimentData:
                      'generic_j':r['generic_alns']['energy_j'],'hybrid_j':r['hybrid']['energy_j']}
                     for r in sorted(source,key=lambda r:(r['scenario_seed'],r['algorithm_seed']))
                     if strict(r['generic_alns']) and strict(r['hybrid'])]
+        if k in (50,80):
+            return [
+                {
+                    'scenario_seed':int(r['scenario_seed']),
+                    'algorithm_seed':int(r['algorithm_seed']),
+                    'generic_j':float(r['B_ALNS_energy_j']),
+                    'hybrid_j':float(r['ESI_ALNS_energy_j']),
+                }
+                for r in self.main_rows(k)
+                if r['B_ALNS_status']=='optimal'
+                and r['ESI_ALNS_status']=='optimal'
+                and r['B_ALNS_energy_j']!=''
+                and r['ESI_ALNS_energy_j']!=''
+            ]
         return [{'scenario_seed':r['scenario_seed'],'algorithm_seed':r['algorithm_seed'],
                  'generic_j':r['base_cvx_energy_j'],'hybrid_j':r['hybrid_cvx_energy_j']}
                 for r in self.dense_rows(k) if dense_strict(r,'generic') and dense_strict(r,'hybrid')]
 
-    def baseline_values(self,method:str) -> list[float]:
-        if method=='ga': rows=self.raw['ga']['rows']
-        else: rows=self.raw['baseline']['rows']
-        if method in ('greedy_repair','nearest_mec'): rows=deterministic_rows(rows,method)
-        return [r[method]['energy_j'] for r in rows if strict(r[method])]
+    def baseline_values(self,method:str,k:int=50) -> list[float]:
+        mapping={
+            'greedy_repair':('GR_MR_status','GR_MR_energy_j'),
+            'nearest_mec':('FTR_NM_status','FTR_NM_energy_j'),
+            'ga':('RGA_MR_status','RGA_MR_energy_j'),
+            'generic_alns':('B_ALNS_status','B_ALNS_energy_j'),
+            'hybrid':('ESI_ALNS_status','ESI_ALNS_energy_j'),
+        }
+        status_key,energy_key=mapping[method]
+        rows=self.main_rows(k)
+        if method in ('greedy_repair','nearest_mec'):
+            by_scenario={}
+            for r in rows:
+                by_scenario.setdefault(r['scenario_seed'],r)
+            rows=[by_scenario[key] for key in sorted(by_scenario,key=int)]
+        return [
+            float(r[energy_key]) for r in rows
+            if r[status_key]=='optimal' and r[energy_key]!=''
+        ]
 
     def validate(self) -> None:
         """重算已有逐次记录可支持的全部主要汇总，并逐列核对 CSV 舍入精度。"""
@@ -121,15 +158,15 @@ class ExperimentData:
                 'route_distance_km_mean':mean(r['hybrid_solution']['distance_m']/1000 for r in h),
                 'runtime_mean_s':mean(r['total_runtime_s'] for r in rows)}
             for key,value in metrics.items(): self.compare(value,summary[key],f'dense/K{k}/{key}')
-        method_names={'Greedy+MEC Repair':'greedy_repair','FR-NM':'nearest_mec',
-            'GA Route Search+Repair':'ga','Generic ALNS':'generic_alns','Proposed Hybrid':'hybrid'}
+        method_names={'GR-MR':'greedy_repair','FTR-NM':'nearest_mec',
+            'RGA-MR':'ga','B-ALNS':'generic_alns','ESI-ALNS':'hybrid'}
         for row in self.tables['baseline_summary']:
-            if row['K']=='50':
-                method=method_names[row['method']]; vals=self.baseline_values(method)
-                self.compare(len(vals),row['strict_count'],f'baseline/{method}/strict')
-                self.compare(mean(vals),row['mean_energy_j'],f'baseline/{method}/mean')
-                import statistics
-                self.compare(statistics.median(vals),row['median_energy_j'],f'baseline/{method}/median')
+            k=int(row['K']); method=method_names[row['method']]
+            vals=self.baseline_values(method,k)
+            self.compare(len(vals),row['strict_count'],f'baseline/K{k}/{method}/strict')
+            self.compare(mean(vals),row['mean_energy_j'],f'baseline/K{k}/{method}/mean')
+            import statistics
+            self.compare(statistics.median(vals),row['median_energy_j'],f'baseline/K{k}/{method}/median')
         for row in self.tables['strong_reference']:
             values=[r for r in self.raw['strong']['rows'] if r['mode']=='standard' and r['stage1_status']=='optimal']
             if row['scenario']!='aggregate': values=[r for r in values if r['scenario_seed']==int(row['scenario'])]
@@ -181,8 +218,8 @@ class ExperimentData:
             if r['variant']!='Full Hybrid' and sum(int(r[k]) for k in ('full_better','full_equal','ablated_better'))!=int(r['strict_count']):
                 raise ValueError(f'消融配对计数不完整：{r["variant"]}')
         counts={k:len(self.pairs(k)) for k in (50,80)}
-        if counts!={50:9,80:9} or len(self.pairs())!=8: raise ValueError('配对样本数与正式实验不符。')
-        for k,expected in [(50,(5,4,0)),(80,(8,1,0)),(None,(2,6,0))]:
+        if counts!={50:24,80:21} or len(self.pairs())!=8: raise ValueError('配对样本数与正式实验不符。')
+        for k,expected in [(50,(14,10,0)),(80,(17,4,0)),(None,(2,6,0))]:
             counts=[0,0,0]
             for p in self.pairs(k):
                 delta=p['generic_j']-p['hybrid_j']
@@ -191,7 +228,7 @@ class ExperimentData:
 
     def export(self) -> None:
         write_json(DATA/'experiment_validation.json',{'passed':True,'rounding_checks':self.checks,
-            'matched_metric_count':len(self.checks),'paired_counts':{'K50':9,'K80':9,'geography':8},
+            'matched_metric_count':len(self.checks),'paired_counts':{'K50':24,'K80':21,'geography':8},
             'statistical_policy':{'energy':'strict Stage-1','qos':'strict Stage-2',
              'sd':'sample standard deviation (ddof=1)','deterministic_unit':'unique scenario',
              'paired_gain':'mean of per-pair percentages','missing':'NaN, never zero'}})
