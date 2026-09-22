@@ -170,8 +170,18 @@ class ExperimentData:
                 'route_distance_km_mean':mean(r['hybrid_solution']['distance_m']/1000 for r in h),
                 'runtime_mean_s':mean(r['total_runtime_s'] for r in rows)}
             for key,value in metrics.items(): self.compare(value,summary[key],f'dense/K{k}/{key}')
-        method_names={'GR-MR':'greedy_repair','FTR-NM':'nearest_mec',
-            'RGA-MR':'ga','B-ALNS':'generic_alns','ESI-ALNS':'hybrid'}
+        method_names={
+            'GR-MR':'greedy_repair',
+            'Greedy+MEC Repair':'greedy_repair',
+            'FTR-NM':'nearest_mec',
+            'FR-NM':'nearest_mec',
+            'RGA-MR':'ga',
+            'GA Route Search+Repair':'ga',
+            'B-ALNS':'generic_alns',
+            'Generic ALNS':'generic_alns',
+            'ESI-ALNS':'hybrid',
+            'Proposed Hybrid':'hybrid',
+        }
         for row in self.tables['baseline_summary']:
             k=int(row['K']); method=method_names[row['method']]
             vals=self.baseline_values(method,k)
