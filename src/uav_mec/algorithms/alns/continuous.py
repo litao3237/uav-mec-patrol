@@ -185,6 +185,7 @@ class _ContinuousESIController:
         self.elite_injections = 0
         self.elite_runtime_s = 0.0
         self.certification_runtime_s = 0.0
+        self.certification_samples_s: list[float] = []
         self.events: list[dict[str, Any]] = []
 
         self.stop_reason: str | None = None
@@ -243,6 +244,7 @@ class _ContinuousESIController:
         )
         runtime_s = perf_counter() - started
         self.certification_runtime_s += runtime_s
+        self.certification_samples_s.append(runtime_s)
         updated = self._update_strict_incumbent(
             solution,
             result,
@@ -350,6 +352,7 @@ class _ContinuousESIController:
         )
         result_runtime_s = perf_counter() - result_started
         self.certification_runtime_s += result_runtime_s
+        self.certification_samples_s.append(result_runtime_s)
 
         strict_improved = False
         injected = False
