@@ -87,6 +87,8 @@ class HybridUavMecALNSResult:
     elite_cvx_calls: int
     elite_cvx_cache_hits: int
     elite_runtime_s: float
+    exploration_runtime_s: float = 0.0
+    elite_phase_runtime_s: float = 0.0
 
     @property
     def exploration_cvx_energy_j(self) -> float:
@@ -111,6 +113,8 @@ def run_uav_mec_hybrid_alns(
     evaluator: ObjectiveEvaluator | None = None,
     elite_rounds: int = 2,
     elite_oracle: Stage1CVXObjectiveOracle | None = None,
+    exploration_max_runtime_s: float | None = None,
+    elite_max_runtime_s: float | None = None,
 ) -> HybridUavMecALNSResult:
     """Run generic ALNS exploration, then exact elite structural refinement.
 
@@ -122,24 +126,41 @@ def run_uav_mec_hybrid_alns(
 
     if elite_rounds <= 0:
         raise ValueError("elite_rounds must be positive")
+    if (
+        exploration_max_runtime_s is not None
+        and exploration_max_runtime_s < 0
+    ):
+        raise ValueError(
+            "exploration_max_runtime_s must be non-negative"
+        )
+    if elite_max_runtime_s is not None and elite_max_runtime_s < 0:
+        raise ValueError("elite_max_runtime_s must be non-negative")
 
     cfg = config or UavMecALNSConfig()
     exploration_cfg = replace(
         cfg,
         enable_problem_operators=False,
+        max_runtime_s=(
+            exploration_max_runtime_s
+            if exploration_max_runtime_s is not None
+            else cfg.max_runtime_s
+        ),
     )
     objective_evaluator = (
         evaluator or ScreenedProxyObjectiveEvaluator()
     )
 
+    exploration_started = perf_counter()
     exploration = run_uav_mec_alns(
         instance,
         initial_solution=initial_solution,
         config=exploration_cfg,
         evaluator=objective_evaluator,
     )
+    exploration_runtime_s = perf_counter() - exploration_started
 
     oracle = elite_oracle or Stage1CVXObjectiveOracle()
+    elite_phase_started = perf_counter()
     exploration_cvx = oracle.solve(
         instance,
         exploration.best_solution,
@@ -176,6 +197,10 @@ def run_uav_mec_hybrid_alns(
             elite_cvx_calls=oracle.calls,
             elite_cvx_cache_hits=oracle.cache_hits,
             elite_runtime_s=0.0,
+            exploration_runtime_s=exploration_runtime_s,
+            elite_phase_runtime_s=(
+                perf_counter() - elite_phase_started
+            ),
         )
 
     state = UavMecState(
@@ -184,12 +209,25 @@ def run_uav_mec_hybrid_alns(
         objective_evaluator,
     )
 
+    elapsed_before_intensification = (
+        perf_counter() - elite_phase_started
+    )
+    remaining_elite_runtime_s = (
+        None
+        if elite_max_runtime_s is None
+        else max(
+            0.0,
+            elite_max_runtime_s - elapsed_before_intensification,
+        )
+    )
+
     t0 = perf_counter()
     intensified, elite_stats = contact_mode_intensification(
         state,
         config=cfg.problem,
         objective=oracle,
         max_rounds=elite_rounds,
+        max_runtime_s=remaining_elite_runtime_s,
     )
     elite_runtime_s = perf_counter() - t0
 
@@ -208,4 +246,8 @@ def run_uav_mec_hybrid_alns(
         elite_cvx_calls=oracle.calls,
         elite_cvx_cache_hits=oracle.cache_hits,
         elite_runtime_s=elite_runtime_s,
+        exploration_runtime_s=exploration_runtime_s,
+        elite_phase_runtime_s=(
+            perf_counter() - elite_phase_started
+        ),
     )
