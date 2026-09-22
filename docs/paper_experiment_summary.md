@@ -1,7 +1,7 @@
 # Paper Experiment Summary
 
 This file consolidates the paper-facing experimental evidence for the frozen
-Proposed Hybrid ALNS. Unless noted otherwise, paper-scale runs use scenario
+ESI-ALNS ALNS. Unless noted otherwise, paper-scale runs use scenario
 seeds 45/46/47, algorithm seeds 100/101/102, and a frozen ALNS budget of 100
 iterations.
 
@@ -21,7 +21,7 @@ The frozen paper-facing algorithm is
 ightarrow
 	ext{MEC Contact/Offloading Repair}
 ightarrow
-	ext{Generic ALNS Exploration}
+	ext{B-ALNS Exploration}
 ightarrow
 	ext{Elite Structural Intensification}
 ightarrow
@@ -108,22 +108,22 @@ Setting: (K=50,E=2).
 
 | Method | Strict feasibility | Mean energy (J) | Median energy (J) |
 |---|---:|---:|---:|
-| Greedy + MEC repair | 2/3 unique scenarios | 230637.625 | 230637.625 |
-| Fixed-Route Nearest-MEC (FR-NM) | 3/3 unique scenarios | 229613.102 | 229866.963 |
-| Route-GA + deterministic MEC repair | 9/9 | 235438.000 | 227768.558 |
-| Generic ALNS | 9/9 | 170323.586 | 172689.240 |
-| Proposed Hybrid | 9/9 | **167015.350** | **170279.207** |
+| GR-MR | 2/3 unique scenarios | 230637.625 | 230637.625 |
+| Fixed-Task-Route Nearest-MEC (FTR-NM) | 3/3 unique scenarios | 229613.102 | 229866.963 |
+| RGA-MR | 9/9 | 235438.000 | 227768.558 |
+| B-ALNS | 9/9 | 170323.586 | 172689.240 |
+| ESI-ALNS | 9/9 | **167015.350** | **170279.207** |
 
 Paired comparisons:
 
-- Hybrid vs FR-NM: 9/9 Hybrid better; mean paired advantage 27.297%; median
+- Hybrid vs FTR-NM: 9/9 Hybrid better; mean paired advantage 27.297%; median
   26.629%.
 - Hybrid vs Route-GA: 9/9 Hybrid better; mean paired advantage 28.884%; median
   28.771%.
-- Hybrid vs Generic ALNS: 5/9 better, 4/9 equal, 0/9 worse; mean 1.803%;
+- Hybrid vs B-ALNS: 5/9 better, 4/9 equal, 0/9 worse; mean 1.803%;
   median 0.047%.
 
-The deterministic Greedy/FR-NM methods are counted by unique scenarios rather
+The deterministic Greedy/FTR-NM methods are counted by unique scenarios rather
 than repeated algorithm seeds.
 
 ### 5.2 High-load feasibility robustness
@@ -132,18 +132,18 @@ Setting: (K=80,E=2).
 
 | Method | Strict feasibility |
 |---|---:|
-| Greedy + MEC repair | 0/3 unique scenarios |
-| FR-NM | 0/3 unique scenarios |
+| GR-MR | 0/3 unique scenarios |
+| FTR-NM | 0/3 unique scenarios |
 | Route-GA + MEC repair | 0/3 in high-budget pilot |
-| Generic ALNS | 9/9 |
-| Proposed Hybrid | 9/9 |
+| B-ALNS | 9/9 |
+| ESI-ALNS | 9/9 |
 
 For the Route-GA high-budget pilot, about 903-904 distinct route structures were
 evaluated per scenario and the best proxy states still retained 6/4/4
 constraint violations. This supports the conclusion that the high-load result
 is not merely caused by an intentionally undersized GA budget.
 
-For Hybrid vs Generic ALNS at K=80/E=2:
+For Hybrid vs B-ALNS at K=80/E=2:
 
 - 8/9 improved;
 - 1/9 unchanged;
@@ -158,7 +158,7 @@ problem-specific elite structural intensification.
 
 ## 6. Elite-family ablation
 
-Setting: (K=80,E=2). Each ablation shares exactly the same Generic ALNS
+Setting: (K=80,E=2). Each ablation shares exactly the same B-ALNS
 exploration and branches only at the elite-refinement stage.
 
 | Ablation | Full better | Equal | Ablated better | Mean Full advantage |
@@ -225,8 +225,8 @@ must be treated as a coupled decision process.
 4. **MEC-count figure:** E vs strict-feasibility rate and offload ratio.
 5. **UAV-count figure:** M vs strict-feasibility rate, mean delay, and
    contacts/UAV.
-6. **Baseline figure:** K=50 mean energy of FR-NM, Route-GA, Generic ALNS, and
-   Proposed Hybrid; Greedy may be shown separately because it is not 3/3 strict.
+6. **Baseline figure:** K=50 mean energy of FTR-NM, Route-GA, B-ALNS, and
+   ESI-ALNS; Greedy may be shown separately because it is not 3/3 strict.
 7. **Ablation figure/table:** paired Full-vs-ablated advantage for Route,
    Contact, Batch, and Widening families.
 
@@ -254,7 +254,7 @@ The formal benchmark fixes:
 
 - K=28, M=2, E=2;
 - scenario seeds 45/46/47;
-- standard Proposed Hybrid: seeds 100/101/102, 100 iterations, 2 elite rounds;
+- standard ESI-ALNS: seeds 100/101/102, 100 iterations, 2 elite rounds;
 - strong reference: seeds 700-711, 1000 iterations, 6 elite rounds;
 - expanded elite exact shortlist/task/route-position budgets;
 - strict Stage-1 CVX verification for every reported energy.
@@ -344,7 +344,7 @@ K\in\{30,40,50,60,70,80\},\quad M=5,\quad E=2
 
 该结果显示：
 
-- \(K=30/40\) 时 Hybrid 相对 Generic ALNS 的额外结构收益接近 0；
+- \(K=30/40\) 时 Hybrid 相对 B-ALNS 的额外结构收益接近 0；
 - 从 \(K=50\) 起，Hybrid 的 paired energy gain 明显增大；
 - 随 K 增加，offload、contacts/UAV、route distance 与 runtime 总体上升；
 - 这支持“Route–Contact–Offloading coupling 越紧，problem-specific elite refinement 越有价值”的解释。
@@ -455,7 +455,7 @@ K=80,\quad M=5,\quad E=2
 
 可以支持的结论：
 
-- Proposed Hybrid 在三种空间分布下均能恢复一定比例的 strict solutions；
+- ESI-ALNS 在三种空间分布下均能恢复一定比例的 strict solutions；
 - clustered/boundary shift 会降低 strict-feasibility robustness，说明空间分布本身是重要难度来源；
 - clustered 情况虽然路线更短，但 offload ratio 显著上升且 bandwidth shadow 更高，表明“几何距离更短”并不等价于“通信/计算耦合更弱”；
 - 因此后续论文可以把这组实验定位为 **out-of-distribution spatial robustness**。
@@ -552,10 +552,10 @@ Absolute energy is not compared directly with the synthetic 1-km-scale cases.
 
 | Method | Strict feasibility | Mean energy over strict solutions |
 |---|---:|---:|
-| Greedy + MEC Repair | 0/3 unique scenarios | - |
-| FR-NM | 0/3 unique scenarios | - |
-| Generic ALNS | **8/9** | 883683.621 J |
-| Proposed Hybrid | **8/9** | **878690.613 J** |
+| GR-MR | 0/3 unique scenarios | - |
+| FTR-NM | 0/3 unique scenarios | - |
+| B-ALNS | **8/9** | 883683.621 J |
+| ESI-ALNS | **8/9** | **878690.613 J** |
 
 For Hybrid versus Generic on the eight common-strict pairs:
 
