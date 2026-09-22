@@ -9,6 +9,8 @@
 
 - 成果总览：[`docs/current_research_achievements.md`](docs/current_research_achievements.md)
 - 论文实验汇总：[`docs/paper_experiment_summary.md`](docs/paper_experiment_summary.md)
+- 最终实验与图表冻结：[`docs/final_experiment_figure_plan.md`](docs/final_experiment_figure_plan.md)
+- 论文中文初稿 v1：[`docs/paper_draft_v1.md`](docs/paper_draft_v1.md)
 - 论文图件与重建入口：[`paper_figures/README.md`](paper_figures/README.md)
 - 当前指标、实验覆盖与证据缺口：[实验完整性核查](#experiment-evidence-audit)
 
