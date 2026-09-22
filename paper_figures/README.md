@@ -1,6 +1,6 @@
 # 论文模型图、算法图与实验图
 
-> **Final-paper update (2026-09-23):** Fig. 5 / Fig. 6 的绘图数据接口、paired CSV、图注和脚本已切换到正式 **8 independent scenarios × 3 algorithm repetitions** 主比较，并统一显示名为 **B-ALNS / ESI-ALNS**。当前仓库中既有 PDF/SVG/PNG 是此前生成的二进制导出；在重新执行 `python paper_figures/scripts/plot_experiments.py` 前，不应把旧 Fig. 5/6 二进制文件作为最终投稿版本。其他实验图的数据口径未因 v5–v7 改变。
+> **Final-paper update (2026-09-23):** Fig. 5 / Fig. 6 的绘图数据接口、paired CSV、图注和脚本已切换到正式 **8 independent scenarios × 3 algorithm repetitions** 主比较，并统一显示名为 **B-ALNS / ESI-ALNS**。Publication-data validation run `35749187944` 已通过：K=50 为 24 common-strict pairs（14 better / 10 equal / 0 worse），K=80 为 21 common-strict pairs（17 / 4 / 0）。当前仓库中既有 PDF/SVG/PNG 是此前生成的二进制导出；在重新执行 `python paper_figures/scripts/plot_experiments.py` 前，不应把旧 Fig. 5/6 二进制文件作为最终投稿版本。其他实验图的数据口径未因 v5–v7 改变。
 
 本目录保留系统模型、已确认的算法框架固定版，以及独立新增的算法图形机制版。三张图均使用 Microsoft Visio 原生矢量构建，白底、英文标签、Times New Roman 字体；文字、图标和路径均可编辑。两种算法图是同一 Fig. 2 的备选表达，供比较选择。
 
