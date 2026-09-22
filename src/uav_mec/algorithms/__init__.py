@@ -12,6 +12,7 @@ from .alns import (
     TerminalRecoveryESIConfig,
     TerminalRecoveryESIResult,
     DestroyConfig,
+    EnergyGuidedESIConfig,
     HybridUavMecALNSResult,
     KKTObjectiveEvaluator,
     ProxyObjectiveEvaluator,
@@ -27,6 +28,8 @@ from .alns import (
     run_uav_mec_terminal_recovery_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
+    energy_guided_intensification,
+    make_energy_guided_intensifier,
 )
 from .initial import (
     GreedyInitialConfig,
@@ -55,6 +58,7 @@ __all__ = [
     "TerminalRecoveryESIConfig",
     "TerminalRecoveryESIResult",
     "DestroyConfig",
+    "EnergyGuidedESIConfig",
     "HybridUavMecALNSResult",
     "GreedyInitialConfig",
     "GARouteConfig",
@@ -82,4 +86,6 @@ __all__ = [
     "run_uav_mec_terminal_recovery_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
+    "energy_guided_intensification",
+    "make_energy_guided_intensifier",
 ]
