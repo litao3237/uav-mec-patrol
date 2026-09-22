@@ -5,6 +5,7 @@ import numpy as np
 from uav_mec.algorithms import (
     AdaptiveESIConfig,
     ContinuousESIConfig,
+    TerminalFirstESIConfig,
     TerminalRecoveryESIConfig,
     GARouteConfig,
     ProxyObjectiveEvaluator,
@@ -17,6 +18,7 @@ from uav_mec.algorithms import (
     run_route_ga,
     run_uav_mec_adaptive_esi_alns,
     run_uav_mec_continuous_esi_alns,
+    run_uav_mec_terminal_first_esi_alns,
     run_uav_mec_terminal_recovery_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
@@ -863,3 +865,36 @@ def test_terminal_recovery_prefers_already_strict_terminal() -> None:
     assert result.final_energy_j == 321.0
     assert result.fallback_used is False
     assert result.high_accuracy_attempted is False
+
+
+
+def test_terminal_first_returns_strict_terminal_with_fake_oracle() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_terminal_first_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=61,
+        ),
+        terminal_first=TerminalFirstESIConfig(
+            total_runtime_s=0.08,
+            final_cert_reserve_fraction=0.20,
+            stagnation_fraction=0.20,
+            min_exploration_fraction=0.10,
+            elite_pool_fraction=0.15,
+            elite_burst_fraction=0.05,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.selection_source == "terminal_strict"
+    assert result.final_energy_j == 321.0
+    assert result.total_runtime_s >= 0.0
+    assert result.terminal_certification_runtime_s >= 0.0
