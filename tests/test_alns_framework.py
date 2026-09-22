@@ -4,6 +4,7 @@ import numpy as np
 
 from uav_mec.algorithms import (
     AdaptiveESIConfig,
+    ContinuousESIConfig,
     GARouteConfig,
     ProxyObjectiveEvaluator,
     ProblemOperatorConfig,
@@ -14,6 +15,7 @@ from uav_mec.algorithms import (
     build_mec_assisted_initial_solution,
     run_route_ga,
     run_uav_mec_adaptive_esi_alns,
+    run_uav_mec_continuous_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
@@ -706,3 +708,72 @@ def test_adaptive_esi_returns_strict_incumbent_with_fake_oracle() -> None:
     assert result.final_energy_j == 321.0
     assert result.strict_incumbent_updates >= 1
     assert result.phase_records
+
+
+
+class _StopImmediately:
+    def __init__(self) -> None:
+        self.stop_reason = "test_stop"
+        self.elapsed_s = 0.0
+        self.last_improvement_elapsed_s = 0.0
+
+    def __call__(self, rng, best, current) -> bool:
+        return True
+
+
+def test_alns_accepts_external_stopping_criterion() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    stop = _StopImmediately()
+
+    result = run_uav_mec_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=47,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        stopping_criterion=stop,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.stop_reason == "test_stop"
+    assert sum(
+        sum(values)
+        for values in result.operator_pair_counts.values()
+    ) == 0
+
+
+def test_continuous_esi_returns_strict_final_with_fake_oracle() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_continuous_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=53,
+        ),
+        continuous=ContinuousESIConfig(
+            total_runtime_s=0.08,
+            final_cert_reserve_fraction=0.20,
+            stagnation_fraction=0.20,
+            min_exploration_fraction=0.10,
+            elite_pool_fraction=0.15,
+            elite_burst_fraction=0.05,
+            max_elite_triggers=1,
+            final_cert_min_screened_gain_rel=0.0,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.strict_incumbent_found is True
+    assert result.final_energy_j == 321.0
+    assert result.oracle_calls >= 1
+    assert result.total_runtime_s >= 0.0
+    assert result.exploration.stop_reason == "search_deadline"
