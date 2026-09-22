@@ -122,7 +122,7 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 
 ---
 
-## 3. 已完成的 Proposed Hybrid ALNS
+## 3. 已完成的 ESI-ALNS ALNS
 
 当前论文主算法已经冻结为：
 
@@ -132,7 +132,7 @@ E_{\mathrm{UAV}}(\mathbf D,\mathbf R)
 \rightarrow
 \text{MEC Contact/Offloading Repair}
 \rightarrow
-\text{Generic ALNS Exploration}
+\text{B-ALNS Exploration}
 \rightarrow
 \text{Elite Structural Intensification}
 \rightarrow
@@ -183,7 +183,7 @@ Greedy 的定位是：
 \text{MEC-assisted feasibility repair}
 \]
 
-### 3.3 Generic ALNS Exploration
+### 3.3 B-ALNS Exploration
 
 Destroy operators：
 
@@ -208,7 +208,7 @@ Repair operators：
 
 ### 3.4 Elite Structural Intensification
 
-Generic ALNS 找到较好的 elite solution 后，再进行问题特定的结构强化。
+B-ALNS 找到较好的 elite solution 后，再进行问题特定的结构强化。
 
 已实现：
 
@@ -533,11 +533,11 @@ K=80,\quad E=2,\quad M\in\{3,5,8\}
 
 当前 baseline 已经完整包含：
 
-1. Greedy + MEC Repair
-2. Fixed-Route Nearest-MEC（FR-NM）
-3. Route-GA + deterministic MEC repair
-4. Generic ALNS
-5. Proposed Hybrid ALNS
+1. GR-MR
+2. Fixed-Task-Route Nearest-MEC（FTR-NM）
+3. RGA-MR
+4. B-ALNS
+5. ESI-ALNS ALNS
 
 ---
 
@@ -551,13 +551,13 @@ K=50,\quad E=2
 
 | Method | Strict Feasibility | Mean Energy (J) | Median Energy (J) |
 |---|---:|---:|---:|
-| Greedy + MEC Repair | 2/3 unique scenarios | 230637.625 | 230637.625 |
-| FR-NM | 3/3 unique scenarios | 229613.102 | 229866.963 |
+| GR-MR | 2/3 unique scenarios | 230637.625 | 230637.625 |
+| FTR-NM | 3/3 unique scenarios | 229613.102 | 229866.963 |
 | Route-GA + MEC Repair | 9/9 | 235438.000 | 227768.558 |
-| Generic ALNS | 9/9 | 170323.586 | 172689.240 |
-| Proposed Hybrid | **9/9** | **167015.350** | **170279.207** |
+| B-ALNS | 9/9 | 170323.586 | 172689.240 |
+| ESI-ALNS | **9/9** | **167015.350** | **170279.207** |
 
-### Hybrid vs FR-NM
+### Hybrid vs FTR-NM
 
 \[
 \boxed{9\text{ better}+0\text{ equal}+0\text{ worse}}
@@ -593,7 +593,7 @@ Median：
 28.771\%
 \]
 
-### Hybrid vs Generic ALNS
+### Hybrid vs B-ALNS
 
 \[
 5\text{ better}+4\text{ equal}+0\text{ worse}
@@ -611,7 +611,7 @@ Median：
 0.047\%
 \]
 
-这说明轻负载下 Generic ALNS 已经可能接近较优结构，所以 elite structural refinement 的增益更加偏态。
+这说明轻负载下 B-ALNS 已经可能接近较优结构，所以 elite structural refinement 的增益更加偏态。
 
 ---
 
@@ -625,11 +625,11 @@ K=80,\quad E=2
 
 | Method | Strict Feasibility |
 |---|---:|
-| Greedy + MEC Repair | 0/3 unique scenarios |
-| FR-NM | 0/3 unique scenarios |
+| GR-MR | 0/3 unique scenarios |
+| FTR-NM | 0/3 unique scenarios |
 | Route-GA + MEC Repair | 0/3 high-budget pilot |
-| Generic ALNS | **9/9** |
-| Proposed Hybrid | **9/9** |
+| B-ALNS | **9/9** |
+| ESI-ALNS | **9/9** |
 
 Hybrid vs Generic：
 
@@ -651,7 +651,7 @@ Median gain：
 
 该设置是当前最适合说明：
 
-> **problem-specific elite structural intensification 相对 Generic ALNS 的稳定增量价值**
+> **problem-specific elite structural intensification 相对 B-ALNS 的稳定增量价值**
 
 的一组实验。
 
@@ -665,7 +665,7 @@ Median gain：
 K=80,\quad E=2
 \]
 
-每个 ablation 与 Full Hybrid 共享同一 Generic ALNS exploration，然后只在 elite refinement 阶段分叉。
+每个 ablation 与 Full Hybrid 共享同一 B-ALNS exploration，然后只在 elite refinement 阶段分叉。
 
 | Ablation | Full Better | Equal | Ablated Better | Mean Full Advantage |
 |---|---:|---:|---:|---:|
@@ -706,7 +706,7 @@ K=80,\quad E=2
 
 最后一个实验用于评估：
 
-> 标准 100-iteration Proposed Hybrid 与更高预算强搜索之间仍有多大解质量空间。
+> 标准 100-iteration ESI-ALNS 与更高预算强搜索之间仍有多大解质量空间。
 
 **该实验不是 global optimum benchmark。**
 
@@ -735,7 +735,7 @@ scale scout 结果：
 
 ## 12.2 Standard 与 Strong 配置
 
-Standard Proposed Hybrid：
+Standard ESI-ALNS：
 
 - scenario seeds 45/46/47；
 - algorithm seeds 100/101/102；
@@ -928,8 +928,8 @@ MEC-count sweep：
 
 1. **固定路径 + 最近 MEC 的分解式策略会显著损失能耗质量。**
 2. **独立 Route-GA 在中等负载可行，但解质量明显弱于 Hybrid；高负载下可行性恢复能力也更弱。**
-3. **Generic ALNS 是强内部 baseline。**
-4. **Hybrid elite refinement 在 \(K=80,E=2\) 下稳定优于或等于 Generic ALNS。**
+3. **B-ALNS 是强内部 baseline。**
+4. **Hybrid elite refinement 在 \(K=80,E=2\) 下稳定优于或等于 B-ALNS。**
 5. **Route-compute relocation 是最主要的 elite family。**
 6. **Contact family 具有正向辅助作用。**
 7. **负载升高后 offload/contact/route pressure 同时上升。**
@@ -1012,15 +1012,15 @@ E=2/3/4 能耗不单调。
 
 截至目前，计划内主要实验已经全部完成：
 
-- [x] Proposed Hybrid 主算法；
+- [x] ESI-ALNS 主算法；
 - [x] KKT-CVX continuous-resource validation；
 - [x] workload sensitivity；
 - [x] MEC-count sensitivity；
 - [x] UAV-count sensitivity；
 - [x] Greedy baseline；
-- [x] FR-NM baseline；
+- [x] FTR-NM baseline；
 - [x] Route-GA baseline；
-- [x] Generic ALNS baseline；
+- [x] B-ALNS baseline；
 - [x] Hybrid vs Generic paired comparison；
 - [x] Route family ablation；
 - [x] Contact family ablation；
@@ -1124,7 +1124,7 @@ K\in\{30,40,50,60,70,80\},\quad M=5,\quad E=2
 
 该结果显示：
 
-- \(K=30/40\) 时 Hybrid 相对 Generic ALNS 的额外结构收益接近 0；
+- \(K=30/40\) 时 Hybrid 相对 B-ALNS 的额外结构收益接近 0；
 - 从 \(K=50\) 起，Hybrid 的 paired energy gain 明显增大；
 - 随 K 增加，offload、contacts/UAV、route distance 与 runtime 总体上升；
 - 这支持“Route–Contact–Offloading coupling 越紧，problem-specific elite refinement 越有价值”的解释。
@@ -1235,7 +1235,7 @@ K=80,\quad M=5,\quad E=2
 
 可以支持的结论：
 
-- Proposed Hybrid 在三种空间分布下均能恢复一定比例的 strict solutions；
+- ESI-ALNS 在三种空间分布下均能恢复一定比例的 strict solutions；
 - clustered/boundary shift 会降低 strict-feasibility robustness，说明空间分布本身是重要难度来源；
 - clustered 情况虽然路线更短，但 offload ratio 显著上升且 bandwidth shadow 更高，表明“几何距离更短”并不等价于“通信/计算耦合更弱”；
 - 因此后续论文可以把这组实验定位为 **out-of-distribution spatial robustness**。
@@ -1365,10 +1365,10 @@ Hybrid 是有限预算启发式搜索，额外 action space 同时也会扩大�
 
 | Method | Strict feasibility | Mean energy over strict solutions |
 |---|---:|---:|
-| Greedy + MEC Repair | 0/3 unique scenarios | - |
-| FR-NM | 0/3 unique scenarios | - |
-| Generic ALNS | **8/9** | 883683.621 J |
-| Proposed Hybrid | **8/9** | **878690.613 J** |
+| GR-MR | 0/3 unique scenarios | - |
+| FTR-NM | 0/3 unique scenarios | - |
+| B-ALNS | **8/9** | 883683.621 J |
+| ESI-ALNS | **8/9** | **878690.613 J** |
 
 Hybrid vs Generic on 8 common strict pairs：
 
@@ -1393,9 +1393,9 @@ Hybrid strict-run structural/QoS statistics：
 
 这组实验主要支持：
 
-1. 在真实历史火灾空间分布和真实设施锚点下，简单 Greedy/FR-NM repair 无法恢复 strict feasible solution，而 Generic/Hybrid 能在 8/9 stochastic runs 中恢复 strict solution；
+1. 在真实历史火灾空间分布和真实设施锚点下，简单 Greedy/FTR-NM repair 无法恢复 strict feasible solution，而 Generic/Hybrid 能在 8/9 stochastic runs 中恢复 strict solution；
 2. Hybrid 在所有 common-strict pair 上保持 non-worse，并在 2/8 pair 上进一步降低 UAV energy；
-3. Proposed Hybrid 的有效性不依赖 synthetic square-map geometry；
+3. ESI-ALNS 的有效性不依赖 synthetic square-map geometry；
 4. 真实地理场景中的 MEC offloading 很稀疏，因此该 case 不应被用来夸大 contact/offloading 的普遍频率；
 5. Contact Opportunity 机制本身的主要验证仍来自受控的 \(C_{\max}=1/2/3/4\) sensitivity，真实 case 的角色是 **external geography robustness**。
 
