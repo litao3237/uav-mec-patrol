@@ -27,8 +27,9 @@ jobs:
           python - <<'PY'
           import sys
           sys.path.insert(0, "paper_figures/scripts")
-          from experiment_data import ExperimentData
-          data = ExperimentData()
+          import experiment_data
+          experiment_data.preserve_existing = lambda: None
+          data = experiment_data.ExperimentData()
           assert len(data.pairs(50)) == 24
           assert len(data.pairs(80)) == 21
           print("K50 pairs:", len(data.pairs(50)))
