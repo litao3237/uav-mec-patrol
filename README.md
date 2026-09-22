@@ -7,8 +7,10 @@
 
 本 README 同时作为项目说明、论文第一项工作的整体路线图、开发任务清单、实验进度记录和下一步工作的参考入口。
 
-成果总览：[`docs/current_research_achievements.md`](docs/current_research_achievements.md)  
-论文实验汇总：[`docs/paper_experiment_summary.md`](docs/paper_experiment_summary.md)
+- 成果总览：[`docs/current_research_achievements.md`](docs/current_research_achievements.md)
+- 论文实验汇总：[`docs/paper_experiment_summary.md`](docs/paper_experiment_summary.md)
+- 论文图件与重建入口：[`paper_figures/README.md`](paper_figures/README.md)
+- 当前指标、实验覆盖与证据缺口：[实验完整性核查](#experiment-evidence-audit)
 
 状态约定：
 
@@ -20,7 +22,72 @@
 当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
-**当前阶段：核心实验链已完成，进入最终绘图、论文表格与正文整合阶段。**
+**当前阶段：已有实验和 Fig. 3–13、Fig. S1–S2 已整理完成；论文论证仍需补强五方法统一比较、计算预算公平性及独立场景覆盖。**
+
+下文历史记录中的“完成”表示对应设置和当时清单已经执行，不表示所有方法、所有指标与所有场景均已覆盖。当前实验范围、结论边界和后续优先级以本节核查及第 6 节为准。
+
+<a id="experiment-evidence-audit"></a>
+
+## 0.1 实验指标、覆盖范围与待补证据（2026-09-22）
+
+现有实验已覆盖能耗、严格求解结果、服务质量、方案结构、资源状态和计算开销，并包含消融、敏感性、强参考和真实地理案例。目前证据最充分的是 Hybrid 相对 Generic ALNS 的比较；五方法跨负载、同等计算成本下的比较仍需补充。13 组图的完成不等于论文实验已无缺口。
+
+### 已有评价指标
+
+| 类别 | 已有指标 | 当前用途与数据范围 |
+|---|---|---|
+| 主目标能耗 | 严格 Stage-1 UAV 总能耗、均值、中位数、运行间样本标准差 | 比较能耗质量；标准差仅在有逐次数据时计算 |
+| 能耗组成 | 固定飞行/采集能耗占比；通信/悬停、本地计算能耗及占比 | 解释能耗来源；分项仅在部分完整原始记录中保存，并非五方法均已采集 |
+| 严格求解结果 | Stage-1 严格成功数/比例、Stage-2 严格有效样本数 | 区分给定预算下的严格结果及 QoS/资源指标的有效样本 |
+| 服务质量 | 平均任务时延、平均/最小截止时间余量 | 检查时延要求与裕度；现有详细指标主要来自 Hybrid |
+| 方案结构 | 卸载任务数/比例、接触次数、每 UAV 接触次数、总路线距离、部分记录中的绕行比例 | 解释路径、接触与卸载决策的变化 |
+| 资源占用 | 活跃 MEC 的带宽/CPU 利用率、部分记录中的分 MEC 分配 | 描述资源配置；Stage-2 带宽利用率不能单独证明带宽是瓶颈 |
+| 资源边际价值 | Stage-1 带宽/CPU 相对影子价格 | 与容量或接触机会缩放实验共同解释资源压力 |
+| 计算开销 | 搜索/算法运行时间、精英阶段时间、部分 CVX 调用与缓存命中次数 | 评价求解成本；现有不同方法的计时边界尚未统一 |
+| 解的质量与稳定性 | 配对节能比例、better/equal/worse 计数、相对 empirical best-known 的差距 | 评价增益及强参考质量；best-known 差距不是全局最优性差距 |
+| 约束使用程度 | 部分详细记录中的最大返航时间、周期使用率、电池使用率 | 作为约束诊断；尚未形成五方法统一比较表 |
+
+汇总依据是 [`paper_results/*.csv`](paper_results/README.md)，完整指标定义见 [`src/uav_mec/analysis/paper_metrics.py`](src/uav_mec/analysis/paper_metrics.py)。原始记录中存在某一指标，不代表它已经在全部实验中采集或汇总；例如此次绘图缓存的 54 次 dense-workload 运行均未保存有效 `paper_metrics`，不能直接补出对应的完整 QoS 曲线。
+
+### 方法数量与实际实验覆盖
+
+正式比较共 **五种方法：四个基线 + 本文方法**。四个基线为 Greedy + MEC Repair、Fixed-Route Nearest-MEC（FR-NM）、Route-GA + MEC Repair、Generic ALNS；本文方法为 Proposed Hybrid。FR-NM 的 fixed-route 与 nearest-MEC 两种描述指向同一个方法，不能重复计为两个基线。
+
+| 实验 | 已有覆盖 | 当前边界 |
+|---|---|---|
+| 连续负载 K=30–80，M=5，E=2 | Generic ALNS、Hybrid；每个 K 为 3 场景 × 3 算法种子 | 可以比较两种 ALNS 的负载趋势，不能直接补画其余三种方法 |
+| K=50 基线比较 | 五种方法均已运行 | Greedy 仅 2/3 独立场景严格成功；FR-NM 为 3/3；GA、Generic、Hybrid 各 9/9 |
+| K=80 基线比较 | 五种方法已有结果 | Route-GA 仅为 3 场景 pilot；Greedy/FR-NM 各 0/3，GA pilot 0/3，Generic/Hybrid 各 9/9 |
+| MEC/UAV 数量、接触预算、带宽、覆盖半径及空间分布敏感性 | 主要展示 Hybrid 的系统响应 | 这类机制/敏感性图无需每张都放五种方法，但不能代替跨方法主比较 |
+| 精英机制消融 | 完整 Hybrid 与四个删减版本，共享 Generic 探索结果 | 已有 K=80 设置下的配对证据，尚不代表各机制在所有负载下均有同等收益 |
+| K=28 强参考 | 标准 Hybrid 与更强搜索预算的 Hybrid | 提供 empirical best-known 参考，不提供全局最优证明 |
+| K=59 真实地理案例 | Greedy、FR-NM、Generic、Hybrid | 未运行 Route-GA；Generic/Hybrid 各 8/9 严格，Hybrid 仅 1 个严格运行发生实际卸载 |
+
+Fig. 5 已完整展示五种方法。Greedy 的两个严格能耗点和均值仅代表这两个有效场景，其余场景不补零；K=80 没有严格能耗的基线仍应通过严格成功率报告，不能为了补齐能耗曲线填入无效值。
+
+### 已确认的证据缺口
+
+1. **五方法主比较的负载覆盖不足。** K=50 有五方法正式比较，但 K=30–80 连续曲线只有 Generic/Hybrid，K=80 的 GA 仍是 pilot。尚不能据此声称五方法在不同负载下的性能趋势已经完整比较。
+2. **计时口径和计算预算不一致。** 当前 GA 的 `search_runtime_s` 在最终 Stage-1 CVX 校验前停止；Generic 的 `runtime_s` 来自 ALNS 探索统计；Hybrid 的 `runtime_s` 是包含精英阶段的调用时间。初始化、最终资源验证是否计入也不一致，不能直接用这些值排名端到端效率。Hybrid 多使用精英搜索预算，需要补充同等时间预算下的质量比较。
+3. **独立场景覆盖有限。** 3 个场景 × 3 个算法种子仍只有三个独立场景；确定性 Greedy/FR-NM 应按场景去重。现有结果可报告描述性收益，对更广泛实例的稳定性判断仍需更多独立场景，不能只增加同一场景的算法重复次数。
+4. **真实地理案例中的 MEC 使用稀疏。** 8 个严格有效 Hybrid 运行中只有 1 个保留实际接触/卸载。该案例提供地理适用性证据；路径–接触–卸载耦合机制的主要证据仍来自受控带宽与接触预算实验。若论文主张在真实地理场景中经常使用 MEC 并持续获益，需另补相应实验。
+5. **跨方法详细指标和完整方案保存不足。** 现有基线制品主要保存 Stage-1 状态、能耗和部分计时/结构摘要，不能从图表补齐所有方法的 Stage-2 QoS、资源分配或搜索过程；这些字段应在补充实验时统一导出。
+
+计时依据：[`experiments/run_core_baseline_comparison.py`](experiments/run_core_baseline_comparison.py)、[`experiments/run_ga_baseline_comparison.py`](experiments/run_ga_baseline_comparison.py)。统计与真实地理结果见 [`docs/paper_experiment_summary.md`](docs/paper_experiment_summary.md)，绘图快照来源见 [`paper_figures/data/experiment_sources.json`](paper_figures/data/experiment_sources.json)。
+
+### 统一报告规则与结论边界
+
+- 主能耗只使用严格 Stage-1 结果；Stage-2 QoS/资源占用使用对应有效样本，并标明分母。离散结构指标按各正式汇总的样本口径注明使用 Stage-1 或 Stage-2 子集。
+- 同时报告严格成功率、各方法严格子集的条件能耗，以及共同严格样本上的配对能耗收益。不同方法或设置的严格子集可能不同，不能只比较条件均值就作全面优劣判断。
+- 配对按相同实例与算法种子匹配；确定性基线不因复制到多个算法种子而增加独立场景数。收益取逐对百分比的平均，不以两个均值的百分比差替代。
+- 严格成功率包含搜索与数值求解状态，不等于任务完成率或原数学问题的可行概率；`optimal_inaccurate`、求解失败或预算内未找到严格解不构成全局不可行证明。
+- 当前误差条是描述性的运行间样本标准差，不是置信区间；不将 3 × 3 运行视作九个独立场景，不添加未经检验的显著性结论。
+- 迭代预算实验由不同预算下的独立搜索组成，不是单次搜索的收敛轨迹；强参考仅称 empirical best-known，不称全局最优。
+- 真实地理实验为 GIS 驱动计算案例，MEC 为建模部署，不是实际飞行或实际基站部署验证。
+
+### 后续工作定位
+
+优先补齐五方法统一主实验、等时间预算比较和独立场景覆盖，再更新论文结论与图表。后续任务及验收要求见[第 6 节](#6-当前最高优先级任务)。上述补充实验目前均为待办；本次文档整理不代表已经启动或完成新增运行。
 
 ---
 
@@ -138,7 +205,7 @@ Route/Contact/Offloading/Batch 结构不再作为 RouletteWheel 的同级算子�
 - **VRP**：描述路径子问题结构，不是一种具体算法；
 - **ALNS**：外层主元启发式；当前论文主线采用 Generic ALNS exploration；
 - **Elite structural intensification**：在 generic best state 上执行 route-compute relocation、contact relocation/replacement/removal、batch merge/split/new-contact、mode/batch reassignment，并由严格 Stage-1 CVX 单调接受；
-- **ACO / GA / VRP heuristic**：仅作为后续独立 baseline 候选，不属于 Proposed Algorithm；
+- **Route-GA**：已实现的独立 baseline，不属于 Proposed Algorithm；ACO / 其他 VRP heuristic 保留为可选候选；
 - **CVXPY / Convex**：固定离散解后的 Stage-1 correctness oracle，也是 elite/final paper-facing 能耗的严格验证器；
 - **KKT**：连续资源子问题 P1-R 的已实现解析/数值求解层；用于闭式资源关系、dual/shadow-price 分析、小规模交叉验证和 fast resource approximation。paper-scale primal recovery 尚未完全稳定，因此当前不替代 CVXPY correctness oracle；
 - **Dual-guided ALNS**：属于可选增强，不是当前冻结主算法的必需组成；只有在 paper-scale dual certificate 足够稳定且消融有收益时才考虑加入；
@@ -531,7 +598,7 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 
 ## M8. Baselines
 
-主算法已经具备独立运行能力，剩余工作是构建论文对照组：
+主算法与四种基线已经具备独立运行能力。以下记录既有实现与结果；五方法统一实验矩阵及公平计算预算比较仍待补齐：
 
 - [x] Greedy + MEC repair：K=80,E=2 下 0/3 unique scenarios strict-feasible，仅作为初始化/可行性恢复 baseline；
 - [x] Generic ALNS：9/9 strict；Hybrid paired 8 better / 1 equal / 0 worse，mean advantage 1.378%；
@@ -590,14 +657,17 @@ KKT **属于已实现的连续资源层**，不是被删除的模块：
 - [x] multi-scenario / multi-algorithm-seed paired hybrid validation；
 - [x] strict-optimal filtering 和 solver-status reporting。
 
-### 尚需完成
+### 已完成的既定实验与待补证据
 
 - [x] 核心 family ablation；
 - [x] baseline comparison；
 - [x] UAV 数量 M=3/5/8 sensitivity：M=3 当前预算 0/9 strict，M=5/8 均 9/9 strict；M=8 Hybrid 6 better / 3 equal / 0 worse；
 - [x] reduced-scale best-known strong benchmark；
 - [x] 汇总 total energy、delay、slack、distance、contacts、offload ratio、runtime、feasibility rate；
-- [ ] **[TODO]** 最终绘图、统计与论文表格。
+- [x] 基于既有正式数据生成 Fig. 3–13、Fig. S1–S2，完成数据比对与图形核验；
+- [ ] **[TODO]** 五方法统一主实验与等时间预算比较；
+- [ ] **[TODO]** 扩大独立场景覆盖，统一保存跨方法指标与完整方案；
+- [ ] **[TODO]** 根据新增证据更新统计分析、论文表格与结论。
 
 ---
 
@@ -733,34 +803,28 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 
 # 6. 当前最高优先级任务
 
-主算法结构已经冻结，当前不再以“增加更多算子”为目标。
+主算法结构保持冻结。优先补强实验比较的可解释性与覆盖范围，保留已有结果，不通过改动算法或实验参数追求预设结论。
 
-优先级：
+| 优先级 | 待办 | 验收要求 |
+|---|---|---|
+| P0 | 统一五方法实验与计时协议 | 固定共同实例、约束、求解器、硬件/线程设置及参数；明确初始化、搜索、最终 Stage-1 校验、Stage-2 指标提取的计时边界；预先约定失败与超时处理 |
+| P1 | 补齐五方法负载主实验 | 在预先确定的负载点运行五种方法，将 K=80 Route-GA pilot 扩展到约定正式矩阵；同时报告真实分母、严格成功率、条件能耗和共同严格配对收益 |
+| P1 | 补充等时间预算质量比较 | 重点比较 Generic/Hybrid，并纳入合理时间预算下的 Route-GA；保留原迭代预算结果，记录各时间点已验证的最佳严格解和验证成本，区分操作设计与额外计算量的贡献 |
+| P1 | 扩大独立场景并统一保存记录 | 增加预先选定的独立实例；具体数量根据先导变异与希望达到的估计精度确定；保存场景/算法种子、全部状态、时间分项、能耗、QoS、资源指标和完整方案 |
+| P2 | 更新统计报告及论文图表 | 按场景组织配对与不确定性分析；记录缺失/失败原因；不将重复算法种子当作独立场景；将新增数据与当前固定结果分别标记来源 |
+| 条件补充 | 加强真实地理 MEC 机制验证 | 仅在论文需要更强现实机制主张时追加；设置变化需有依据并预先说明，同时报告不利结果，不能只挑选有卸载或正收益的运行 |
 
-1. [x] 完成 Hybrid 主算法与严格 CVX acceptance；
-2. [x] 完成 K=100,E=2/3/4 高负载 MEC-count sensitivity；
-3. [x] `w/o route_compute_relocate` 核心消融；
-4. [x] contact / batch / progressive-widening 消融；
-5. [x] Greedy / FR-NM / Generic ALNS / Route-GA / Proposed Hybrid baselines；
-6. [x] K=28 reduced-scale best-known strong benchmark；
-7. [x] M=3/5/8 sensitivity 与最终指标汇总；
-8. [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，但不阻塞 Hybrid 主算法消融与 baseline 实验。
+实施清单：
 
-当前原则：
+- [ ] **[TODO]** 固定统一实验协议及可复现配置；
+- [ ] **[TODO]** 补齐五方法主实验；
+- [ ] **[TODO]** 完成等时间预算比较；
+- [ ] **[TODO]** 扩大独立场景并完成逐次记录导出；
+- [ ] **[TODO]** 更新统计分析与论文结论；
+- [ ] **[OPTIONAL]** 在有相应论文主张时补充真实地理 MEC 机制实验；
+- [ ] **[VERIFY]** paper-scale KKT primal recovery；KKT 继续作为资源解析层完善，当前不宣称已全面替代 CVXPY。
 
-\[
-\boxed{
-\text{Freeze Proposed Algorithm}
-\rightarrow
-\text{Ablation}
-\rightarrow
-\text{Baselines}
-\rightarrow
-\text{Scale/Sensitivity}
-\rightarrow
-\text{Final Paper Tables}
-}
-\]
+本节是后续实验计划，不代表新增实验已经运行。此前系统模型、两种算法图及已核验实验图继续保留；只有新增证据核验通过后才更新对应论文图表。
 
 ---
 
@@ -778,7 +842,9 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 
 ---
 
-# 8. 当前阶段结论
+# 8. 历史阶段诊断记录
+
+以下保留开发过程中的诊断结果与当时判断；其中“下一步”“当前”等表述属于对应实验阶段。最新进度与未完成事项见[实验完整性核查](#experiment-evidence-audit)和第 6 节。
 
 已完成：
 
@@ -2257,8 +2323,11 @@ as a claim that energy decreases monotonically with fleet size for all M.
 
 ## Final paper metric definitions
 
-The final paper tables use one unified metric extractor so workload, MEC-count,
-UAV-count, and baseline results do not mix incompatible definitions.
+The Hybrid workload, MEC-count, and UAV-count summaries use a unified metric
+extractor. Detailed QoS/resource metrics have not yet been collected uniformly
+for all five methods; existing baseline timing fields also use different
+boundaries. The intended definitions below do not imply complete cross-method
+coverage. See the current evidence audit at the beginning of this README.
 
 For every strict Hybrid solution:
 

@@ -1,0 +1,94 @@
+[
+  {
+    "seed": 42,
+    "num_tasks": 30,
+    "num_uavs": 5,
+    "num_mecs": 3,
+    "num_contact_points": 37,
+    "contacts_per_mec": {
+      "E1": 12,
+      "E2": 13,
+      "E3": 12
+    },
+    "data_mb_min": 1.0796079090515909,
+    "data_mb_mean": 2.5008372285589133,
+    "data_mb_max": 3.7872958487938515,
+    "workload_gcycles_min": 7.59642405888552,
+    "workload_gcycles_mean": 20.529217406985357,
+    "workload_gcycles_max": 34.888228536677715,
+    "deadline_s_min": 247.60294130302987,
+    "deadline_s_mean": 324.673921782174,
+    "deadline_s_max": 419.7983529972206,
+    "cycle_s": 450.0,
+    "avg_delay_budget_s": 300.0
+  },
+  {
+    "seed": 42,
+    "num_tasks": 50,
+    "num_uavs": 5,
+    "num_mecs": 3,
+    "num_contact_points": 37,
+    "contacts_per_mec": {
+      "E1": 12,
+      "E2": 13,
+      "E3": 12
+    },
+    "data_mb_min": 1.0796079090515909,
+    "data_mb_mean": 2.4763072641091655,
+    "data_mb_max": 3.9524956340978985,
+    "workload_gcycles_min": 7.59642405888552,
+    "workload_gcycles_mean": 19.983124858589036,
+    "workload_gcycles_max": 34.888228536677715,
+    "deadline_s_min": 247.60294130302987,
+    "deadline_s_mean": 329.227794894678,
+    "deadline_s_max": 424.85559188035063,
+    "cycle_s": 450.0,
+    "avg_delay_budget_s": 300.0
+  },
+  {
+    "seed": 42,
+    "num_tasks": 80,
+    "num_uavs": 5,
+    "num_mecs": 3,
+    "num_contact_points": 37,
+    "contacts_per_mec": {
+      "E1": 12,
+      "E2": 13,
+      "E3": 12
+    },
+    "data_mb_min": 1.02900909882502,
+    "data_mb_mean": 2.51095486820255,
+    "data_mb_max": 3.961699190894513,
+    "workload_gcycles_min": 6.833423405749321,
+    "workload_gcycles_mean": 20.06340210597977,
+    "workload_gcycles_max": 34.888228536677715,
+    "deadline_s_min": 247.5730691455118,
+    "deadline_s_mean": 336.5778231710045,
+    "deadline_s_max": 427.2217993537996,
+    "cycle_s": 450.0,
+    "avg_delay_budget_s": 300.0
+  },
+  {
+    "seed": 42,
+    "num_tasks": 100,
+    "num_uavs": 5,
+    "num_mecs": 3,
+    "num_contact_points": 37,
+    "contacts_per_mec": {
+      "E1": 12,
+      "E2": 13,
+      "E3": 12
+    },
+    "data_mb_min": 1.0166344544140953,
+    "data_mb_mean": 2.485786754952951,
+    "data_mb_max": 3.961699190894513,
+    "workload_gcycles_min": 6.833423405749321,
+    "workload_gcycles_mean": 20.01250911047341,
+    "workload_gcycles_max": 34.888228536677715,
+    "deadline_s_min": 247.5730691455118,
+    "deadline_s_mean": 336.1478843289923,
+    "deadline_s_max": 427.2217993537996,
+    "cycle_s": 450.0,
+    "avg_delay_budget_s": 300.0
+  }
+]

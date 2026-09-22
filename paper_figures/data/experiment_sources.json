@@ -1,0 +1,70 @@
+{
+  "retrieved_at": "2026-09-22T06:36:17.576654+00:00",
+  "sources": {
+    "dense": {
+      "repository": "litao3237/uav-mec-patrol",
+      "artifact_id": 10651261069,
+      "run_id": 35623551801,
+      "commit": "8d0f9ca5b07667231ce926e8bf1ff50e28a5ce45",
+      "workflow": "dense-workload-curve",
+      "run_url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/35623551801",
+      "archive_member": "dense_workload_K30-80_M5_E2.json",
+      "archive_sha256": "17824bebb36ce3047ce82ff642d88351a4872175719ea7c48f7620ac96ed6bdd",
+      "json_path": "paper_figures/data/raw/dense.json",
+      "json_sha256": "226f8470b2929de996427479ef3ed2021910c21ec95e88c7bf1bfcd82efc3203",
+      "rows": 54
+    },
+    "baseline": {
+      "repository": "litao3237/uav-mec-patrol",
+      "artifact_id": 10640744688,
+      "run_id": 35606211937,
+      "commit": "2100549a1a9db7e875ca4dc6e2f66dc7786a0190",
+      "workflow": "core-baseline-light-load",
+      "run_url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/35606211937",
+      "archive_member": "core_baseline_K50_E2_S45-46-47_A100-101-102_I100_matrix.json",
+      "archive_sha256": "60a851c86400af6c49469f6df5587cc1eac0fb37d5f1c49ba7803d685088e87a",
+      "json_path": "paper_figures/data/raw/baseline.json",
+      "json_sha256": "87d02bb4ae7d84f2ddd29d56b7dfc3e54e644254be772a7c658fc1b7a54f3d42",
+      "rows": 9
+    },
+    "ga": {
+      "repository": "litao3237/uav-mec-patrol",
+      "artifact_id": 10643135771,
+      "run_id": 35606683206,
+      "commit": "bfee87f84f601a8642a41706cd4863bfe51bc7cc",
+      "workflow": "ga-baseline-light-matrix",
+      "run_url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/35606683206",
+      "archive_member": "ga_baseline_K50_E2_S45-46-47_A100-101-102_I100_P24_G40_matrix.json",
+      "archive_sha256": "c79b3d77bbdae1822aaa7b99321b990325d39832fa09a0c3e55fce724dd220bd",
+      "json_path": "paper_figures/data/raw/ga.json",
+      "json_sha256": "906b2e2df0db591ee9fa2b409092c2b595df96ec3915e1e5c3ae56c823245b00",
+      "rows": 9
+    },
+    "strong": {
+      "repository": "litao3237/uav-mec-patrol",
+      "artifact_id": 10647510876,
+      "run_id": 35616968050,
+      "commit": "20c98628f5c05eb1e7fadda353cf5544839b6af2",
+      "workflow": "small-strong-benchmark",
+      "run_url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/35616968050",
+      "archive_member": "small_strong_K28_M2_E2_S45-46-47_matrix.json",
+      "archive_sha256": "7518f482923189ee2e411af89dbe32071a3c9d095d4cec7dc42542fce1992dec",
+      "json_path": "paper_figures/data/raw/strong.json",
+      "json_sha256": "5eeb6680263b1a2d94be2fe07092be822745c81b1914c402775c229ee15e260b",
+      "rows": 45
+    },
+    "geography": {
+      "repository": "litao3237/uav-mec-patrol",
+      "artifact_id": 10674531133,
+      "run_id": 35679546095,
+      "commit": "846dd1b56c23ede45ee00238623c3bff487bceb0",
+      "workflow": "stanislaus-real-geography-formal",
+      "run_url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/35679546095",
+      "archive_member": "outputs/results/stanislaus_real_case_K59_M5_E2_S45-46-47_A100-101-102.json",
+      "archive_sha256": "62e81c0eb0188a01c28c9d228efd3b96c7abc6ba87cfc0c465c9c6d7b02cbf1a",
+      "json_path": "paper_figures/data/raw/geography.json",
+      "json_sha256": "784e92148b04a6409fc61d39bc438d33358386c767d9bf5ff20990fcc2cabd9f",
+      "rows": 9
+    }
+  }
+}

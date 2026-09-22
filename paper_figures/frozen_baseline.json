@@ -1,0 +1,66 @@
+{
+  "description": "固定系统模型与已确认的文字框架版；新增图形机制版不得覆盖这些文件。",
+  "recorded_at": "2026-09-22T15:02:54.3135165+09:00",
+  "files": [
+    {
+      "path": "visio/fig01_system_model.vsdx",
+      "sha256": "c82d34a4788c4ff6e7e4dce5a282f55010e4439bdcf5ce44ea6417b4b0b04bd6",
+      "bytes": 63040
+    },
+    {
+      "path": "output/pdf/fig01_system_model.pdf",
+      "sha256": "3d26d210e87f62b44d774f8668ffbce5d47a092864bc79bd8046b69eae421bca",
+      "bytes": 138673
+    },
+    {
+      "path": "output/svg/fig01_system_model.svg",
+      "sha256": "cd42fb96071a7cc0b6af66f3391ddf93d398fcd77d8b9888e5b7df865492a028",
+      "bytes": 103149
+    },
+    {
+      "path": "output/png/fig01_system_model.png",
+      "sha256": "35129b2f0807c50195ac39c0fd4f4c9d4c79df499c482287f250fd527a816e02",
+      "bytes": 228042
+    },
+    {
+      "path": "visio/assets/fig01_system_model.scene.json",
+      "sha256": "6f4fe7b0b4f158168484aa4ef42fad6e4e8f5c5c55fb5c311b07d0f864faf87e",
+      "bytes": 181231
+    },
+    {
+      "path": "visio/fig02_hybrid_alns_framework.vsdx",
+      "sha256": "5566d4683e8ec09b19288c75c3f755cc65bab479f87d13798cb7c9d534d243f3",
+      "bytes": 36827
+    },
+    {
+      "path": "output/pdf/fig02_hybrid_alns_framework.pdf",
+      "sha256": "aae5eb8ea1824693dbc04c806ad855db639b9d69a4143cf37df0830758f3760f",
+      "bytes": 149744
+    },
+    {
+      "path": "output/svg/fig02_hybrid_alns_framework.svg",
+      "sha256": "6f63238d03b9e701c1da3a328373fa85b90cb0c93865ab493fe817a0773209d1",
+      "bytes": 69296
+    },
+    {
+      "path": "output/png/fig02_hybrid_alns_framework.png",
+      "sha256": "40314d8d4189a9830f40e4f027d632d76eba09adb718b60fa11c52c1115685e4",
+      "bytes": 191019
+    },
+    {
+      "path": "visio/assets/fig02_hybrid_alns_framework.scene.json",
+      "sha256": "e3edad66bc8a67e33fbf697033cadbf72a07b92ffde8006e871372f97e0cd1d1",
+      "bytes": 47348
+    },
+    {
+      "path": "scripts/build_algorithm_figure.mjs",
+      "sha256": "5fbfed499cc0a425fc3e2ecf56fe0b233e0c5aa95441eed9af63dc7bfc513540",
+      "bytes": 15063
+    },
+    {
+      "path": "scripts/render_concept_figures.ps1",
+      "sha256": "0c63b120f0d41f5b6553df06f875ae12478da310b0a2dcfa3affbfa137ac8137",
+      "bytes": 8654
+    }
+  ]
+}

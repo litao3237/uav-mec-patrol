@@ -1,0 +1,577 @@
+{
+  "passed": true,
+  "rounding_checks": [
+    {
+      "metric": "dense/K30/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K30/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K30/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K30/generic_energy_mean_j",
+      "computed": 122917.3772353322,
+      "published": 122917.377,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/hybrid_energy_mean_j",
+      "computed": 122914.05171074677,
+      "published": 122914.052,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/hybrid_gain_mean_pct",
+      "computed": 0.002659103420941868,
+      "published": 0.003,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/offload_ratio_mean",
+      "computed": 0.05925925925925926,
+      "published": 0.059,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/contacts_per_uav_mean",
+      "computed": 0.26666666666666666,
+      "published": 0.267,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/route_distance_km_mean",
+      "computed": 6.46495454162348,
+      "published": 6.465,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K30/runtime_mean_s",
+      "computed": 3.6107075746666686,
+      "published": 3.611,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K40/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K40/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K40/generic_energy_mean_j",
+      "computed": 135783.3609206843,
+      "published": 135783.361,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/hybrid_energy_mean_j",
+      "computed": 135693.41995439434,
+      "published": 135693.42,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/hybrid_gain_mean_pct",
+      "computed": 0.0659281939583531,
+      "published": 0.066,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/offload_ratio_mean",
+      "computed": 0.08888888888888889,
+      "published": 0.089,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/contacts_per_uav_mean",
+      "computed": 0.3777777777777778,
+      "published": 0.378,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/route_distance_km_mean",
+      "computed": 7.034490522251414,
+      "published": 7.034,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K40/runtime_mean_s",
+      "computed": 5.490578803000002,
+      "published": 5.491,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K50/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K50/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K50/generic_energy_mean_j",
+      "computed": 170323.58579654503,
+      "published": 170323.586,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/hybrid_energy_mean_j",
+      "computed": 167015.34981498652,
+      "published": 167015.35,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/hybrid_gain_mean_pct",
+      "computed": 1.802715383494123,
+      "published": 1.803,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/offload_ratio_mean",
+      "computed": 0.08,
+      "published": 0.08,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/contacts_per_uav_mean",
+      "computed": 0.5333333333333333,
+      "published": 0.533,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/route_distance_km_mean",
+      "computed": 8.654953496984676,
+      "published": 8.655,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K50/runtime_mean_s",
+      "computed": 14.448989395666665,
+      "published": 14.449,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K60/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K60/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K60/generic_energy_mean_j",
+      "computed": 186149.8913701222,
+      "published": 186149.891,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/hybrid_energy_mean_j",
+      "computed": 182822.5622339082,
+      "published": 182822.562,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/hybrid_gain_mean_pct",
+      "computed": 1.806629962307884,
+      "published": 1.807,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/offload_ratio_mean",
+      "computed": 0.0962962962962963,
+      "published": 0.096,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/contacts_per_uav_mean",
+      "computed": 0.6666666666666667,
+      "published": 0.667,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/route_distance_km_mean",
+      "computed": 9.384929803305184,
+      "published": 9.385,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K60/runtime_mean_s",
+      "computed": 24.501248416666673,
+      "published": 24.501,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K70/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K70/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K70/generic_energy_mean_j",
+      "computed": 205019.28460932043,
+      "published": 205019.285,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/hybrid_energy_mean_j",
+      "computed": 202464.78191823413,
+      "published": 202464.782,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/hybrid_gain_mean_pct",
+      "computed": 1.2712395233222689,
+      "published": 1.271,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/offload_ratio_mean",
+      "computed": 0.09841269841269841,
+      "published": 0.098,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/contacts_per_uav_mean",
+      "computed": 0.6888888888888889,
+      "published": 0.689,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/route_distance_km_mean",
+      "computed": 10.34150793405389,
+      "published": 10.342,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K70/runtime_mean_s",
+      "computed": 28.861553671666673,
+      "published": 28.862,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/runs",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K80/generic_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K80/hybrid_strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "dense/K80/generic_energy_mean_j",
+      "computed": 230038.32285106272,
+      "published": 230038.323,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/hybrid_energy_mean_j",
+      "computed": 226768.19561011315,
+      "published": 226768.196,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/hybrid_gain_mean_pct",
+      "computed": 1.377763886351072,
+      "published": 1.378,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/offload_ratio_mean",
+      "computed": 0.12222222222222222,
+      "published": 0.122,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/contacts_per_uav_mean",
+      "computed": 1.0444444444444445,
+      "published": 1.044,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/route_distance_km_mean",
+      "computed": 11.49425975761249,
+      "published": 11.494,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "dense/K80/runtime_mean_s",
+      "computed": 52.30266407366667,
+      "published": 52.303,
+      "tolerance": 0.0005000001
+    },
+    {
+      "metric": "baseline/greedy_repair/strict",
+      "computed": 2,
+      "published": 2.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "baseline/greedy_repair/mean",
+      "computed": 230637.62457868434,
+      "published": 230637.624579,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/nearest_mec/strict",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "baseline/nearest_mec/mean",
+      "computed": 229613.10152010186,
+      "published": 229613.10152,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/nearest_mec/median",
+      "computed": 229866.96286485353,
+      "published": 229866.962865,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/ga/strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "baseline/ga/mean",
+      "computed": 235438.00005403292,
+      "published": 235438.000054,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/ga/median",
+      "computed": 227768.55793589045,
+      "published": 227768.557936,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/generic_alns/strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "baseline/generic_alns/mean",
+      "computed": 170323.58579654503,
+      "published": 170323.585797,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/generic_alns/median",
+      "computed": 172689.24012893607,
+      "published": 172689.240129,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/hybrid/strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "baseline/hybrid/mean",
+      "computed": 167015.34981498652,
+      "published": 167015.349815,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "baseline/hybrid/median",
+      "computed": 170279.20664622515,
+      "published": 170279.206646,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "strong/45/gap",
+      "computed": 9.695224777546237,
+      "published": 9.695225,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "strong/45/strict",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "strong/46/gap",
+      "computed": 0.07057154644746766,
+      "published": 0.070572,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "strong/46/strict",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "strong/47/gap",
+      "computed": 8.136903416045195,
+      "published": 8.136903,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "strong/47/strict",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "strong/aggregate/gap",
+      "computed": 5.967566580012966,
+      "published": 5.967567,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "strong/aggregate/strict",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/greedy_repair/strict",
+      "computed": 0,
+      "published": 0.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/greedy_repair/total",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/nearest_mec/strict",
+      "computed": 0,
+      "published": 0.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/nearest_mec/total",
+      "computed": 3,
+      "published": 3.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/generic_alns/strict",
+      "computed": 8,
+      "published": 8.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/generic_alns/total",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/generic_alns/mean",
+      "computed": 883683.6207390968,
+      "published": 883683.620739,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "geography/hybrid/strict",
+      "computed": 8,
+      "published": 8.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/hybrid/total",
+      "computed": 9,
+      "published": 9.0,
+      "tolerance": 0.5000000001
+    },
+    {
+      "metric": "geography/hybrid/mean",
+      "computed": 878690.6127926005,
+      "published": 878690.612793,
+      "tolerance": 5.001e-07
+    },
+    {
+      "metric": "geography/paired_gain",
+      "computed": 0.5430409579960822,
+      "published": 0.543041,
+      "tolerance": 5.001e-07
+    }
+  ],
+  "matched_metric_count": 93,
+  "paired_counts": {
+    "K50": 9,
+    "K80": 9,
+    "geography": 8
+  },
+  "statistical_policy": {
+    "energy": "strict Stage-1",
+    "qos": "strict Stage-2",
+    "sd": "sample standard deviation (ddof=1)",
+    "deterministic_unit": "unique scenario",
+    "paired_gain": "mean of per-pair percentages",
+    "missing": "NaN, never zero"
+  }
+}

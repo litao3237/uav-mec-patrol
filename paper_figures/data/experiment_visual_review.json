@@ -1,0 +1,79 @@
+{
+  "reviewer": "Codex visual inspection",
+  "reviewed_at": "2026-09-22T07:13:36.312460+00:00",
+  "checks": [
+    "Actual PDF color and grayscale renders inspected for all 13 figures",
+    "Complete labels, readable legends, no clipping or overlapping text",
+    "Markers, hatching and route line styles distinguish series in grayscale",
+    "Geographic main map and detail show consistent task/contact/route positions"
+  ],
+  "figures": {
+    "fig03_dense_workload": {
+      "pdf_render_sha256": "b374833e0c8b845e1f08dd547c2d2886682743c0af0ec509ea3a99b33bb8afa2",
+      "grayscale_sha256": "bc53191aea25abbee606f35138fec2dbd347c056de66716916eaffeef554cca7",
+      "passed": true
+    },
+    "fig04_workload_structure": {
+      "pdf_render_sha256": "1f3a5878e3a5db1e83257d8d401f28e49ad20f8a7190e71056d0344769f58244",
+      "grayscale_sha256": "1968677f09e6bc2ef98f1b9d58ab3460a13fa88cc20305955aa72468faf9ebc6",
+      "passed": true
+    },
+    "fig05_baseline_comparison": {
+      "pdf_render_sha256": "03ef902e8efc50860d1f1fa3831831eb83c40db1e582d21fc3153f119de186cc",
+      "grayscale_sha256": "0a1346866abff1a6f1a1e6c7d365d160c24ed4caf0392603113c470d94bedeb6",
+      "passed": true,
+      "reviewed_at": "2026-09-22T07:19:47.409838+00:00",
+      "note": "All five methods shown; Greedy energy uses two strict unique scenarios; labels and grayscale checked."
+    },
+    "fig06_paired_comparison": {
+      "pdf_render_sha256": "3530705579ecc1f8ddc0bcba202ae392198883b68110df2d4d8b1e59aeeacf2a",
+      "grayscale_sha256": "29b04ed186cf0d3bf070a900eb9d3bcc08c4ce31d08a81cf31da89428b2d3a26",
+      "passed": true
+    },
+    "fig07_elite_ablation": {
+      "pdf_render_sha256": "d78f9d151778fcec735a1f03284594f78bcfe00d6fa906df771eb5b8afeb7a62",
+      "grayscale_sha256": "29e1d61754b9f563849e364680dcb33a455cfc80f8cf96ab3b72be9112335e40",
+      "passed": true
+    },
+    "fig08_mec_uav_sensitivity": {
+      "pdf_render_sha256": "4f533bebc736d6f1c4a577e9448ab4b302df2bf37d6a0b59db6f5b6614bf9fcd",
+      "grayscale_sha256": "68f909698e78335d254ca198f7ea0a58a6eed53007ab1caee780c37d6845abce",
+      "passed": true
+    },
+    "fig09_contact_budget": {
+      "pdf_render_sha256": "d0aa9d565fa30f64349fc913b8b6d60bad18c3ffcc14df4d15753eb9448e1720",
+      "grayscale_sha256": "741ba7233eeabcd622c3eac5a244c1d7c7f98b9bbfe73306a8edca0f171db92d",
+      "passed": true
+    },
+    "fig10_bandwidth_shadow": {
+      "pdf_render_sha256": "21cd50e358957bdd2ed20547b80060dc5b1e8e8ed057b9ec8284b3a37be112a5",
+      "grayscale_sha256": "7e6a0024bb4571aaec3361e82b05fea68edbe77547826f9127f747c3231ac379",
+      "passed": true
+    },
+    "fig11_iteration_budget": {
+      "pdf_render_sha256": "3ad4adc330a722a07c5c560615597b80dc475551bc1a77bc54bc0afcc8ccbc65",
+      "grayscale_sha256": "f1c6db75c4d33a45c3239e5dbf81a966080bc55d9524848a37b37fbd8144c60c",
+      "passed": true
+    },
+    "fig12_strong_reference": {
+      "pdf_render_sha256": "608cdfd690aa56cecd39cedd5c61879b2269b2810d970f046a5cbd69a91cf9fc",
+      "grayscale_sha256": "f93ce95d29cd0d51d494ecc432c40bf41dd1c4146a14c218655ed3ae4370a83b",
+      "passed": true
+    },
+    "fig13_stanislaus_case": {
+      "pdf_render_sha256": "ee2ac742d07388596b31ba843fd7d2470be6bd68ccd38b088ecb2e9f583472bb",
+      "grayscale_sha256": "79fba9e5056a5270db798155762f5d0491553a093aee11d10c7be8db57254e79",
+      "passed": true
+    },
+    "figS1_spatial_robustness": {
+      "pdf_render_sha256": "439d2bab943734968eb2dddef92874db62dc65c458dfebe64cce856be129697c",
+      "grayscale_sha256": "c66845cc7c88c9c1e9d07e4df6d0f9eab348887899af9905340dc5973b5c1a16",
+      "passed": true
+    },
+    "figS2_coverage_radius": {
+      "pdf_render_sha256": "3268d1e21ac1bd6115430ca7f8fc6a1248b88d0f2cf6e234830dd1ead81fa12b",
+      "grayscale_sha256": "a41222cfebc46a2b8dc9cfc157050e9afc66e1c32c6ed90a18fb726dd53255d3",
+      "passed": true
+    }
+  }
+}

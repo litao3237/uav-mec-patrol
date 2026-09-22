@@ -1,0 +1,1555 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 fig01_system_model.svg fig01_system_model -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="7.20472in" height="4.97126in"
+		viewBox="0 0 518.74 357.931" xml:space="preserve" color-interpolation-filters="sRGB" class="st85">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false"/>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:#f6f8f3;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st2 {fill:#d4e0c9;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.570614}
+		.st3 {stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.570614}
+		.st4 {fill:#e1ead8;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.656206}
+		.st5 {stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.656206}
+		.st6 {fill:#e1ead8;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.570614}
+		.st7 {fill:#e1ead8;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.627675}
+		.st8 {stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.627675}
+		.st9 {fill:#e1ead8;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.542083}
+		.st10 {stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.542083}
+		.st11 {fill:#e1ead8;stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.670471}
+		.st12 {stroke:#8b9e80;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.670471}
+		.st13 {fill:none;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st14 {fill:#29343d;font-family:Times New Roman;font-size:0.800011em;font-weight:bold}
+		.st15 {fill:#eff5fa;stroke:#6f9ab7;stroke-dasharray:5.95,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st16 {fill:#f0f6f4;stroke:#7da49b;stroke-dasharray:5.95,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st17 {fill:#29343d;font-family:Times New Roman;font-size:0.791656em;font-weight:bold}
+		.st18 {fill:#29343d;font-family:Times New Roman;font-size:0.708344em}
+		.st19 {font-family:Cambria Math;font-size:1em}
+		.st20 {fill:#29343d;font-family:Times New Roman;font-size:0.691658em}
+		.st21 {marker-end:url(#mrkr4-114);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st22 {fill:#306587;fill-opacity:1;stroke:#306587;stroke-opacity:1;stroke-width:0.40983606557377}
+		.st23 {marker-end:url(#mrkr4-120);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st24 {marker-end:url(#mrkr4-126);stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st25 {fill:#a46d36;fill-opacity:1;stroke:#a46d36;stroke-opacity:1;stroke-width:0.40983606557377}
+		.st26 {marker-end:url(#mrkr4-142);stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st27 {fill:#ffffff;stroke:#29343d;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.8}
+		.st28 {fill:#29343d;font-family:Times New Roman;font-size:0.708344em;font-style:italic}
+		.st29 {fill:#29343d;font-family:Times New Roman;font-size:0.75em;font-weight:bold}
+		.st30 {marker-end:url(#mrkr4-174);stroke:#29343d;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st31 {fill:#29343d;fill-opacity:1;stroke:#29343d;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st32 {marker-end:url(#mrkr4-183);stroke:#397b73;stroke-dasharray:0,5.75;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.15}
+		.st33 {fill:#397b73;fill-opacity:1;stroke:#397b73;stroke-opacity:1;stroke-width:0.38983050847458}
+		.st34 {font-size:1em}
+		.st35 {fill:#f7ecd9;stroke:#9d784f;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.7}
+		.st36 {fill:#29343d;font-family:Times New Roman;font-size:0.783325em;font-weight:bold}
+		.st37 {fill:#ffffff;stroke:#b6bec5;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.7}
+		.st38 {fill:#eef4f8;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st39 {stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.7}
+		.st40 {fill:#ffffff;stroke:#b6bec5;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st41 {fill:#29343d;font-family:Times New Roman;font-size:0.741669em;font-weight:bold}
+		.st42 {fill:#29343d;font-family:Times New Roman;font-size:0.683327em}
+		.st43 {marker-end:url(#mrkr4-260);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.1}
+		.st44 {fill:#306587;fill-opacity:1;stroke:#306587;stroke-opacity:1;stroke-width:0.37931034482759}
+		.st45 {marker-end:url(#mrkr4-269);stroke:#397b73;stroke-dasharray:0,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st46 {fill:#397b73;fill-opacity:1;stroke:#397b73;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st47 {stroke:#73808a;stroke-dasharray:5.95,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st48 {stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.2}
+		.st49 {stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.9}
+		.st50 {fill:#f8faf7;stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.8}
+		.st51 {fill:#cedfd0;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st52 {fill:#5b7666;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st53 {stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.52825}
+		.st54 {fill:#29343d;font-family:Times New Roman;font-size:0.674995em;font-style:italic}
+		.st55 {stroke:#6d7765;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.2}
+		.st56 {stroke:#6d7765;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.9}
+		.st57 {fill:#f8faf7;stroke:#6d7765;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.8}
+		.st58 {fill:#6d7765;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st59 {stroke:#6d7765;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.52825}
+		.st60 {fill:#d9e6ef;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st61 {stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5733}
+		.st62 {fill:#d9e6ef;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5733}
+		.st63 {fill:#306587;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st64 {fill:#ffffff;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st65 {fill:#efe0c9;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st66 {stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.60989}
+		.st67 {fill:#efe0c9;stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.60989}
+		.st68 {fill:#a46d36;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st69 {stroke:#bc9d6c;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.55}
+		.st70 {stroke:#47746c;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.12359}
+		.st71 {fill:#47746c;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st72 {fill:#f4f7f6;stroke:#47746c;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.99}
+		.st73 {stroke:#47746c;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.72}
+		.st74 {stroke:#47746c;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.26}
+		.st75 {fill:#bfd4cb;stroke:#47746c;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.866036}
+		.st76 {fill:#dee7e5;stroke:#4f6469;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.77928}
+		.st77 {stroke:#4f6469;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.77928}
+		.st78 {fill:#bbcac7;stroke:#738b87;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.55}
+		.st79 {stroke:#829893;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.5}
+		.st80 {fill:#ecf0ea;stroke:#8b9a88;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.8}
+		.st81 {fill:#6f8571;font-family:Times New Roman;font-size:0.833336em;font-weight:bold}
+		.st82 {fill:#f8faf7;stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.7}
+		.st83 {stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.7}
+		.st84 {stroke:#5b7666;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.367441}
+		.st85 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Markers">
+		<g id="lend4">
+			<path d="M 2 1 L 0 0 L 2 -1 L 2 1 " style="stroke:none"/>
+		</g>
+		<marker id="mrkr4-114" class="st22" v:arrowType="4" v:arrowSize="1" v:setback="4.592" refX="-4.592" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.44,-2.44) "/>
+		</marker>
+		<marker id="mrkr4-120" class="st22" v:arrowType="4" v:arrowSize="1" v:setback="4.88" refX="-4.88" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.44,-2.44) "/>
+		</marker>
+		<marker id="mrkr4-126" class="st25" v:arrowType="4" v:arrowSize="1" v:setback="4.592" refX="-4.592" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.44,-2.44) "/>
+		</marker>
+		<marker id="mrkr4-142" class="st25" v:arrowType="4" v:arrowSize="1" v:setback="4.88" refX="-4.88" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.44,-2.44) "/>
+		</marker>
+		<marker id="mrkr4-174" class="st31" v:arrowType="4" v:arrowSize="1" v:setback="6.23529" refX="-6.2352941176471"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-183" class="st33" v:arrowType="4" v:arrowSize="1" v:setback="5.13043" refX="-5.1304347826087"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.5652173913043,-2.5652173913043) "/>
+		</marker>
+		<marker id="mrkr4-260" class="st44" v:arrowType="4" v:arrowSize="1" v:setback="5.27273" refX="-5.2727272727273"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.6363636363636,-2.6363636363636) "/>
+		</marker>
+		<marker id="mrkr4-269" class="st46" v:arrowType="4" v:arrowSize="1" v:setback="6.23529" refX="-6.2352941176471"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+	</defs>
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<title>fig01_system_model</title>
+		<v:pageProperties v:drawingScale="1" v:pageScale="1" v:drawingUnits="0" v:shadowOffsetX="0" v:shadowOffsetY="0"/>
+		<v:layer v:name="aircraft1" v:index="0"/>
+		<v:layer v:name="aircraft2" v:index="1"/>
+		<v:layer v:name="cache" v:index="2"/>
+		<v:layer v:name="collection" v:index="3"/>
+		<v:layer v:name="contact1" v:index="4"/>
+		<v:layer v:name="contact2" v:index="5"/>
+		<v:layer v:name="contacts" v:index="6"/>
+		<v:layer v:name="depot" v:index="7"/>
+		<v:layer v:name="edge1" v:index="8"/>
+		<v:layer v:name="edge1_antenna" v:index="9"/>
+		<v:layer v:name="edge1_rack" v:index="10"/>
+		<v:layer v:name="edge2" v:index="11"/>
+		<v:layer v:name="edge2_antenna" v:index="12"/>
+		<v:layer v:name="edge2_rack" v:index="13"/>
+		<v:layer v:name="forest_asset_0" v:index="14"/>
+		<v:layer v:name="forest_asset_11" v:index="15"/>
+		<v:layer v:name="forest_asset_13" v:index="16"/>
+		<v:layer v:name="forest_asset_3" v:index="17"/>
+		<v:layer v:name="forest_asset_5" v:index="18"/>
+		<v:layer v:name="forest_asset_7" v:index="19"/>
+		<v:layer v:name="forest_asset_9" v:index="20"/>
+		<v:layer v:name="forest_context" v:index="21"/>
+		<v:layer v:name="hangar" v:index="22"/>
+		<v:layer v:name="labels" v:index="23"/>
+		<v:layer v:name="legend" v:index="24"/>
+		<v:layer v:name="legend_contact" v:index="25"/>
+		<v:layer v:name="legend_station_radio" v:index="26"/>
+		<v:layer v:name="local_computing" v:index="27"/>
+		<v:layer v:name="mec_coverage" v:index="28"/>
+		<v:layer v:name="mec1_device" v:index="29"/>
+		<v:layer v:name="mec2_device" v:index="30"/>
+		<v:layer v:name="patrol_routes" v:index="31"/>
+		<v:layer v:name="sensor_i" v:index="32"/>
+		<v:layer v:name="sensor_i_radio" v:index="33"/>
+		<v:layer v:name="sensor_j" v:index="34"/>
+		<v:layer v:name="sensor_j_radio" v:index="35"/>
+		<v:layer v:name="sensor_k" v:index="36"/>
+		<v:layer v:name="sensor_k_radio" v:index="37"/>
+		<v:layer v:name="sensor_l" v:index="38"/>
+		<v:layer v:name="sensor_l_radio" v:index="39"/>
+		<v:layer v:name="sensor_p" v:index="40"/>
+		<v:layer v:name="sensor_p_radio" v:index="41"/>
+		<v:layer v:name="sensor_q" v:index="42"/>
+		<v:layer v:name="sensor_q_radio" v:index="43"/>
+		<v:layer v:name="sensor_r" v:index="44"/>
+		<v:layer v:name="sensor_r_radio" v:index="45"/>
+		<v:layer v:name="sensor_s" v:index="46"/>
+		<v:layer v:name="sensor_s_radio" v:index="47"/>
+		<v:layer v:name="sensor_t" v:index="48"/>
+		<v:layer v:name="sensor_t_radio" v:index="49"/>
+		<v:layer v:name="uav1" v:index="50"/>
+		<v:layer v:name="uav2" v:index="51"/>
+		<v:layer v:name="uploads" v:index="52"/>
+		<g id="shape1-1" v:mID="1" v:groupContext="shape" v:layerMember="21" transform="translate(10.8935,-43.5742)">
+			<title>forest_ground</title>
+			<path d="M0 297.24 L40.46 273.89 L106.86 282.19 L170.15 270.26 L228.76 282.19 L295.16 268.19 L344.44 285.83 L343.92 321.1
+						 L278.04 353.78 L191.42 357.93 L105.3 344.44 L23.86 342.89 L0 297.24 Z" class="st1"/>
+		</g>
+		<g id="shape2-3" v:mID="2" v:groupContext="shape" v:layerMember="14" transform="translate(16.7726,-109.627)">
+			<title>forest_asset_0_0</title>
+			<path d="M3.91 350.15 C4.13 347.73 6.17 345.83 8.65 345.83 C11.13 345.83 13.16 347.73 13.38 350.15 C13.39 350.15 13.39
+						 350.15 13.4 350.15 C15.55 350.15 17.29 351.89 17.29 354.04 C17.29 356.19 15.55 357.93 13.4 357.93 C10.23
+						 357.93 7.06 357.93 3.89 357.93 C1.74 357.93 -0 356.19 0 354.04 C0 351.89 1.74 350.15 3.89 350.15 C3.9 350.15
+						 3.9 350.15 3.91 350.15 Z" class="st2"/>
+		</g>
+		<g id="shape3-5" v:mID="3" v:groupContext="shape" v:layerMember="14" transform="translate(25.4183,-111.356)">
+			<title>forest_asset_0_1</title>
+			<path d="M0 357.93 C0.72 357.21 1.44 356.49 2.16 355.77" class="st3"/>
+		</g>
+		<g id="shape4-8" v:mID="4" v:groupContext="shape" v:layerMember="14" transform="translate(22.8246,-112.653)">
+			<title>forest_asset_0_2</title>
+			<path d="M2.59 357.93 C1.73 357.07 0.86 356.2 0 355.34" class="st3"/>
+		</g>
+		<g id="shape5-11" v:mID="5" v:groupContext="shape" v:layerMember="14" transform="translate(25.4183,-104.44)">
+			<title>forest_asset_0_3</title>
+			<path d="M0 357.93 C0 354.18 0 350.44 0 346.69" class="st3"/>
+		</g>
+		<g id="shape6-14" v:mID="6" v:groupContext="shape" v:layerMember="17" transform="translate(76.6871,-107.552)">
+			<title>forest_asset_3_0</title>
+			<path d="M4.5 348.98 C4.75 346.2 7.09 344.01 9.94 344.01 C12.8 344.01 15.14 346.2 15.39 348.98 C15.4 348.98 15.4 348.98
+						 15.41 348.98 C17.88 348.98 19.89 350.99 19.89 353.46 C19.89 355.93 17.88 357.93 15.41 357.93 C11.77 357.93
+						 8.12 357.93 4.47 357.93 C2 357.93 -0 355.93 0 353.46 C0 350.99 2 348.98 4.47 348.98 C4.48 348.98 4.49 348.98
+						 4.5 348.98 Z" class="st4"/>
+		</g>
+		<g id="shape7-16" v:mID="7" v:groupContext="shape" v:layerMember="17" transform="translate(86.6296,-109.541)">
+			<title>forest_asset_3_1</title>
+			<path d="M0 357.93 C0.83 357.1 1.66 356.27 2.49 355.45" class="st5"/>
+		</g>
+		<g id="shape8-19" v:mID="8" v:groupContext="shape" v:layerMember="17" transform="translate(83.6469,-111.032)">
+			<title>forest_asset_3_2</title>
+			<path d="M2.98 357.93 C1.99 356.94 0.99 355.94 0 354.95" class="st5"/>
+		</g>
+		<g id="shape9-22" v:mID="9" v:groupContext="shape" v:layerMember="17" transform="translate(86.6296,-101.587)">
+			<title>forest_asset_3_3</title>
+			<path d="M0 357.93 C0 353.62 0 349.31 0 345.01" class="st5"/>
+		</g>
+		<g id="shape10-25" v:mID="10" v:groupContext="shape" v:layerMember="18" transform="translate(116.889,-100.809)">
+			<title>forest_asset_5_0</title>
+			<path d="M3.91 350.15 C4.13 347.73 6.17 345.83 8.65 345.83 C11.13 345.83 13.16 347.73 13.38 350.15 C13.39 350.15 13.39
+						 350.15 13.4 350.15 C15.55 350.15 17.29 351.89 17.29 354.04 C17.29 356.19 15.55 357.93 13.4 357.93 C10.23
+						 357.93 7.06 357.93 3.89 357.93 C1.74 357.93 -0 356.19 0 354.04 C0 351.89 1.74 350.15 3.89 350.15 C3.9 350.15
+						 3.9 350.15 3.91 350.15 Z" class="st6"/>
+		</g>
+		<g id="shape11-27" v:mID="11" v:groupContext="shape" v:layerMember="18" transform="translate(125.535,-102.538)">
+			<title>forest_asset_5_1</title>
+			<path d="M0 357.93 C0.72 357.21 1.44 356.49 2.16 355.77" class="st3"/>
+		</g>
+		<g id="shape12-30" v:mID="12" v:groupContext="shape" v:layerMember="18" transform="translate(122.941,-103.834)">
+			<title>forest_asset_5_2</title>
+			<path d="M2.59 357.93 C1.73 357.07 0.86 356.2 0 355.34" class="st3"/>
+		</g>
+		<g id="shape13-33" v:mID="13" v:groupContext="shape" v:layerMember="18" transform="translate(125.535,-95.6211)">
+			<title>forest_asset_5_3</title>
+			<path d="M0 357.93 C0 354.18 0 350.44 0 346.69" class="st3"/>
+		</g>
+		<g id="shape14-36" v:mID="14" v:groupContext="shape" v:layerMember="19" transform="translate(155.968,-87.4942)">
+			<title>forest_asset_7_0</title>
+			<path d="M4.3 349.37 C4.54 346.71 6.78 344.62 9.51 344.62 C12.24 344.62 14.48 346.71 14.72 349.37 C14.73 349.37 14.73
+						 349.37 14.74 349.37 C17.1 349.37 19.02 351.29 19.02 353.65 C19.02 356.01 17.1 357.93 14.74 357.93 C11.25
+						 357.93 7.77 357.93 4.28 357.93 C1.92 357.93 0 356.01 0 353.65 C0 351.29 1.92 349.37 4.28 349.37 C4.29 349.37
+						 4.29 349.37 4.3 349.37 Z" class="st7"/>
+		</g>
+		<g id="shape15-38" v:mID="15" v:groupContext="shape" v:layerMember="19" transform="translate(165.478,-89.3962)">
+			<title>forest_asset_7_1</title>
+			<path d="M0 357.93 C0.79 357.14 1.59 356.35 2.38 355.55" class="st8"/>
+		</g>
+		<g id="shape16-41" v:mID="16" v:groupContext="shape" v:layerMember="19" transform="translate(162.625,-90.8228)">
+			<title>forest_asset_7_2</title>
+			<path d="M2.85 357.93 C1.9 356.98 0.95 356.03 0 355.08" class="st8"/>
+		</g>
+		<g id="shape17-44" v:mID="17" v:groupContext="shape" v:layerMember="19" transform="translate(165.478,-81.788)">
+			<title>forest_asset_7_3</title>
+			<path d="M0 357.93 C0 353.81 0 349.69 0 345.57" class="st8"/>
+		</g>
+		<g id="shape18-47" v:mID="18" v:groupContext="shape" v:layerMember="20" transform="translate(190.464,-51.1824)">
+			<title>forest_asset_9_0</title>
+			<path d="M3.71 350.54 C3.92 348.24 5.86 346.43 8.21 346.43 C10.57 346.43 12.5 348.24 12.71 350.54 C12.72 350.54 12.72
+						 350.54 12.73 350.54 C14.77 350.54 16.43 352.19 16.43 354.23 C16.43 356.28 14.77 357.93 12.73 357.93 C9.72
+						 357.93 6.71 357.93 3.7 357.93 C1.65 357.93 0 356.28 0 354.23 C0 352.19 1.65 350.54 3.7 350.54 C3.7 350.54
+						 3.71 350.54 3.71 350.54 Z" class="st9"/>
+		</g>
+		<g id="shape19-49" v:mID="19" v:groupContext="shape" v:layerMember="20" transform="translate(198.677,-52.825)">
+			<title>forest_asset_9_1</title>
+			<path d="M0 357.93 C0.68 357.25 1.37 356.56 2.05 355.88" class="st10"/>
+		</g>
+		<g id="shape20-52" v:mID="20" v:groupContext="shape" v:layerMember="20" transform="translate(196.213,-54.057)">
+			<title>forest_asset_9_2</title>
+			<path d="M2.46 357.93 C1.64 357.11 0.82 356.29 0 355.47" class="st10"/>
+		</g>
+		<g id="shape21-55" v:mID="21" v:groupContext="shape" v:layerMember="20" transform="translate(198.677,-46.2543)">
+			<title>forest_asset_9_3</title>
+			<path d="M0 357.93 C0 354.37 0 350.81 0 347.25" class="st10"/>
+		</g>
+		<g id="shape22-58" v:mID="22" v:groupContext="shape" v:layerMember="15" transform="translate(300.307,-61.5572)">
+			<title>forest_asset_11_0</title>
+			<path d="M4.59 348.79 C4.85 345.94 7.24 343.71 10.16 343.71 C13.07 343.71 15.47 345.94 15.72 348.79 C15.73 348.79 15.74
+						 348.79 15.75 348.79 C18.27 348.79 20.32 350.83 20.32 353.36 C20.32 355.88 18.27 357.93 15.75 357.93 C12.02
+						 357.93 8.3 357.93 4.57 357.93 C2.05 357.93 0 355.88 0 353.36 C0 350.83 2.05 348.79 4.57 348.79 C4.58 348.79
+						 4.59 348.79 4.59 348.79 Z" class="st11"/>
+		</g>
+		<g id="shape23-60" v:mID="23" v:groupContext="shape" v:layerMember="15" transform="translate(310.466,-63.5889)">
+			<title>forest_asset_11_1</title>
+			<path d="M0 357.93 C0.85 357.08 1.69 356.24 2.54 355.39" class="st12"/>
+		</g>
+		<g id="shape24-63" v:mID="24" v:groupContext="shape" v:layerMember="15" transform="translate(307.418,-65.1127)">
+			<title>forest_asset_11_2</title>
+			<path d="M3.05 357.93 C2.03 356.91 1.02 355.9 0 354.88" class="st12"/>
+		</g>
+		<g id="shape25-66" v:mID="25" v:groupContext="shape" v:layerMember="15" transform="translate(310.466,-55.462)">
+			<title>forest_asset_11_3</title>
+			<path d="M0 357.93 C0 353.53 0 349.13 0 344.72" class="st12"/>
+		</g>
+		<g id="shape26-69" v:mID="26" v:groupContext="shape" v:layerMember="16" transform="translate(335.798,-60.3468)">
+			<title>forest_asset_13_0</title>
+			<path d="M3.91 350.15 C4.13 347.73 6.17 345.83 8.65 345.83 C11.13 345.83 13.16 347.73 13.38 350.15 C13.39 350.15 13.39
+						 350.15 13.4 350.15 C15.55 350.15 17.29 351.89 17.29 354.04 C17.29 356.19 15.55 357.93 13.4 357.93 C10.23
+						 357.93 7.06 357.93 3.89 357.93 C1.74 357.93 0 356.19 0 354.04 C0 351.89 1.74 350.15 3.89 350.15 C3.9 350.15
+						 3.9 350.15 3.91 350.15 Z" class="st6"/>
+		</g>
+		<g id="shape27-71" v:mID="27" v:groupContext="shape" v:layerMember="16" transform="translate(344.443,-62.0759)">
+			<title>forest_asset_13_1</title>
+			<path d="M0 357.93 C0.72 357.21 1.44 356.49 2.16 355.77" class="st3"/>
+		</g>
+		<g id="shape28-74" v:mID="28" v:groupContext="shape" v:layerMember="16" transform="translate(341.85,-63.3728)">
+			<title>forest_asset_13_2</title>
+			<path d="M2.59 357.93 C1.73 357.07 0.86 356.2 0 355.34" class="st3"/>
+		</g>
+		<g id="shape29-77" v:mID="29" v:groupContext="shape" v:layerMember="16" transform="translate(344.443,-55.1594)">
+			<title>forest_asset_13_3</title>
+			<path d="M0 357.93 C0 354.18 0 350.44 0 346.69" class="st3"/>
+		</g>
+		<g id="shape30-80" v:mID="30" v:groupContext="shape" v:layerMember="23" transform="translate(15.5622,-333.031)">
+			<title>forest_title</title>
+			<desc>Multi-UAV patrol in a forest monitoring region</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="175.075" cy="349.112" width="350.15" height="17.6372"/>
+			<rect x="0" y="340.294" width="350.15" height="17.6372" class="st13"/>
+			<text x="0" y="351.51" class="st14" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Multi-UAV patrol in a forest monitoring region</text>		</g>
+		<g id="shape31-83" v:mID="31" v:groupContext="shape" v:layerMember="28" transform="translate(18.1559,-148.878)">
+			<title>coverage1</title>
+			<ellipse cx="104.267" cy="278.823" rx="104.267" ry="79.1079" class="st15"/>
+		</g>
+		<g id="shape32-85" v:mID="32" v:groupContext="shape" v:layerMember="28" transform="translate(313.319,-133.316)">
+			<title>coverage2</title>
+			<ellipse cx="93.6326" cy="282.713" rx="93.6326" ry="75.2173" class="st16"/>
+		</g>
+		<g id="shape33-87" v:mID="33" v:groupContext="shape" v:layerMember="29" transform="translate(65.88,-257.814)">
+			<title>mec1_name</title>
+			<desc>MEC 1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="39.4243" cy="350.409" width="78.85" height="15.0435"/>
+			<rect x="0" y="342.887" width="78.8485" height="15.0435" class="st13"/>
+			<text x="24.78" y="352.78" class="st17" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>MEC 1</text>		</g>
+		<g id="shape34-90" v:mID="34" v:groupContext="shape" v:layerMember="29" transform="translate(68.9924,-245.364)">
+			<title>mec1_resources</title>
+			<desc>(B₁, F₁)</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="36.3118" cy="351.446" width="72.63" height="12.9685"/>
+			<rect x="0" y="344.962" width="72.6236" height="12.9685" class="st13"/>
+			<text x="22.7" y="353.6" class="st18" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>(B<tspan
+						class="st19">₁</tspan>, F<tspan class="st19">₁</tspan>)</text>		</g>
+		<g id="shape35-95" v:mID="35" v:groupContext="shape" v:layerMember="30" transform="translate(392.686,-248.995)">
+			<title>mec2_name</title>
+			<desc>MEC 2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="39.4243" cy="350.409" width="78.85" height="15.0435"/>
+			<rect x="0" y="342.887" width="78.8485" height="15.0435" class="st13"/>
+			<text x="24.78" y="352.78" class="st17" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>MEC 2</text>		</g>
+		<g id="shape36-98" v:mID="36" v:groupContext="shape" v:layerMember="30" transform="translate(395.799,-236.546)">
+			<title>mec2_resources</title>
+			<desc>(B₂, F₂)</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="36.3118" cy="351.706" width="72.63" height="12.4498"/>
+			<rect x="0" y="345.481" width="72.6236" height="12.4498" class="st13"/>
+			<text x="22.7" y="353.86" class="st18" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>(B<tspan
+						class="st19">₂</tspan>, F<tspan class="st19">₂</tspan>)</text>		</g>
+		<g id="shape37-103" v:mID="37" v:groupContext="shape" v:layerMember="29" transform="translate(66.3987,-176.372)">
+			<title>mec1_compute</title>
+			<desc>Edge computing</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="38.9055" cy="351.446" width="77.82" height="12.9685"/>
+			<rect x="0" y="344.962" width="77.811" height="12.9685" class="st13"/>
+			<text x="11.59" y="353.52" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Edge computing</text>		</g>
+		<g id="shape38-106" v:mID="38" v:groupContext="shape" v:layerMember="30" transform="translate(393.205,-164.959)">
+			<title>mec2_compute</title>
+			<desc>Edge computing</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="38.9055" cy="351.446" width="77.82" height="12.9685"/>
+			<rect x="0" y="344.962" width="77.811" height="12.9685" class="st13"/>
+			<text x="11.59" y="353.52" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Edge computing</text>		</g>
+		<g id="shape39-109" v:mID="39" v:groupContext="shape" v:layerMember="31" transform="translate(42.5367,-70.5487)">
+			<title>uav1_route_out</title>
+			<path d="M193.49 357.93 L103.75 308.13 L17.64 289.46 L0 215.28 L53.95 134.87 L145.25 159.77 L135.91 231.36 L135.91 231.36"
+					class="st21"/>
+		</g>
+		<g id="shape40-115" v:mID="40" v:groupContext="shape" v:layerMember="31" transform="translate(178.447,-70.5487)">
+			<title>uav1_route_return</title>
+			<path d="M-0 231.36 L55.05 352.38" class="st23"/>
+		</g>
+		<g id="shape41-121" v:mID="41" v:groupContext="shape" v:layerMember="31" transform="translate(247.958,-70.5487)">
+			<title>uav2_route_out</title>
+			<path d="M0 357.93 L45.13 295.68 L56.54 241.21 L36.31 221.5 L25.42 166 L69.51 110.49 L219.43 125.02 L238.1 196.6 L224.1
+						 262.48 L224.1 262.48" class="st24"/>
+		</g>
+		<g id="shape42-127" v:mID="42" v:groupContext="shape" v:layerMember="31" transform="translate(247.958,-70.5487)">
+			<title>uav2_route_return</title>
+			<path d="M224.1 262.48 L104.27 315.39 L0 357.93 L0 357.93" class="st24"/>
+		</g>
+		<g id="shape43-132" v:mID="43" v:groupContext="shape" v:layerMember="31" transform="translate(61.7301,-237.064)">
+			<title>uav1_direction</title>
+			<path d="M-0 357.93 L5.95 349" class="st23"/>
+		</g>
+		<g id="shape44-137" v:mID="44" v:groupContext="shape" v:layerMember="31" transform="translate(372.974,-310.725)">
+			<title>uav2_direction</title>
+			<path d="M0 355.86 L13.13 357.28" class="st26"/>
+		</g>
+		<g id="shape45-143" v:mID="45" v:groupContext="shape" v:layerMember="31" transform="translate(310.207,-95.9669)">
+			<title>uav2_return_direction</title>
+			<path d="M16.08 351.19 L5.63 355.57" class="st26"/>
+		</g>
+		<g id="shape46-148" v:mID="46" v:groupContext="shape" v:layerMember="23" transform="translate(344.962,-287.382)">
+			<title>fixed_nodes_note</title>
+			<desc>Fixed monitoring stations</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="71.5861" cy="351.446" width="143.18" height="12.9685"/>
+			<rect x="0" y="344.962" width="143.172" height="12.9685" class="st13"/>
+			<text x="28.93" y="353.52" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Fixed monitoring stations</text>		</g>
+		<g id="shape47-151" v:mID="47" v:groupContext="shape" v:layerMember="4" transform="translate(174.297,-192.971)">
+			<title>contact1</title>
+			<path d="M4.15 349.63 L8.3 353.78 L4.15 357.93 L0 353.78 L4.15 349.63 Z" class="st27"/>
+		</g>
+		<g id="shape48-153" v:mID="48" v:groupContext="shape" v:layerMember="5" transform="translate(467.904,-161.847)">
+			<title>contact2</title>
+			<path d="M4.15 349.63 L8.3 353.78 L4.15 357.93 L0 353.78 L4.15 349.63 Z" class="st27"/>
+		</g>
+		<g id="shape49-155" v:mID="49" v:groupContext="shape" v:layerMember="6" transform="translate(186.746,-186.746)">
+			<title>contact1_label</title>
+			<desc>c₁</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="9.07795" cy="351.187" width="18.16" height="13.4872"/>
+			<rect x="0" y="344.443" width="18.1559" height="13.4872" class="st13"/>
+			<text x="5.46" y="353.34" class="st28" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st19">₁</tspan></text>		</g>
+		<g id="shape50-159" v:mID="50" v:groupContext="shape" v:layerMember="6" transform="translate(478.797,-154.066)">
+			<title>contact2_label</title>
+			<desc>c₂</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="9.07795" cy="351.187" width="18.16" height="13.4872"/>
+			<rect x="0" y="344.443" width="18.1559" height="13.4872" class="st13"/>
+			<text x="5.46" y="353.34" class="st28" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st19">₂</tspan></text>		</g>
+		<g id="shape51-163" v:mID="51" v:groupContext="shape" v:layerMember="50" transform="translate(121.904,-227.727)">
+			<title>uav1_label</title>
+			<desc>UAV 1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="22.3058" cy="350.928" width="44.62" height="14.006"/>
+			<rect x="0" y="343.925" width="44.6117" height="14.006" class="st13"/>
+			<text x="9.18" y="353.18" class="st29" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>UAV 1</text>		</g>
+		<g id="shape52-166" v:mID="52" v:groupContext="shape" v:layerMember="51" transform="translate(224.096,-230.321)">
+			<title>uav2_label</title>
+			<desc>UAV 2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="24.6402" cy="350.928" width="49.29" height="14.006"/>
+			<rect x="0" y="343.925" width="49.2803" height="14.006" class="st13"/>
+			<text x="11.52" y="353.18" class="st29" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>UAV 2</text>		</g>
+		<g id="shape53-169" v:mID="53" v:groupContext="shape" v:layerMember="3" transform="translate(284.27,-232.396)">
+			<title>collection_arrow</title>
+			<path d="M0 357.93 L0 354.41" class="st30"/>
+		</g>
+		<g id="shape54-175" v:mID="54" v:groupContext="shape" v:layerMember="3" transform="translate(293.607,-229.283)">
+			<title>collection_label</title>
+			<desc>Collect</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="22.0465" cy="350.668" width="44.1" height="14.5247"/>
+			<rect x="0" y="343.406" width="44.0929" height="14.5247" class="st13"/>
+			<text x="0" y="352.74" class="st20" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Collect</text>		</g>
+		<g id="shape55-178" v:mID="55" v:groupContext="shape" v:layerMember="52" transform="translate(138.504,-199.196)">
+			<title>upload1</title>
+			<path d="M33.2 357.93 L5.24 343.52" class="st32"/>
+		</g>
+		<g id="shape56-184" v:mID="56" v:groupContext="shape" v:layerMember="52" transform="translate(459.085,-170.666)">
+			<title>upload2</title>
+			<path d="M7.26 357.93 L1.95 342.75" class="st32"/>
+		</g>
+		<g id="shape57-189" v:mID="57" v:groupContext="shape" v:layerMember="52" transform="translate(138.504,-171.184)">
+			<title>upload1_label</title>
+			<desc>Batch upload</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="19.9715" cy="346.778" width="39.95" height="22.3058"/>
+			<rect x="0" y="335.625" width="39.943" height="22.3058" class="st13"/>
+			<text x="10.29" y="344.7" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Batch<v:newlineChar/><tspan
+						x="8.68" dy="1em" class="st34">upload</tspan></text>		</g>
+		<g id="shape58-193" v:mID="58" v:groupContext="shape" v:layerMember="52" transform="translate(370.38,-148.878)">
+			<title>upload2_label</title>
+			<desc>Batch upload</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="38.3868" cy="351.187" width="76.78" height="13.4872"/>
+			<rect x="0" y="344.443" width="76.7735" height="13.4872" class="st13"/>
+			<text x="16.37" y="353.26" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Batch upload</text>		</g>
+		<g id="shape59-196" v:mID="59" v:groupContext="shape" v:layerMember="28" transform="translate(79.3672,-152.51)">
+			<title>coverage1_label</title>
+			<desc>MEC coverage</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="350.928" width="87.67" height="14.006"/>
+			<rect x="0" y="343.925" width="87.6671" height="14.006" class="st13"/>
+			<text x="18.83" y="353" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>MEC coverage</text>		</g>
+		<g id="shape60-199" v:mID="60" v:groupContext="shape" v:layerMember="28" transform="translate(407.73,-116.198)">
+			<title>coverage2_label</title>
+			<desc>MEC coverage</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="350.928" width="87.67" height="14.006"/>
+			<rect x="0" y="343.925" width="87.6671" height="14.006" class="st13"/>
+			<text x="18.83" y="353" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>MEC coverage</text>		</g>
+		<g id="shape61-202" v:mID="61" v:groupContext="shape" v:layerMember="2" transform="translate(176.89,-312.282)">
+			<title>storecarry_title</title>
+			<desc>Onboard cache</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="44.0929" cy="350.668" width="88.19" height="14.5247"/>
+			<rect x="0" y="343.406" width="88.1858" height="14.5247" class="st13"/>
+			<text x="14.72" y="352.92" class="st29" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Onboard cache</text>		</g>
+		<g id="shape62-205" v:mID="62" v:groupContext="shape" v:layerMember="2" transform="translate(202.827,-294.644)">
+			<title>cache_item0</title>
+			<rect x="0" y="346" width="10.3748" height="11.931" class="st35"/>
+		</g>
+		<g id="shape63-207" v:mID="63" v:groupContext="shape" v:layerMember="2" transform="translate(215.796,-294.644)">
+			<title>cache_item1</title>
+			<rect x="0" y="346" width="10.3748" height="11.931" class="st35"/>
+		</g>
+		<g id="shape64-209" v:mID="64" v:groupContext="shape" v:layerMember="2" transform="translate(228.764,-294.644)">
+			<title>cache_item2</title>
+			<rect x="0" y="346" width="10.3748" height="11.931" class="st35"/>
+		</g>
+		<g id="shape65-211" v:mID="65" v:groupContext="shape" v:layerMember="2" transform="translate(212.683,-153.028)">
+			<title>carry_gap_label</title>
+			<desc>Store / carry between contacts</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="40.2024" cy="344.962" width="80.41" height="25.937"/>
+			<rect x="0" y="331.994" width="80.4047" height="25.937" class="st13"/>
+			<text x="19.2" y="342.84" class="st18" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Store / carry<v:newlineChar/><tspan
+						x="11.06" dy="1em" class="st34">between contacts</tspan></text>		</g>
+		<g id="shape66-215" v:mID="66" v:groupContext="shape" v:layerMember="7" transform="translate(201.79,-19.7121)">
+			<title>depot_label</title>
+			<desc>UAV depot</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="47.2054" cy="350.928" width="94.42" height="14.006"/>
+			<rect x="0" y="343.925" width="94.4107" height="14.006" class="st13"/>
+			<text x="24.62" y="353.28" class="st36" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>UAV depot</text>		</g>
+		<g id="shape67-218" v:mID="67" v:groupContext="shape" v:layerMember="7" transform="translate(186.228,-5.1874)">
+			<title>periodic_return</title>
+			<desc>Periodic departure / return</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="63.2863" cy="351.706" width="126.58" height="12.4498"/>
+			<rect x="0" y="345.481" width="126.573" height="12.4498" class="st13"/>
+			<text x="19.61" y="353.78" class="st20" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Periodic departure / return</text>		</g>
+		<g id="shape68-221" v:mID="68" v:groupContext="shape" v:layerMember="27" transform="translate(25.4183,-13.4872)">
+			<title>onboard_panel</title>
+			<rect x="0" y="313.319" width="145.247" height="44.6117" class="st37"/>
+		</g>
+		<g id="shape69-223" v:mID="69" v:groupContext="shape" v:layerMember="27" transform="translate(35.2743,-25.937)">
+			<title>cpu_chip</title>
+			<rect x="0" y="339.775" width="19.7121" height="18.1559" class="st38"/>
+		</g>
+		<g id="shape70-225" v:mID="70" v:groupContext="shape" v:layerMember="27" transform="translate(31.6432,-40.9805)">
+			<title>cpu_pin_l0</title>
+			<path d="M-0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape71-228" v:mID="71" v:groupContext="shape" v:layerMember="27" transform="translate(54.9865,-40.9805)">
+			<title>cpu_pin_r0</title>
+			<path d="M0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape72-231" v:mID="72" v:groupContext="shape" v:layerMember="27" transform="translate(31.6432,-35.7931)">
+			<title>cpu_pin_l1</title>
+			<path d="M-0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape73-234" v:mID="73" v:groupContext="shape" v:layerMember="27" transform="translate(54.9865,-35.7931)">
+			<title>cpu_pin_r1</title>
+			<path d="M0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape74-237" v:mID="74" v:groupContext="shape" v:layerMember="27" transform="translate(31.6432,-30.6057)">
+			<title>cpu_pin_l2</title>
+			<path d="M-0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape75-240" v:mID="75" v:groupContext="shape" v:layerMember="27" transform="translate(54.9865,-30.6057)">
+			<title>cpu_pin_r2</title>
+			<path d="M0 357.93 L3.63 357.93" class="st39"/>
+		</g>
+		<g id="shape76-243" v:mID="76" v:groupContext="shape" v:layerMember="27" transform="translate(63.2863,-16.5997)">
+			<title>local_computing_label</title>
+			<desc>UAV local computing Onboard FIFO</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="50.5772" cy="339.775" width="101.16" height="36.3118"/>
+			<rect x="0" y="321.619" width="101.154" height="36.3118" class="st13"/>
+			<text x="0" y="337.65" class="st18" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>UAV local computing<v:newlineChar/><tspan
+						x="0" dy="1em" class="st34">Onboard FIFO</tspan></text>		</g>
+		<g id="shape77-247" v:mID="77" v:groupContext="shape" v:layerMember="24" transform="translate(365.193,-10.8935)">
+			<title>legend_panel</title>
+			<rect x="0" y="263.001" width="137.985" height="94.9294" class="st40"/>
+		</g>
+		<g id="shape78-249" v:mID="78" v:groupContext="shape" v:layerMember="24" transform="translate(373.493,-89.2233)">
+			<title>legend_title</title>
+			<desc>Legend</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="59.1364" cy="351.446" width="118.28" height="12.9685"/>
+			<rect x="0" y="344.962" width="118.273" height="12.9685" class="st13"/>
+			<text x="0" y="353.67" class="st41" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Legend</text>		</g>
+		<g id="shape79-252" v:mID="79" v:groupContext="shape" v:layerMember="24" transform="translate(393.724,-73.6611)">
+			<title>legend_sensor_text</title>
+			<desc>Monitoring station</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="51.3553" cy="350.928" width="102.72" height="14.006"/>
+			<rect x="0" y="343.925" width="102.711" height="14.006" class="st13"/>
+			<text x="0" y="352.98" class="st42" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Monitoring station</text>		</g>
+		<g id="shape80-255" v:mID="80" v:groupContext="shape" v:layerMember="24" transform="translate(373.493,-66.3987)">
+			<title>legend_route_line</title>
+			<path d="M-0 357.93 L10.8 357.93" class="st43"/>
+		</g>
+		<g id="shape81-261" v:mID="81" v:groupContext="shape" v:layerMember="24" transform="translate(393.724,-59.1364)">
+			<title>legend_route_text</title>
+			<desc>Patrol route</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="51.3553" cy="350.928" width="102.72" height="14.006"/>
+			<rect x="0" y="343.925" width="102.711" height="14.006" class="st13"/>
+			<text x="0" y="352.98" class="st42" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Patrol route</text>		</g>
+		<g id="shape82-264" v:mID="82" v:groupContext="shape" v:layerMember="24" transform="translate(373.493,-51.874)">
+			<title>legend_upload_line</title>
+			<path d="M-0 357.93 L11.3 357.93" class="st45"/>
+		</g>
+		<g id="shape83-270" v:mID="83" v:groupContext="shape" v:layerMember="24" transform="translate(393.724,-44.6117)">
+			<title>legend_upload_text</title>
+			<desc>Batch upload</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="51.3553" cy="350.928" width="102.72" height="14.006"/>
+			<rect x="0" y="343.925" width="102.711" height="14.006" class="st13"/>
+			<text x="0" y="352.98" class="st42" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>Batch upload</text>		</g>
+		<g id="shape84-273" v:mID="84" v:groupContext="shape" v:layerMember="25" transform="translate(378.68,-34.2369)">
+			<title>legend_contact</title>
+			<path d="M3.11 351.71 L6.22 354.82 L3.11 357.93 L0 354.82 L3.11 351.71 Z" class="st27"/>
+		</g>
+		<g id="shape85-275" v:mID="85" v:groupContext="shape" v:layerMember="24" transform="translate(393.724,-30.0869)">
+			<title>legend_contact_text</title>
+			<desc>MEC contact</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="51.3553" cy="350.928" width="102.72" height="14.006"/>
+			<rect x="0" y="343.925" width="102.711" height="14.006" class="st13"/>
+			<text x="0" y="352.98" class="st42" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>MEC contact</text>		</g>
+		<g id="shape86-278" v:mID="86" v:groupContext="shape" v:layerMember="24" transform="translate(373.493,-22.8246)">
+			<title>legend_cover_line</title>
+			<path d="M-0 357.93 L16.6 357.93" class="st47"/>
+		</g>
+		<g id="shape87-281" v:mID="87" v:groupContext="shape" v:layerMember="24" transform="translate(393.724,-15.5622)">
+			<title>legend_cover_text</title>
+			<desc>MEC coverage</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="51.3553" cy="350.928" width="102.72" height="14.006"/>
+			<rect x="0" y="343.925" width="102.711" height="14.006" class="st13"/>
+			<text x="0" y="352.98" class="st42" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>MEC coverage</text>		</g>
+		<g id="shape88-284" v:mID="88" v:groupContext="shape" v:layerMember="32" transform="translate(42.5367,-213.202)">
+			<title>sensor_i_post</title>
+			<path d="M0 350.67 L0 357.93" class="st48"/>
+		</g>
+		<g id="shape89-287" v:mID="89" v:groupContext="shape" v:layerMember="32" transform="translate(38.9055,-213.202)">
+			<title>sensor_i_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st49"/>
+		</g>
+		<g id="shape90-290" v:mID="90" v:groupContext="shape" v:layerMember="32" transform="translate(37.868,-219.427)">
+			<title>sensor_i_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st50"/>
+		</g>
+		<g id="shape91-292" v:mID="91" v:groupContext="shape" v:layerMember="32" transform="translate(39.943,-223.577)">
+			<title>sensor_i_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape92-294" v:mID="92" v:groupContext="shape" v:layerMember="32" transform="translate(41.7586,-220.465)">
+			<title>sensor_i_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st52"/>
+		</g>
+		<g id="shape93-296" v:mID="93" v:groupContext="shape" v:layerMember="33" transform="translate(46.5104,-228.422)">
+			<title>sensor_i_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st53"/>
+		</g>
+		<g id="shape94-299" v:mID="94" v:groupContext="shape" v:layerMember="33" transform="translate(36.917,-228.422)">
+			<title>sensor_i_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C-0 355.51 0.63 356.91 1.65 357.93" class="st53"/>
+		</g>
+		<g id="shape95-302" v:mID="95" v:groupContext="shape" v:layerMember="33" transform="translate(38.8839,-229.614)">
+			<title>sensor_i_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C0 356.24 0.44 357.22 1.15 357.93" class="st53"/>
+		</g>
+		<g id="shape96-305" v:mID="96" v:groupContext="shape" v:layerMember="33" transform="translate(45.0373,-229.614)">
+			<title>sensor_i_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st53"/>
+		</g>
+		<g id="shape97-308" v:mID="97" v:groupContext="shape" v:layerMember="33" transform="translate(42.5367,-226.776)">
+			<title>sensor_i_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st53"/>
+		</g>
+		<g id="shape98-311" v:mID="98" v:groupContext="shape" v:layerMember="33" transform="translate(42.5367,-235.205)">
+			<title>sensor_i_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st53"/>
+		</g>
+		<g id="shape99-314" v:mID="99" v:groupContext="shape" v:layerMember="33" transform="translate(41.6937,-231.553)">
+			<title>sensor_i_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st52"/>
+		</g>
+		<g id="shape100-316" v:mID="100" v:groupContext="shape" v:layerMember="32" transform="translate(48.2428,-201.271)">
+			<title>sensor_i_label</title>
+			<desc>i</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>i</text>		</g>
+		<g id="shape101-319" v:mID="101" v:groupContext="shape" v:layerMember="34" transform="translate(96.4857,-293.607)">
+			<title>sensor_j_post</title>
+			<path d="M0 350.67 L0 357.93" class="st48"/>
+		</g>
+		<g id="shape102-322" v:mID="102" v:groupContext="shape" v:layerMember="34" transform="translate(92.8545,-293.607)">
+			<title>sensor_j_foot</title>
+			<path d="M-0 357.93 L7.26 357.93" class="st49"/>
+		</g>
+		<g id="shape103-325" v:mID="103" v:groupContext="shape" v:layerMember="34" transform="translate(91.817,-299.832)">
+			<title>sensor_j_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st50"/>
+		</g>
+		<g id="shape104-327" v:mID="104" v:groupContext="shape" v:layerMember="34" transform="translate(93.892,-303.982)">
+			<title>sensor_j_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape105-329" v:mID="105" v:groupContext="shape" v:layerMember="34" transform="translate(95.7076,-300.869)">
+			<title>sensor_j_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st52"/>
+		</g>
+		<g id="shape106-331" v:mID="106" v:groupContext="shape" v:layerMember="35" transform="translate(100.459,-308.827)">
+			<title>sensor_j_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st53"/>
+		</g>
+		<g id="shape107-334" v:mID="107" v:groupContext="shape" v:layerMember="35" transform="translate(90.866,-308.827)">
+			<title>sensor_j_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C0 355.51 0.63 356.91 1.65 357.93" class="st53"/>
+		</g>
+		<g id="shape108-337" v:mID="108" v:groupContext="shape" v:layerMember="35" transform="translate(92.8329,-310.019)">
+			<title>sensor_j_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C0 356.24 0.44 357.22 1.15 357.93" class="st53"/>
+		</g>
+		<g id="shape109-340" v:mID="109" v:groupContext="shape" v:layerMember="35" transform="translate(98.9863,-310.019)">
+			<title>sensor_j_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st53"/>
+		</g>
+		<g id="shape110-343" v:mID="110" v:groupContext="shape" v:layerMember="35" transform="translate(96.4857,-307.181)">
+			<title>sensor_j_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st53"/>
+		</g>
+		<g id="shape111-346" v:mID="111" v:groupContext="shape" v:layerMember="35" transform="translate(96.4857,-315.61)">
+			<title>sensor_j_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st53"/>
+		</g>
+		<g id="shape112-349" v:mID="112" v:groupContext="shape" v:layerMember="35" transform="translate(95.6427,-311.957)">
+			<title>sensor_j_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C0 357.55 0.38 357.93 0.84 357.93 Z" class="st52"/>
+		</g>
+		<g id="shape113-351" v:mID="113" v:groupContext="shape" v:layerMember="34" transform="translate(101.673,-280.12)">
+			<title>sensor_j_label</title>
+			<desc>j</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>j</text>		</g>
+		<g id="shape114-354" v:mID="114" v:groupContext="shape" v:layerMember="36" transform="translate(187.784,-268.707)">
+			<title>sensor_k_post</title>
+			<path d="M0 350.67 L0 357.93" class="st48"/>
+		</g>
+		<g id="shape115-357" v:mID="115" v:groupContext="shape" v:layerMember="36" transform="translate(184.153,-268.707)">
+			<title>sensor_k_foot</title>
+			<path d="M-0 357.93 L7.26 357.93" class="st49"/>
+		</g>
+		<g id="shape116-360" v:mID="116" v:groupContext="shape" v:layerMember="36" transform="translate(183.115,-274.932)">
+			<title>sensor_k_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st50"/>
+		</g>
+		<g id="shape117-362" v:mID="117" v:groupContext="shape" v:layerMember="36" transform="translate(185.19,-279.082)">
+			<title>sensor_k_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape118-364" v:mID="118" v:groupContext="shape" v:layerMember="36" transform="translate(187.006,-275.97)">
+			<title>sensor_k_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st52"/>
+		</g>
+		<g id="shape119-366" v:mID="119" v:groupContext="shape" v:layerMember="37" transform="translate(191.758,-283.927)">
+			<title>sensor_k_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st53"/>
+		</g>
+		<g id="shape120-369" v:mID="120" v:groupContext="shape" v:layerMember="37" transform="translate(182.164,-283.927)">
+			<title>sensor_k_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C0 355.51 0.63 356.91 1.65 357.93" class="st53"/>
+		</g>
+		<g id="shape121-372" v:mID="121" v:groupContext="shape" v:layerMember="37" transform="translate(184.131,-285.119)">
+			<title>sensor_k_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st53"/>
+		</g>
+		<g id="shape122-375" v:mID="122" v:groupContext="shape" v:layerMember="37" transform="translate(190.285,-285.119)">
+			<title>sensor_k_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st53"/>
+		</g>
+		<g id="shape123-378" v:mID="123" v:groupContext="shape" v:layerMember="37" transform="translate(187.784,-282.281)">
+			<title>sensor_k_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st53"/>
+		</g>
+		<g id="shape124-381" v:mID="124" v:groupContext="shape" v:layerMember="37" transform="translate(187.784,-290.711)">
+			<title>sensor_k_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st53"/>
+		</g>
+		<g id="shape125-384" v:mID="125" v:groupContext="shape" v:layerMember="37" transform="translate(186.941,-287.058)">
+			<title>sensor_k_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 0 356.62
+						 0 357.09 C0 357.55 0.38 357.93 0.84 357.93 Z" class="st52"/>
+		</g>
+		<g id="shape126-386" v:mID="126" v:groupContext="shape" v:layerMember="36" transform="translate(194.009,-256.258)">
+			<title>sensor_k_label</title>
+			<desc>k</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>k</text>		</g>
+		<g id="shape127-389" v:mID="127" v:groupContext="shape" v:layerMember="38" transform="translate(146.285,-120.348)">
+			<title>sensor_l_post</title>
+			<path d="M0 350.67 L0 357.93" class="st48"/>
+		</g>
+		<g id="shape128-392" v:mID="128" v:groupContext="shape" v:layerMember="38" transform="translate(142.654,-120.348)">
+			<title>sensor_l_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st49"/>
+		</g>
+		<g id="shape129-395" v:mID="129" v:groupContext="shape" v:layerMember="38" transform="translate(141.616,-126.573)">
+			<title>sensor_l_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st50"/>
+		</g>
+		<g id="shape130-397" v:mID="130" v:groupContext="shape" v:layerMember="38" transform="translate(143.691,-130.723)">
+			<title>sensor_l_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape131-399" v:mID="131" v:groupContext="shape" v:layerMember="38" transform="translate(145.507,-127.61)">
+			<title>sensor_l_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st52"/>
+		</g>
+		<g id="shape132-401" v:mID="132" v:groupContext="shape" v:layerMember="39" transform="translate(150.258,-135.567)">
+			<title>sensor_l_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st53"/>
+		</g>
+		<g id="shape133-404" v:mID="133" v:groupContext="shape" v:layerMember="39" transform="translate(140.665,-135.567)">
+			<title>sensor_l_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C-0 355.51 0.63 356.91 1.65 357.93" class="st53"/>
+		</g>
+		<g id="shape134-407" v:mID="134" v:groupContext="shape" v:layerMember="39" transform="translate(142.632,-136.759)">
+			<title>sensor_l_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C0 356.24 0.44 357.22 1.15 357.93" class="st53"/>
+		</g>
+		<g id="shape135-410" v:mID="135" v:groupContext="shape" v:layerMember="39" transform="translate(148.785,-136.759)">
+			<title>sensor_l_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st53"/>
+		</g>
+		<g id="shape136-413" v:mID="136" v:groupContext="shape" v:layerMember="39" transform="translate(146.285,-133.921)">
+			<title>sensor_l_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st53"/>
+		</g>
+		<g id="shape137-416" v:mID="137" v:groupContext="shape" v:layerMember="39" transform="translate(146.285,-142.351)">
+			<title>sensor_l_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st53"/>
+		</g>
+		<g id="shape138-419" v:mID="138" v:groupContext="shape" v:layerMember="39" transform="translate(145.442,-138.698)">
+			<title>sensor_l_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st52"/>
+		</g>
+		<g id="shape139-421" v:mID="139" v:groupContext="shape" v:layerMember="38" transform="translate(151.472,-106.342)">
+			<title>sensor_l_label</title>
+			<desc>l</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>l</text>		</g>
+		<g id="shape140-424" v:mID="140" v:groupContext="shape" v:layerMember="40" transform="translate(284.27,-206.977)">
+			<title>sensor_p_post</title>
+			<path d="M0 350.67 L0 357.93" class="st55"/>
+		</g>
+		<g id="shape141-427" v:mID="141" v:groupContext="shape" v:layerMember="40" transform="translate(280.638,-206.977)">
+			<title>sensor_p_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st56"/>
+		</g>
+		<g id="shape142-430" v:mID="142" v:groupContext="shape" v:layerMember="40" transform="translate(279.601,-213.202)">
+			<title>sensor_p_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st57"/>
+		</g>
+		<g id="shape143-432" v:mID="143" v:groupContext="shape" v:layerMember="40" transform="translate(281.676,-217.352)">
+			<title>sensor_p_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape144-434" v:mID="144" v:groupContext="shape" v:layerMember="40" transform="translate(283.491,-214.24)">
+			<title>sensor_p_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st58"/>
+		</g>
+		<g id="shape145-436" v:mID="145" v:groupContext="shape" v:layerMember="41" transform="translate(288.243,-222.197)">
+			<title>sensor_p_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st59"/>
+		</g>
+		<g id="shape146-439" v:mID="146" v:groupContext="shape" v:layerMember="41" transform="translate(278.65,-222.197)">
+			<title>sensor_p_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C-0 355.51 0.63 356.91 1.65 357.93" class="st59"/>
+		</g>
+		<g id="shape147-442" v:mID="147" v:groupContext="shape" v:layerMember="41" transform="translate(280.617,-223.389)">
+			<title>sensor_p_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st59"/>
+		</g>
+		<g id="shape148-445" v:mID="148" v:groupContext="shape" v:layerMember="41" transform="translate(286.77,-223.389)">
+			<title>sensor_p_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st59"/>
+		</g>
+		<g id="shape149-448" v:mID="149" v:groupContext="shape" v:layerMember="41" transform="translate(284.27,-220.551)">
+			<title>sensor_p_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st59"/>
+		</g>
+		<g id="shape150-451" v:mID="150" v:groupContext="shape" v:layerMember="41" transform="translate(284.27,-228.981)">
+			<title>sensor_p_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st59"/>
+		</g>
+		<g id="shape151-454" v:mID="151" v:groupContext="shape" v:layerMember="41" transform="translate(283.427,-225.328)">
+			<title>sensor_p_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st58"/>
+		</g>
+		<g id="shape152-456" v:mID="152" v:groupContext="shape" v:layerMember="40" transform="translate(284.27,-192.453)">
+			<title>sensor_p_label</title>
+			<desc>p</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>p</text>		</g>
+		<g id="shape153-459" v:mID="153" v:groupContext="shape" v:layerMember="42" transform="translate(317.469,-317.988)">
+			<title>sensor_q_post</title>
+			<path d="M0 350.67 L0 357.93" class="st55"/>
+		</g>
+		<g id="shape154-462" v:mID="154" v:groupContext="shape" v:layerMember="42" transform="translate(313.838,-317.988)">
+			<title>sensor_q_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st56"/>
+		</g>
+		<g id="shape155-465" v:mID="155" v:groupContext="shape" v:layerMember="42" transform="translate(312.8,-324.213)">
+			<title>sensor_q_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st57"/>
+		</g>
+		<g id="shape156-467" v:mID="156" v:groupContext="shape" v:layerMember="42" transform="translate(314.875,-328.363)">
+			<title>sensor_q_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape157-469" v:mID="157" v:groupContext="shape" v:layerMember="42" transform="translate(316.691,-325.25)">
+			<title>sensor_q_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st58"/>
+		</g>
+		<g id="shape158-471" v:mID="158" v:groupContext="shape" v:layerMember="43" transform="translate(321.443,-333.207)">
+			<title>sensor_q_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st59"/>
+		</g>
+		<g id="shape159-474" v:mID="159" v:groupContext="shape" v:layerMember="43" transform="translate(311.849,-333.207)">
+			<title>sensor_q_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C0 355.51 0.63 356.91 1.65 357.93" class="st59"/>
+		</g>
+		<g id="shape160-477" v:mID="160" v:groupContext="shape" v:layerMember="43" transform="translate(313.816,-334.399)">
+			<title>sensor_q_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st59"/>
+		</g>
+		<g id="shape161-480" v:mID="161" v:groupContext="shape" v:layerMember="43" transform="translate(319.97,-334.399)">
+			<title>sensor_q_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st59"/>
+		</g>
+		<g id="shape162-483" v:mID="162" v:groupContext="shape" v:layerMember="43" transform="translate(317.469,-331.561)">
+			<title>sensor_q_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st59"/>
+		</g>
+		<g id="shape163-486" v:mID="163" v:groupContext="shape" v:layerMember="43" transform="translate(317.469,-339.991)">
+			<title>sensor_q_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st59"/>
+		</g>
+		<g id="shape164-489" v:mID="164" v:groupContext="shape" v:layerMember="43" transform="translate(316.626,-336.338)">
+			<title>sensor_q_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st58"/>
+		</g>
+		<g id="shape165-491" v:mID="165" v:groupContext="shape" v:layerMember="42" transform="translate(322.656,-303.982)">
+			<title>sensor_q_label</title>
+			<desc>q</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>q</text>		</g>
+		<g id="shape166-494" v:mID="166" v:groupContext="shape" v:layerMember="44" transform="translate(467.385,-303.463)">
+			<title>sensor_r_post</title>
+			<path d="M0 350.67 L0 357.93" class="st55"/>
+		</g>
+		<g id="shape167-497" v:mID="167" v:groupContext="shape" v:layerMember="44" transform="translate(463.754,-303.463)">
+			<title>sensor_r_foot</title>
+			<path d="M-0 357.93 L7.26 357.93" class="st56"/>
+		</g>
+		<g id="shape168-500" v:mID="168" v:groupContext="shape" v:layerMember="44" transform="translate(462.716,-309.688)">
+			<title>sensor_r_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st57"/>
+		</g>
+		<g id="shape169-502" v:mID="169" v:groupContext="shape" v:layerMember="44" transform="translate(464.791,-313.838)">
+			<title>sensor_r_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape170-504" v:mID="170" v:groupContext="shape" v:layerMember="44" transform="translate(466.607,-310.725)">
+			<title>sensor_r_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st58"/>
+		</g>
+		<g id="shape171-506" v:mID="171" v:groupContext="shape" v:layerMember="45" transform="translate(471.359,-318.683)">
+			<title>sensor_r_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st59"/>
+		</g>
+		<g id="shape172-509" v:mID="172" v:groupContext="shape" v:layerMember="45" transform="translate(461.765,-318.683)">
+			<title>sensor_r_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C-0 355.51 0.63 356.91 1.65 357.93" class="st59"/>
+		</g>
+		<g id="shape173-512" v:mID="173" v:groupContext="shape" v:layerMember="45" transform="translate(463.732,-319.875)">
+			<title>sensor_r_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st59"/>
+		</g>
+		<g id="shape174-515" v:mID="174" v:groupContext="shape" v:layerMember="45" transform="translate(469.885,-319.875)">
+			<title>sensor_r_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st59"/>
+		</g>
+		<g id="shape175-518" v:mID="175" v:groupContext="shape" v:layerMember="45" transform="translate(467.385,-317.037)">
+			<title>sensor_r_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st59"/>
+		</g>
+		<g id="shape176-521" v:mID="176" v:groupContext="shape" v:layerMember="45" transform="translate(467.385,-325.466)">
+			<title>sensor_r_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st59"/>
+		</g>
+		<g id="shape177-524" v:mID="177" v:groupContext="shape" v:layerMember="45" transform="translate(466.542,-321.813)">
+			<title>sensor_r_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st58"/>
+		</g>
+		<g id="shape178-526" v:mID="178" v:groupContext="shape" v:layerMember="44" transform="translate(474.129,-288.938)">
+			<title>sensor_r_label</title>
+			<desc>r</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>r</text>		</g>
+		<g id="shape179-529" v:mID="179" v:groupContext="shape" v:layerMember="46" transform="translate(293.088,-132.797)">
+			<title>sensor_s_post</title>
+			<path d="M0 350.67 L0 357.93" class="st55"/>
+		</g>
+		<g id="shape180-532" v:mID="180" v:groupContext="shape" v:layerMember="46" transform="translate(289.457,-132.797)">
+			<title>sensor_s_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st56"/>
+		</g>
+		<g id="shape181-535" v:mID="181" v:groupContext="shape" v:layerMember="46" transform="translate(288.42,-139.022)">
+			<title>sensor_s_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st57"/>
+		</g>
+		<g id="shape182-537" v:mID="182" v:groupContext="shape" v:layerMember="46" transform="translate(290.494,-143.172)">
+			<title>sensor_s_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape183-539" v:mID="183" v:groupContext="shape" v:layerMember="46" transform="translate(292.31,-140.06)">
+			<title>sensor_s_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st58"/>
+		</g>
+		<g id="shape184-541" v:mID="184" v:groupContext="shape" v:layerMember="47" transform="translate(297.062,-148.017)">
+			<title>sensor_s_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st59"/>
+		</g>
+		<g id="shape185-544" v:mID="185" v:groupContext="shape" v:layerMember="47" transform="translate(287.469,-148.017)">
+			<title>sensor_s_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C-0 355.51 0.63 356.91 1.65 357.93" class="st59"/>
+		</g>
+		<g id="shape186-547" v:mID="186" v:groupContext="shape" v:layerMember="47" transform="translate(289.435,-149.209)">
+			<title>sensor_s_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st59"/>
+		</g>
+		<g id="shape187-550" v:mID="187" v:groupContext="shape" v:layerMember="47" transform="translate(295.589,-149.209)">
+			<title>sensor_s_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st59"/>
+		</g>
+		<g id="shape188-553" v:mID="188" v:groupContext="shape" v:layerMember="47" transform="translate(293.088,-146.371)">
+			<title>sensor_s_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st59"/>
+		</g>
+		<g id="shape189-556" v:mID="189" v:groupContext="shape" v:layerMember="47" transform="translate(293.088,-154.801)">
+			<title>sensor_s_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st59"/>
+		</g>
+		<g id="shape190-559" v:mID="190" v:groupContext="shape" v:layerMember="47" transform="translate(292.245,-151.148)">
+			<title>sensor_s_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st58"/>
+		</g>
+		<g id="shape191-561" v:mID="191" v:groupContext="shape" v:layerMember="46" transform="translate(299.313,-120.348)">
+			<title>sensor_s_label</title>
+			<desc>s</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>s</text>		</g>
+		<g id="shape192-564" v:mID="192" v:groupContext="shape" v:layerMember="48" transform="translate(352.225,-113.085)">
+			<title>sensor_t_post</title>
+			<path d="M0 350.67 L0 357.93" class="st55"/>
+		</g>
+		<g id="shape193-567" v:mID="193" v:groupContext="shape" v:layerMember="48" transform="translate(348.593,-113.085)">
+			<title>sensor_t_foot</title>
+			<path d="M0 357.93 L7.26 357.93" class="st56"/>
+		</g>
+		<g id="shape194-570" v:mID="194" v:groupContext="shape" v:layerMember="48" transform="translate(347.556,-119.31)">
+			<title>sensor_t_case</title>
+			<rect x="0" y="348.075" width="9.33732" height="9.85606" class="st57"/>
+		</g>
+		<g id="shape195-572" v:mID="195" v:groupContext="shape" v:layerMember="48" transform="translate(349.631,-123.46)">
+			<title>sensor_t_panel</title>
+			<rect x="0" y="354.3" width="5.1874" height="3.63118" class="st51"/>
+		</g>
+		<g id="shape196-574" v:mID="196" v:groupContext="shape" v:layerMember="48" transform="translate(351.446,-120.348)">
+			<title>sensor_t_led</title>
+			<ellipse cx="0.77811" cy="357.153" rx="0.77811" ry="0.77811" class="st58"/>
+		</g>
+		<g id="shape197-576" v:mID="197" v:groupContext="shape" v:layerMember="49" transform="translate(356.198,-128.305)">
+			<title>sensor_t_radio_0</title>
+			<path d="M0 357.93 C1.02 356.91 1.65 355.51 1.65 353.96 C1.65 352.41 1.02 351 0 349.98" class="st59"/>
+		</g>
+		<g id="shape198-579" v:mID="198" v:groupContext="shape" v:layerMember="49" transform="translate(346.605,-128.305)">
+			<title>sensor_t_radio_1</title>
+			<path d="M1.65 349.98 C0.63 351 0 352.41 0 353.96 C0 355.51 0.63 356.91 1.65 357.93" class="st59"/>
+		</g>
+		<g id="shape199-582" v:mID="199" v:groupContext="shape" v:layerMember="49" transform="translate(348.572,-129.497)">
+			<title>sensor_t_radio_2</title>
+			<path d="M1.15 352.37 C0.44 353.08 0 354.06 0 355.15 C-0 356.24 0.44 357.22 1.15 357.93" class="st59"/>
+		</g>
+		<g id="shape200-585" v:mID="200" v:groupContext="shape" v:layerMember="49" transform="translate(354.725,-129.497)">
+			<title>sensor_t_radio_3</title>
+			<path d="M0 357.93 C0.71 357.22 1.15 356.24 1.15 355.15 C1.15 354.06 0.71 353.08 0 352.37" class="st59"/>
+		</g>
+		<g id="shape201-588" v:mID="201" v:groupContext="shape" v:layerMember="49" transform="translate(352.225,-126.659)">
+			<title>sensor_t_radio_4</title>
+			<path d="M0 357.93 C0 356.99 0 356.06 0 355.12" class="st59"/>
+		</g>
+		<g id="shape202-591" v:mID="202" v:groupContext="shape" v:layerMember="49" transform="translate(352.225,-135.089)">
+			<title>sensor_t_radio_5</title>
+			<path d="M0 355.12 C0 356.06 0 356.99 0 357.93" class="st59"/>
+		</g>
+		<g id="shape203-594" v:mID="203" v:groupContext="shape" v:layerMember="49" transform="translate(351.382,-131.436)">
+			<title>sensor_t_radio_6</title>
+			<path d="M0.84 357.93 C1.31 357.93 1.69 357.55 1.69 357.09 C1.69 356.62 1.31 356.24 0.84 356.24 C0.38 356.24 -0 356.62
+						 0 357.09 C-0 357.55 0.38 357.93 0.84 357.93 Z" class="st58"/>
+		</g>
+		<g id="shape204-596" v:mID="204" v:groupContext="shape" v:layerMember="48" transform="translate(356.893,-99.5981)">
+			<title>sensor_t_label</title>
+			<desc>t</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.48425" cy="351.965" width="12.97" height="11.931"/>
+			<rect x="0" y="346" width="12.9685" height="11.931" class="st13"/>
+			<text x="0" y="353.99" class="st54" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>t</text>		</g>
+		<g id="shape205-599" v:mID="205" v:groupContext="shape" v:layerMember="0" transform="translate(163.922,-228.018)">
+			<title>aircraft1_rotor_fill1</title>
+			<ellipse cx="5.30135" cy="352.629" rx="5.30135" ry="5.30135" class="st60"/>
+		</g>
+		<g id="shape206-601" v:mID="206" v:groupContext="shape" v:layerMember="0" transform="translate(184.443,-228.018)">
+			<title>aircraft1_rotor_fill2</title>
+			<ellipse cx="5.30135" cy="352.629" rx="5.30135" ry="5.30135" class="st60"/>
+		</g>
+		<g id="shape207-603" v:mID="207" v:groupContext="shape" v:layerMember="0" transform="translate(163.922,-207.496)">
+			<title>aircraft1_rotor_fill3</title>
+			<ellipse cx="5.30135" cy="352.629" rx="5.30135" ry="5.30135" class="st60"/>
+		</g>
+		<g id="shape208-605" v:mID="208" v:groupContext="shape" v:layerMember="0" transform="translate(184.443,-207.496)">
+			<title>aircraft1_rotor_fill4</title>
+			<ellipse cx="5.30135" cy="352.629" rx="5.30135" ry="5.30135" class="st60"/>
+		</g>
+		<g id="shape209-607" v:mID="209" v:groupContext="shape" v:layerMember="0" transform="translate(169.223,-227.334)">
+			<title>aircraft1_0</title>
+			<path d="M0 351.95 C2 353.94 3.99 355.94 5.99 357.93" class="st61"/>
+		</g>
+		<g id="shape210-610" v:mID="210" v:groupContext="shape" v:layerMember="0" transform="translate(183.759,-212.798)">
+			<title>aircraft1_1</title>
+			<path d="M5.99 357.93 C3.99 355.94 2 353.94 0 351.95" class="st61"/>
+		</g>
+		<g id="shape211-613" v:mID="211" v:groupContext="shape" v:layerMember="0" transform="translate(183.759,-227.334)">
+			<title>aircraft1_2</title>
+			<path d="M5.99 351.95 C3.99 353.94 2 355.94 0 357.93" class="st61"/>
+		</g>
+		<g id="shape212-616" v:mID="212" v:groupContext="shape" v:layerMember="0" transform="translate(169.223,-212.798)">
+			<title>aircraft1_3</title>
+			<path d="M0 357.93 C2 355.94 3.99 353.94 5.99 351.95" class="st61"/>
+		</g>
+		<g id="shape213-619" v:mID="213" v:groupContext="shape" v:layerMember="0" transform="translate(175.209,-218.783)">
+			<title>aircraft1_4</title>
+			<rect x="0" y="349.38" width="8.55057" height="8.55057" class="st62"/>
+		</g>
+		<g id="shape214-621" v:mID="214" v:groupContext="shape" v:layerMember="0" transform="translate(183.759,-227.334)">
+			<title>aircraft1_5</title>
+			<path d="M5.99 357.93 C7.17 357.93 8.33 357.58 9.31 356.92 C10.29 356.26 11.06 355.33 11.52 354.24 C11.97 353.14 12.09
+						 351.94 11.86 350.78 C11.62 349.62 11.05 348.55 10.22 347.71 C9.38 346.88 8.31 346.31 7.15 346.07 C5.99 345.84
+						 4.79 345.96 3.69 346.42 C2.6 346.87 1.67 347.64 1.01 348.62 C0.35 349.6 0 350.76 0 351.95" class="st61"/>
+		</g>
+		<g id="shape215-624" v:mID="215" v:groupContext="shape" v:layerMember="0" transform="translate(183.759,-206.819)">
+			<title>aircraft1_6</title>
+			<path d="M5.99 345.97 C7.17 345.97 8.33 346.32 9.31 346.98 C10.29 347.63 11.06 348.57 11.52 349.66 C11.97 350.76 12.09
+						 351.96 11.86 353.12 C11.62 354.28 11.05 355.35 10.22 356.18 C9.38 357.02 8.31 357.59 7.15 357.82 C5.99 358.05
+						 4.79 357.94 3.69 357.48 C2.6 357.03 1.67 356.26 1.01 355.28 C0.35 354.29 0 353.14 0 351.95" class="st61"/>
+		</g>
+		<g id="shape216-627" v:mID="216" v:groupContext="shape" v:layerMember="0" transform="translate(163.238,-206.819)">
+			<title>aircraft1_7</title>
+			<path d="M5.99 345.97 C4.8 345.97 3.64 346.32 2.66 346.98 C1.68 347.63 0.91 348.57 0.46 349.66 C0 350.76 -0.12 351.96
+						 0.12 353.12 C0.35 354.28 0.92 355.35 1.75 356.18 C2.59 357.02 3.66 357.59 4.82 357.82 C5.98 358.05 7.18
+						 357.94 8.28 357.48 C9.37 357.03 10.3 356.26 10.96 355.28 C11.62 354.29 11.97 353.14 11.97 351.95"
+					class="st61"/>
+		</g>
+		<g id="shape217-630" v:mID="217" v:groupContext="shape" v:layerMember="0" transform="translate(163.238,-227.334)">
+			<title>aircraft1_8</title>
+			<path d="M5.99 357.93 C4.8 357.93 3.64 357.58 2.66 356.92 C1.68 356.26 0.91 355.33 0.46 354.24 C0 353.14 -0.12 351.94
+						 0.12 350.78 C0.35 349.62 0.92 348.55 1.75 347.71 C2.59 346.88 3.66 346.31 4.82 346.07 C5.98 345.84 7.18
+						 345.96 8.28 346.42 C9.37 346.87 10.3 347.64 10.96 348.62 C11.62 349.6 11.97 350.76 11.97 351.95"
+					class="st61"/>
+		</g>
+		<g id="shape218-633" v:mID="218" v:groupContext="shape" v:layerMember="0" transform="translate(176.919,-218.783)">
+			<title>aircraft1_camera</title>
+			<rect x="0" y="353.655" width="5.13034" height="4.27528" class="st63"/>
+		</g>
+		<g id="shape219-635" v:mID="219" v:groupContext="shape" v:layerMember="0" transform="translate(178.202,-219.638)">
+			<title>aircraft1_lens</title>
+			<ellipse cx="1.28259" cy="356.648" rx="1.28259" ry="1.28259" class="st64"/>
+		</g>
+		<g id="shape220-637" v:mID="220" v:groupContext="shape" v:layerMember="1" transform="translate(257.452,-267.557)">
+			<title>aircraft2_rotor_fill1</title>
+			<ellipse cx="5.42464" cy="352.506" rx="5.42464" ry="5.42464" class="st65"/>
+		</g>
+		<g id="shape221-639" v:mID="221" v:groupContext="shape" v:layerMember="1" transform="translate(278.451,-267.557)">
+			<title>aircraft2_rotor_fill2</title>
+			<ellipse cx="5.42464" cy="352.506" rx="5.42464" ry="5.42464" class="st65"/>
+		</g>
+		<g id="shape222-641" v:mID="222" v:groupContext="shape" v:layerMember="1" transform="translate(257.452,-246.559)">
+			<title>aircraft2_rotor_fill3</title>
+			<ellipse cx="5.42464" cy="352.506" rx="5.42464" ry="5.42464" class="st65"/>
+		</g>
+		<g id="shape223-643" v:mID="223" v:groupContext="shape" v:layerMember="1" transform="translate(278.451,-246.559)">
+			<title>aircraft2_rotor_fill4</title>
+			<ellipse cx="5.42464" cy="352.506" rx="5.42464" ry="5.42464" class="st65"/>
+		</g>
+		<g id="shape224-645" v:mID="224" v:groupContext="shape" v:layerMember="1" transform="translate(262.877,-266.857)">
+			<title>aircraft2_0</title>
+			<path d="M0 351.81 C2.04 353.85 4.08 355.89 6.12 357.93" class="st66"/>
+		</g>
+		<g id="shape225-648" v:mID="225" v:groupContext="shape" v:layerMember="1" transform="translate(277.751,-251.983)">
+			<title>aircraft2_1</title>
+			<path d="M6.12 357.93 C4.08 355.89 2.04 353.85 0 351.81" class="st66"/>
+		</g>
+		<g id="shape226-651" v:mID="226" v:groupContext="shape" v:layerMember="1" transform="translate(277.751,-266.857)">
+			<title>aircraft2_2</title>
+			<path d="M6.12 351.81 C4.08 353.85 2.04 355.89 0 357.93" class="st66"/>
+		</g>
+		<g id="shape227-654" v:mID="227" v:groupContext="shape" v:layerMember="1" transform="translate(262.877,-251.983)">
+			<title>aircraft2_3</title>
+			<path d="M0 357.93 C2.04 355.89 4.08 353.85 6.12 351.81" class="st66"/>
+		</g>
+		<g id="shape228-657" v:mID="228" v:groupContext="shape" v:layerMember="1" transform="translate(269.001,-258.108)">
+			<title>aircraft2_4</title>
+			<rect x="0" y="349.181" width="8.74942" height="8.74942" class="st67"/>
+		</g>
+		<g id="shape229-659" v:mID="229" v:groupContext="shape" v:layerMember="1" transform="translate(277.751,-266.857)">
+			<title>aircraft2_5</title>
+			<path d="M6.12 357.93 C7.34 357.93 8.52 357.57 9.53 356.9 C10.53 356.23 11.32 355.27 11.78 354.15 C12.25 353.03 12.37
+						 351.8 12.13 350.61 C11.9 349.42 11.31 348.33 10.46 347.48 C9.6 346.62 8.51 346.04 7.32 345.8 C6.13 345.56
+						 4.9 345.68 3.78 346.15 C2.66 346.61 1.71 347.4 1.03 348.4 C0.36 349.41 0 350.59 0 351.81" class="st66"/>
+		</g>
+		<g id="shape230-662" v:mID="230" v:groupContext="shape" v:layerMember="1" transform="translate(277.751,-245.866)">
+			<title>aircraft2_6</title>
+			<path d="M6.12 345.69 C7.34 345.69 8.52 346.05 9.53 346.72 C10.53 347.39 11.32 348.35 11.78 349.47 C12.25 350.59 12.37
+						 351.82 12.13 353.01 C11.9 354.2 11.31 355.29 10.46 356.14 C9.6 357 8.51 357.58 7.32 357.82 C6.13 358.06
+						 4.9 357.94 3.78 357.47 C2.66 357.01 1.71 356.22 1.03 355.22 C0.36 354.21 0 353.02 0 351.81" class="st66"/>
+		</g>
+		<g id="shape231-665" v:mID="231" v:groupContext="shape" v:layerMember="1" transform="translate(256.752,-245.866)">
+			<title>aircraft2_7</title>
+			<path d="M6.12 345.69 C4.91 345.69 3.73 346.05 2.72 346.72 C1.71 347.39 0.93 348.35 0.47 349.47 C0 350.59 -0.12 351.82
+						 0.12 353.01 C0.35 354.2 0.94 355.29 1.79 356.14 C2.65 357 3.74 357.58 4.93 357.82 C6.12 358.06 7.35 357.94
+						 8.47 357.47 C9.59 357.01 10.54 356.22 11.22 355.22 C11.89 354.21 12.25 353.02 12.25 351.81" class="st66"/>
+		</g>
+		<g id="shape232-668" v:mID="232" v:groupContext="shape" v:layerMember="1" transform="translate(256.752,-266.857)">
+			<title>aircraft2_8</title>
+			<path d="M6.12 357.93 C4.91 357.93 3.73 357.57 2.72 356.9 C1.71 356.23 0.93 355.27 0.47 354.15 C0 353.03 -0.12 351.8
+						 0.12 350.61 C0.35 349.42 0.94 348.33 1.79 347.48 C2.65 346.62 3.74 346.04 4.93 345.8 C6.12 345.56 7.35 345.68
+						 8.47 346.15 C9.59 346.61 10.54 347.4 11.22 348.4 C11.89 349.41 12.25 350.59 12.25 351.81" class="st66"/>
+		</g>
+		<g id="shape233-671" v:mID="233" v:groupContext="shape" v:layerMember="1" transform="translate(270.751,-258.108)">
+			<title>aircraft2_camera</title>
+			<rect x="0" y="353.556" width="5.24965" height="4.37471" class="st68"/>
+		</g>
+		<g id="shape234-673" v:mID="234" v:groupContext="shape" v:layerMember="1" transform="translate(272.064,-258.983)">
+			<title>aircraft2_lens</title>
+			<ellipse cx="1.31241" cy="356.618" rx="1.31241" ry="1.31241" class="st64"/>
+		</g>
+		<g id="shape235-675" v:mID="235" v:groupContext="shape" v:layerMember="2" transform="translate(204.902,-302.425)">
+			<title>task_card_line0</title>
+			<path d="M-0 357.93 L6.22 357.93" class="st69"/>
+		</g>
+		<g id="shape236-678" v:mID="236" v:groupContext="shape" v:layerMember="2" transform="translate(204.902,-299.313)">
+			<title>task_card_line_b0</title>
+			<path d="M-0 357.93 L4.67 357.93" class="st69"/>
+		</g>
+		<g id="shape237-681" v:mID="237" v:groupContext="shape" v:layerMember="2" transform="translate(217.871,-302.425)">
+			<title>task_card_line1</title>
+			<path d="M-0 357.93 L6.22 357.93" class="st69"/>
+		</g>
+		<g id="shape238-684" v:mID="238" v:groupContext="shape" v:layerMember="2" transform="translate(217.871,-299.313)">
+			<title>task_card_line_b1</title>
+			<path d="M-0 357.93 L4.67 357.93" class="st69"/>
+		</g>
+		<g id="shape239-687" v:mID="239" v:groupContext="shape" v:layerMember="2" transform="translate(230.839,-302.425)">
+			<title>task_card_line2</title>
+			<path d="M-0 357.93 L6.22 357.93" class="st69"/>
+		</g>
+		<g id="shape240-690" v:mID="240" v:groupContext="shape" v:layerMember="2" transform="translate(230.839,-299.313)">
+			<title>task_card_line_b2</title>
+			<path d="M-0 357.93 L4.67 357.93" class="st69"/>
+		</g>
+		<g id="shape241-693" v:mID="241" v:groupContext="shape" v:layerMember="9" transform="translate(103.62,-219.97)">
+			<title>edge1_antenna_0</title>
+			<path d="M0 357.93 C2.68 355.26 4.33 351.56 4.33 347.48 C4.33 343.39 2.68 339.7 0 337.02" class="st70"/>
+		</g>
+		<g id="shape242-696" v:mID="242" v:groupContext="shape" v:layerMember="9" transform="translate(78.3816,-219.97)">
+			<title>edge1_antenna_1</title>
+			<path d="M4.33 337.02 C1.65 339.7 0 343.39 0 347.48 C0 351.56 1.65 355.26 4.33 357.93" class="st70"/>
+		</g>
+		<g id="shape243-699" v:mID="243" v:groupContext="shape" v:layerMember="9" transform="translate(83.5561,-223.107)">
+			<title>edge1_antenna_2</title>
+			<path d="M3.03 343.3 C1.16 345.17 0 347.76 0 350.61 C-0 353.47 1.16 356.06 3.03 357.93" class="st70"/>
+		</g>
+		<g id="shape244-702" v:mID="244" v:groupContext="shape" v:layerMember="9" transform="translate(99.7442,-223.107)">
+			<title>edge1_antenna_3</title>
+			<path d="M0 357.93 C1.87 356.06 3.03 353.47 3.03 350.61 C3.03 347.76 1.87 345.17 0 343.3" class="st70"/>
+		</g>
+		<g id="shape245-705" v:mID="245" v:groupContext="shape" v:layerMember="9" transform="translate(93.1657,-215.64)">
+			<title>edge1_antenna_4</title>
+			<path d="M0 357.93 C0 355.47 0 353 0 350.54" class="st70"/>
+		</g>
+		<g id="shape246-708" v:mID="246" v:groupContext="shape" v:layerMember="9" transform="translate(93.1657,-237.816)">
+			<title>edge1_antenna_5</title>
+			<path d="M0 350.54 C0 353 0 355.47 0 357.93" class="st70"/>
+		</g>
+		<g id="shape247-711" v:mID="247" v:groupContext="shape" v:layerMember="9" transform="translate(90.9481,-228.207)">
+			<title>edge1_antenna_6</title>
+			<path d="M2.22 357.93 C3.44 357.93 4.44 356.94 4.44 355.71 C4.44 354.49 3.44 353.5 2.22 353.5 C0.99 353.5 0 354.49 0
+						 355.71 C-0 356.94 0.99 357.93 2.22 357.93 Z" class="st71"/>
+		</g>
+		<g id="shape248-713" v:mID="248" v:groupContext="shape" v:layerMember="8" transform="translate(83.3615,-197.744)">
+			<title>edge1_mast</title>
+			<path d="M9.8 323.85 L0 357.93 L19.61 357.93 L9.8 323.85 Z" class="st72"/>
+		</g>
+		<g id="shape249-715" v:mID="249" v:groupContext="shape" v:layerMember="8" transform="translate(88.4971,-205.214)">
+			<title>edge1_cross1</title>
+			<path d="M0 345.79 L12.61 357.93" class="st73"/>
+		</g>
+		<g id="shape250-718" v:mID="250" v:groupContext="shape" v:layerMember="8" transform="translate(85.229,-205.214)">
+			<title>edge1_cross2</title>
+			<path d="M12.61 345.79 L0 357.93" class="st73"/>
+		</g>
+		<g id="shape251-721" v:mID="251" v:groupContext="shape" v:layerMember="8" transform="translate(80.5603,-197.277)">
+			<title>edge1_base</title>
+			<path d="M-0 357.93 L25.21 357.93" class="st74"/>
+		</g>
+		<g id="shape252-724" v:mID="252" v:groupContext="shape" v:layerMember="10" transform="translate(108.3,-207.042)">
+			<title>edge1_rack_0</title>
+			<path d="M20.62 349.68 C13.75 349.68 6.87 349.68 0 349.68 C0 352.43 0 355.18 0 357.93 C6.87 357.93 13.75 357.93 20.62
+						 357.93 C20.62 355.18 20.62 352.43 20.62 349.68 Z" class="st75"/>
+		</g>
+		<g id="shape253-726" v:mID="253" v:groupContext="shape" v:layerMember="10" transform="translate(108.3,-194.67)">
+			<title>edge1_rack_1</title>
+			<path d="M20.62 349.68 C13.75 349.68 6.87 349.68 0 349.68 C0 352.43 0 355.18 0 357.93 C6.87 357.93 13.75 357.93 20.62
+						 357.93 C20.62 355.18 20.62 352.43 20.62 349.68 Z" class="st75"/>
+		</g>
+		<g id="shape254-728" v:mID="254" v:groupContext="shape" v:layerMember="10" transform="translate(111.393,-210.135)">
+			<title>edge1_rack_2</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C-0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape255-730" v:mID="255" v:groupContext="shape" v:layerMember="10" transform="translate(111.393,-197.763)">
+			<title>edge1_rack_3</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C-0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape256-732" v:mID="256" v:groupContext="shape" v:layerMember="10" transform="translate(115.517,-210.135)">
+			<title>edge1_rack_4</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 -0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42
+						 C0 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42
+						 C2.06 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape257-734" v:mID="257" v:groupContext="shape" v:layerMember="10" transform="translate(115.517,-197.763)">
+			<title>edge1_rack_5</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 -0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42
+						 C0 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42
+						 C2.06 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape258-736" v:mID="258" v:groupContext="shape" v:layerMember="12" transform="translate(430.426,-208.039)">
+			<title>edge2_antenna_0</title>
+			<path d="M0 357.93 C2.68 355.26 4.33 351.56 4.33 347.48 C4.33 343.39 2.68 339.7 0 337.02" class="st70"/>
+		</g>
+		<g id="shape259-739" v:mID="259" v:groupContext="shape" v:layerMember="12" transform="translate(405.188,-208.039)">
+			<title>edge2_antenna_1</title>
+			<path d="M4.33 337.02 C1.65 339.7 0 343.39 0 347.48 C0 351.56 1.65 355.26 4.33 357.93" class="st70"/>
+		</g>
+		<g id="shape260-742" v:mID="260" v:groupContext="shape" v:layerMember="12" transform="translate(410.362,-211.176)">
+			<title>edge2_antenna_2</title>
+			<path d="M3.03 343.3 C1.16 345.17 0 347.76 0 350.61 C-0 353.47 1.16 356.06 3.03 357.93" class="st70"/>
+		</g>
+		<g id="shape261-745" v:mID="261" v:groupContext="shape" v:layerMember="12" transform="translate(426.551,-211.176)">
+			<title>edge2_antenna_3</title>
+			<path d="M0 357.93 C1.87 356.06 3.03 353.47 3.03 350.61 C3.03 347.76 1.87 345.17 0 343.3" class="st70"/>
+		</g>
+		<g id="shape262-748" v:mID="262" v:groupContext="shape" v:layerMember="12" transform="translate(419.972,-203.709)">
+			<title>edge2_antenna_4</title>
+			<path d="M0 357.93 C0 355.47 0 353 0 350.54" class="st70"/>
+		</g>
+		<g id="shape263-751" v:mID="263" v:groupContext="shape" v:layerMember="12" transform="translate(419.972,-225.885)">
+			<title>edge2_antenna_5</title>
+			<path d="M0 350.54 C0 353 0 355.47 0 357.93" class="st70"/>
+		</g>
+		<g id="shape264-754" v:mID="264" v:groupContext="shape" v:layerMember="12" transform="translate(417.754,-216.276)">
+			<title>edge2_antenna_6</title>
+			<path d="M2.22 357.93 C3.44 357.93 4.44 356.94 4.44 355.71 C4.44 354.49 3.44 353.5 2.22 353.5 C0.99 353.5 0 354.49 0
+						 355.71 C0 356.94 0.99 357.93 2.22 357.93 Z" class="st71"/>
+		</g>
+		<g id="shape265-756" v:mID="265" v:groupContext="shape" v:layerMember="11" transform="translate(410.168,-185.813)">
+			<title>edge2_mast</title>
+			<path d="M9.8 323.85 L0 357.93 L19.61 357.93 L9.8 323.85 Z" class="st72"/>
+		</g>
+		<g id="shape266-758" v:mID="266" v:groupContext="shape" v:layerMember="11" transform="translate(415.303,-193.283)">
+			<title>edge2_cross1</title>
+			<path d="M0 345.79 L12.61 357.93" class="st73"/>
+		</g>
+		<g id="shape267-761" v:mID="267" v:groupContext="shape" v:layerMember="11" transform="translate(412.035,-193.283)">
+			<title>edge2_cross2</title>
+			<path d="M12.61 345.79 L0 357.93" class="st73"/>
+		</g>
+		<g id="shape268-764" v:mID="268" v:groupContext="shape" v:layerMember="11" transform="translate(407.367,-185.346)">
+			<title>edge2_base</title>
+			<path d="M-0 357.93 L25.21 357.93" class="st74"/>
+		</g>
+		<g id="shape269-767" v:mID="269" v:groupContext="shape" v:layerMember="13" transform="translate(435.106,-195.111)">
+			<title>edge2_rack_0</title>
+			<path d="M20.62 349.68 C13.75 349.68 6.87 349.68 0 349.68 C0 352.43 0 355.18 0 357.93 C6.87 357.93 13.75 357.93 20.62
+						 357.93 C20.62 355.18 20.62 352.43 20.62 349.68 Z" class="st75"/>
+		</g>
+		<g id="shape270-769" v:mID="270" v:groupContext="shape" v:layerMember="13" transform="translate(435.106,-182.739)">
+			<title>edge2_rack_1</title>
+			<path d="M20.62 349.68 C13.75 349.68 6.87 349.68 0 349.68 C0 352.43 0 355.18 0 357.93 C6.87 357.93 13.75 357.93 20.62
+						 357.93 C20.62 355.18 20.62 352.43 20.62 349.68 Z" class="st75"/>
+		</g>
+		<g id="shape271-771" v:mID="271" v:groupContext="shape" v:layerMember="13" transform="translate(438.199,-198.204)">
+			<title>edge2_rack_2</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape272-773" v:mID="272" v:groupContext="shape" v:layerMember="13" transform="translate(438.199,-185.832)">
+			<title>edge2_rack_3</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape273-775" v:mID="273" v:groupContext="shape" v:layerMember="13" transform="translate(442.323,-198.204)">
+			<title>edge2_rack_4</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C-0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape274-777" v:mID="274" v:groupContext="shape" v:layerMember="13" transform="translate(442.323,-185.832)">
+			<title>edge2_rack_5</title>
+			<path d="M1.55 355.87 C1.2 355.87 0.86 355.87 0.52 355.87 C0.23 355.87 0 356.1 0 356.38 C0 356.73 0 357.07 0 357.42 C-0
+						 357.7 0.23 357.93 0.52 357.93 C0.86 357.93 1.2 357.93 1.55 357.93 C1.83 357.93 2.06 357.7 2.06 357.42 C2.06
+						 357.07 2.06 356.73 2.06 356.38 C2.06 356.1 1.83 355.87 1.55 355.87 Z" class="st64"/>
+		</g>
+		<g id="shape275-779" v:mID="275" v:groupContext="shape" v:layerMember="22" transform="translate(219.514,-38.992)">
+			<title>hangar_0</title>
+			<path d="M42.36 357.93 C42.36 349.46 42.36 340.99 42.36 332.51 C35.3 326.86 28.24 321.22 21.18 315.57 C14.12 321.22 7.06
+						 326.86 0 332.51 C0 340.99 0 349.46 0 357.93 C4.24 357.93 8.47 357.93 12.71 357.93 C12.71 351.58 12.71 345.22
+						 12.71 338.87 C18.36 338.87 24.01 338.87 29.65 338.87 C29.65 345.22 29.65 351.58 29.65 357.93 C33.89 357.93
+						 38.13 357.93 42.36 357.93 Z" class="st76"/>
+		</g>
+		<g id="shape276-781" v:mID="276" v:groupContext="shape" v:layerMember="22" transform="translate(240.695,-38.992)">
+			<title>hangar_1</title>
+			<path d="M0 357.93 C0 354.4 0 350.87 0 347.34" class="st77"/>
+		</g>
+		<g id="shape277-784" v:mID="277" v:groupContext="shape" v:layerMember="22" transform="translate(231.877,-37.3493)">
+			<title>hangar_door</title>
+			<rect x="0" y="337.181" width="17.6372" height="20.7496" class="st78"/>
+		</g>
+		<g id="shape278-786" v:mID="278" v:groupContext="shape" v:layerMember="22" transform="translate(232.396,-53.4302)">
+			<title>hangar_door_line0</title>
+			<path d="M0 357.93 L16.6 357.93" class="st79"/>
+		</g>
+		<g id="shape279-789" v:mID="279" v:groupContext="shape" v:layerMember="22" transform="translate(232.396,-48.7616)">
+			<title>hangar_door_line1</title>
+			<path d="M0 357.93 L16.6 357.93" class="st79"/>
+		</g>
+		<g id="shape280-792" v:mID="280" v:groupContext="shape" v:layerMember="22" transform="translate(232.396,-44.0929)">
+			<title>hangar_door_line2</title>
+			<path d="M0 357.93 L16.6 357.93" class="st79"/>
+		</g>
+		<g id="shape281-795" v:mID="281" v:groupContext="shape" v:layerMember="22" transform="translate(269.226,-42.5367)">
+			<title>helipad</title>
+			<ellipse cx="15.5622" cy="349.112" rx="15.5622" ry="8.81858" class="st80"/>
+		</g>
+		<g id="shape282-797" v:mID="282" v:groupContext="shape" v:layerMember="22" transform="translate(273.376,-45.6491)">
+			<title>helipad_h</title>
+			<desc>H</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="11.4123" cy="352.225" width="22.83" height="11.4123"/>
+			<rect x="0" y="346.518" width="22.8246" height="11.4123" class="st13"/>
+			<text x="7.52" y="354.72" class="st81" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>H</text>		</g>
+		<g id="shape283-800" v:mID="283" v:groupContext="shape" v:layerMember="24" transform="translate(377.124,-75.7361)">
+			<title>legend_station_case</title>
+			<rect x="0" y="350.668" width="6.74362" height="7.26236" class="st82"/>
+		</g>
+		<g id="shape284-802" v:mID="284" v:groupContext="shape" v:layerMember="24" transform="translate(380.496,-72.6236)">
+			<title>legend_station_post</title>
+			<path d="M0 354.82 L0 357.93" class="st83"/>
+		</g>
+		<g id="shape285-805" v:mID="285" v:groupContext="shape" v:layerMember="26" transform="translate(383.094,-82.2158)">
+			<title>legend_station_radio_0</title>
+			<path d="M0 357.93 C0.66 357.27 1.08 356.35 1.08 355.33 C1.08 354.32 0.66 353.4 0 352.73" class="st84"/>
+		</g>
+		<g id="shape286-808" v:mID="286" v:groupContext="shape" v:layerMember="26" transform="translate(376.821,-82.2158)">
+			<title>legend_station_radio_1</title>
+			<path d="M1.08 352.73 C0.41 353.4 0 354.32 0 355.33 C-0 356.35 0.41 357.27 1.08 357.93" class="st84"/>
+		</g>
+		<g id="shape287-811" v:mID="287" v:groupContext="shape" v:layerMember="26" transform="translate(378.108,-82.9953)">
+			<title>legend_station_radio_2</title>
+			<path d="M0.75 354.29 C0.29 354.76 0 355.4 0 356.11 C0 356.82 0.29 357.47 0.75 357.93" class="st84"/>
+		</g>
+		<g id="shape288-814" v:mID="288" v:groupContext="shape" v:layerMember="26" transform="translate(382.131,-82.9953)">
+			<title>legend_station_radio_3</title>
+			<path d="M0 357.93 C0.47 357.47 0.75 356.82 0.75 356.11 C0.75 355.4 0.47 354.76 0 354.29" class="st84"/>
+		</g>
+		<g id="shape289-817" v:mID="289" v:groupContext="shape" v:layerMember="26" transform="translate(380.496,-81.1396)">
+			<title>legend_station_radio_4</title>
+			<path d="M0 357.93 C0 357.32 0 356.71 0 356.09" class="st84"/>
+		</g>
+		<g id="shape290-820" v:mID="290" v:groupContext="shape" v:layerMember="26" transform="translate(380.496,-86.6512)">
+			<title>legend_station_radio_5</title>
+			<path d="M0 356.09 C0 356.71 0 357.32 0 357.93" class="st84"/>
+		</g>
+		<g id="shape291-823" v:mID="291" v:groupContext="shape" v:layerMember="26" transform="translate(379.945,-84.2629)">
+			<title>legend_station_radio_6</title>
+			<path d="M0.55 357.93 C0.86 357.93 1.1 357.68 1.1 357.38 C1.1 357.08 0.86 356.83 0.55 356.83 C0.25 356.83 -0 357.08 0
+						 357.38 C-0 357.68 0.25 357.93 0.55 357.93 Z" class="st52"/>
+		</g>
+	</g>
+</svg>

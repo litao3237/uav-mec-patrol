@@ -1,0 +1,1366 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 fig02_hybrid_alns_visual.svg fig02_hybrid_alns_visual -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="7.20472in" height="5.70614in"
+		viewBox="0 0 518.74 410.842" xml:space="preserve" color-interpolation-filters="sRGB" class="st69">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false"/>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:none;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st2 {fill:#29343d;font-family:Times New Roman;font-size:0.774994em;font-weight:bold}
+		.st3 {fill:#ffffff;stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st4 {fill:#306587;font-family:Times New Roman;font-size:0.774994em;font-weight:bold}
+		.st5 {fill:#397b73;font-family:Times New Roman;font-size:0.774994em;font-weight:bold}
+		.st6 {fill:#a46d36;font-family:Times New Roman;font-size:0.774994em;font-weight:bold}
+		.st7 {stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st8 {marker-end:url(#mrkr4-49);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st9 {fill:#306587;fill-opacity:1;stroke:#306587;stroke-opacity:1;stroke-width:0.29411764705882}
+		.st10 {fill:#29343d;stroke:#29343d;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st11 {fill:#ffffff;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st12 {stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st13 {marker-end:url(#mrkr4-85);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st14 {fill:#fcf6ef;stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st15 {marker-end:url(#mrkr4-103);stroke:#29343d;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.05}
+		.st16 {fill:#29343d;fill-opacity:1;stroke:#29343d;stroke-opacity:1;stroke-width:0.36842105263158}
+		.st17 {fill:#eff5f9;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st18 {fill:#ffffff;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st19 {marker-end:url(#mrkr4-128);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st20 {fill:#306587;fill-opacity:1;stroke:#306587;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st21 {fill:#eff7f4;stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st22 {stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.4}
+		.st23 {fill:#397b73;font-family:Times New Roman;font-size:0.708344em;font-weight:bold}
+		.st24 {fill:#ffffff;stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st25 {fill:#fcf6ef;stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st26 {marker-end:url(#mrkr4-153);stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st27 {fill:#a46d36;fill-opacity:1;stroke:#a46d36;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st28 {stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.6}
+		.st29 {fill:#eff5f9;stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st30 {fill:#306587;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st31 {fill:#ffffff;font-family:Times New Roman;font-size:0.833336em;font-weight:bold}
+		.st32 {fill:#29343d;font-family:Times New Roman;font-size:0.766663em;font-weight:bold}
+		.st33 {stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st34 {fill:#29343d;font-family:Times New Roman;font-size:0.708344em}
+		.st35 {stroke:#c1cbd2;stroke-dasharray:4.55,3.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st36 {fill:#fcf6ef;stroke:#a46d36;stroke-dasharray:5.25,3.75;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st37 {stroke:#a46d36;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st38 {marker-end:url(#mrkr4-334);stroke:#75828b;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st39 {fill:#75828b;fill-opacity:1;stroke:#75828b;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st40 {fill:#29343d;font-family:Times New Roman;font-size:0.75em;font-weight:bold}
+		.st41 {fill:#29343d;font-family:Times New Roman;font-size:0.733337em;font-weight:bold}
+		.st42 {marker-end:url(#mrkr4-355);stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st43 {fill:#fcf6ef;stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st44 {fill:#a46d36;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st45 {fill:#ffffff;stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.5}
+		.st46 {fill:#f6f8fa;stroke:#bdcad0;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st47 {fill:#29343d;font-family:Times New Roman;font-size:0.708344em;font-style:italic}
+		.st48 {font-family:Cambria Math;font-size:1em}
+		.st49 {stroke:#75828b;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st50 {fill:#eff7f4;stroke:#397b73;stroke-dasharray:4.2,3;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.6}
+		.st51 {fill:#ffffff;stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st52 {font-family:宋体;font-size:1em}
+		.st53 {stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st54 {fill:#ffffff;stroke:#306587;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.5}
+		.st55 {fill:#ffffff;stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.65}
+		.st56 {fill:#eff7f4;stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.5}
+		.st57 {marker-end:url(#mrkr4-611);stroke:#397b73;stroke-dasharray:0,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st58 {fill:#397b73;fill-opacity:1;stroke:#397b73;stroke-opacity:1;stroke-width:0.32075471698113}
+		.st59 {fill:#29343d;font-family:Times New Roman;font-size:0.733337em}
+		.st60 {fill:#29343d;font-family:Times New Roman;font-size:0.833336em;font-weight:bold}
+		.st61 {fill:#397b73;font-family:Times New Roman;font-size:1.08334em;font-weight:bold}
+		.st62 {marker-end:url(#mrkr4-657);stroke:#397b73;stroke-dasharray:5.95,4.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st63 {fill:#ffffff;stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.5}
+		.st64 {fill:#397b73;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st65 {marker-end:url(#mrkr4-657);stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st66 {fill:#29343d;font-family:Times New Roman;font-size:0.916672em;font-style:italic}
+		.st67 {stroke:#75828b;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.2}
+		.st68 {marker-end:url(#mrkr4-738);stroke:#397b73;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.85}
+		.st69 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Markers">
+		<g id="lend4">
+			<path d="M 2 1 L 0 0 L 2 -1 L 2 1 " style="stroke:none"/>
+		</g>
+		<marker id="mrkr4-49" class="st9" v:arrowType="4" v:arrowSize="1" v:setback="0" refX="-0" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.4,-3.4) "/>
+		</marker>
+		<marker id="mrkr4-85" class="st9" v:arrowType="4" v:arrowSize="1" v:setback="6.8" refX="-6.8" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.4,-3.4) "/>
+		</marker>
+		<marker id="mrkr4-103" class="st16" v:arrowType="4" v:arrowSize="1" v:setback="5.42857" refX="-5.4285714285714"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-2.7142857142857,-2.7142857142857) "/>
+		</marker>
+		<marker id="mrkr4-128" class="st20" v:arrowType="4" v:arrowSize="1" v:setback="5.81176" refX="-5.8117647058824"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-153" class="st27" v:arrowType="4" v:arrowSize="1" v:setback="5.81176" refX="-5.8117647058824"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-334" class="st39" v:arrowType="4" v:arrowSize="1" v:setback="6.23529" refX="-6.2352941176471"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-355" class="st20" v:arrowType="4" v:arrowSize="1" v:setback="6.23529" refX="-6.2352941176471"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-611" class="st58" v:arrowType="4" v:arrowSize="1" v:setback="0" refX="-0" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-657" class="st58" v:arrowType="4" v:arrowSize="1" v:setback="6.23529" refX="-6.2352941176471"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+		<marker id="mrkr4-738" class="st58" v:arrowType="4" v:arrowSize="1" v:setback="5.81176" refX="-5.8117647058824"
+				orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend4" transform="scale(-3.1176470588235,-3.1176470588235) "/>
+		</marker>
+	</defs>
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<title>fig02_hybrid_alns_visual</title>
+		<v:pageProperties v:drawingScale="1" v:pageScale="1" v:drawingUnits="0" v:shadowOffsetX="0" v:shadowOffsetY="0"/>
+		<v:layer v:name="current_route" v:index="0"/>
+		<v:layer v:name="destroyed_route" v:index="1"/>
+		<v:layer v:name="elite" v:index="2"/>
+		<v:layer v:name="elite_heading" v:index="3"/>
+		<v:layer v:name="exploration" v:index="4"/>
+		<v:layer v:name="exploration_heading" v:index="5"/>
+		<v:layer v:name="final_routes" v:index="6"/>
+		<v:layer v:name="initial_routes" v:index="7"/>
+		<v:layer v:name="main_flow" v:index="8"/>
+		<v:layer v:name="move_batch" v:index="9"/>
+		<v:layer v:name="move_contact" v:index="10"/>
+		<v:layer v:name="move_mode" v:index="11"/>
+		<v:layer v:name="move_route" v:index="12"/>
+		<v:layer v:name="repaired_route" v:index="13"/>
+		<v:layer v:name="resource_calls" v:index="14"/>
+		<v:layer v:name="resources" v:index="15"/>
+		<v:layer v:name="route_after" v:index="16"/>
+		<v:layer v:name="route_before" v:index="17"/>
+		<v:layer v:name="screening" v:index="18"/>
+		<v:layer v:name="strict_cvx" v:index="19"/>
+		<g id="shape1-1" v:mID="1" v:groupContext="shape" v:layerMember="8" transform="translate(19.7121,-384.386)">
+			<title>initialize_title</title>
+			<desc>Initialize</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="37.868" cy="403.839" width="75.74" height="14.006"/>
+			<rect x="0" y="396.836" width="75.7361" height="14.006" class="st1"/>
+			<text x="20.3" y="406.16" class="st2" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Initialize</text>		</g>
+		<g id="shape2-4" v:mID="2" v:groupContext="shape" v:layerMember="8" transform="translate(25.937,-334.069)">
+			<title>initialize_frame</title>
+			<rect x="0" y="367.787" width="63.2863" height="43.0554" class="st3"/>
+		</g>
+		<g id="shape3-6" v:mID="3" v:groupContext="shape" v:layerMember="8" transform="translate(113.604,-384.386)">
+			<title>explore_title</title>
+			<desc>ALNS exploration</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="42.018" cy="403.839" width="84.04" height="14.006"/>
+			<rect x="0" y="396.836" width="84.0359" height="14.006" class="st1"/>
+			<text x="5.72" y="406.16" class="st4" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>ALNS exploration</text>		</g>
+		<g id="shape4-9" v:mID="4" v:groupContext="shape" v:layerMember="8" transform="translate(119.829,-334.069)">
+			<title>explore_frame</title>
+			<rect x="0" y="367.787" width="71.5861" height="43.0554" class="st3"/>
+		</g>
+		<g id="shape5-11" v:mID="5" v:groupContext="shape" v:layerMember="8" transform="translate(215.277,-384.386)">
+			<title>validate_title</title>
+			<desc>Strict validation</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="44.0929" cy="403.839" width="88.19" height="14.006"/>
+			<rect x="0" y="396.836" width="88.1858" height="14.006" class="st1"/>
+			<text x="11.93" y="406.16" class="st5" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Strict validation</text>		</g>
+		<g id="shape6-14" v:mID="6" v:groupContext="shape" v:layerMember="8" transform="translate(221.502,-334.069)">
+			<title>validate_frame</title>
+			<rect x="0" y="367.787" width="75.7361" height="43.0554" class="st3"/>
+		</g>
+		<g id="shape7-16" v:mID="7" v:groupContext="shape" v:layerMember="8" transform="translate(319.544,-384.386)">
+			<title>refine_title</title>
+			<desc>Elite refinement</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.5742" cy="403.839" width="87.15" height="14.006"/>
+			<rect x="0" y="396.836" width="87.1483" height="14.006" class="st1"/>
+			<text x="11.42" y="406.16" class="st6" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Elite refinement</text>		</g>
+		<g id="shape8-19" v:mID="8" v:groupContext="shape" v:layerMember="8" transform="translate(325.769,-334.069)">
+			<title>refine_frame</title>
+			<rect x="0" y="367.787" width="74.6986" height="43.0554" class="st3"/>
+		</g>
+		<g id="shape9-21" v:mID="9" v:groupContext="shape" v:layerMember="8" transform="translate(428.998,-384.386)">
+			<title>final_title</title>
+			<desc>Final solution</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="38.1274" cy="403.839" width="76.26" height="14.006"/>
+			<rect x="0" y="396.836" width="76.2548" height="14.006" class="st1"/>
+			<text x="10.87" y="406.16" class="st2" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Final solution</text>		</g>
+		<g id="shape10-24" v:mID="10" v:groupContext="shape" v:layerMember="8" transform="translate(435.223,-334.069)">
+			<title>final_frame</title>
+			<rect x="0" y="367.787" width="63.805" height="43.0554" class="st3"/>
+		</g>
+		<g id="shape11-26" v:mID="11" v:groupContext="shape" v:layerMember="7" transform="translate(38.7188,-347.452)">
+			<title>initial_routes_edge_0</title>
+			<path d="M0.86 410.84 L0 396.1" class="st7"/>
+		</g>
+		<g id="shape12-29" v:mID="12" v:groupContext="shape" v:layerMember="7" transform="translate(38.7188,-362.195)">
+			<title>initial_routes_edge_1</title>
+			<path d="M0 410.84 L16.79 406.27" class="st7"/>
+		</g>
+		<g id="shape13-32" v:mID="13" v:groupContext="shape" v:layerMember="7" transform="translate(55.5104,-361.432)">
+			<title>initial_routes_edge_2</title>
+			<path d="M0 405.5 L19.81 410.84" class="st7"/>
+		</g>
+		<g id="shape14-35" v:mID="14" v:groupContext="shape" v:layerMember="7" transform="translate(73.1631,-345.927)">
+			<title>initial_routes_edge_3</title>
+			<path d="M2.15 395.34 L0 410.84" class="st7"/>
+		</g>
+		<g id="shape15-38" v:mID="15" v:groupContext="shape" v:layerMember="7" transform="translate(54.6493,-345.927)">
+			<title>initial_routes_edge_4</title>
+			<path d="M18.51 410.84 L0 402.45" class="st7"/>
+		</g>
+		<g id="shape16-41" v:mID="16" v:groupContext="shape" v:layerMember="7" transform="translate(39.5799,-347.452)">
+			<title>initial_routes_edge_5</title>
+			<path d="M15.07 403.98 L0 410.84" class="st7"/>
+		</g>
+		<g id="shape17-44" v:mID="17" v:groupContext="shape" v:layerMember="7" transform="translate(45.6076,-350.197)">
+			<title>initial_routes_direction</title>
+			<path d="M3.47 409.26 L0 410.84" class="st8"/>
+		</g>
+		<g id="shape18-50" v:mID="18" v:groupContext="shape" v:layerMember="7" transform="translate(37.5049,-345.377)">
+			<title>initial_routes_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape19-52" v:mID="19" v:groupContext="shape" v:layerMember="7" transform="translate(36.8513,-360.327)">
+			<title>initial_routes_task_1</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape20-54" v:mID="20" v:groupContext="shape" v:layerMember="7" transform="translate(53.6429,-364.903)">
+			<title>initial_routes_task_2</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape21-56" v:mID="21" v:groupContext="shape" v:layerMember="7" transform="translate(73.4484,-359.565)">
+			<title>initial_routes_task_3</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape22-58" v:mID="22" v:groupContext="shape" v:layerMember="7" transform="translate(71.2956,-344.06)">
+			<title>initial_routes_task_4</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape23-60" v:mID="23" v:groupContext="shape" v:layerMember="7" transform="translate(52.7818,-352.448)">
+			<title>initial_routes_task_5</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape24-62" v:mID="24" v:groupContext="shape" v:layerMember="6" transform="translate(446.967,-347.452)">
+			<title>final_routes_edge_0</title>
+			<path d="M0.86 410.84 L0 396.1" class="st7"/>
+		</g>
+		<g id="shape25-65" v:mID="25" v:groupContext="shape" v:layerMember="6" transform="translate(446.967,-354.315)">
+			<title>final_routes_edge_1</title>
+			<path d="M0 402.96 L15.93 410.84" class="st12"/>
+		</g>
+		<g id="shape26-68" v:mID="26" v:groupContext="shape" v:layerMember="6" transform="translate(462.898,-354.315)">
+			<title>final_routes_edge_2</title>
+			<path d="M0 410.84 L0.86 398.39" class="st12"/>
+		</g>
+		<g id="shape27-71" v:mID="27" v:groupContext="shape" v:layerMember="6" transform="translate(463.759,-361.432)">
+			<title>final_routes_edge_3</title>
+			<path d="M-0 405.5 L19.81 410.84" class="st12"/>
+		</g>
+		<g id="shape28-74" v:mID="28" v:groupContext="shape" v:layerMember="6" transform="translate(481.412,-345.927)">
+			<title>final_routes_edge_4</title>
+			<path d="M2.15 395.34 L-0 410.84" class="st7"/>
+		</g>
+		<g id="shape29-77" v:mID="29" v:groupContext="shape" v:layerMember="6" transform="translate(447.828,-345.927)">
+			<title>final_routes_edge_5</title>
+			<path d="M33.58 410.84 L-0 409.32" class="st7"/>
+		</g>
+		<g id="shape30-80" v:mID="30" v:groupContext="shape" v:layerMember="6" transform="translate(461.262,-346.491)">
+			<title>final_routes_direction</title>
+			<path d="M7.72 410.84 L5.09 410.72" class="st13"/>
+		</g>
+		<g id="shape31-86" v:mID="31" v:groupContext="shape" v:layerMember="6" transform="translate(445.753,-345.377)">
+			<title>final_routes_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape32-88" v:mID="32" v:groupContext="shape" v:layerMember="6" transform="translate(445.1,-360.327)">
+			<title>final_routes_task_1</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape33-90" v:mID="33" v:groupContext="shape" v:layerMember="6" transform="translate(461.891,-364.903)">
+			<title>final_routes_task_2</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st14"/>
+		</g>
+		<g id="shape34-92" v:mID="34" v:groupContext="shape" v:layerMember="6" transform="translate(481.697,-359.565)">
+			<title>final_routes_task_3</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape35-94" v:mID="35" v:groupContext="shape" v:layerMember="6" transform="translate(479.544,-344.06)">
+			<title>final_routes_task_4</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape36-96" v:mID="36" v:groupContext="shape" v:layerMember="6" transform="translate(461.03,-352.448)">
+			<title>final_routes_task_5</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st14"/>
+		</g>
+		<g id="shape37-98" v:mID="37" v:groupContext="shape" v:layerMember="8" transform="translate(91.817,-355.337)">
+			<title>flow_first</title>
+			<path d="M-0 410.84 L18.68 410.84" class="st15"/>
+		</g>
+		<g id="shape38-104" v:mID="38" v:groupContext="shape" v:layerMember="8" transform="translate(194.009,-355.337)">
+			<title>flow_second</title>
+			<path d="M-0 410.84 L18.16 410.84" class="st15"/>
+		</g>
+		<g id="shape39-109" v:mID="39" v:groupContext="shape" v:layerMember="8" transform="translate(299.832,-355.337)">
+			<title>flow_third</title>
+			<path d="M0 410.84 L16.61 410.84" class="st15"/>
+		</g>
+		<g id="shape40-114" v:mID="40" v:groupContext="shape" v:layerMember="8" transform="translate(403.061,-355.337)">
+			<title>flow_fourth</title>
+			<path d="M-0 410.84 L22.83 410.84" class="st15"/>
+		</g>
+		<g id="shape41-119" v:mID="41" v:groupContext="shape" v:layerMember="8" transform="translate(138.504,-350.15)">
+			<title>explore_card_back</title>
+			<rect x="0" y="396.317" width="17.1184" height="14.5247" class="st17"/>
+		</g>
+		<g id="shape42-121" v:mID="42" v:groupContext="shape" v:layerMember="8" transform="translate(151.991,-343.406)">
+			<title>explore_card_front</title>
+			<rect x="0" y="396.317" width="17.1184" height="14.5247" class="st18"/>
+		</g>
+		<g id="shape43-123" v:mID="43" v:groupContext="shape" v:layerMember="8" transform="translate(135.391,-362.599)">
+			<title>explore_loop_top</title>
+			<path d="M35.79 410.84 L35.79 404.1 L0 404.1 L0 410.32 L0 410.32" class="st19"/>
+		</g>
+		<g id="shape44-129" v:mID="44" v:groupContext="shape" v:layerMember="8" transform="translate(136.947,-339.775)">
+			<title>explore_loop_bottom</title>
+			<path d="M0 404.62 L0 410.84 L35.79 410.84 L35.79 403.58 L35.79 403.58" class="st19"/>
+		</g>
+		<g id="shape45-134" v:mID="45" v:groupContext="shape" v:layerMember="8" transform="translate(247.439,-340.294)">
+			<title>validation_sheet</title>
+			<rect x="0" y="380.755" width="24.3808" height="30.0869" class="st21"/>
+		</g>
+		<g id="shape46-136" v:mID="46" v:groupContext="shape" v:layerMember="8" transform="translate(253.664,-354.486)">
+			<title>validation_check</title>
+			<path d="M0 407.14 L3.7 410.84 L10.89 401.69" class="st22"/>
+		</g>
+		<g id="shape47-139" v:mID="47" v:groupContext="shape" v:layerMember="8" transform="translate(247.958,-341.85)">
+			<title>validation_cvx</title>
+			<desc>CVX</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="11.6717" cy="406.174" width="23.35" height="9.33732"/>
+			<rect x="0" y="401.505" width="23.3433" height="9.33732" class="st1"/>
+			<text x="2.46" y="408.3" class="st23" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>CVX</text>		</g>
+		<g id="shape48-142" v:mID="48" v:groupContext="shape" v:layerMember="8" transform="translate(337.7,-351.706)">
+			<title>refine_card_0</title>
+			<rect x="0" y="397.355" width="9.85606" height="13.4872" class="st24"/>
+		</g>
+		<g id="shape49-144" v:mID="49" v:groupContext="shape" v:layerMember="8" transform="translate(352.743,-351.706)">
+			<title>refine_card_1</title>
+			<rect x="0" y="397.355" width="9.85606" height="13.4872" class="st25"/>
+		</g>
+		<g id="shape50-146" v:mID="50" v:groupContext="shape" v:layerMember="8" transform="translate(367.787,-351.706)">
+			<title>refine_card_2</title>
+			<rect x="0" y="397.355" width="9.85606" height="13.4872" class="st24"/>
+		</g>
+		<g id="shape51-148" v:mID="51" v:groupContext="shape" v:layerMember="8" transform="translate(342.369,-341.331)">
+			<title>refine_pick</title>
+			<path d="M0 404.62 L0 410.84 L30.09 410.84 L30.09 403.58 L30.09 403.58" class="st26"/>
+		</g>
+		<g id="shape52-154" v:mID="52" v:groupContext="shape" v:layerMember="8" transform="translate(25.937,-321.1)">
+			<title>top_divider</title>
+			<path d="M0 410.84 L473.09 410.84" class="st28"/>
+		</g>
+		<g id="shape53-157" v:mID="53" v:groupContext="shape" v:layerMember="4" transform="translate(30.0869,-113.085)">
+			<title>exploration_panel</title>
+			<rect x="0" y="216.315" width="206.459" height="194.528" class="st29"/>
+		</g>
+		<g id="shape54-159" v:mID="54" v:groupContext="shape" v:layerMember="5" transform="translate(30.0869,-289.457)">
+			<title>exploration_heading_band</title>
+			<rect x="0" y="392.686" width="206.459" height="18.1559" class="st30"/>
+		</g>
+		<g id="shape55-161" v:mID="55" v:groupContext="shape" v:layerMember="5" transform="translate(36.3118,-291.532)">
+			<title>exploration_heading_label</title>
+			<desc>(a) ALNS exploration</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="97.0044" cy="403.839" width="194.01" height="14.006"/>
+			<rect x="0" y="396.836" width="194.009" height="14.006" class="st1"/>
+			<text x="0" y="406.34" class="st31" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>(a) ALNS exploration</text>		</g>
+		<g id="shape56-164" v:mID="56" v:groupContext="shape" v:layerMember="4" transform="translate(42.5367,-269.226)">
+			<title>current_label</title>
+			<desc>Current</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="26.4557" cy="404.358" width="52.92" height="12.9685"/>
+			<rect x="0" y="397.874" width="52.9115" height="12.9685" class="st1"/>
+			<text x="10.36" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Current</text>		</g>
+		<g id="shape57-167" v:mID="57" v:groupContext="shape" v:layerMember="4" transform="translate(107.898,-269.226)">
+			<title>destroy_label</title>
+			<desc>Destroy</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="26.4557" cy="404.358" width="52.92" height="12.9685"/>
+			<rect x="0" y="397.874" width="52.9115" height="12.9685" class="st1"/>
+			<text x="11.13" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Destroy</text>		</g>
+		<g id="shape58-170" v:mID="58" v:groupContext="shape" v:layerMember="4" transform="translate(173.778,-269.226)">
+			<title>repair_label</title>
+			<desc>Repair</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="26.4557" cy="404.358" width="52.92" height="12.9685"/>
+			<rect x="0" y="397.874" width="52.9115" height="12.9685" class="st1"/>
+			<text x="12.91" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Repair</text>		</g>
+		<g id="shape59-173" v:mID="59" v:groupContext="shape" v:layerMember="0" transform="translate(48.8238,-225.859)">
+			<title>current_route_edge_0</title>
+			<path d="M0.92 410.84 L0 387.68" class="st33"/>
+		</g>
+		<g id="shape60-176" v:mID="60" v:groupContext="shape" v:layerMember="0" transform="translate(48.8238,-249.026)">
+			<title>current_route_edge_1</title>
+			<path d="M0 410.84 L18.01 403.65" class="st33"/>
+		</g>
+		<g id="shape61-179" v:mID="61" v:groupContext="shape" v:layerMember="0" transform="translate(66.8293,-247.828)">
+			<title>current_route_edge_2</title>
+			<path d="M0 402.45 L21.24 410.84" class="st33"/>
+		</g>
+		<g id="shape62-182" v:mID="62" v:groupContext="shape" v:layerMember="0" transform="translate(85.7581,-223.463)">
+			<title>current_route_edge_3</title>
+			<path d="M2.31 386.48 L0 410.84" class="st33"/>
+		</g>
+		<g id="shape63-185" v:mID="63" v:groupContext="shape" v:layerMember="0" transform="translate(65.9059,-223.463)">
+			<title>current_route_edge_4</title>
+			<path d="M19.85 410.84 L0 397.66" class="st33"/>
+		</g>
+		<g id="shape64-188" v:mID="64" v:groupContext="shape" v:layerMember="0" transform="translate(49.7472,-225.859)">
+			<title>current_route_edge_5</title>
+			<path d="M16.16 400.06 L0 410.84" class="st33"/>
+		</g>
+		<g id="shape65-191" v:mID="65" v:groupContext="shape" v:layerMember="0" transform="translate(56.2107,-230.173)">
+			<title>current_route_direction</title>
+			<path d="M3.72 408.36 L-0 410.84" class="st8"/>
+		</g>
+		<g id="shape66-196" v:mID="66" v:groupContext="shape" v:layerMember="0" transform="translate(47.6722,-223.785)">
+			<title>current_route_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape67-198" v:mID="67" v:groupContext="shape" v:layerMember="0" transform="translate(44.1552,-244.358)">
+			<title>current_route_task_1</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape68-200" v:mID="68" v:groupContext="shape" v:layerMember="0" transform="translate(44.1552,-244.358)">
+			<title>current_route_number_1</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape69-203" v:mID="69" v:groupContext="shape" v:layerMember="0" transform="translate(62.1606,-251.547)">
+			<title>current_route_task_2</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape70-205" v:mID="70" v:groupContext="shape" v:layerMember="0" transform="translate(62.1606,-251.547)">
+			<title>current_route_number_2</title>
+			<desc>2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>2</text>		</g>
+		<g id="shape71-208" v:mID="71" v:groupContext="shape" v:layerMember="0" transform="translate(83.3979,-243.159)">
+			<title>current_route_task_3</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape72-210" v:mID="72" v:groupContext="shape" v:layerMember="0" transform="translate(83.3979,-243.159)">
+			<title>current_route_number_3</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape73-213" v:mID="73" v:groupContext="shape" v:layerMember="0" transform="translate(81.0895,-218.794)">
+			<title>current_route_task_4</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape74-215" v:mID="74" v:groupContext="shape" v:layerMember="0" transform="translate(81.0895,-218.794)">
+			<title>current_route_number_4</title>
+			<desc>4</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>4</text>		</g>
+		<g id="shape75-218" v:mID="75" v:groupContext="shape" v:layerMember="0" transform="translate(61.2373,-231.975)">
+			<title>current_route_task_5</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape76-220" v:mID="76" v:groupContext="shape" v:layerMember="0" transform="translate(61.2373,-231.975)">
+			<title>current_route_number_5</title>
+			<desc>5</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>5</text>		</g>
+		<g id="shape77-223" v:mID="77" v:groupContext="shape" v:layerMember="1" transform="translate(114.185,-249.026)">
+			<title>destroyed_route_old_1</title>
+			<path d="M0 410.84 L18.01 403.65" class="st35"/>
+		</g>
+		<g id="shape78-226" v:mID="78" v:groupContext="shape" v:layerMember="1" transform="translate(132.191,-247.828)">
+			<title>destroyed_route_old_2</title>
+			<path d="M-0 402.45 L21.24 410.84" class="st35"/>
+		</g>
+		<g id="shape79-229" v:mID="79" v:groupContext="shape" v:layerMember="1" transform="translate(131.267,-223.463)">
+			<title>destroyed_route_old_4</title>
+			<path d="M19.85 410.84 L-0 397.66" class="st35"/>
+		</g>
+		<g id="shape80-232" v:mID="80" v:groupContext="shape" v:layerMember="1" transform="translate(115.108,-225.859)">
+			<title>destroyed_route_old_5</title>
+			<path d="M16.16 400.06 L0 410.84" class="st35"/>
+		</g>
+		<g id="shape81-235" v:mID="81" v:groupContext="shape" v:layerMember="1" transform="translate(114.185,-225.859)">
+			<title>destroyed_route_edge_0</title>
+			<path d="M0.92 410.84 L0 387.68" class="st33"/>
+		</g>
+		<g id="shape82-238" v:mID="82" v:groupContext="shape" v:layerMember="1" transform="translate(114.185,-247.828)">
+			<title>destroyed_route_edge_1</title>
+			<path d="M0 409.64 L39.24 410.84" class="st33"/>
+		</g>
+		<g id="shape83-241" v:mID="83" v:groupContext="shape" v:layerMember="1" transform="translate(151.119,-223.463)">
+			<title>destroyed_route_edge_2</title>
+			<path d="M2.31 386.48 L0 410.84" class="st33"/>
+		</g>
+		<g id="shape84-244" v:mID="84" v:groupContext="shape" v:layerMember="1" transform="translate(115.108,-223.463)">
+			<title>destroyed_route_edge_3</title>
+			<path d="M36.01 410.84 L0 408.45" class="st33"/>
+		</g>
+		<g id="shape85-247" v:mID="85" v:groupContext="shape" v:layerMember="1" transform="translate(129.513,-224.35)">
+			<title>destroyed_route_direction</title>
+			<path d="M8.28 410.84 L5.09 410.63" class="st13"/>
+		</g>
+		<g id="shape86-252" v:mID="86" v:groupContext="shape" v:layerMember="1" transform="translate(113.033,-223.785)">
+			<title>destroyed_route_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape87-254" v:mID="87" v:groupContext="shape" v:layerMember="1" transform="translate(109.516,-244.358)">
+			<title>destroyed_route_task_1</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape88-256" v:mID="88" v:groupContext="shape" v:layerMember="1" transform="translate(109.516,-244.358)">
+			<title>destroyed_route_number_1</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape89-259" v:mID="89" v:groupContext="shape" v:layerMember="1" transform="translate(127.522,-251.547)">
+			<title>destroyed_route_task_2</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st36"/>
+		</g>
+		<g id="shape90-261" v:mID="90" v:groupContext="shape" v:layerMember="1" transform="translate(127.522,-251.547)">
+			<title>destroyed_route_number_2</title>
+			<desc>2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>2</text>		</g>
+		<g id="shape91-264" v:mID="91" v:groupContext="shape" v:layerMember="1" transform="translate(148.759,-243.159)">
+			<title>destroyed_route_task_3</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape92-266" v:mID="92" v:groupContext="shape" v:layerMember="1" transform="translate(148.759,-243.159)">
+			<title>destroyed_route_number_3</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape93-269" v:mID="93" v:groupContext="shape" v:layerMember="1" transform="translate(146.451,-218.794)">
+			<title>destroyed_route_task_4</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape94-271" v:mID="94" v:groupContext="shape" v:layerMember="1" transform="translate(146.451,-218.794)">
+			<title>destroyed_route_number_4</title>
+			<desc>4</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>4</text>		</g>
+		<g id="shape95-274" v:mID="95" v:groupContext="shape" v:layerMember="1" transform="translate(126.599,-231.975)">
+			<title>destroyed_route_task_5</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st36"/>
+		</g>
+		<g id="shape96-276" v:mID="96" v:groupContext="shape" v:layerMember="1" transform="translate(126.599,-231.975)">
+			<title>destroyed_route_number_5</title>
+			<desc>5</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>5</text>		</g>
+		<g id="shape97-279" v:mID="97" v:groupContext="shape" v:layerMember="13" transform="translate(180.065,-225.859)">
+			<title>repaired_route_edge_0</title>
+			<path d="M0.92 410.84 L0 387.68" class="st33"/>
+		</g>
+		<g id="shape98-282" v:mID="98" v:groupContext="shape" v:layerMember="13" transform="translate(180.065,-236.644)">
+			<title>repaired_route_edge_1</title>
+			<path d="M0 398.46 L17.08 410.84" class="st37"/>
+		</g>
+		<g id="shape99-285" v:mID="99" v:groupContext="shape" v:layerMember="13" transform="translate(197.147,-236.644)">
+			<title>repaired_route_edge_2</title>
+			<path d="M-0 410.84 L0.92 391.27" class="st37"/>
+		</g>
+		<g id="shape100-288" v:mID="100" v:groupContext="shape" v:layerMember="13" transform="translate(198.071,-247.828)">
+			<title>repaired_route_edge_3</title>
+			<path d="M0 402.45 L21.24 410.84" class="st37"/>
+		</g>
+		<g id="shape101-291" v:mID="101" v:groupContext="shape" v:layerMember="13" transform="translate(216.999,-223.463)">
+			<title>repaired_route_edge_4</title>
+			<path d="M2.31 386.48 L0 410.84" class="st33"/>
+		</g>
+		<g id="shape102-294" v:mID="102" v:groupContext="shape" v:layerMember="13" transform="translate(180.988,-223.463)">
+			<title>repaired_route_edge_5</title>
+			<path d="M36.01 410.84 L-0 408.45" class="st33"/>
+		</g>
+		<g id="shape103-297" v:mID="103" v:groupContext="shape" v:layerMember="13" transform="translate(195.393,-224.35)">
+			<title>repaired_route_direction</title>
+			<path d="M8.28 410.84 L5.09 410.63" class="st13"/>
+		</g>
+		<g id="shape104-302" v:mID="104" v:groupContext="shape" v:layerMember="13" transform="translate(178.913,-223.785)">
+			<title>repaired_route_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape105-304" v:mID="105" v:groupContext="shape" v:layerMember="13" transform="translate(175.396,-244.358)">
+			<title>repaired_route_task_1</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape106-306" v:mID="106" v:groupContext="shape" v:layerMember="13" transform="translate(175.396,-244.358)">
+			<title>repaired_route_number_1</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape107-309" v:mID="107" v:groupContext="shape" v:layerMember="13" transform="translate(193.402,-251.547)">
+			<title>repaired_route_task_2</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st14"/>
+		</g>
+		<g id="shape108-311" v:mID="108" v:groupContext="shape" v:layerMember="13" transform="translate(193.402,-251.547)">
+			<title>repaired_route_number_2</title>
+			<desc>2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>2</text>		</g>
+		<g id="shape109-314" v:mID="109" v:groupContext="shape" v:layerMember="13" transform="translate(214.639,-243.159)">
+			<title>repaired_route_task_3</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape110-316" v:mID="110" v:groupContext="shape" v:layerMember="13" transform="translate(214.639,-243.159)">
+			<title>repaired_route_number_3</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape111-319" v:mID="111" v:groupContext="shape" v:layerMember="13" transform="translate(212.331,-218.794)">
+			<title>repaired_route_task_4</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st11"/>
+		</g>
+		<g id="shape112-321" v:mID="112" v:groupContext="shape" v:layerMember="13" transform="translate(212.331,-218.794)">
+			<title>repaired_route_number_4</title>
+			<desc>4</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>4</text>		</g>
+		<g id="shape113-324" v:mID="113" v:groupContext="shape" v:layerMember="13" transform="translate(192.479,-231.975)">
+			<title>repaired_route_task_5</title>
+			<ellipse cx="4.66866" cy="406.174" rx="4.66866" ry="4.66866" class="st14"/>
+		</g>
+		<g id="shape114-326" v:mID="114" v:groupContext="shape" v:layerMember="13" transform="translate(192.479,-231.975)">
+			<title>repaired_route_number_5</title>
+			<desc>5</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="406.174" width="9.34" height="9.33732"/>
+			<rect x="0" y="401.505" width="9.33732" height="9.33732" class="st1"/>
+			<text x="2.54" y="408.3" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>5</text>		</g>
+		<g id="shape115-329" v:mID="115" v:groupContext="shape" v:layerMember="4" transform="translate(95.9669,-239.658)">
+			<title>destroy_transition</title>
+			<path d="M-0 410.84 L2.48 410.84" class="st38"/>
+		</g>
+		<g id="shape116-335" v:mID="116" v:groupContext="shape" v:layerMember="4" transform="translate(161.328,-239.658)">
+			<title>repair_transition</title>
+			<path d="M0 410.84 L3 410.84" class="st38"/>
+		</g>
+		<g id="shape117-340" v:mID="117" v:groupContext="shape" v:layerMember="4" transform="translate(147.841,-158.734)">
+			<title>explore_evaluate</title>
+			<rect x="0" y="390.093" width="70.0299" height="20.7496" class="st18"/>
+		</g>
+		<g id="shape118-342" v:mID="118" v:groupContext="shape" v:layerMember="4" transform="translate(150.953,-162.366)">
+			<title>explore_evaluate_label</title>
+			<desc>Evaluate</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="31.9025" cy="403.839" width="63.81" height="14.006"/>
+			<rect x="0" y="396.836" width="63.805" height="14.006" class="st1"/>
+			<text x="14.9" y="406.09" class="st40" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Evaluate</text>		</g>
+		<g id="shape119-345" v:mID="119" v:groupContext="shape" v:layerMember="4" transform="translate(51.874,-158.734)">
+			<title>explore_accept</title>
+			<rect x="0" y="390.093" width="82.4797" height="20.7496" class="st18"/>
+		</g>
+		<g id="shape120-347" v:mID="120" v:groupContext="shape" v:layerMember="4" transform="translate(54.4677,-162.366)">
+			<title>explore_accept_label</title>
+			<desc>Accept / update</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="38.6461" cy="403.839" width="77.3" height="14.006"/>
+			<rect x="0" y="396.836" width="77.2923" height="14.006" class="st1"/>
+			<text x="9.32" y="406.04" class="st41" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Accept / update</text>		</g>
+		<g id="shape121-350" v:mID="121" v:groupContext="shape" v:layerMember="4" transform="translate(199.715,-179.484)">
+			<title>repair_to_evaluate</title>
+			<path d="M0 376.61 L0 405.54" class="st42"/>
+		</g>
+		<g id="shape122-356" v:mID="122" v:groupContext="shape" v:layerMember="4" transform="translate(134.354,-169.109)">
+			<title>evaluate_to_accept</title>
+			<path d="M13.49 410.84 L5.3 410.84" class="st42"/>
+		</g>
+		<g id="shape123-361" v:mID="123" v:groupContext="shape" v:layerMember="4" transform="translate(68.9924,-179.484)">
+			<title>accept_to_current</title>
+			<path d="M0 410.84 L0 383.98" class="st42"/>
+		</g>
+		<g id="shape124-366" v:mID="124" v:groupContext="shape" v:layerMember="2" transform="translate(280.12,-113.085)">
+			<title>elite_panel</title>
+			<rect x="0" y="216.315" width="207.496" height="194.528" class="st43"/>
+		</g>
+		<g id="shape125-368" v:mID="125" v:groupContext="shape" v:layerMember="3" transform="translate(280.12,-289.457)">
+			<title>elite_heading_band</title>
+			<rect x="0" y="392.686" width="207.496" height="18.1559" class="st44"/>
+		</g>
+		<g id="shape126-370" v:mID="126" v:groupContext="shape" v:layerMember="3" transform="translate(286.345,-291.532)">
+			<title>elite_heading_label</title>
+			<desc>(b) Elite refinement</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="97.5231" cy="403.839" width="195.05" height="14.006"/>
+			<rect x="0" y="396.836" width="195.046" height="14.006" class="st1"/>
+			<text x="0" y="406.34" class="st31" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>(b) Elite refinement</text>		</g>
+		<g id="shape127-373" v:mID="127" v:groupContext="shape" v:layerMember="12" transform="translate(286.863,-215.277)">
+			<title>move_route_panel</title>
+			<rect x="0" y="342.887" width="93.892" height="67.955" class="st45"/>
+		</g>
+		<g id="shape128-375" v:mID="128" v:groupContext="shape" v:layerMember="12" transform="translate(289.976,-268.189)">
+			<title>move_route_title</title>
+			<desc>Route</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="404.358" width="87.67" height="12.9685"/>
+			<rect x="0" y="397.874" width="87.6671" height="12.9685" class="st1"/>
+			<text x="32.08" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Route</text>		</g>
+		<g id="shape129-378" v:mID="129" v:groupContext="shape" v:layerMember="9" transform="translate(387.499,-215.277)">
+			<title>move_batch_panel</title>
+			<rect x="0" y="342.887" width="93.892" height="67.955" class="st45"/>
+		</g>
+		<g id="shape130-380" v:mID="130" v:groupContext="shape" v:layerMember="9" transform="translate(390.611,-268.189)">
+			<title>move_batch_title</title>
+			<desc>Batch</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="404.358" width="87.67" height="12.9685"/>
+			<rect x="0" y="397.874" width="87.6671" height="12.9685" class="st1"/>
+			<text x="32.33" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Batch</text>		</g>
+		<g id="shape131-383" v:mID="131" v:groupContext="shape" v:layerMember="10" transform="translate(286.863,-143.172)">
+			<title>move_contact_panel</title>
+			<rect x="0" y="342.887" width="93.892" height="67.955" class="st45"/>
+		</g>
+		<g id="shape132-385" v:mID="132" v:groupContext="shape" v:layerMember="10" transform="translate(289.976,-196.084)">
+			<title>move_contact_title</title>
+			<desc>Contact</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="404.358" width="87.67" height="12.9685"/>
+			<rect x="0" y="397.874" width="87.6671" height="12.9685" class="st1"/>
+			<text x="28.25" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Contact</text>		</g>
+		<g id="shape133-388" v:mID="133" v:groupContext="shape" v:layerMember="11" transform="translate(387.499,-143.172)">
+			<title>move_mode_panel</title>
+			<rect x="0" y="342.887" width="93.892" height="67.955" class="st45"/>
+		</g>
+		<g id="shape134-390" v:mID="134" v:groupContext="shape" v:layerMember="11" transform="translate(390.611,-196.084)">
+			<title>move_mode_title</title>
+			<desc>Task mode</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.8335" cy="404.358" width="87.67" height="12.9685"/>
+			<rect x="0" y="397.874" width="87.6671" height="12.9685" class="st1"/>
+			<text x="22.24" y="406.66" class="st32" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Task mode</text>		</g>
+		<g id="shape135-393" v:mID="135" v:groupContext="shape" v:layerMember="17" transform="translate(297.134,-231.981)">
+			<title>route_before_edge_0</title>
+			<path d="M0.62 410.84 L-0 395.5" class="st7"/>
+		</g>
+		<g id="shape136-396" v:mID="136" v:groupContext="shape" v:layerMember="17" transform="translate(297.134,-246.531)">
+			<title>route_before_edge_1</title>
+			<path d="M-0 410.05 L26.46 410.84" class="st7"/>
+		</g>
+		<g id="shape137-399" v:mID="137" v:groupContext="shape" v:layerMember="17" transform="translate(309.273,-246.531)">
+			<title>route_before_edge_2</title>
+			<path d="M14.32 410.84 L-0 405.29" class="st7"/>
+		</g>
+		<g id="shape138-402" v:mID="138" v:groupContext="shape" v:layerMember="17" transform="translate(309.273,-230.393)">
+			<title>route_before_edge_3</title>
+			<path d="M-0 389.15 L12.76 410.84" class="st7"/>
+		</g>
+		<g id="shape139-405" v:mID="139" v:groupContext="shape" v:layerMember="17" transform="translate(308.65,-230.393)">
+			<title>route_before_edge_4</title>
+			<path d="M13.38 410.84 L0 402.11" class="st7"/>
+		</g>
+		<g id="shape140-408" v:mID="140" v:groupContext="shape" v:layerMember="17" transform="translate(297.757,-231.981)">
+			<title>route_before_edge_5</title>
+			<path d="M10.89 403.7 L-0 410.84" class="st7"/>
+		</g>
+		<g id="shape141-411" v:mID="141" v:groupContext="shape" v:layerMember="17" transform="translate(302.114,-234.838)">
+			<title>route_before_direction</title>
+			<path d="M2.51 409.2 L-0 410.84" class="st8"/>
+		</g>
+		<g id="shape142-416" v:mID="142" v:groupContext="shape" v:layerMember="17" transform="translate(295.682,-229.906)">
+			<title>route_before_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape143-418" v:mID="143" v:groupContext="shape" v:layerMember="17" transform="translate(295.267,-245.457)">
+			<title>route_before_task_1</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape144-420" v:mID="144" v:groupContext="shape" v:layerMember="17" transform="translate(307.405,-250.22)">
+			<title>route_before_task_2</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape145-422" v:mID="145" v:groupContext="shape" v:layerMember="17" transform="translate(321.723,-244.664)">
+			<title>route_before_task_3</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape146-424" v:mID="146" v:groupContext="shape" v:layerMember="17" transform="translate(320.166,-228.526)">
+			<title>route_before_task_4</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape147-426" v:mID="147" v:groupContext="shape" v:layerMember="17" transform="translate(306.783,-237.256)">
+			<title>route_before_task_5</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape148-428" v:mID="148" v:groupContext="shape" v:layerMember="16" transform="translate(346.415,-231.981)">
+			<title>route_after_edge_0</title>
+			<path d="M0.62 410.84 L-0 395.5" class="st7"/>
+		</g>
+		<g id="shape149-431" v:mID="149" v:groupContext="shape" v:layerMember="16" transform="translate(346.415,-247.325)">
+			<title>route_after_edge_1</title>
+			<path d="M-0 410.84 L12.14 406.08" class="st7"/>
+		</g>
+		<g id="shape150-434" v:mID="150" v:groupContext="shape" v:layerMember="16" transform="translate(358.553,-246.531)">
+			<title>route_after_edge_2</title>
+			<path d="M-0 405.29 L14.32 410.84" class="st7"/>
+		</g>
+		<g id="shape151-437" v:mID="151" v:groupContext="shape" v:layerMember="16" transform="translate(371.314,-230.393)">
+			<title>route_after_edge_3</title>
+			<path d="M1.56 394.7 L0 410.84" class="st7"/>
+		</g>
+		<g id="shape152-440" v:mID="152" v:groupContext="shape" v:layerMember="16" transform="translate(357.931,-230.393)">
+			<title>route_after_edge_4</title>
+			<path d="M13.38 410.84 L-0 402.11" class="st7"/>
+		</g>
+		<g id="shape153-443" v:mID="153" v:groupContext="shape" v:layerMember="16" transform="translate(347.037,-231.981)">
+			<title>route_after_edge_5</title>
+			<path d="M10.89 403.7 L0 410.84" class="st7"/>
+		</g>
+		<g id="shape154-446" v:mID="154" v:groupContext="shape" v:layerMember="16" transform="translate(351.395,-234.838)">
+			<title>route_after_direction</title>
+			<path d="M2.51 409.2 L0 410.84" class="st8"/>
+		</g>
+		<g id="shape155-451" v:mID="155" v:groupContext="shape" v:layerMember="16" transform="translate(344.962,-229.906)">
+			<title>route_after_depot</title>
+			<rect x="0" y="406.692" width="4.14992" height="4.14992" class="st10"/>
+		</g>
+		<g id="shape156-453" v:mID="156" v:groupContext="shape" v:layerMember="16" transform="translate(344.547,-245.457)">
+			<title>route_after_task_1</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape157-455" v:mID="157" v:groupContext="shape" v:layerMember="16" transform="translate(356.686,-250.22)">
+			<title>route_after_task_2</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape158-457" v:mID="158" v:groupContext="shape" v:layerMember="16" transform="translate(371.003,-244.664)">
+			<title>route_after_task_3</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape159-459" v:mID="159" v:groupContext="shape" v:layerMember="16" transform="translate(369.447,-228.526)">
+			<title>route_after_task_4</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape160-461" v:mID="160" v:groupContext="shape" v:layerMember="16" transform="translate(356.063,-237.256)">
+			<title>route_after_task_5</title>
+			<ellipse cx="1.86746" cy="408.975" rx="1.86746" ry="1.86746" class="st11"/>
+		</g>
+		<g id="shape161-463" v:mID="161" v:groupContext="shape" v:layerMember="12" transform="translate(329.919,-240.177)">
+			<title>route_change</title>
+			<path d="M-0 410.84 L3.52 410.84" class="st38"/>
+		</g>
+		<g id="shape162-468" v:mID="162" v:groupContext="shape" v:layerMember="9" transform="translate(403.58,-244.327)">
+			<title>batch_early</title>
+			<rect x="0" y="395.28" width="21.7871" height="15.5622" class="st46"/>
+		</g>
+		<g id="shape163-470" v:mID="163" v:groupContext="shape" v:layerMember="9" transform="translate(403.58,-220.465)">
+			<title>batch_late</title>
+			<rect x="0" y="395.28" width="21.7871" height="15.5622" class="st46"/>
+		</g>
+		<g id="shape164-472" v:mID="164" v:groupContext="shape" v:layerMember="9" transform="translate(389.574,-246.402)">
+			<title>batch_c1</title>
+			<desc>c₁</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.22488" cy="404.877" width="12.45" height="11.931"/>
+			<rect x="0" y="398.911" width="12.4498" height="11.931" class="st1"/>
+			<text x="2.61" y="407.03" class="st47" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st48">₁</tspan></text>		</g>
+		<g id="shape165-476" v:mID="165" v:groupContext="shape" v:layerMember="9" transform="translate(389.574,-222.54)">
+			<title>batch_c2</title>
+			<desc>c₂</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="6.22488" cy="404.877" width="12.45" height="11.931"/>
+			<rect x="0" y="398.911" width="12.4498" height="11.931" class="st1"/>
+			<text x="2.61" y="407.03" class="st47" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st48">₂</tspan></text>		</g>
+		<g id="shape166-480" v:mID="166" v:groupContext="shape" v:layerMember="9" transform="translate(405.136,-246.402)">
+			<title>batch_1_before</title>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st25"/>
+		</g>
+		<g id="shape167-482" v:mID="167" v:groupContext="shape" v:layerMember="9" transform="translate(405.136,-246.402)">
+			<title>batch_1_before_label</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.40929" cy="405.136" width="8.82" height="11.4123"/>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st1"/>
+			<text x="2.28" y="407.26" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape168-485" v:mID="168" v:groupContext="shape" v:layerMember="9" transform="translate(415.511,-246.402)">
+			<title>batch_2_before</title>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st25"/>
+		</g>
+		<g id="shape169-487" v:mID="169" v:groupContext="shape" v:layerMember="9" transform="translate(415.511,-246.402)">
+			<title>batch_2_before_label</title>
+			<desc>2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.40929" cy="405.136" width="8.82" height="11.4123"/>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st1"/>
+			<text x="2.28" y="407.26" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>2</text>		</g>
+		<g id="shape170-490" v:mID="170" v:groupContext="shape" v:layerMember="9" transform="translate(410.323,-222.54)">
+			<title>batch_3_before</title>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st25"/>
+		</g>
+		<g id="shape171-492" v:mID="171" v:groupContext="shape" v:layerMember="9" transform="translate(410.323,-222.54)">
+			<title>batch_3_before_label</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.40929" cy="405.136" width="8.82" height="11.4123"/>
+			<rect x="0" y="399.43" width="8.81858" height="11.4123" class="st1"/>
+			<text x="2.28" y="407.26" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape172-495" v:mID="172" v:groupContext="shape" v:layerMember="9" transform="translate(425.367,-240.695)">
+			<title>batch_join_early</title>
+			<path d="M0 399.43 L7.26 399.43 L7.26 410.84" class="st49"/>
+		</g>
+		<g id="shape173-498" v:mID="173" v:groupContext="shape" v:layerMember="9" transform="translate(425.367,-228.246)">
+			<title>batch_join_late</title>
+			<path d="M0 410.84 L7.26 410.84 L7.26 398.39" class="st49"/>
+		</g>
+		<g id="shape174-501" v:mID="174" v:groupContext="shape" v:layerMember="9" transform="translate(432.629,-240.695)">
+			<title>batch_join</title>
+			<path d="M0 410.84 L4.04 410.84" class="st38"/>
+		</g>
+		<g id="shape175-506" v:mID="175" v:groupContext="shape" v:layerMember="9" transform="translate(443.004,-231.358)">
+			<title>batch_combined</title>
+			<rect x="0" y="391.649" width="34.7556" height="19.1934" class="st46"/>
+		</g>
+		<g id="shape176-508" v:mID="176" v:groupContext="shape" v:layerMember="9" transform="translate(444.56,-234.989)">
+			<title>batch_1_after</title>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st25"/>
+		</g>
+		<g id="shape177-510" v:mID="177" v:groupContext="shape" v:layerMember="9" transform="translate(444.56,-234.989)">
+			<title>batch_1_after_label</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="404.877" width="9.34" height="11.931"/>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st1"/>
+			<text x="2.54" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape178-513" v:mID="178" v:groupContext="shape" v:layerMember="9" transform="translate(455.454,-234.989)">
+			<title>batch_2_after</title>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st25"/>
+		</g>
+		<g id="shape179-515" v:mID="179" v:groupContext="shape" v:layerMember="9" transform="translate(455.454,-234.989)">
+			<title>batch_2_after_label</title>
+			<desc>2</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="404.877" width="9.34" height="11.931"/>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st1"/>
+			<text x="2.54" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>2</text>		</g>
+		<g id="shape180-518" v:mID="180" v:groupContext="shape" v:layerMember="9" transform="translate(466.347,-234.989)">
+			<title>batch_3_after</title>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st25"/>
+		</g>
+		<g id="shape181-520" v:mID="181" v:groupContext="shape" v:layerMember="9" transform="translate(466.347,-234.989)">
+			<title>batch_3_after_label</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="404.877" width="9.34" height="11.931"/>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st1"/>
+			<text x="2.54" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape182-523" v:mID="182" v:groupContext="shape" v:layerMember="9" transform="translate(452.86,-217.352)">
+			<title>batch_c2_after</title>
+			<desc>c₂</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.52173" cy="404.877" width="15.05" height="11.931"/>
+			<rect x="0" y="398.911" width="15.0435" height="11.931" class="st1"/>
+			<text x="3.9" y="407.03" class="st47" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st48">₂</tspan></text>		</g>
+		<g id="shape183-527" v:mID="183" v:groupContext="shape" v:layerMember="10" transform="translate(303.982,-153.547)">
+			<title>coverage_before</title>
+			<ellipse cx="8.29984" cy="391.908" rx="8.29984" ry="18.934" class="st50"/>
+		</g>
+		<g id="shape184-529" v:mID="184" v:groupContext="shape" v:layerMember="10" transform="translate(297.757,-158.734)">
+			<title>contact_route_before</title>
+			<path d="M0 410.84 L14.52 385.94 L27.49 410.84" class="st7"/>
+		</g>
+		<g id="shape185-532" v:mID="185" v:groupContext="shape" v:layerMember="10" transform="translate(295.682,-156.66)">
+			<title>contact_start_before</title>
+			<ellipse cx="2.07496" cy="408.767" rx="2.07496" ry="2.07496" class="st11"/>
+		</g>
+		<g id="shape186-534" v:mID="186" v:groupContext="shape" v:layerMember="10" transform="translate(323.175,-156.66)">
+			<title>contact_end_before</title>
+			<ellipse cx="2.07496" cy="408.767" rx="2.07496" ry="2.07496" class="st11"/>
+		</g>
+		<g id="shape187-536" v:mID="187" v:groupContext="shape" v:layerMember="10" transform="translate(309.429,-180.781)">
+			<title>contact_before</title>
+			<path d="M2.85 405.14 L5.71 407.99 L2.85 410.84 L0 407.99 L2.85 405.14 Z" class="st51"/>
+		</g>
+		<g id="shape188-538" v:mID="188" v:groupContext="shape" v:layerMember="10" transform="translate(287.901,-181.559)">
+			<title>contact_name_before</title>
+			<desc>c</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.26236" cy="405.136" width="14.53" height="11.4123"/>
+			<rect x="0" y="399.43" width="14.5247" height="11.4123" class="st1"/>
+			<text x="5.38" y="407.26" class="st47" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c</text>		</g>
+		<g id="shape189-541" v:mID="189" v:groupContext="shape" v:layerMember="10" transform="translate(353.262,-153.547)">
+			<title>coverage_after</title>
+			<ellipse cx="8.29984" cy="391.908" rx="8.29984" ry="18.934" class="st50"/>
+		</g>
+		<g id="shape190-543" v:mID="190" v:groupContext="shape" v:layerMember="10" transform="translate(347.037,-158.734)">
+			<title>contact_route_after</title>
+			<path d="M0 410.84 L14.52 396.32 L27.49 410.84" class="st7"/>
+		</g>
+		<g id="shape191-546" v:mID="191" v:groupContext="shape" v:layerMember="10" transform="translate(344.962,-156.66)">
+			<title>contact_start_after</title>
+			<ellipse cx="2.07496" cy="408.767" rx="2.07496" ry="2.07496" class="st11"/>
+		</g>
+		<g id="shape192-548" v:mID="192" v:groupContext="shape" v:layerMember="10" transform="translate(372.455,-156.66)">
+			<title>contact_end_after</title>
+			<ellipse cx="2.07496" cy="408.767" rx="2.07496" ry="2.07496" class="st11"/>
+		</g>
+		<g id="shape193-550" v:mID="193" v:groupContext="shape" v:layerMember="10" transform="translate(358.709,-170.406)">
+			<title>contact_after</title>
+			<path d="M2.85 405.14 L5.71 407.99 L2.85 410.84 L0 407.99 L2.85 405.14 Z" class="st51"/>
+		</g>
+		<g id="shape194-552" v:mID="194" v:groupContext="shape" v:layerMember="10" transform="translate(337.181,-171.184)">
+			<title>contact_name_after</title>
+			<desc>c′</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.26236" cy="405.136" width="14.53" height="11.4123"/>
+			<rect x="0" y="399.43" width="14.5247" height="11.4123" class="st1"/>
+			<text x="1.13" y="407.47" class="st47" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>c<tspan
+						class="st52">′</tspan></text>		</g>
+		<g id="shape195-556" v:mID="195" v:groupContext="shape" v:layerMember="10" transform="translate(329.919,-172.222)">
+			<title>contact_change</title>
+			<path d="M-0 410.84 L3.52 410.84" class="st38"/>
+		</g>
+		<g id="shape196-561" v:mID="196" v:groupContext="shape" v:layerMember="11" transform="translate(406.692,-180.003)">
+			<title>mode_task_before</title>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st25"/>
+		</g>
+		<g id="shape197-563" v:mID="197" v:groupContext="shape" v:layerMember="11" transform="translate(406.692,-180.003)">
+			<title>mode_task_before_label</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="404.877" width="9.34" height="11.931"/>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st1"/>
+			<text x="2.54" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape198-566" v:mID="198" v:groupContext="shape" v:layerMember="11" transform="translate(460.123,-180.003)">
+			<title>mode_task_after</title>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st25"/>
+		</g>
+		<g id="shape199-568" v:mID="199" v:groupContext="shape" v:layerMember="11" transform="translate(460.123,-180.003)">
+			<title>mode_task_after_label</title>
+			<desc>1</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="4.66866" cy="404.877" width="9.34" height="11.931"/>
+			<rect x="0" y="398.911" width="9.33732" height="11.931" class="st1"/>
+			<text x="2.54" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>1</text>		</g>
+		<g id="shape200-571" v:mID="200" v:groupContext="shape" v:layerMember="11" transform="translate(401.505,-169.628)">
+			<title>mode_cpu_pin_l_0</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape201-574" v:mID="201" v:groupContext="shape" v:layerMember="11" transform="translate(419.142,-169.628)">
+			<title>mode_cpu_pin_r_0</title>
+			<path d="M-0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape202-577" v:mID="202" v:groupContext="shape" v:layerMember="11" transform="translate(401.505,-165.737)">
+			<title>mode_cpu_pin_l_1</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape203-580" v:mID="203" v:groupContext="shape" v:layerMember="11" transform="translate(419.142,-165.737)">
+			<title>mode_cpu_pin_r_1</title>
+			<path d="M-0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape204-583" v:mID="204" v:groupContext="shape" v:layerMember="11" transform="translate(401.505,-161.847)">
+			<title>mode_cpu_pin_l_2</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape205-586" v:mID="205" v:groupContext="shape" v:layerMember="11" transform="translate(419.142,-161.847)">
+			<title>mode_cpu_pin_r_2</title>
+			<path d="M-0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape206-589" v:mID="206" v:groupContext="shape" v:layerMember="11" transform="translate(404.099,-158.216)">
+			<title>mode_cpu</title>
+			<rect x="0" y="395.799" width="15.0435" height="15.0435" class="st17"/>
+		</g>
+		<g id="shape207-591" v:mID="207" v:groupContext="shape" v:layerMember="11" transform="translate(407.73,-161.847)">
+			<title>mode_cpu_core</title>
+			<rect x="0" y="403.061" width="7.7811" height="7.7811" class="st54"/>
+		</g>
+		<g id="shape208-593" v:mID="208" v:groupContext="shape" v:layerMember="11" transform="translate(457.01,-155.622)">
+			<title>mode_server</title>
+			<rect x="0" y="391.649" width="16.0809" height="19.1934" class="st55"/>
+		</g>
+		<g id="shape209-595" v:mID="209" v:groupContext="shape" v:layerMember="11" transform="translate(459.604,-168.591)">
+			<title>mode_server_rack_0</title>
+			<rect x="0" y="407.73" width="10.8935" height="3.11244" class="st56"/>
+		</g>
+		<g id="shape210-597" v:mID="210" v:groupContext="shape" v:layerMember="11" transform="translate(459.604,-164.095)">
+			<title>mode_server_rack_1</title>
+			<rect x="0" y="407.73" width="10.8935" height="3.11244" class="st56"/>
+		</g>
+		<g id="shape211-599" v:mID="211" v:groupContext="shape" v:layerMember="11" transform="translate(459.604,-159.599)">
+			<title>mode_server_rack_2</title>
+			<rect x="0" y="407.73" width="10.8935" height="3.11244" class="st56"/>
+		</g>
+		<g id="shape212-601" v:mID="212" v:groupContext="shape" v:layerMember="11" transform="translate(411.361,-173.778)">
+			<title>mode_to_cpu</title>
+			<path d="M0 404.62 L0 405.54" class="st42"/>
+		</g>
+		<g id="shape213-606" v:mID="213" v:groupContext="shape" v:layerMember="11" transform="translate(464.791,-175.334)">
+			<title>mode_to_server</title>
+			<path d="M0 406.17 L0 410.84" class="st57"/>
+		</g>
+		<g id="shape214-612" v:mID="214" v:groupContext="shape" v:layerMember="11" transform="translate(428.479,-171.184)">
+			<title>mode_change</title>
+			<path d="M0 410.84 L11.82 410.84" class="st38"/>
+		</g>
+		<g id="shape215-617" v:mID="215" v:groupContext="shape" v:layerMember="11" transform="translate(396.317,-144.21)">
+			<title>mode_local</title>
+			<desc>Local</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="15.5622" cy="405.395" width="31.13" height="10.8935"/>
+			<rect x="0" y="399.949" width="31.1244" height="10.8935" class="st1"/>
+			<text x="5.89" y="407.52" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Local</text>		</g>
+		<g id="shape216-620" v:mID="216" v:groupContext="shape" v:layerMember="11" transform="translate(449.229,-143.691)">
+			<title>mode_mec</title>
+			<desc>MEC</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="15.8216" cy="405.395" width="31.65" height="10.8935"/>
+			<rect x="0" y="399.949" width="31.6431" height="10.8935" class="st1"/>
+			<text x="6.61" y="407.52" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>MEC</text>		</g>
+		<g id="shape217-623" v:mID="217" v:groupContext="shape" v:layerMember="2" transform="translate(344.443,-127.091)">
+			<title>shortlist_label</title>
+			<desc>Shortlist</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="30.0869" cy="404.617" width="60.18" height="12.4498"/>
+			<rect x="0" y="398.392" width="60.1739" height="12.4498" class="st1"/>
+			<text x="15.17" y="406.82" class="st59" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Shortlist</text>		</g>
+		<g id="shape218-626" v:mID="218" v:groupContext="shape" v:layerMember="2" transform="translate(409.286,-128.129)">
+			<title>elite_shortlist</title>
+			<path d="M0 399.43 L15.56 399.43 L9.49 405.71 L9.49 410.84 L6.07 410.84 L6.07 405.71 L0 399.43 Z" class="st51"/>
+		</g>
+		<g id="shape219-628" v:mID="219" v:groupContext="shape" v:layerMember="2" transform="translate(325.769,-114.642)">
+			<title>elite_acceptance</title>
+			<desc>Accept if ΔE &#62; τ</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="55.7646" cy="405.136" width="111.53" height="11.4123"/>
+			<rect x="0" y="399.43" width="111.529" height="11.4123" class="st1"/>
+			<text x="21.45" y="407.56" class="st41" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Accept if <tspan
+						class="st52">Δ</tspan>E &#62; <tspan class="st52">τ</tspan></text>		</g>
+		<g id="shape220-633" v:mID="220" v:groupContext="shape" v:layerMember="15" transform="translate(30.0869,-88.7046)">
+			<title>resource_heading</title>
+			<desc>(c) Resource evaluation</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="119.829" cy="403.32" width="239.66" height="15.0435"/>
+			<rect x="0" y="395.799" width="239.658" height="15.0435" class="st1"/>
+			<text x="0" y="405.82" class="st60" v:langID="2052"><v:paragraph v:spLine="-1"/><v:tabList/>(c) Resource evaluation</text>		</g>
+		<g id="shape221-636" v:mID="221" v:groupContext="shape" v:layerMember="18" transform="translate(30.0869,-16.0809)">
+			<title>screening_panel</title>
+			<rect x="0" y="347.037" width="121.904" height="63.805" class="st21"/>
+		</g>
+		<g id="shape222-638" v:mID="222" v:groupContext="shape" v:layerMember="18" transform="translate(34.2369,-64.8425)">
+			<title>screening_title</title>
+			<desc>Screening</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="56.802" cy="404.358" width="113.61" height="12.9685"/>
+			<rect x="0" y="397.874" width="113.604" height="12.9685" class="st1"/>
+			<text x="37.17" y="406.68" class="st2" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Screening</text>		</g>
+		<g id="shape223-641" v:mID="223" v:groupContext="shape" v:layerMember="18" transform="translate(63.2863,-39.4243)">
+			<title>screen_filter</title>
+			<path d="M0 392.17 L22.31 392.17 L13.61 402.44 L13.61 410.84 L8.7 410.84 L8.7 402.44 L0 392.17 Z" class="st51"/>
+		</g>
+		<g id="shape224-643" v:mID="224" v:groupContext="shape" v:layerMember="18" transform="translate(99.5981,-46.2716)">
+			<title>screen_check</title>
+			<path d="M0 407.31 L3.53 410.84 L10.37 402.13" class="st22"/>
+		</g>
+		<g id="shape225-646" v:mID="225" v:groupContext="shape" v:layerMember="18" transform="translate(111.529,-43.0554)">
+			<title>screen_question</title>
+			<desc>?</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.00299" cy="402.802" width="14.01" height="16.0809"/>
+			<rect x="0" y="394.761" width="14.006" height="16.0809" class="st1"/>
+			<text x="3.75" y="406.05" class="st61" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>?</text>		</g>
+		<g id="shape226-649" v:mID="226" v:groupContext="shape" v:layerMember="18" transform="translate(33.7181,-20.7496)">
+			<title>screening_methods</title>
+			<desc>Proxy / precheck</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="57.3208" cy="404.877" width="114.65" height="11.931"/>
+			<rect x="0" y="398.911" width="114.642" height="11.931" class="st1"/>
+			<text x="27.51" y="407.08" class="st59" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Proxy / precheck</text>		</g>
+		<g id="shape227-652" v:mID="227" v:groupContext="shape" v:layerMember="14" transform="translate(151.991,-47.7241)">
+			<title>optional_cvx</title>
+			<path d="M-0 410.84 L41.39 410.84" class="st62"/>
+		</g>
+		<g id="shape228-658" v:mID="228" v:groupContext="shape" v:layerMember="14" transform="translate(151.991,-26.9745)">
+			<title>optional_cvx_return</title>
+			<path d="M46.69 410.84 L5.3 410.84" class="st62"/>
+		</g>
+		<g id="shape229-663" v:mID="229" v:groupContext="shape" v:layerMember="14" transform="translate(153.547,-51.3553)">
+			<title>optional_cvx_label</title>
+			<desc>as needed</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="21.7871" cy="404.358" width="43.58" height="12.9685"/>
+			<rect x="0" y="397.874" width="43.5742" height="12.9685" class="st1"/>
+			<text x="5.15" y="406.48" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>as needed</text>		</g>
+		<g id="shape230-666" v:mID="230" v:groupContext="shape" v:layerMember="19" transform="translate(198.677,-16.0809)">
+			<title>strict_panel</title>
+			<rect x="0" y="347.037" width="289.976" height="63.805" class="st21"/>
+		</g>
+		<g id="shape231-668" v:mID="231" v:groupContext="shape" v:layerMember="19" transform="translate(203.346,-64.8425)">
+			<title>strict_title</title>
+			<desc>Strict CVX</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="140.319" cy="404.358" width="280.64" height="12.9685"/>
+			<rect x="0" y="397.874" width="280.638" height="12.9685" class="st1"/>
+			<text x="117.98" y="406.68" class="st2" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Strict CVX</text>		</g>
+		<g id="shape232-671" v:mID="232" v:groupContext="shape" v:layerMember="19" transform="translate(217.352,-50.3178)">
+			<title>allocation_cpu_pin_l_0</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape233-674" v:mID="233" v:groupContext="shape" v:layerMember="19" transform="translate(240.177,-50.3178)">
+			<title>allocation_cpu_pin_r_0</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape234-677" v:mID="234" v:groupContext="shape" v:layerMember="19" transform="translate(217.352,-44.871)">
+			<title>allocation_cpu_pin_l_1</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape235-680" v:mID="235" v:groupContext="shape" v:layerMember="19" transform="translate(240.177,-44.871)">
+			<title>allocation_cpu_pin_r_1</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape236-683" v:mID="236" v:groupContext="shape" v:layerMember="19" transform="translate(217.352,-39.4243)">
+			<title>allocation_cpu_pin_l_2</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape237-686" v:mID="237" v:groupContext="shape" v:layerMember="19" transform="translate(240.177,-39.4243)">
+			<title>allocation_cpu_pin_r_2</title>
+			<path d="M0 410.84 L2.59 410.84" class="st53"/>
+		</g>
+		<g id="shape238-689" v:mID="238" v:groupContext="shape" v:layerMember="19" transform="translate(219.946,-35.7931)">
+			<title>allocation_cpu</title>
+			<rect x="0" y="392.686" width="20.2309" height="18.1559" class="st17"/>
+		</g>
+		<g id="shape239-691" v:mID="239" v:groupContext="shape" v:layerMember="19" transform="translate(223.577,-39.4243)">
+			<title>allocation_cpu_core</title>
+			<rect x="0" y="399.949" width="12.9685" height="10.8935" class="st54"/>
+		</g>
+		<g id="shape240-693" v:mID="240" v:groupContext="shape" v:layerMember="19" transform="translate(275.97,-50.8365)">
+			<title>bandwidth_track_0</title>
+			<rect x="0" y="406.174" width="41.4992" height="4.66866" class="st63"/>
+		</g>
+		<g id="shape241-695" v:mID="241" v:groupContext="shape" v:layerMember="19" transform="translate(276.489,-51.3553)">
+			<title>bandwidth_share_0</title>
+			<rect x="0" y="407.211" width="25.4183" height="3.63118" class="st64"/>
+		</g>
+		<g id="shape242-697" v:mID="242" v:groupContext="shape" v:layerMember="19" transform="translate(275.97,-43.0554)">
+			<title>bandwidth_track_1</title>
+			<rect x="0" y="406.174" width="41.4992" height="4.66866" class="st63"/>
+		</g>
+		<g id="shape243-699" v:mID="243" v:groupContext="shape" v:layerMember="19" transform="translate(276.489,-43.5742)">
+			<title>bandwidth_share_1</title>
+			<rect x="0" y="407.211" width="14.5247" height="3.63118" class="st64"/>
+		</g>
+		<g id="shape244-701" v:mID="244" v:groupContext="shape" v:layerMember="19" transform="translate(275.97,-35.2743)">
+			<title>bandwidth_track_2</title>
+			<rect x="0" y="406.174" width="41.4992" height="4.66866" class="st63"/>
+		</g>
+		<g id="shape245-703" v:mID="245" v:groupContext="shape" v:layerMember="19" transform="translate(276.489,-35.7931)">
+			<title>bandwidth_share_2</title>
+			<rect x="0" y="407.211" width="32.1619" height="3.63118" class="st64"/>
+		</g>
+		<g id="shape246-705" v:mID="246" v:groupContext="shape" v:layerMember="19" transform="translate(203.865,-18.6746)">
+			<title>allocation_cpu_label</title>
+			<desc>CPU</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="28.012" cy="405.136" width="56.03" height="11.4123"/>
+			<rect x="0" y="399.43" width="56.0239" height="11.4123" class="st1"/>
+			<text x="19.74" y="407.26" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>CPU</text>		</g>
+		<g id="shape247-708" v:mID="247" v:groupContext="shape" v:layerMember="19" transform="translate(263.52,-18.6746)">
+			<title>allocation_bandwidth_label</title>
+			<desc>Bandwidth</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="34.2369" cy="405.136" width="68.48" height="11.4123"/>
+			<rect x="0" y="399.43" width="68.4737" height="11.4123" class="st1"/>
+			<text x="15.58" y="407.26" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Bandwidth</text>		</g>
+		<g id="shape248-711" v:mID="248" v:groupContext="shape" v:layerMember="19" transform="translate(328.881,-44.6117)">
+			<title>allocation_to_result</title>
+			<path d="M-0 410.84 L17.01 410.84" class="st65"/>
+		</g>
+		<g id="shape249-716" v:mID="249" v:groupContext="shape" v:layerMember="19" transform="translate(357.931,-20.2309)">
+			<title>resource_result</title>
+			<rect x="0" y="371.937" width="119.829" height="38.9055" class="st3"/>
+		</g>
+		<g id="shape250-718" v:mID="250" v:groupContext="shape" v:layerMember="19" transform="translate(364.674,-38.3868)">
+			<title>resource_energy</title>
+			<desc>E(D)</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="24.1214" cy="403.58" width="48.25" height="14.5247"/>
+			<rect x="0" y="396.317" width="48.2428" height="14.5247" class="st1"/>
+			<text x="13.13" y="406.33" class="st66" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>E(D)</text>		</g>
+		<g id="shape251-721" v:mID="251" v:groupContext="shape" v:layerMember="19" transform="translate(430.554,-42.9932)">
+			<title>feasible_symbol</title>
+			<path d="M0 407.67 L3.17 410.84 L9.34 403" class="st22"/>
+		</g>
+		<g id="shape252-724" v:mID="252" v:groupContext="shape" v:layerMember="19" transform="translate(455.973,-42.018)">
+			<title>infeasible_symbol_a</title>
+			<path d="M-0 403.06 L7.78 410.84" class="st67"/>
+		</g>
+		<g id="shape253-727" v:mID="253" v:groupContext="shape" v:layerMember="19" transform="translate(455.973,-42.018)">
+			<title>infeasible_symbol_b</title>
+			<path d="M-0 410.84 L7.78 403.06" class="st67"/>
+		</g>
+		<g id="shape254-730" v:mID="254" v:groupContext="shape" v:layerMember="19" transform="translate(362.599,-21.7871)">
+			<title>resource_return_label</title>
+			<desc>Energy / status</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="55.2458" cy="404.877" width="110.5" height="11.931"/>
+			<rect x="0" y="398.911" width="110.492" height="11.931" class="st1"/>
+			<text x="29.99" y="407" class="st34" v:langID="2052"><v:paragraph v:spLine="-1" v:horizAlign="1"/><v:tabList/>Energy / status</text>		</g>
+		<g id="shape255-733" v:mID="255" v:groupContext="shape" v:layerMember="14" transform="translate(12.4498,-56.0239)">
+			<title>exploration_request</title>
+			<path d="M189.86 308.13 L189.86 334.07 L0 334.07 L0 410.84 L17.64 410.84 L17.64 410.84" class="st68"/>
+		</g>
+		<g id="shape256-739" v:mID="256" v:groupContext="shape" v:layerMember="14" transform="translate(21.7871,-36.3118)">
+			<title>exploration_response</title>
+			<path d="M8.3 410.84 L0 410.84 L0 324.73 L192.97 324.73 L192.97 288.42 L192.97 288.42" class="st68"/>
+		</g>
+		<g id="shape257-744" v:mID="257" v:groupContext="shape" v:layerMember="14" transform="translate(424.848,-56.0239)">
+			<title>elite_request</title>
+			<path d="M0 333.03 L81.44 333.03 L81.44 410.84 L63.81 410.84 L63.81 410.84" class="st68"/>
+		</g>
+		<g id="shape258-749" v:mID="258" v:groupContext="shape" v:layerMember="14" transform="translate(437.298,-34.2369)">
+			<title>elite_response</title>
+			<path d="M51.36 410.84 L59.66 410.84 L59.66 324.73 L0 324.73 L0 324.73" class="st68"/>
+		</g>
+	</g>
+</svg>

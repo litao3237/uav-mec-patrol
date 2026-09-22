@@ -1,0 +1,341 @@
+{
+  "complete": true,
+  "aggregate": {
+    "methods": {
+      "ga": {
+        "runs": 9,
+        "strict_optimal": 9,
+        "strict_rate": 1.0,
+        "mean_energy_j": 235438.00005403292,
+        "median_energy_j": 227768.55793589045
+      },
+      "generic_alns": {
+        "runs": 9,
+        "strict_optimal": 9,
+        "strict_rate": 1.0,
+        "mean_energy_j": 170323.58579654503,
+        "median_energy_j": 172689.24012893607
+      },
+      "hybrid": {
+        "runs": 9,
+        "strict_optimal": 9,
+        "strict_rate": 1.0,
+        "mean_energy_j": 167015.34981498652,
+        "median_energy_j": 170279.20664622515
+      }
+    },
+    "paired": {
+      "hybrid_vs_ga": {
+        "comparable": 9,
+        "hybrid_better": 9,
+        "equal": 0,
+        "baseline_better": 0,
+        "mean_hybrid_advantage_pct": 28.884121391158036,
+        "median_hybrid_advantage_pct": 28.77102132147292
+      },
+      "hybrid_vs_generic_alns": {
+        "comparable": 9,
+        "hybrid_better": 5,
+        "equal": 4,
+        "baseline_better": 0,
+        "mean_hybrid_advantage_pct": 1.802715383494123,
+        "median_hybrid_advantage_pct": 0.04677338080859563
+      }
+    },
+    "ga_search": {
+      "mean_distinct_evaluations": 894.4444444444445,
+      "mean_search_runtime_s": 61.36276733444444,
+      "proxy_feasible_runs": 9
+    }
+  },
+  "rows": [
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 100,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 218491.91677000126,
+        "search_runtime_s": 56.840247754,
+        "evaluations": 895,
+        "cache_hits": 89,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          218792.4756397316,
+          11542.51408714602
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 186697.24119728155
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 183137.35715041464,
+        "elite_cvx_calls": 13
+      },
+      "hybrid_advantage_vs_ga_pct": 16.181175094364303,
+      "hybrid_advantage_vs_generic_pct": 1.9067684257343716
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 101,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 221822.67632839733,
+        "search_runtime_s": 60.263106429,
+        "evaluations": 895,
+        "cache_hits": 89,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          222122.3465158894,
+          11727.50691359923
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 165428.9477732258
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 165428.9477732258,
+        "elite_cvx_calls": 6
+      },
+      "hybrid_advantage_vs_ga_pct": 25.422887095493987,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 102,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 233506.69122147825,
+        "search_runtime_s": 51.788999638,
+        "evaluations": 897,
+        "cache_hits": 87,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          233855.81919876856,
+          12379.36650709252
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 179150.21329499572
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 170279.20664622515,
+        "elite_cvx_calls": 13
+      },
+      "hybrid_advantage_vs_ga_pct": 27.077375917798687,
+      "hybrid_advantage_vs_generic_pct": 4.9517142545419235
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 100,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 227768.55793589045,
+        "search_runtime_s": 83.192420454,
+        "evaluations": 892,
+        "cache_hits": 92,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          228152.34961724712,
+          12053.210776091182
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 145847.9870824299
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 145847.9870824299,
+        "elite_cvx_calls": 6
+      },
+      "hybrid_advantage_vs_ga_pct": 35.96658449956845,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 101,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 226234.44604521597,
+        "search_runtime_s": 45.234697063,
+        "evaluations": 894,
+        "cache_hits": 90,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          226578.77304127972,
+          11970.411611730055
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 146439.33916212755
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 146439.33916212755,
+        "elite_cvx_calls": 6
+      },
+      "hybrid_advantage_vs_ga_pct": 35.27098029410619,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 102,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 227768.55793589045,
+        "search_runtime_s": 57.676916442999996,
+        "evaluations": 898,
+        "cache_hits": 86,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          228152.34961724712,
+          12053.210776091182
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 172689.24012893607
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 172689.24012893607,
+        "elite_cvx_calls": 6
+      },
+      "hybrid_advantage_vs_ga_pct": 24.18214274441578,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 100,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 251771.746302342,
+        "search_runtime_s": 69.059439877,
+        "evaluations": 891,
+        "cache_hits": 93,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          252147.39486186468,
+          13393.997099233415
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 179418.36352666336
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 179334.4434922505,
+        "elite_cvx_calls": 12
+      },
+      "hybrid_advantage_vs_ga_pct": 28.77102132147292,
+      "hybrid_advantage_vs_generic_pct": 0.04677338080859563
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 101,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 255800.08385497343,
+        "search_runtime_s": 45.02714821599999,
+        "evaluations": 891,
+        "cache_hits": 93,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          256190.24624338956,
+          13613.314899030884
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 185532.7805455369
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 168656.3294884225,
+        "elite_cvx_calls": 13
+      },
+      "hybrid_advantage_vs_ga_pct": 34.06713283798505,
+      "hybrid_advantage_vs_generic_pct": 9.096209849004163
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 102,
+      "ga": {
+        "stage1_status": "optimal",
+        "energy_j": 255777.32409210704,
+        "search_runtime_s": 83.18193013599999,
+        "evaluations": 897,
+        "cache_hits": 87,
+        "proxy_score": [
+          0.0,
+          0.0,
+          0.0,
+          256163.25005029642,
+          13599.551838516905
+        ],
+        "proxy_feasible": true
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 171708.15945770845
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 171325.29741084646,
+        "elite_cvx_calls": 13
+      },
+      "hybrid_advantage_vs_ga_pct": 33.017792715216956,
+      "hybrid_advantage_vs_generic_pct": 0.22297254135805383
+    }
+  ]
+}

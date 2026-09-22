@@ -1,0 +1,626 @@
+{
+  "complete": true,
+  "aggregate": {
+    "methods": {
+      "greedy_repair": {
+        "runs": 3,
+        "strict_optimal": 2,
+        "strict_rate": 0.6666666666666666,
+        "mean_energy_j": 230637.62457868434,
+        "median_energy_j": 230637.62457868434
+      },
+      "nearest_mec": {
+        "runs": 3,
+        "strict_optimal": 3,
+        "strict_rate": 1.0,
+        "mean_energy_j": 229613.10152010186,
+        "median_energy_j": 229866.96286485353
+      },
+      "generic_alns": {
+        "runs": 9,
+        "strict_optimal": 9,
+        "strict_rate": 1.0,
+        "mean_energy_j": 170323.58579654503,
+        "median_energy_j": 172689.24012893607
+      },
+      "hybrid": {
+        "runs": 9,
+        "strict_optimal": 9,
+        "strict_rate": 1.0,
+        "mean_energy_j": 167015.34981498652,
+        "median_energy_j": 170279.20664622515
+      }
+    },
+    "paired": {
+      "hybrid_vs_greedy_repair": {
+        "comparable": 6,
+        "hybrid_better": 6,
+        "equal": 0,
+        "baseline_better": 0,
+        "mean_hybrid_advantage_pct": 28.94306756080121,
+        "median_hybrid_advantage_pct": 28.115945486753553
+      },
+      "hybrid_vs_nearest_mec": {
+        "comparable": 9,
+        "hybrid_better": 9,
+        "equal": 0,
+        "baseline_better": 0,
+        "mean_hybrid_advantage_pct": 27.297398564152765,
+        "median_hybrid_advantage_pct": 26.628721506369235
+      },
+      "hybrid_vs_generic_alns": {
+        "comparable": 9,
+        "hybrid_better": 5,
+        "equal": 4,
+        "baseline_better": 0,
+        "mean_hybrid_advantage_pct": 1.802715383494123,
+        "median_hybrid_advantage_pct": 0.04677338080859563
+      }
+    }
+  },
+  "rows": [
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 100,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 233506.69122147825,
+        "runtime_s": 1.9966667580000035,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12379.36650709252
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 234276.96243383703,
+        "runtime_s": 0.25575585200000006,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12417.700211244362
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 186697.24119728155,
+        "runtime_s": 11.138767551999997,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 9757.959467184079
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 183137.35715041464,
+        "runtime_s": 15.438725465000005,
+        "elite_runtime_s": 4.060266560000002,
+        "elite_cvx_calls": 13,
+        "accepted_moves": [
+          {
+            "move": "route_compute_relocate::S47->U4@2",
+            "objective": 183919.98695305895,
+            "improvement_j": 2777.2542442225968,
+            "improvement_pct": 1.4875711212507385
+          },
+          {
+            "move": "route_compute_relocate::S36->U2@15",
+            "objective": 183137.35715041464,
+            "improvement_j": 782.629802644311,
+            "improvement_pct": 0.42552732609972294
+          }
+        ],
+        "solution": {
+          "contacts": 2,
+          "offloaded": 3,
+          "active_pairs": 2,
+          "distance_m": 9553.207031529693
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 21.570831143030894,
+      "hybrid_advantage_vs_nearest_pct": 21.82869572498615,
+      "hybrid_advantage_vs_generic_pct": 1.9067684257343716
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 101,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 233506.69122147825,
+        "runtime_s": 1.8734956300000007,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12379.36650709252
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 234276.96243383703,
+        "runtime_s": 0.2221659509999938,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12417.700211244362
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 165428.9477732258,
+        "runtime_s": 6.9278867989999995,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 5,
+          "active_pairs": 2,
+          "distance_m": 8568.365207589555
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 165428.9477732258,
+        "runtime_s": 8.272774605999999,
+        "elite_runtime_s": 1.071226154999998,
+        "elite_cvx_calls": 6,
+        "accepted_moves": [],
+        "solution": {
+          "contacts": 3,
+          "offloaded": 5,
+          "active_pairs": 2,
+          "distance_m": 8568.365207589555
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 29.154515055708416,
+      "hybrid_advantage_vs_nearest_pct": 29.387445502694202,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 45,
+      "algorithm_seed": 102,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 233506.69122147825,
+        "runtime_s": 2.5205704319999995,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12379.36650709252
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 234276.96243383703,
+        "runtime_s": 0.3347644970000019,
+        "solution": {
+          "contacts": 1,
+          "offloaded": 1,
+          "active_pairs": 1,
+          "distance_m": 12417.700211244362
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 179150.21329499572,
+        "runtime_s": 14.032783483000003,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 7,
+          "active_pairs": 3,
+          "distance_m": 9234.992582773213
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 170279.20664622515,
+        "runtime_s": 18.617306002999996,
+        "elite_runtime_s": 4.227674340999997,
+        "elite_cvx_calls": 13,
+        "accepted_moves": [
+          {
+            "move": "batch_merge::G_U3_1->G_U3_2",
+            "objective": 171432.31766133825,
+            "improvement_j": 7717.895633657463,
+            "improvement_pct": 4.308058300186825
+          },
+          {
+            "move": "route_compute_relocate::S37->U1@12",
+            "objective": 170279.20664622515,
+            "improvement_j": 1153.1110151130997,
+            "improvement_pct": 0.6726333930753078
+          }
+        ],
+        "solution": {
+          "contacts": 2,
+          "offloaded": 7,
+          "active_pairs": 2,
+          "distance_m": 8810.080585909289
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 27.077375917798687,
+      "hybrid_advantage_vs_nearest_pct": 27.31713571951647,
+      "hybrid_advantage_vs_generic_pct": 4.9517142545419235
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 100,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 227768.55793589045,
+        "runtime_s": 1.9528718069999798,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12053.210776091182
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 224695.37926161505,
+        "runtime_s": 0.2569527419999815,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 2,
+          "distance_m": 11882.138661763485
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 145847.9870824299,
+        "runtime_s": 7.334089629000005,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 5,
+          "active_pairs": 2,
+          "distance_m": 7466.78861107188
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 145847.9870824299,
+        "runtime_s": 8.826903105000014,
+        "elite_runtime_s": 1.1949015910000185,
+        "elite_cvx_calls": 6,
+        "accepted_moves": [],
+        "solution": {
+          "contacts": 3,
+          "offloaded": 5,
+          "active_pairs": 2,
+          "distance_m": 7466.78861107188
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 35.96658449956845,
+      "hybrid_advantage_vs_nearest_pct": 35.09079378414024,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 101,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 227768.55793589045,
+        "runtime_s": 2.4690174949999957,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12053.210776091182
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 224695.37926161505,
+        "runtime_s": 0.3460600290000002,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 2,
+          "distance_m": 11882.138661763485
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 146439.33916212755,
+        "runtime_s": 10.806006226999997,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 4,
+          "active_pairs": 3,
+          "distance_m": 7488.380754896083
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 146439.33916212755,
+        "runtime_s": 13.173577479999999,
+        "elite_runtime_s": 2.052792175999997,
+        "elite_cvx_calls": 6,
+        "accepted_moves": [],
+        "solution": {
+          "contacts": 3,
+          "offloaded": 4,
+          "active_pairs": 3,
+          "distance_m": 7488.380754896083
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 35.70695600428505,
+      "hybrid_advantage_vs_nearest_pct": 34.82761432684969,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 46,
+      "algorithm_seed": 102,
+      "greedy_repair": {
+        "stage1_status": "optimal",
+        "energy_j": 227768.55793589045,
+        "runtime_s": 2.2819092869999977,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12053.210776091182
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 224695.37926161505,
+        "runtime_s": 0.2998732100000012,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 2,
+          "distance_m": 11882.138661763485
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 172689.24012893607,
+        "runtime_s": 10.763850319,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 4,
+          "active_pairs": 3,
+          "distance_m": 8972.377878753516
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 172689.24012893607,
+        "runtime_s": 12.267564008,
+        "elite_runtime_s": 1.1869933219999993,
+        "elite_cvx_calls": 6,
+        "accepted_moves": [],
+        "solution": {
+          "contacts": 3,
+          "offloaded": 4,
+          "active_pairs": 3,
+          "distance_m": 8972.377878753516
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": 24.18214274441578,
+      "hybrid_advantage_vs_nearest_pct": 23.145175171638805,
+      "hybrid_advantage_vs_generic_pct": 0.0
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 100,
+      "greedy_repair": {
+        "stage1_status": "infeasible_precheck",
+        "energy_j": null,
+        "runtime_s": 2.0191692949999904,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12875.282373680044
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 229866.96286485353,
+        "runtime_s": 0.3997016400000035,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12153.485786665122
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 179418.36352666336,
+        "runtime_s": 7.162534908000005,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 3,
+          "distance_m": 9341.537345902856
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 179334.4434922505,
+        "runtime_s": 11.491025916000005,
+        "elite_runtime_s": 4.018230713000001,
+        "elite_cvx_calls": 12,
+        "accepted_moves": [
+          {
+            "move": "route_compute_relocate::S17->U1@5",
+            "objective": 179334.4434922505,
+            "improvement_j": 83.9200344128767,
+            "improvement_pct": 0.04677338080859563
+          }
+        ],
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 9354.97415755326
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": null,
+      "hybrid_advantage_vs_nearest_pct": 21.983376272436676,
+      "hybrid_advantage_vs_generic_pct": 0.04677338080859563
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 101,
+      "greedy_repair": {
+        "stage1_status": "infeasible_precheck",
+        "energy_j": null,
+        "runtime_s": 2.067519116000014,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12875.282373680044
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 229866.96286485353,
+        "runtime_s": 0.4396950769999819,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12153.485786665122
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 185532.7805455369,
+        "runtime_s": 8.645786359000013,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 2,
+          "distance_m": 9693.488276289385
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 168656.3294884225,
+        "runtime_s": 13.538494104999998,
+        "elite_runtime_s": 4.5690593779999915,
+        "elite_cvx_calls": 13,
+        "accepted_moves": [
+          {
+            "move": "route_compute_relocate::S28->U1@4",
+            "objective": 174339.44470742147,
+            "improvement_j": 11193.335838115425,
+            "improvement_pct": 6.033077176552178
+          },
+          {
+            "move": "route_compute_relocate::S30->U5@2",
+            "objective": 168656.3294884225,
+            "improvement_j": 5683.115218998981,
+            "improvement_pct": 3.259798853057294
+          }
+        ],
+        "solution": {
+          "contacts": 4,
+          "offloaded": 4,
+          "active_pairs": 2,
+          "distance_m": 8781.560090695682
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": null,
+      "hybrid_advantage_vs_nearest_pct": 26.628721506369235,
+      "hybrid_advantage_vs_generic_pct": 9.096209849004163
+    },
+    {
+      "K": 50,
+      "E": 2,
+      "scenario_seed": 47,
+      "algorithm_seed": 102,
+      "greedy_repair": {
+        "stage1_status": "infeasible_precheck",
+        "energy_j": null,
+        "runtime_s": 1.3432150699999958,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12875.282373680044
+        }
+      },
+      "nearest_mec": {
+        "stage1_status": "optimal",
+        "energy_j": 229866.96286485353,
+        "runtime_s": 0.23236828000000287,
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 12153.485786665122
+        }
+      },
+      "generic_alns": {
+        "stage1_status": "optimal",
+        "energy_j": 171708.15945770845,
+        "runtime_s": 4.430683789,
+        "solution": {
+          "contacts": 3,
+          "offloaded": 3,
+          "active_pairs": 3,
+          "distance_m": 8896.57159231729
+        }
+      },
+      "hybrid": {
+        "stage1_status": "optimal",
+        "energy_j": 171325.29741084646,
+        "runtime_s": 7.203898335999998,
+        "elite_runtime_s": 2.5532641459999965,
+        "elite_cvx_calls": 13,
+        "accepted_moves": [
+          {
+            "move": "route_compute_relocate::S44->U1@1",
+            "objective": 171409.21744519385,
+            "improvement_j": 298.9420125145989,
+            "improvement_pct": 0.17409889748904334
+          },
+          {
+            "move": "route_compute_relocate::S17->U1@5",
+            "objective": 171325.29741084646,
+            "improvement_j": 83.92003434739308,
+            "improvement_pct": 0.04895888074060286
+          }
+        ],
+        "solution": {
+          "contacts": 2,
+          "offloaded": 2,
+          "active_pairs": 2,
+          "distance_m": 8898.847154863135
+        }
+      },
+      "hybrid_advantage_vs_greedy_pct": null,
+      "hybrid_advantage_vs_nearest_pct": 25.467629068743417,
+      "hybrid_advantage_vs_generic_pct": 0.22297254135805383
+    }
+  ]
+}

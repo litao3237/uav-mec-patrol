@@ -1,0 +1,126 @@
+{
+  "fig01_system_model": {
+    "page_name": "fig01_system_model",
+    "native_shapes": 291,
+    "expected_shapes": 291,
+    "foreign_objects": 0,
+    "pdf_pages": 1,
+    "pdf_images": 0,
+    "missing_labels": [],
+    "text_outside_page": [],
+    "png_dpi": [
+      299.9994,
+      299.9994
+    ],
+    "png_pixel_sha256": "5fd98e74b71f0ea0f4d876eb47dee3d7153db660b7e40f2fa626e0753d13890a",
+    "png_size": [
+      2053,
+      1447
+    ],
+    "image_identical_to_selected_final": true
+  },
+  "fig02_hybrid_alns_framework": {
+    "page_name": "fig02_hybrid_alns_framework",
+    "native_shapes": 158,
+    "expected_shapes": 158,
+    "foreign_objects": 0,
+    "pdf_pages": 1,
+    "pdf_images": 0,
+    "missing_labels": [],
+    "text_outside_page": [],
+    "width_mm": 183,
+    "height_mm": 172.935,
+    "font_range_pt": [
+      8.1,
+      10.2
+    ],
+    "png_dpi": [
+      299.9994,
+      299.9994
+    ],
+    "png_pixel_sha256": "e8a6d62f7f02802302d6032bcdd0d4529743e7efff3722ec57e774d221061a7c",
+    "png_size": [
+      2047,
+      1981
+    ],
+    "layout": "Five numbered search steps with emphasized core modules, repeated resource evaluation and three subordinate structural-move examples"
+  },
+  "fig02_hybrid_alns_visual": {
+    "page_name": "fig02_hybrid_alns_visual",
+    "native_shapes": 258,
+    "expected_shapes": 258,
+    "foreign_objects": 0,
+    "pdf_pages": 1,
+    "pdf_images": 0,
+    "missing_labels": [],
+    "text_outside_page": [],
+    "width_mm": 183,
+    "height_mm": 144.936,
+    "pdf_dimensions_mm": [
+      182.965,
+      144.907
+    ],
+    "font_range_pt": [
+      8.5,
+      13
+    ],
+    "english_word_count": 54,
+    "fixed_version_word_count": 166,
+    "word_reduction_percent": 67.5,
+    "png_dpi": [
+      299.9994,
+      299.9994
+    ],
+    "png_pixel_sha256": "c49b66622946f7fceb531eb6f5a82856ed3bdfbb2c2c7fcff439d685af3c7c6e",
+    "png_size": [
+      2063,
+      1600
+    ],
+    "fixed_files_verified": 12,
+    "fixed_files_unchanged": true,
+    "semantic_checks": {
+      "taskSetBefore": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "taskSetAfter": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "removedTasks": [
+        2,
+        5
+      ],
+      "batchBefore": [
+        [
+          1,
+          2
+        ],
+        [
+          3
+        ]
+      ],
+      "batchAfter": [
+        1,
+        2,
+        3
+      ],
+      "batchDestination": "later contact c2",
+      "modeTaskBefore": 1,
+      "modeTaskAfter": 1
+    },
+    "layout": "Five-stage overview, graphical route destroy/repair, four structural moves and shared resource evaluation",
+    "visual_qa": {
+      "pdf_render_inspected": true,
+      "grayscale_inspected": true,
+      "overlapping_labels": false,
+      "task_identity_preserved": true
+    }
+  }
+}

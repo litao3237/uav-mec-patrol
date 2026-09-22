@@ -1,0 +1,2495 @@
+{
+  "name": "fig02_hybrid_alns_framework",
+  "width": 1000,
+  "height": 945,
+  "widthMm": 183,
+  "description": "Hierarchical Hybrid ALNS overview: five numbered search steps, repeated resource evaluation, and illustrative structural moves.",
+  "shapes": [
+    {
+      "type": "rect",
+      "id": "search_background",
+      "group": "panel_backgrounds",
+      "x": 30,
+      "y": 64,
+      "w": 520,
+      "h": 627,
+      "fill": "#F8F9FA",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "panel_search_marker",
+      "group": "panel_titles",
+      "x": 30,
+      "y": 16,
+      "w": 36,
+      "h": 30,
+      "fill": "#29343D",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "panel_search_letter",
+      "group": "panel_titles",
+      "x": 30,
+      "y": 16,
+      "w": 36,
+      "h": 30,
+      "text": "(a)",
+      "fontPt": 9.5,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "panel_search",
+      "group": "panel_titles",
+      "x": 77,
+      "y": 16,
+      "w": 473,
+      "h": 30,
+      "text": "Discrete search",
+      "fontPt": 10.2,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "panel_search_rule",
+      "group": "panel_titles",
+      "points": [
+        [
+          30,
+          56
+        ],
+        [
+          550,
+          56
+        ]
+      ],
+      "stroke": "#29343D",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "rect",
+      "id": "panel_evaluation_marker",
+      "group": "panel_titles",
+      "x": 645,
+      "y": 16,
+      "w": 36,
+      "h": 30,
+      "fill": "#397B73",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "panel_evaluation_letter",
+      "group": "panel_titles",
+      "x": 645,
+      "y": 16,
+      "w": 36,
+      "h": 30,
+      "text": "(b)",
+      "fontPt": 9.5,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "panel_evaluation",
+      "group": "panel_titles",
+      "x": 692,
+      "y": 16,
+      "w": 283,
+      "h": 30,
+      "text": "Resource evaluation",
+      "fontPt": 10.2,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "panel_evaluation_rule",
+      "group": "panel_titles",
+      "points": [
+        [
+          645,
+          56
+        ],
+        [
+          975,
+          56
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "rect",
+      "id": "initialization",
+      "group": "initialization",
+      "x": 75,
+      "y": 70,
+      "w": 460,
+      "h": 62,
+      "fill": "#FFFFFF",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "initialization_header",
+      "group": "initialization",
+      "x": 75,
+      "y": 70,
+      "w": 460,
+      "h": 32,
+      "fill": "#EDF0F2",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "ellipse",
+      "id": "initialization_badge",
+      "group": "initialization",
+      "x": 86,
+      "y": 74,
+      "w": 24,
+      "h": 24,
+      "fill": "#73808A",
+      "stroke": "#73808A",
+      "linePt": 0.8
+    },
+    {
+      "type": "text",
+      "id": "initialization_number",
+      "group": "initialization",
+      "x": 86,
+      "y": 74,
+      "w": 24,
+      "h": 24,
+      "text": "01",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "initialization_title",
+      "group": "initialization",
+      "x": 120,
+      "y": 74,
+      "w": 403,
+      "h": 25,
+      "text": "Initialize solution",
+      "fontPt": 9.2,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "initialization_body",
+      "group": "initialization",
+      "x": 88,
+      "y": 103,
+      "w": 434,
+      "h": 24,
+      "text": "Greedy routes + feasibility repair",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "initialize_to_search",
+      "group": "connections",
+      "points": [
+        [
+          305,
+          132
+        ],
+        [
+          305,
+          170
+        ]
+      ],
+      "stroke": "#29343D",
+      "fill": null,
+      "arrow": true,
+      "linePt": 1.2
+    },
+    {
+      "type": "rect",
+      "id": "alns",
+      "group": "alns",
+      "x": 75,
+      "y": 170,
+      "w": 460,
+      "h": 108,
+      "fill": "#EEF4F8",
+      "stroke": "#306587",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "alns_header",
+      "group": "alns",
+      "x": 75,
+      "y": 170,
+      "w": 460,
+      "h": 35,
+      "fill": "#306587",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "ellipse",
+      "id": "alns_badge",
+      "group": "alns",
+      "x": 86,
+      "y": 175.5,
+      "w": 24,
+      "h": 24,
+      "fill": "#FFFFFF",
+      "stroke": null,
+      "linePt": 0.8
+    },
+    {
+      "type": "text",
+      "id": "alns_number",
+      "group": "alns",
+      "x": 86,
+      "y": 175.5,
+      "w": 24,
+      "h": 24,
+      "text": "02",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#306587"
+    },
+    {
+      "type": "text",
+      "id": "alns_title",
+      "group": "alns",
+      "x": 120,
+      "y": 174,
+      "w": 403,
+      "h": 27,
+      "text": "ALNS exploration",
+      "fontPt": 9.4,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "alns_destroy_repair",
+      "group": "alns",
+      "x": 88,
+      "y": 213,
+      "w": 434,
+      "h": 23,
+      "text": "Select operators → destroy / repair",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "alns_update",
+      "group": "alns",
+      "x": 88,
+      "y": 243,
+      "w": 434,
+      "h": 23,
+      "text": "Evaluate → accept / reject → update weights",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "alns_iteration",
+      "group": "alns",
+      "points": [
+        [
+          75,
+          255
+        ],
+        [
+          45,
+          255
+        ],
+        [
+          45,
+          191
+        ],
+        [
+          75,
+          191
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "search_to_baseline",
+      "group": "connections",
+      "points": [
+        [
+          305,
+          278
+        ],
+        [
+          305,
+          324
+        ]
+      ],
+      "stroke": "#29343D",
+      "fill": null,
+      "arrow": true,
+      "linePt": 1.2
+    },
+    {
+      "type": "text",
+      "id": "exploration_stop",
+      "group": "labels",
+      "x": 326,
+      "y": 286,
+      "w": 186,
+      "h": 25,
+      "text": "Iteration budget reached",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#59666F"
+    },
+    {
+      "type": "rect",
+      "id": "baseline",
+      "group": "baseline",
+      "x": 75,
+      "y": 324,
+      "w": 460,
+      "h": 54,
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "ellipse",
+      "id": "baseline_badge",
+      "group": "baseline",
+      "x": 86,
+      "y": 328,
+      "w": 24,
+      "h": 24,
+      "fill": "#397B73",
+      "stroke": "#397B73",
+      "linePt": 0.8
+    },
+    {
+      "type": "text",
+      "id": "baseline_number",
+      "group": "baseline",
+      "x": 86,
+      "y": 328,
+      "w": 24,
+      "h": 24,
+      "text": "03",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "baseline_title",
+      "group": "baseline",
+      "x": 120,
+      "y": 328,
+      "w": 403,
+      "h": 24,
+      "text": "Validate exploration best",
+      "fontPt": 9,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "baseline_body",
+      "group": "baseline",
+      "x": 88,
+      "y": 353,
+      "w": 434,
+      "h": 21,
+      "text": "Strict CVX resource solution",
+      "fontPt": 8.3,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "baseline_to_elite",
+      "group": "connections",
+      "points": [
+        [
+          305,
+          378
+        ],
+        [
+          305,
+          424
+        ]
+      ],
+      "stroke": "#29343D",
+      "fill": null,
+      "arrow": true,
+      "linePt": 1.2
+    },
+    {
+      "type": "text",
+      "id": "baseline_pass",
+      "group": "labels",
+      "x": 323,
+      "y": 387,
+      "w": 132,
+      "h": 24,
+      "text": "Validated baseline",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#59666F"
+    },
+    {
+      "type": "rect",
+      "id": "elite",
+      "group": "elite",
+      "x": 75,
+      "y": 424,
+      "w": 460,
+      "h": 120,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "elite_header",
+      "group": "elite",
+      "x": 75,
+      "y": 424,
+      "w": 460,
+      "h": 35,
+      "fill": "#A46D36",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "ellipse",
+      "id": "elite_badge",
+      "group": "elite",
+      "x": 86,
+      "y": 429.5,
+      "w": 24,
+      "h": 24,
+      "fill": "#FFFFFF",
+      "stroke": null,
+      "linePt": 0.8
+    },
+    {
+      "type": "text",
+      "id": "elite_number",
+      "group": "elite",
+      "x": 86,
+      "y": 429.5,
+      "w": 24,
+      "h": 24,
+      "text": "04",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#A46D36"
+    },
+    {
+      "type": "text",
+      "id": "elite_title",
+      "group": "elite",
+      "x": 120,
+      "y": 428,
+      "w": 403,
+      "h": 27,
+      "text": "Elite structural refinement",
+      "fontPt": 9.4,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "elite_candidates",
+      "group": "elite",
+      "x": 88,
+      "y": 466,
+      "w": 434,
+      "h": 23,
+      "text": "Generate / shortlist candidates",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "elite_acceptance",
+      "group": "elite",
+      "x": 88,
+      "y": 493,
+      "w": 434,
+      "h": 23,
+      "text": "Evaluate → accept meaningful energy gains",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "elite_families",
+      "group": "elite",
+      "x": 88,
+      "y": 518,
+      "w": 434,
+      "h": 20,
+      "text": "Route · contact · batch · task mode",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#A46D36"
+    },
+    {
+      "type": "polyline",
+      "id": "elite_iteration",
+      "group": "elite",
+      "points": [
+        [
+          75,
+          520
+        ],
+        [
+          45,
+          520
+        ],
+        [
+          45,
+          446
+        ],
+        [
+          75,
+          446
+        ]
+      ],
+      "stroke": "#A46D36",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "elite_to_output",
+      "group": "connections",
+      "points": [
+        [
+          305,
+          544
+        ],
+        [
+          305,
+          604
+        ]
+      ],
+      "stroke": "#29343D",
+      "fill": null,
+      "arrow": true,
+      "linePt": 1.2
+    },
+    {
+      "type": "text",
+      "id": "elite_stop",
+      "group": "labels",
+      "x": 329,
+      "y": 561,
+      "w": 207,
+      "h": 28,
+      "text": "No improvement / round limit",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#59666F"
+    },
+    {
+      "type": "rect",
+      "id": "output",
+      "group": "output",
+      "x": 75,
+      "y": 604,
+      "w": 460,
+      "h": 77,
+      "fill": "#FFFFFF",
+      "stroke": "#73808A",
+      "linePt": 1
+    },
+    {
+      "type": "rect",
+      "id": "output_header",
+      "group": "output",
+      "x": 75,
+      "y": 604,
+      "w": 460,
+      "h": 32,
+      "fill": "#EDF0F2",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "ellipse",
+      "id": "output_badge",
+      "group": "output",
+      "x": 86,
+      "y": 608,
+      "w": 24,
+      "h": 24,
+      "fill": "#73808A",
+      "stroke": "#73808A",
+      "linePt": 0.8
+    },
+    {
+      "type": "text",
+      "id": "output_number",
+      "group": "output",
+      "x": 86,
+      "y": 608,
+      "w": 24,
+      "h": 24,
+      "text": "05",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "output_title",
+      "group": "output",
+      "x": 120,
+      "y": 608,
+      "w": 403,
+      "h": 25,
+      "text": "Final solution",
+      "fontPt": 9.2,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "output_content",
+      "group": "output",
+      "x": 88,
+      "y": 640,
+      "w": 434,
+      "h": 33,
+      "text": "Routes, offloading and resource allocation\nUAV energy and task completion times",
+      "fontPt": 8.3,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "evaluation_panel",
+      "group": "evaluation_panel",
+      "x": 645,
+      "y": 70,
+      "w": 330,
+      "h": 484,
+      "fill": "#EFF6F4",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "evaluation_scope",
+      "group": "evaluation_panel",
+      "x": 654,
+      "y": 80,
+      "w": 312,
+      "h": 28,
+      "text": "For fixed discrete decisions",
+      "fontPt": 9,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "evaluation_variables",
+      "group": "evaluation_panel",
+      "x": 658,
+      "y": 115,
+      "w": 304,
+      "h": 39,
+      "text": "Allocate UAV CPU,\nMEC bandwidth and CPU",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "screening",
+      "group": "screening",
+      "x": 665,
+      "y": 176,
+      "w": 290,
+      "h": 100,
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "screening_header",
+      "group": "screening",
+      "x": 665,
+      "y": 176,
+      "w": 290,
+      "h": 35,
+      "fill": "#DCECE7",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "screening_title",
+      "group": "screening",
+      "x": 677,
+      "y": 183,
+      "w": 266,
+      "h": 26,
+      "text": "Exploration screening",
+      "fontPt": 8.9,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "screening_proxy",
+      "group": "screening",
+      "x": 677,
+      "y": 216,
+      "w": 266,
+      "h": 23,
+      "text": "Proxy + feasibility precheck",
+      "fontPt": 8.2,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "screening_cvx",
+      "group": "screening",
+      "x": 677,
+      "y": 244,
+      "w": 266,
+      "h": 23,
+      "text": "CVX when required",
+      "fontPt": 8.2,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "exploration_request",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          535,
+          214
+        ],
+        [
+          665,
+          214
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "exploration_response",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          665,
+          252
+        ],
+        [
+          535,
+          252
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "exploration_request_label",
+      "group": "evaluation_calls",
+      "x": 543,
+      "y": 186,
+      "w": 112,
+      "h": 24,
+      "text": "Candidate",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "exploration_response_label",
+      "group": "evaluation_calls",
+      "x": 543,
+      "y": 256,
+      "w": 112,
+      "h": 24,
+      "text": "Score",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "strict_cvx",
+      "group": "strict_cvx",
+      "x": 665,
+      "y": 323,
+      "w": 290,
+      "h": 219,
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "strict_cvx_header",
+      "group": "strict_cvx",
+      "x": 665,
+      "y": 323,
+      "w": 290,
+      "h": 39,
+      "fill": "#397B73",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "strict_cvx_title",
+      "group": "strict_cvx",
+      "x": 677,
+      "y": 328,
+      "w": 266,
+      "h": 29,
+      "text": "Strict CVX resource solve",
+      "fontPt": 8.9,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "strict_cvx_objective",
+      "group": "strict_cvx",
+      "x": 677,
+      "y": 379,
+      "w": 266,
+      "h": 25,
+      "text": "Minimize UAV energy",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "strict_cvx_constraints",
+      "group": "strict_cvx",
+      "x": 677,
+      "y": 407,
+      "w": 266,
+      "h": 24,
+      "text": "Timing and capacity constraints",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "strict_cvx_separator",
+      "group": "strict_cvx",
+      "points": [
+        [
+          685,
+          443
+        ],
+        [
+          934,
+          443
+        ]
+      ],
+      "stroke": "#B6BEC5",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.5
+    },
+    {
+      "type": "rect",
+      "id": "strict_cvx_return_background",
+      "group": "strict_cvx",
+      "x": 676,
+      "y": 453,
+      "w": 268,
+      "h": 78,
+      "fill": "#EFF6F4",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "strict_cvx_return",
+      "group": "strict_cvx",
+      "x": 677,
+      "y": 460,
+      "w": 266,
+      "h": 62,
+      "text": "Return energy, feasibility\nand resource allocation",
+      "fontPt": 8.5,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "baseline_request",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          535,
+          342
+        ],
+        [
+          665,
+          342
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "baseline_response",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          665,
+          368
+        ],
+        [
+          535,
+          368
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "baseline_request_label",
+      "group": "evaluation_calls",
+      "x": 536,
+      "y": 314,
+      "w": 110,
+      "h": 24,
+      "text": "Baseline",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "baseline_response_label",
+      "group": "evaluation_calls",
+      "x": 536,
+      "y": 373,
+      "w": 110,
+      "h": 24,
+      "text": "Status",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "elite_request",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          535,
+          474
+        ],
+        [
+          665,
+          474
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "elite_response",
+      "group": "evaluation_calls",
+      "points": [
+        [
+          665,
+          512
+        ],
+        [
+          535,
+          512
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "elite_request_label",
+      "group": "evaluation_calls",
+      "x": 543,
+      "y": 446,
+      "w": 112,
+      "h": 24,
+      "text": "Candidates",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "elite_response_label",
+      "group": "evaluation_calls",
+      "x": 543,
+      "y": 517,
+      "w": 112,
+      "h": 24,
+      "text": "Energy",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "kkt_note",
+      "group": "kkt_note",
+      "x": 645,
+      "y": 583,
+      "w": 330,
+      "h": 98,
+      "fill": "#F8F9FA",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "kkt_title",
+      "group": "kkt_note",
+      "x": 657,
+      "y": 590,
+      "w": 306,
+      "h": 26,
+      "text": "KKT analytical support",
+      "fontPt": 8.7,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#59666F"
+    },
+    {
+      "type": "text",
+      "id": "kkt_body",
+      "group": "kkt_note",
+      "x": 657,
+      "y": 620,
+      "w": 306,
+      "h": 48,
+      "text": "Resource allocation laws\nSmall-instance CVX cross-checks",
+      "fontPt": 8.3,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "panel_moves_marker",
+      "group": "panel_titles",
+      "x": 30,
+      "y": 705,
+      "w": 36,
+      "h": 30,
+      "fill": "#A46D36",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "panel_moves_letter",
+      "group": "panel_titles",
+      "x": 30,
+      "y": 705,
+      "w": 36,
+      "h": 30,
+      "text": "(c)",
+      "fontPt": 9.5,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "panel_moves",
+      "group": "panel_titles",
+      "x": 77,
+      "y": 705,
+      "w": 898,
+      "h": 30,
+      "text": "Examples of structural moves",
+      "fontPt": 10.2,
+      "bold": true,
+      "align": "left",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "move_contact_panel",
+      "group": "move_contact",
+      "x": 30,
+      "y": 747,
+      "w": 296,
+      "h": 181,
+      "fill": "#FFFFFF",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "move_contact_header",
+      "group": "move_contact",
+      "x": 30,
+      "y": 747,
+      "w": 296,
+      "h": 36,
+      "fill": "#FBF5EE",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "move_contact_title",
+      "group": "move_contact",
+      "x": 38,
+      "y": 754,
+      "w": 280,
+      "h": 27,
+      "text": "Contact-point adjustment",
+      "fontPt": 8.8,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "move_batch_panel",
+      "group": "move_batch",
+      "x": 352,
+      "y": 747,
+      "w": 296,
+      "h": 181,
+      "fill": "#FFFFFF",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "move_batch_header",
+      "group": "move_batch",
+      "x": 352,
+      "y": 747,
+      "w": 296,
+      "h": 36,
+      "fill": "#FBF5EE",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "move_batch_title",
+      "group": "move_batch",
+      "x": 360,
+      "y": 754,
+      "w": 280,
+      "h": 27,
+      "text": "Batch merging",
+      "fontPt": 8.8,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "move_mode_panel",
+      "group": "move_mode",
+      "x": 674,
+      "y": 747,
+      "w": 296,
+      "h": 181,
+      "fill": "#FFFFFF",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "move_mode_header",
+      "group": "move_mode",
+      "x": 674,
+      "y": 747,
+      "w": 296,
+      "h": 36,
+      "fill": "#FBF5EE",
+      "stroke": null,
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "move_mode_title",
+      "group": "move_mode",
+      "x": 682,
+      "y": 754,
+      "w": 280,
+      "h": 27,
+      "text": "Task-mode reassignment",
+      "fontPt": 8.8,
+      "bold": true,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_coverage_before",
+      "group": "move_contact",
+      "x": 78,
+      "y": 810,
+      "w": 44,
+      "h": 80,
+      "fill": "#EFF6F4",
+      "stroke": "#397B73",
+      "linePt": 0.6,
+      "dash": 2
+    },
+    {
+      "type": "polyline",
+      "id": "contact_route_before",
+      "group": "move_contact",
+      "points": [
+        [
+          62,
+          881
+        ],
+        [
+          100,
+          826
+        ],
+        [
+          138,
+          881
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_task_i_before",
+      "group": "move_contact",
+      "x": 58,
+      "y": 877,
+      "w": 8,
+      "h": 8,
+      "fill": "#FFFFFF",
+      "stroke": "#306587",
+      "linePt": 0.8
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_task_j_before",
+      "group": "move_contact",
+      "x": 134,
+      "y": 877,
+      "w": 8,
+      "h": 8,
+      "fill": "#FFFFFF",
+      "stroke": "#306587",
+      "linePt": 0.8
+    },
+    {
+      "type": "polygon",
+      "id": "contact_point_before",
+      "group": "move_contact",
+      "points": [
+        [
+          100,
+          820
+        ],
+        [
+          106,
+          826
+        ],
+        [
+          100,
+          832
+        ],
+        [
+          94,
+          826
+        ],
+        [
+          100,
+          820
+        ]
+      ],
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "contact_label_before",
+      "group": "move_contact",
+      "x": 125,
+      "y": 812,
+      "w": 25,
+      "h": 22,
+      "text": "c",
+      "fontPt": 8.2,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "contact_i_before",
+      "group": "move_contact",
+      "x": 47,
+      "y": 885,
+      "w": 30,
+      "h": 23,
+      "text": "i",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "contact_j_before",
+      "group": "move_contact",
+      "x": 123,
+      "y": 885,
+      "w": 30,
+      "h": 23,
+      "text": "j",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_coverage_after",
+      "group": "move_contact",
+      "x": 229,
+      "y": 810,
+      "w": 44,
+      "h": 80,
+      "fill": "#EFF6F4",
+      "stroke": "#397B73",
+      "linePt": 0.6,
+      "dash": 2
+    },
+    {
+      "type": "polyline",
+      "id": "contact_route_after",
+      "group": "move_contact",
+      "points": [
+        [
+          213,
+          881
+        ],
+        [
+          251,
+          857
+        ],
+        [
+          289,
+          881
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_task_i_after",
+      "group": "move_contact",
+      "x": 209,
+      "y": 877,
+      "w": 8,
+      "h": 8,
+      "fill": "#FFFFFF",
+      "stroke": "#306587",
+      "linePt": 0.8
+    },
+    {
+      "type": "ellipse",
+      "id": "contact_task_j_after",
+      "group": "move_contact",
+      "x": 285,
+      "y": 877,
+      "w": 8,
+      "h": 8,
+      "fill": "#FFFFFF",
+      "stroke": "#306587",
+      "linePt": 0.8
+    },
+    {
+      "type": "polygon",
+      "id": "contact_point_after",
+      "group": "move_contact",
+      "points": [
+        [
+          251,
+          851
+        ],
+        [
+          257,
+          857
+        ],
+        [
+          251,
+          863
+        ],
+        [
+          245,
+          857
+        ],
+        [
+          251,
+          851
+        ]
+      ],
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "contact_label_after",
+      "group": "move_contact",
+      "x": 276,
+      "y": 843,
+      "w": 25,
+      "h": 22,
+      "text": "c′",
+      "fontPt": 8.2,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "contact_i_after",
+      "group": "move_contact",
+      "x": 198,
+      "y": 885,
+      "w": 30,
+      "h": 23,
+      "text": "i",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "contact_j_after",
+      "group": "move_contact",
+      "x": 274,
+      "y": 885,
+      "w": 30,
+      "h": 23,
+      "text": "j",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "contact_before",
+      "group": "move_contact",
+      "x": 51,
+      "y": 786,
+      "w": 99,
+      "h": 24,
+      "text": "Before",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "contact_after",
+      "group": "move_contact",
+      "x": 202,
+      "y": 786,
+      "w": 99,
+      "h": 24,
+      "text": "After",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "polyline",
+      "id": "contact_change_arrow",
+      "group": "move_contact",
+      "points": [
+        [
+          159,
+          849
+        ],
+        [
+          190,
+          849
+        ]
+      ],
+      "stroke": "#73808A",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "contact_note",
+      "group": "move_contact",
+      "x": 41,
+      "y": 905,
+      "w": 274,
+      "h": 20,
+      "text": "Same task order",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "batch_before",
+      "group": "move_batch",
+      "x": 374,
+      "y": 786,
+      "w": 105,
+      "h": 24,
+      "text": "Before",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "batch_after",
+      "group": "move_batch",
+      "x": 534,
+      "y": 786,
+      "w": 104,
+      "h": 24,
+      "text": "After",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "batch_early",
+      "group": "move_batch",
+      "x": 384,
+      "y": 814,
+      "w": 83,
+      "h": 34,
+      "fill": "#F8F9FA",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "batch_late",
+      "group": "move_batch",
+      "x": 384,
+      "y": 863,
+      "w": 83,
+      "h": 34,
+      "fill": "#F8F9FA",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_contact_early",
+      "group": "move_batch",
+      "x": 356,
+      "y": 816,
+      "w": 25,
+      "h": 25,
+      "text": "c₁",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "batch_contact_late",
+      "group": "move_batch",
+      "x": 356,
+      "y": 866,
+      "w": 25,
+      "h": 25,
+      "text": "c₂",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "batch_a_before",
+      "group": "move_batch",
+      "x": 396,
+      "y": 819,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_a_before_label",
+      "group": "move_batch",
+      "x": 397,
+      "y": 820,
+      "w": 18,
+      "h": 22,
+      "text": "a",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "batch_b_before",
+      "group": "move_batch",
+      "x": 429,
+      "y": 819,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_b_before_label",
+      "group": "move_batch",
+      "x": 430,
+      "y": 820,
+      "w": 18,
+      "h": 22,
+      "text": "b",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "batch_d_before",
+      "group": "move_batch",
+      "x": 412,
+      "y": 868,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_d_before_label",
+      "group": "move_batch",
+      "x": 413,
+      "y": 869,
+      "w": 18,
+      "h": 22,
+      "text": "d",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "polyline",
+      "id": "batch_early_branch",
+      "group": "move_batch",
+      "points": [
+        [
+          467,
+          831
+        ],
+        [
+          488,
+          831
+        ],
+        [
+          488,
+          855
+        ]
+      ],
+      "stroke": "#73808A",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "batch_late_branch",
+      "group": "move_batch",
+      "points": [
+        [
+          467,
+          880
+        ],
+        [
+          488,
+          880
+        ],
+        [
+          488,
+          855
+        ]
+      ],
+      "stroke": "#73808A",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "batch_merge_arrow",
+      "group": "move_batch",
+      "points": [
+        [
+          488,
+          855
+        ],
+        [
+          531,
+          855
+        ]
+      ],
+      "stroke": "#73808A",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "rect",
+      "id": "batch_merged",
+      "group": "move_batch",
+      "x": 535,
+      "y": 834,
+      "w": 96,
+      "h": 43,
+      "fill": "#F8F9FA",
+      "stroke": "#B6BEC5",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "batch_a_after",
+      "group": "move_batch",
+      "x": 544,
+      "y": 843,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_a_after_label",
+      "group": "move_batch",
+      "x": 545,
+      "y": 844,
+      "w": 18,
+      "h": 22,
+      "text": "a",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "batch_b_after",
+      "group": "move_batch",
+      "x": 573,
+      "y": 843,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_b_after_label",
+      "group": "move_batch",
+      "x": 574,
+      "y": 844,
+      "w": 18,
+      "h": 22,
+      "text": "b",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "batch_d_after",
+      "group": "move_batch",
+      "x": 602,
+      "y": 843,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "batch_d_after_label",
+      "group": "move_batch",
+      "x": 603,
+      "y": 844,
+      "w": 18,
+      "h": 22,
+      "text": "d",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "batch_contact_merged",
+      "group": "move_batch",
+      "x": 559,
+      "y": 878,
+      "w": 48,
+      "h": 23,
+      "text": "c₂",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "text",
+      "id": "batch_note",
+      "group": "move_batch",
+      "x": 362,
+      "y": 905,
+      "w": 276,
+      "h": 20,
+      "text": "Combine tasks at a later contact",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "mode_before",
+      "group": "move_mode",
+      "x": 696,
+      "y": 786,
+      "w": 99,
+      "h": 24,
+      "text": "Local",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "text",
+      "id": "mode_after",
+      "group": "move_mode",
+      "x": 864,
+      "y": 786,
+      "w": 99,
+      "h": 24,
+      "text": "MEC",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    },
+    {
+      "type": "rect",
+      "id": "mode_task_local",
+      "group": "move_mode",
+      "x": 734,
+      "y": 815,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "mode_task_local_label",
+      "group": "move_mode",
+      "x": 735,
+      "y": 816,
+      "w": 18,
+      "h": 22,
+      "text": "a",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "rect",
+      "id": "mode_task_mec",
+      "group": "move_mode",
+      "x": 903,
+      "y": 815,
+      "w": 20,
+      "h": 24,
+      "fill": "#FBF5EE",
+      "stroke": "#A46D36",
+      "linePt": 0.75
+    },
+    {
+      "type": "text",
+      "id": "mode_task_mec_label",
+      "group": "move_mode",
+      "x": 904,
+      "y": 816,
+      "w": 18,
+      "h": 22,
+      "text": "a",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D",
+      "italic": true
+    },
+    {
+      "type": "polyline",
+      "id": "mode_local_to_cpu",
+      "group": "move_mode",
+      "points": [
+        [
+          744,
+          839
+        ],
+        [
+          744,
+          856
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "polyline",
+      "id": "mode_offload_to_mec",
+      "group": "move_mode",
+      "points": [
+        [
+          913,
+          839
+        ],
+        [
+          913,
+          856
+        ]
+      ],
+      "stroke": "#397B73",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9,
+      "dash": 3
+    },
+    {
+      "type": "rect",
+      "id": "mode_cpu",
+      "group": "move_mode",
+      "x": 725,
+      "y": 861,
+      "w": 38,
+      "h": 31,
+      "fill": "#EEF4F8",
+      "stroke": "#306587",
+      "linePt": 0.75
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_left_0",
+      "group": "move_mode",
+      "points": [
+        [
+          719,
+          867
+        ],
+        [
+          725,
+          867
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_right_0",
+      "group": "move_mode",
+      "points": [
+        [
+          763,
+          867
+        ],
+        [
+          769,
+          867
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_left_1",
+      "group": "move_mode",
+      "points": [
+        [
+          719,
+          876
+        ],
+        [
+          725,
+          876
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_right_1",
+      "group": "move_mode",
+      "points": [
+        [
+          763,
+          876
+        ],
+        [
+          769,
+          876
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_left_2",
+      "group": "move_mode",
+      "points": [
+        [
+          719,
+          885
+        ],
+        [
+          725,
+          885
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "polyline",
+      "id": "mode_cpu_right_2",
+      "group": "move_mode",
+      "points": [
+        [
+          763,
+          885
+        ],
+        [
+          769,
+          885
+        ]
+      ],
+      "stroke": "#306587",
+      "fill": null,
+      "arrow": false,
+      "linePt": 0.6
+    },
+    {
+      "type": "rect",
+      "id": "mode_mec_server",
+      "group": "move_mode",
+      "x": 893,
+      "y": 856,
+      "w": 40,
+      "h": 42,
+      "fill": "#FFFFFF",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "mode_mec_rack_0",
+      "group": "move_mode",
+      "x": 899,
+      "y": 862,
+      "w": 28,
+      "h": 7,
+      "fill": "#EFF6F4",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "mode_mec_rack_1",
+      "group": "move_mode",
+      "x": 899,
+      "y": 873,
+      "w": 28,
+      "h": 7,
+      "fill": "#EFF6F4",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "rect",
+      "id": "mode_mec_rack_2",
+      "group": "move_mode",
+      "x": 899,
+      "y": 884,
+      "w": 28,
+      "h": 7,
+      "fill": "#EFF6F4",
+      "stroke": "#397B73",
+      "linePt": 0.75
+    },
+    {
+      "type": "polyline",
+      "id": "mode_change_arrow",
+      "group": "move_mode",
+      "points": [
+        [
+          800,
+          853
+        ],
+        [
+          854,
+          853
+        ]
+      ],
+      "stroke": "#73808A",
+      "fill": null,
+      "arrow": true,
+      "linePt": 0.9
+    },
+    {
+      "type": "text",
+      "id": "mode_note",
+      "group": "move_mode",
+      "x": 684,
+      "y": 905,
+      "w": 276,
+      "h": 20,
+      "text": "Switch the processing location",
+      "fontPt": 8.1,
+      "bold": false,
+      "align": "center",
+      "fill": null,
+      "stroke": null,
+      "color": "#29343D"
+    }
+  ]
+}
