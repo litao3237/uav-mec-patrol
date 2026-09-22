@@ -9,14 +9,14 @@ def draw_primary(data,registry):
     # 误差条是每个任务规模 9 次运行的样本标准差；右图采用逐对收益的均值。
     table=data.tables['dense_workload']; x=[int(r['K']) for r in table]
     fig=figure(98); axes=fig.subplots(1,2)
-    for method,key,color,marker,ls,label in [('generic','base',BLUE,'o','--','Generic ALNS'),('hybrid','hybrid',ORANGE,'s','-','Proposed Hybrid')]:
+    for method,key,color,marker,ls,label in [('generic','base',BLUE,'o','--','B-ALNS'),('hybrid','hybrid',ORANGE,'s','-','ESI-ALNS')]:
         values=[[r[f'{key}_cvx_energy_j']/1000 for r in data.dense_rows(k) if dense_strict(r,method)] for k in x]
         series(axes[0],x,[mean(v) for v in values],color=color,marker=marker,ls=ls,label=label,error=[sample_std(v) for v in values])
     panel(axes[0],'a','Energy versus workload','UAV energy (kJ)','Tasks, K')
     axes[0].legend(loc='upper left')
     gains=[number(r,'hybrid_gain_mean_pct') for r in table]
     series(axes[1],x,gains); axes[1].set_ylim(-.05,2.2)
-    panel(axes[1],'b','Paired improvement','Hybrid improvement (%)','Tasks, K')
+    panel(axes[1],'b','Paired improvement','ESI-ALNS improvement (%)','Tasks, K')
     counts(axes[1],[x[i] for i in (0,2,5)],[gains[i] for i in (0,2,5)],[f'{gains[i]:.3f}%' for i in (0,2,5)],dy=6)
     fig.supxlabel('3 scenarios × 3 algorithm seeds per K; error bars: ±1 SD',fontsize=8.5)
     save(fig,'fig03_dense_workload','Dense-workload performance',registry)
@@ -27,17 +27,28 @@ def draw_primary(data,registry):
         ['Offloading','MEC contacts','Route length'],['Offloaded tasks (%)','Contacts per UAV','Route distance (km)']):
         series(ax,x,[number(r,key)*scale for r in table]); panel(ax,letter,title,ylabel,'Tasks, K')
         ax.set_xticks([30,40,50,60,70,80])
-    fig.supxlabel('Proposed Hybrid; 9 Stage-1-strict runs at each task scale',fontsize=8.5)
+    fig.supxlabel('ESI-ALNS; 9 Stage-1-strict runs at each task scale',fontsize=8.5)
     save(fig,'fig04_workload_structure','Structural evolution with workload',registry)
 
     draw_baselines(data,registry)
 
-    fig=figure(122); axes=fig.subplots(1,2)
+    fig=figure(112); axes=fig.subplots(1,2)
     for ax,k,letter in zip(axes,[50,80],'ab'):
-        paired_plot(ax,data.pairs(k),letter,f'K = {k}')
+        grouped={}
+        for row in data.pairs(k):
+            grouped.setdefault(row['scenario_seed'],[]).append(row)
+        scenario_rows=[
+            {
+                'scenario_seed':scenario,
+                'generic_j':mean(r['generic_j'] for r in rows),
+                'hybrid_j':mean(r['hybrid_j'] for r in rows),
+            }
+            for scenario,rows in sorted(grouped.items())
+        ]
+        paired_plot(ax,scenario_rows,letter,f'K = {k}')
     method_legend(fig)
-    fig.supxlabel('K=50: 5 better / 4 equal; K=80: 8 better / 1 equal; no worse pairs',fontsize=8.5)
-    save(fig,'fig06_paired_comparison','Paired Generic-versus-Hybrid energy',registry)
+    fig.supxlabel('Independent-scenario means: K=50, 7 better / 1 equal; K=80, 8 better / 0 equal; no worse scenarios',fontsize=8.5)
+    save(fig,'fig06_paired_comparison','Scenario-paired B-ALNS versus ESI-ALNS energy',registry)
 
     fig=figure(92); axes=fig.subplots(1,2,gridspec_kw={'width_ratios':[3,1.6]},sharey=True)
     rows=[r for r in data.tables['ablation'] if r['variant']!='Full Hybrid']
@@ -63,7 +74,7 @@ def draw_baselines(data,registry):
     fig=figure(107); axes=fig.subplots(1,2)
     methods=['greedy_repair','nearest_mec','ga','generic_alns','hybrid']
     colors=[TEAL,GRAY,'#776486',BLUE,ORANGE]
-    labels=['Greedy*\n2/3','FR-NM\n3/3','Route-GA\n9/9','Generic\n9/9','Hybrid\n9/9']
+    labels=['GR-MR*\n7/8','FTR-NM\n8/8','RGA-MR\n24/24','B-ALNS\n24/24','ESI-ALNS\n24/24']
     all_values=[]
     for i,(method,color) in enumerate(zip(methods,colors)):
         # Greedy 与 FR-NM 在数据接口按场景去重；未获严格解的场景不绘制能耗点。
@@ -75,9 +86,9 @@ def draw_baselines(data,registry):
     axes[0].set_ylim(min(all_values)-12,max(all_values)+15)
     panel(axes[0],'a','K = 50: run-level energy','UAV energy (kJ)','Method (strict / scheduled)')
     rows=[r for r in data.tables['baseline_summary'] if r['K']=='80']
-    rate_bars(axes[1],['Greedy','FR-NM','GA†','Generic','Hybrid'],
+    rate_bars(axes[1],['GR-MR','FTR-NM','RGA-MR','B-ALNS','ESI-ALNS'],
         [int(r['strict_count']) for r in rows],[int(r['total_count']) for r in rows],
         colors=colors,hatches=['','','///','',''])
     panel(axes[1],'b','K = 80: strict feasibility','Strict runs (%)')
-    fig.supxlabel('* Greedy energy uses 2 strict scenarios; horizontal marks show means.\n† K=80 GA: 3-scenario pilot; search budgets are not matched.',fontsize=8.5)
-    save(fig,'fig05_baseline_comparison','Baseline energy and strict feasibility',registry)
+    fig.supxlabel('* GR-MR energy uses 7 strict scenarios; horizontal marks show conditional means.\nK=80 RGA-MR is strict in 3/24 runs, all from one independent scenario.',fontsize=8.5)
+    save(fig,'fig05_baseline_comparison','Formal 8-scenario baseline energy and strict feasibility',registry)
