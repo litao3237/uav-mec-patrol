@@ -318,6 +318,8 @@ def run_uav_mec_alns(
     initial_solution: DiscreteSolution | None = None,
     config: UavMecALNSConfig | None = None,
     evaluator: ObjectiveEvaluator | None = None,
+    acceptance_criterion: Any | None = None,
+    stopping_criterion: Any | None = None,
 ) -> UavMecALNSResult:
     """Run the external ALNS framework on the UAV-MEC discrete problem.
 
@@ -417,7 +419,9 @@ def run_uav_mec_alns(
         ],
     )
 
-    if cfg.time_scaled_rrt:
+    if acceptance_criterion is not None:
+        accept = acceptance_criterion
+    elif cfg.time_scaled_rrt:
         assert cfg.max_runtime_s is not None
         accept = _TimeScaledRecordToRecordTravel(
             initial_objective,
@@ -434,7 +438,10 @@ def run_uav_mec_alns(
         )
 
     tracked_stop: _MaxRuntimeOrStagnation | None = None
-    if cfg.max_runtime_s is None:
+    if stopping_criterion is not None:
+        stop = stopping_criterion
+        stop_reason = "custom"
+    elif cfg.max_runtime_s is None:
         stop = MaxIterations(cfg.iterations)
         stop_reason = "iterations"
     elif cfg.stagnation_runtime_s is not None:
@@ -469,6 +476,24 @@ def run_uav_mec_alns(
         stop_elapsed_s = tracked_stop.elapsed_s
         last_improvement_elapsed_s = (
             tracked_stop.last_improvement_elapsed_s
+        )
+    elif stopping_criterion is not None:
+        stop_reason = str(
+            getattr(
+                stopping_criterion,
+                "stop_reason",
+                stop_reason,
+            )
+        )
+        stop_elapsed_s = getattr(
+            stopping_criterion,
+            "elapsed_s",
+            None,
+        )
+        last_improvement_elapsed_s = getattr(
+            stopping_criterion,
+            "last_improvement_elapsed_s",
+            None,
         )
 
     return UavMecALNSResult(
