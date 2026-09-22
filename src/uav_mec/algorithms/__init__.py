@@ -1,6 +1,8 @@
 """Discrete optimization algorithms."""
 
 from .alns import (
+    BudgetAwareTerminalFirstConfig,
+    BudgetAwareTerminalFirstResult,
     AdaptiveESIConfig,
     AdaptiveESIResult,
     ContinuousESIConfig,
@@ -18,6 +20,7 @@ from .alns import (
     Stage1CVXObjectiveOracle,
     UavMecALNSConfig,
     UavMecALNSResult,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
     run_uav_mec_adaptive_esi_alns,
     run_uav_mec_continuous_esi_alns,
     run_uav_mec_terminal_first_esi_alns,
@@ -41,6 +44,8 @@ from .initial import (
 )
 
 __all__ = [
+    "BudgetAwareTerminalFirstConfig",
+    "BudgetAwareTerminalFirstResult",
     "AdaptiveESIConfig",
     "AdaptiveESIResult",
     "ContinuousESIConfig",
@@ -70,6 +75,7 @@ __all__ = [
     "build_mec_assisted_initial_solution",
     "evaluate_initial_proxy",
     "run_route_ga",
+    "run_uav_mec_budget_aware_terminal_first_esi_alns",
     "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_continuous_esi_alns",
     "run_uav_mec_terminal_first_esi_alns",
