@@ -75,8 +75,8 @@ def rate_bars(ax,labels,success,total,*,colors=None,hatches=None):
 
 
 def method_legend(fig):
-    handles=[Line2D([],[],color=BLUE,marker='o',ls='--',label='Generic ALNS'),
-             Line2D([],[],color=ORANGE,marker='s',label='Proposed Hybrid')]
+    handles=[Line2D([],[],color=BLUE,marker='o',ls='--',label='B-ALNS'),
+             Line2D([],[],color=ORANGE,marker='s',label='ESI-ALNS')]
     fig.legend(handles=handles,loc='outside upper center',ncols=2)
 
 
@@ -87,7 +87,13 @@ def paired_plot(ax,rows,letter,title):
     ax.hlines(y,np.minimum(g,h),np.maximum(g,h),color=GRAY,lw=1,zorder=2)
     ax.scatter(g,y,s=29,facecolors='white',edgecolors=BLUE,marker='o',linewidth=1,zorder=4)
     ax.scatter(h,y,s=16,color=ORANGE,marker='s',zorder=5)
-    ax.set_yticks(y,[f'S{r["scenario_seed"]}/A{r["algorithm_seed"]}' for r in rows])
+    labels=[
+        f'S{r["scenario_seed"]}/A{r["algorithm_seed"]}'
+        if 'algorithm_seed' in r
+        else f'S{r["scenario_seed"]}'
+        for r in rows
+    ]
+    ax.set_yticks(y,labels)
     ax.invert_yaxis(); ax.margins(x=.13,y=.075)
     panel(ax,letter,title,xlabel='UAV energy (kJ)')
     ax.grid(axis='y',visible=False); ax.grid(axis='x',color='#E5E9EC',lw=.55)
