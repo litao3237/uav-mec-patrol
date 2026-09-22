@@ -5,7 +5,7 @@ case:
     name: Groveland Ranger District Office
     latitude: 37.821982
     longitude: -120.098763
-  task_radius_km: 6.0
+  task_radius_km: 4.0
   num_tasks: 50
   num_uavs: 5
   cycle_s: 2400.0
