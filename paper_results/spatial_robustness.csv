@@ -1,0 +1,4 @@
+profile,runs,stage1_strict,energy_mean_strict_subset_j,hybrid_gain_mean_pct,offload_ratio_mean,contacts_per_uav_mean,route_distance_km_mean,bandwidth_relative_shadow_mean
+uniform,9,9,226768.196,1.378,0.122,1.044,11.494,0.005
+clustered,9,7,146764.392,0.200,0.275,0.971,6.981,0.013
+boundary-biased,9,6,226126.636,0.381,0.131,0.933,11.485,0.004
