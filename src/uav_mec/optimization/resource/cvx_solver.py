@@ -355,27 +355,80 @@ def solve_resource_problem(
             cp.Minimize(model.normalized_mec_cpu),
             model.constraints + [energy_guard],
         )
-        solver2, stage2_errors = _solve_with_fallback(
-            problem2,
-            verbose=verbose,
-            preferred_solver=solver1,
-        )
 
-        if solver2 is None or problem2.status not in (
-            cp.OPTIMAL,
-            cp.OPTIMAL_INACCURATE,
-        ):
-            final_values = stage1_values
-            final_energy = energy_star
-            stage2_status = (
-                "solver_error" if solver2 is None else str(problem2.status)
+        stage2_excluded: set[str] = set()
+        stage2_valid = False
+        stage2_status = "solver_error"
+        final_values = stage1_values
+        final_energy = energy_star
+        solver_final = solver1
+
+        while True:
+            solver2, solve_errors = _solve_with_fallback(
+                problem2,
+                verbose=verbose,
+                preferred_solver=solver1,
+                excluded_solvers=stage2_excluded,
             )
-            solver_final = solver1
-        else:
+            stage2_errors.extend(solve_errors)
+
+            if solver2 is None:
+                stage2_status = "solver_error"
+                break
+
+            if problem2.status not in (
+                cp.OPTIMAL,
+                cp.OPTIMAL_INACCURATE,
+            ):
+                stage2_status = str(problem2.status)
+                break
+
+            (
+                stage2_bandwidth,
+                stage2_mec_cpu,
+                stage2_local_cpu,
+                stage2_primal_violations,
+            ) = _stage1_resource_values(model)
+
+            if stage2_primal_violations:
+                stage2_errors.append(
+                    f"{solver2}: invalid Stage-2 resource primal: "
+                    + "; ".join(stage2_primal_violations)
+                )
+                stage2_excluded.add(solver2)
+                if len(stage2_excluded) >= len(_solver_candidates()):
+                    stage2_status = "invalid_primal"
+                    break
+                continue
+
             final_values = _snapshot_vars(model.variables)
+            # Reuse the same positive-resource sanitization used after Stage 1.
+            # This clips only tiny numerical lower-bound violations while
+            # preserving all non-resource Stage-2 values verbatim.
+            final_values["bandwidth_mhz"] = {
+                str(key): value
+                for key, value in stage2_bandwidth.items()
+            }
+            final_values["mec_cpu_ghz"] = {
+                str(key): value
+                for key, value in stage2_mec_cpu.items()
+            }
+            final_values["local_cpu_ghz"] = {
+                str(key): value
+                for key, value in stage2_local_cpu.items()
+            }
             final_energy = _value(model.total_energy.value)
             stage2_status = str(problem2.status)
             solver_final = solver2
+            stage2_valid = True
+            break
+
+        if not stage2_valid:
+            # Stage 1 remains the correctness result. A numerically invalid
+            # lexicographic realization must never replace its valid primal.
+            final_values = stage1_values
+            final_energy = energy_star
+            solver_final = solver1
     else:
         final_values = stage1_values
         final_energy = energy_star
