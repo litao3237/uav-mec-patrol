@@ -1,0 +1,5 @@
+iterations,runs,strict_runs,strict_rate,conditional_energy_mean_j,gap_to_pair_best_mean_pct,runtime_mean_s
+25,9,6,0.666667,245028.040,14.452,20.798
+50,9,8,0.888889,238428.651,9.580,26.343
+100,9,9,1.000000,226768.196,2.568,50.011
+200,9,7,0.777778,217985.012,0.000,88.577
