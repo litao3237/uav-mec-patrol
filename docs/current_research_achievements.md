@@ -1289,3 +1289,119 @@ C_{\max}\in\{1,2,3,4\}
 
 但不应把 \(C_{\max}=4\) 能耗略高于 \(C_{\max}=3\) 解释成“更多 contact 有害”；
 Hybrid 是有限预算启发式搜索，额外 action space 同时也会扩大搜索空间。
+
+
+---
+
+# GIS-driven Real-Geography Case Study: Stanislaus National Forest
+
+为补齐 synthetic simulation 之外的外部地理真实性验证，新增真实 GIS 驱动 case study。
+
+## A. 数据与场景
+
+研究区域围绕美国 California 的 **Stanislaus National Forest / Groveland Ranger District** 构建。
+
+真实地理锚点：
+
+- UAV depot / modeled edge site E1：Groveland Ranger District Office；
+- modeled edge site E2：Smith Peak Lookout；
+- monitoring-node candidate positions：USDA Forest Service historical FireOccurrence point records；
+- 正式实验固定使用 2026-09-22 拉取并去重后的 59 个 USFS 历史火灾坐标。
+
+解释边界：
+
+- E1/E2 仅表示在真实设施位置**建模部署 MEC 能力**，不声称现场已经存在本文参数的 MEC server；
+- 历史火灾坐标被用作 prospective fixed monitoring-node deployment positions，不声称这些地点已经安装传感器；
+- 本实验属于 **GIS-driven real-geography validation**，不是实机 UAV field-flight experiment。
+
+正式快照：
+
+\`data/real_case/stanislaus/usfs_fire_occurrences_selected59_2026-09-22.json\`
+
+在线 USFS ArcGIS scout 脚本：
+
+\`experiments/prepare_stanislaus_real_case.py\`
+
+正式实例构造器：
+
+\`src/uav_mec/instances/real_geography.py\`
+
+正式 runner：
+
+\`experiments/run_real_geography_case.py\`
+
+## B. 真实地理尺度与参数
+
+正式 K=59 instance：
+
+- real historical monitoring candidates：59；
+- UAVs：5；
+- modeled MEC sites：2；
+- fire-history years represented：1992–2024；
+- projected geometry extent：約 7.783 km × 5.016 km；
+- cycle budget：2400 s；
+- average-delay budget：1000 s；
+- per-UAV energy budget：500 kJ；
+- task data size / cycles-per-bit / channel model 保持与 synthetic baseline 相同；
+- 100 Hybrid iterations；
+- scenario seeds 45/46/47；
+- algorithm seeds 100/101/102。
+
+由于真实 AOI 的几何尺度远大于 synthetic 1 km × 1 km baseline，本实验的绝对 energy 不与 synthetic 表格做数值横向比较。
+
+## C. Scale calibration
+
+真实 case calibration 采用透明的 geometry-driven 过程：
+
+1. 初始 4 km AOI + 1200 s cycle：路线尺度过大，全部 optimistic precheck infeasible；
+2. 根据真实路径尺度将 patrol cycle 调整为 2400 s、battery 调整为 500 kJ；
+3. K=50 变为 strict feasible，但最优结构退化为 all-local；
+4. 扩大 AOI 到 6 km 会使 K=50/K=80 路线过长并再次 precheck infeasible，因此放弃扩大地理范围；
+5. 回到固定 4 km AOI，使用其全部 59 个唯一 USFS historical fire points，得到 strict-feasible 且至少一个 run 出现真实 MEC contact/offload 的 K=59 正式设置。
+
+因此最终参数不是为了获得更大 Hybrid improvement 而调节，而是由真实 AOI 航程尺度与非退化性共同确定。
+
+## D. 正式 3×3 结果
+
+| Method | Strict feasibility | Mean energy over strict solutions |
+|---|---:|---:|
+| Greedy + MEC Repair | 0/3 unique scenarios | - |
+| FR-NM | 0/3 unique scenarios | - |
+| Generic ALNS | **8/9** | 883683.621 J |
+| Proposed Hybrid | **8/9** | **878690.613 J** |
+
+Hybrid vs Generic on 8 common strict pairs：
+
+- Hybrid better：2；
+- equal：6；
+- Generic better：0；
+- mean paired Hybrid advantage：**0.543%**；
+- median advantage：0%。
+
+Hybrid strict-run structural/QoS statistics：
+
+- Stage-2 strict：8/8；
+- mean route distance：48.154 km；
+- mean delay：646.164 s；
+- mean deadline slack：446.796 s；
+- mean offload ratio：0.212%；
+- mean contacts/UAV：0.025。
+
+其中 S45/A100 保留 1 个 MEC contact 和 1 个 offloaded task；其余多数 strict solutions 为 all-local。说明在当前真实设施位置、4 km AOI 和任务计算强度下，MEC offloading 是稀疏而非主导的。
+
+## E. 可以支持的结论
+
+这组实验主要支持：
+
+1. 在真实历史火灾空间分布和真实设施锚点下，简单 Greedy/FR-NM repair 无法恢复 strict feasible solution，而 Generic/Hybrid 能在 8/9 stochastic runs 中恢复 strict solution；
+2. Hybrid 在所有 common-strict pair 上保持 non-worse，并在 2/8 pair 上进一步降低 UAV energy；
+3. Proposed Hybrid 的有效性不依赖 synthetic square-map geometry；
+4. 真实地理场景中的 MEC offloading 很稀疏，因此该 case 不应被用来夸大 contact/offloading 的普遍频率；
+5. Contact Opportunity 机制本身的主要验证仍来自受控的 \(C_{\max}=1/2/3/4\) sensitivity，真实 case 的角色是 **external geography robustness**。
+
+该实验不能声称：
+
+- 真实部署了 59 个监测节点；
+- Smith Peak/Groveland 现场已有本文规格 MEC；
+- 已完成实机飞行验证；
+- real-case 与 synthetic case 的绝对能耗可以直接比较。
