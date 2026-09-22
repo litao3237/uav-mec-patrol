@@ -1438,6 +1438,39 @@ Codex 在生成图之前优先读取：
 
 ---
 
+## 25.1 Codex 优先使用的已跟踪绘图数据
+
+最终论文作图时，Codex **优先读取 Git 中已跟踪的 `paper_results/*.csv`**，
+而不是依赖本地是否存在 `outputs/results/` 或手工下载 GitHub Actions artifact。
+
+当前已跟踪：
+
+- `paper_results/dense_workload.csv`
+- `paper_results/baseline_summary.csv`
+- `paper_results/ablation.csv`
+- `paper_results/mec_count.csv`
+- `paper_results/uav_count.csv`
+- `paper_results/contact_budget.csv`
+- `paper_results/bandwidth_sensitivity.csv`
+- `paper_results/coverage_radius.csv`
+- `paper_results/spatial_robustness.csv`
+- `paper_results/iteration_budget.csv`
+- `paper_results/strong_reference.csv`
+- `paper_results/real_geography.csv`
+
+这些文件是最终论文绘图的 compact publication interface。
+原始 per-run JSON、日志和 Actions artifact 仍作为审计/复现实验依据，不要求
+`git pull` 自动获取。
+
+读取这些 CSV 前必须同时阅读：
+
+- `paper_results/README.md`
+
+其中定义了 strict-subset、deterministic baseline、Stage-1/Stage-2、
+shadow price、real-geography 等统计口径。
+
+---
+
 # 26. 最终绘图目标
 
 最终图集应体现清晰的论文证据链：
