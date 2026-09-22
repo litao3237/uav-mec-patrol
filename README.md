@@ -196,8 +196,11 @@ quad [J/CVX].
 - [x] 已实现三臂实验脚本 `experiments/run_paired_checkpoint_fork_v7.py`：continued B-ALNS / Legacy ESI / Energy-Guided ESI，共享同一 strict checkpoint，使用冻结的 K=50 12+3 s 与 K=80 36+9 s 预算；
 - [x] smoke CI `.github/workflows/paired_checkpoint_fork_v7_smoke.yml` 已通过：run `35741894388`，paired-checkpoint 回归测试 3/3 passed；K=50/S85/A100 的 prefix 为 12.05 s / 149 iterations，checkpoint Stage-1 为 strict `optimal`；
 - [x] smoke 三臂均完整执行并保持 strict：continued B-ALNS 3.07 s / 47 iterations / 0 gray-zone CVX；Legacy ESI 1.67 s / 5 exact-CVX；Energy-Guided ESI 1.06 s / 3 exact-CVX。三臂本样本均未进一步降低能耗，因此该 smoke 只证明 checkpoint/fork/计时/统计链路正确，不作为 ESI 有效性证据；
-- [ ] **[TODO]** 扩展到已观察开发场景 S85–92 做 paired marginal-value 机制验证；
-- [ ] **[TODO]** 机制冻结后才选择新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
+- [x] 已完成 S85–92 × A100/101/102 的 paired marginal-value 开发集验证，run `35742584262`，16/16 场景 job 与 aggregate 均成功；
+- [x] 开发集结论具有明显负载分层：K=50 的 Energy-Guided ESI 相对 continued B-ALNS 场景级 mean ΔE 差为 -205.0 J，场景 better/equal/worse = 1/2/5；场景级 J/s 差为 -24.8 J/s，3/1/4。K=80 在 19/24 strict checkpoint 上，Energy-Guided ESI 相对 continued B-ALNS 场景级 mean ΔE 差为 +1149.9 J，5/1/2；场景级 J/s 差为 +206.7 J/s，6/1/1；
+- [x] K=50 strict checkpoint = 24/24；K=80 strict checkpoint = 19/24。K=80 缺失的 5 个 pair 来自 prefix 后的 `optimal_inaccurate` / `infeasible(_precheck)`，因此 K=80 的边际价值结论只适用于 shared strict checkpoint 子集；
+- [x] continued B-ALNS 最终报告已修正为保留已知 exact checkpoint incumbent；该修正只消除 post-hoc exact-energy 负增益，不改变搜索轨迹。开发集按此口径，B-ALNS mean ΔE 为 K=50 1010.8 J、K=80 2130.6 J；Energy-Guided ESI 分别为 805.8 J、3225.7 J；
+- [ ] **[VERIFY]** 修正后的 smoke 通过后冻结 v7 参数，并进入新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
 - [ ] **[TODO]** 若 paired fork 仍不能证明 ESI 的单位时间收益优于 continued B-ALNS，则不再继续增加 ESI 复杂度，论文回到“固定 exploration 后的严格后强化机制”这一较窄主张。
 
 v7 的计时口径固定为：checkpoint 的 strict Stage-1 验证和每条 arm 的最终 correctness verification 属于共同测量开销，不计入 branch wall-clock；算法在 branch 内主动触发的 exact Stage-1 CVX（B-ALNS gray-zone refinement 或 ESI candidate acceptance）计入该 arm 的计算成本与 J/CVX。
