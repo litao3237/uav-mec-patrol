@@ -89,3 +89,29 @@ def test_positive_resource_sanitizer_rejects_zero_and_nonfinite() -> None:
 
     assert not values
     assert len(violations) == 2
+
+
+
+def test_stage2_final_positive_resources_are_safe_for_reduced_metrics() -> None:
+    instance, solution = build_small_instance()
+    info = build_event_info(instance, solution)
+    result = solve_resource_problem(
+        instance,
+        solution,
+        info,
+        verbose=False,
+        run_stage2=True,
+    )
+
+    assert result.feasible, result.diagnostics
+    if result.diagnostics.get("stage2_status") == "optimal":
+        for group in (
+            "bandwidth_mhz",
+            "mec_cpu_ghz",
+            "local_cpu_ghz",
+        ):
+            assert result.final_values[group]
+            assert all(
+                float(value) > 0.0
+                for value in result.final_values[group].values()
+            )
