@@ -17,6 +17,11 @@ METHODS = (
     "esi_alns",
 )
 
+EXPECTED_TASKS = (50, 80)
+EXPECTED_SCENARIOS = tuple(range(45, 53))
+EXPECTED_ALGORITHMS = (100, 101, 102)
+EXPECTED_FACTORS = (1, 2)
+
 
 def _stats(values: list[float]) -> dict[str, float | None]:
     if not values:
@@ -49,6 +54,42 @@ def _load_rows(input_dir: Path) -> list[dict[str, Any]]:
     if not rows:
         raise ValueError(f"No result rows found in {input_dir}")
     return rows
+
+
+def _validate_main_matrix(rows: list[dict[str, Any]]) -> None:
+    expected = {
+        (k, scenario, algorithm, factor)
+        for k in EXPECTED_TASKS
+        for scenario in EXPECTED_SCENARIOS
+        for algorithm in EXPECTED_ALGORITHMS
+        for factor in EXPECTED_FACTORS
+    }
+    observed_keys = [
+        (
+            int(row["K"]),
+            int(row["scenario_seed"]),
+            int(row["algorithm_seed"]),
+            int(row["budget_factor"]),
+        )
+        for row in rows
+    ]
+    observed = set(observed_keys)
+    duplicates = sorted(
+        key
+        for key in observed
+        if observed_keys.count(key) > 1
+    )
+    missing = sorted(expected - observed)
+    unexpected = sorted(observed - expected)
+
+    if duplicates or missing or unexpected:
+        raise ValueError(
+            "Matched-runtime matrix is incomplete or inconsistent: "
+            f"expected={len(expected)}, rows={len(rows)}, "
+            f"unique={len(observed)}, "
+            f"missing={missing}, duplicates={duplicates}, "
+            f"unexpected={unexpected}"
+        )
 
 
 def _method_records(
@@ -339,6 +380,7 @@ def main() -> None:
     args = parser.parse_args()
 
     rows = _load_rows(Path(args.input_dir))
+    _validate_main_matrix(rows)
     ks = sorted({int(row["K"]) for row in rows})
     factors = sorted(
         {int(row["budget_factor"]) for row in rows}
