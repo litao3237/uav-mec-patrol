@@ -22,17 +22,22 @@
 当前代码版本：**v0.6.0**  
 主开发分支：**develop**
 
-**当前阶段（2026-09-22）：五方法 8×3 主比较已完成；固定迭代下 ESI 对 B-ALNS 的后强化增益成立，但等时间实验表明原 ESI 与继续运行 B-ALNS 基本持平。v5 已验证“动态认证预算”能消除固定 10% reserve 的浪费；v6 Energy-Guided ESI 在开发集上提高了 J/CVX 与 J/s，但 S93–100 unseen hold-out 在完成 47/48 组后已提前终止，整体 same-time 增益未达到预注册晋升标准。当前工作已切换到 `experiment/paired-checkpoint-fork-v7`，下一步不再比较两条独立时间轨迹，而是从同一个 B-ALNS checkpoint 分叉，直接比较继续 B-ALNS、旧 ESI 与 Energy-Guided ESI 的边际节能效率。**
+**当前阶段（2026-09-22）：算法开发已冻结。论文正式算法回到并保持 `develop` 上的原始 ESI-ALNS：Generic ALNS Exploration → Elite Structural Intensification → Strict Stage-1 CVX Acceptance。固定 exploration 下的 ESI 增量价值成立；matched-runtime 与 v7 paired-checkpoint unseen 验证均不支持“相同追加 wall-clock 下 ESI 稳定优于继续 B-ALNS”的主张。v5–v7 仅作为预算公平性、工程效率和结论边界验证证据，不晋升为论文正式算法。最终算法与保留/废弃清单以 [`docs/final_algorithm_freeze.md`](docs/final_algorithm_freeze.md) 为唯一冻结说明。后续阶段转入论文正文、图表、实验表和代码清理，不再启动 v8 调参。**
 
 下文历史记录中的“完成”表示对应设置和当时清单已经执行，不表示所有方法、所有指标与所有场景均已覆盖。当前实验范围、结论边界和后续优先级以本节核查及第 6 节为准。
 
 
-## 0.2 新会话继续入口：算法稳定性与 same-time 实验进展
+## 0.2 新会话继续入口：最终算法冻结与 same-time 验证历史
 
-> 如果从新会话继续本项目，优先读取本节，再阅读
+> 如果从新会话继续本项目，先读取
+> [`docs/final_algorithm_freeze.md`](docs/final_algorithm_freeze.md)，
+> 再按需要查阅本节以及
+> `docs/matched_runtime_results.md`、
 > `docs/budget_utilization_v5_results.md`、
 > `docs/energy_guided_esi_v6_dev_round2_results.md` 和
 > `docs/energy_guided_esi_v6_holdout_early_terminated.md`。
+>
+> 本节以下 v1–v7 内容作为研发历史和负结果证据保留，不再代表“下一步继续调算法”。
 
 ### 当前分支与保护原则
 
