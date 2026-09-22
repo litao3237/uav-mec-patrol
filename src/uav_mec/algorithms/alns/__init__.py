@@ -1,3 +1,8 @@
+from .adaptive import (
+    AdaptiveESIConfig,
+    AdaptiveESIResult,
+    run_uav_mec_adaptive_esi_alns,
+)
 from .evaluator import (
     KKTObjectiveEvaluator,
     ProxyObjectiveEvaluator,
@@ -35,6 +40,8 @@ from .runner import (
 from .state import UavMecState
 
 __all__ = [
+    "AdaptiveESIConfig",
+    "AdaptiveESIResult",
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "KKTObjectiveEvaluator",
@@ -57,6 +64,7 @@ __all__ = [
     "regret2_insertion_repair",
     "route_segment_removal",
     "shared_mec_pressure_removal",
+    "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
     "solution_signature",
