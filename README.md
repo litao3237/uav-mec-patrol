@@ -2585,3 +2585,31 @@ opportunities restrict the feasible search region, while increasing the budget
 to the baseline Cmax=3 restores 9/9 strict feasibility and lowers conditional
 energy. Cmax=4 does not produce a further monotone energy reduction under the
 frozen search budget, so no claim of monotonic benefit is made.
+
+
+## M13. GIS-driven Real-Geography Validation
+
+A formal external-geography case study is complete for the Groveland Ranger
+District / Stanislaus National Forest.
+
+- [x] official USFS FireOccurrence GIS scout and reproducible snapshot;
+- [x] pinned 59-point historical-fire snapshot dated 2026-09-22;
+- [x] real-geography instance builder using local metric projection;
+- [x] formal \(K=59,M=5,E=2\), 3 scenario x 3 algorithm-seed matrix;
+- [x] Generic ALNS strict: 8/9;
+- [x] Proposed Hybrid strict: 8/9;
+- [x] Hybrid vs Generic common-strict: 2 better / 6 equal / 0 worse;
+- [x] mean paired Hybrid advantage: 0.543%;
+- [x] mean Hybrid route distance: 48.154 km;
+- [x] interpretation limited to GIS-driven geography robustness, not field deployment.
+
+Formal snapshot:
+\`data/real_case/stanislaus/usfs_fire_occurrences_selected59_2026-09-22.json\`
+
+Formal workflow:
+\`.github/workflows/stanislaus_real_geography_formal.yml\`
+
+Formal run: \`35679546095\`.
+
+Offloading is sparse in this real geometry, so the controlled contact-budget and
+bandwidth experiments remain the main mechanism evidence.
