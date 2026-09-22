@@ -1,3 +1,8 @@
+from .terminal_first import (
+    TerminalFirstESIConfig,
+    TerminalFirstESIResult,
+    run_uav_mec_terminal_first_esi_alns,
+)
 from .terminal_recovery import (
     TerminalRecoveryESIConfig,
     TerminalRecoveryESIResult,
@@ -54,6 +59,8 @@ __all__ = [
     "AdaptiveESIResult",
     "ContinuousESIConfig",
     "ContinuousESIResult",
+    "TerminalFirstESIConfig",
+    "TerminalFirstESIResult",
     "TerminalRecoveryESIConfig",
     "TerminalRecoveryESIResult",
     "DestroyConfig",
@@ -80,6 +87,7 @@ __all__ = [
     "shared_mec_pressure_removal",
     "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_continuous_esi_alns",
+    "run_uav_mec_terminal_first_esi_alns",
     "run_uav_mec_terminal_recovery_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
