@@ -148,6 +148,7 @@ class _ContinuousESIController:
         policy: ContinuousESIConfig,
         started_at: float,
         search_deadline_at: float,
+        elite_intensifier=contact_mode_intensification,
     ) -> None:
         self.instance = instance
         self.evaluator = evaluator
@@ -156,6 +157,7 @@ class _ContinuousESIController:
         self.policy = policy
         self.started_at = started_at
         self.search_deadline_at = search_deadline_at
+        self.elite_intensifier = elite_intensifier
 
         self.stagnation_s = (
             policy.total_runtime_s * policy.stagnation_fraction
@@ -304,6 +306,11 @@ class _ContinuousESIController:
             ),
             "baseline_cert_runtime_s": cert_runtime_s,
             "archive_updated_before_elite": archive_updated,
+            "intensifier": getattr(
+                self.elite_intensifier,
+                "__name__",
+                type(self.elite_intensifier).__name__,
+            ),
             "strict_improved": False,
             "injected": False,
         }
@@ -335,7 +342,7 @@ class _ContinuousESIController:
             self.evaluator,
         )
         elite_started = perf_counter()
-        intensified, elite_stats = contact_mode_intensification(
+        intensified, elite_stats = self.elite_intensifier(
             state,
             config=self.problem_config,
             objective=self.oracle,
