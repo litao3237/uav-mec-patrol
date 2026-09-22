@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/stanislaus_real_case_scout.yml'
 
+# scout revision 2
 jobs:
   scout:
     runs-on: ubuntu-latest
