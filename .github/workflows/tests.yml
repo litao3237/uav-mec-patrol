@@ -34,6 +34,7 @@ jobs:
           experiments/aggregate_convergence_study.py
           experiments/aggregate_dense_workload.py
           experiments/aggregate_spatial_robustness.py
+          experiments/prepare_stanislaus_real_case.py
           experiments/run_convergence_study.py
       - name: Run tests
         run: uv run pytest
