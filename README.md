@@ -194,8 +194,9 @@ quad [J/CVX].
 - [x] continued B-ALNS 的 branch 内 gray-zone Stage-1 CVX 调用与 accepted-CVX hit rate 已单独计数；
 - [x] 已增加 paired-fork 回归测试：同一 checkpoint 的两个独立 fork 在相同 RNG/selector 状态下继续相同迭代数，应得到一致 current/best、operator outcome 统计和 RNG state；
 - [x] 已实现三臂实验脚本 `experiments/run_paired_checkpoint_fork_v7.py`：continued B-ALNS / Legacy ESI / Energy-Guided ESI，共享同一 strict checkpoint，使用冻结的 K=50 12+3 s 与 K=80 36+9 s 预算；
-- [ ] **[VERIFY]** smoke CI `.github/workflows/paired_checkpoint_fork_v7_smoke.yml` 已提交，先运行已观察开发点 K=50/S85/A100；当前会话尚未从 GitHub check/status 接口取得完成结果，因此不标记为通过；
-- [ ] **[TODO]** smoke 通过后扩展到已观察开发场景 S85–92 做 paired marginal-value 机制验证；
+- [x] smoke CI `.github/workflows/paired_checkpoint_fork_v7_smoke.yml` 已通过：run `35741894388`，paired-checkpoint 回归测试 3/3 passed；K=50/S85/A100 的 prefix 为 12.05 s / 149 iterations，checkpoint Stage-1 为 strict `optimal`；
+- [x] smoke 三臂均完整执行并保持 strict：continued B-ALNS 3.07 s / 47 iterations / 0 gray-zone CVX；Legacy ESI 1.67 s / 5 exact-CVX；Energy-Guided ESI 1.06 s / 3 exact-CVX。三臂本样本均未进一步降低能耗，因此该 smoke 只证明 checkpoint/fork/计时/统计链路正确，不作为 ESI 有效性证据；
+- [ ] **[TODO]** 扩展到已观察开发场景 S85–92 做 paired marginal-value 机制验证；
 - [ ] **[TODO]** 机制冻结后才选择新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
 - [ ] **[TODO]** 若 paired fork 仍不能证明 ESI 的单位时间收益优于 continued B-ALNS，则不再继续增加 ESI 复杂度，论文回到“固定 exploration 后的严格后强化机制”这一较窄主张。
 
