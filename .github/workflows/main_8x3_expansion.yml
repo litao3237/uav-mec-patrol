@@ -1,0 +1,139 @@
+name: main-8x3-expansion
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/main_8x3_expansion.yml'
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        tasks: [50, 80]
+        scenario: [45, 46, 47, 48, 49, 50, 51, 52]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run four-method core comparison
+        run: >-
+          uv run python experiments/run_core_baseline_comparison.py
+          --tasks ${{ matrix.tasks }}
+          --mecs 2
+          --uavs 5
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+      - name: Upload core seed-pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-8x3-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/baseline_core_K${{ matrix.tasks }}_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100.json
+          if-no-files-found: warn
+
+  ga:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        tasks: [50, 80]
+        scenario: [45, 46, 47, 48, 49, 50, 51, 52]
+        algorithm: [100, 101, 102]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --dev
+      - name: Run Route-GA comparison
+        run: >-
+          uv run python experiments/run_ga_baseline_comparison.py
+          --tasks ${{ matrix.tasks }}
+          --mecs 2
+          --uavs 5
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds ${{ matrix.algorithm }}
+          --iterations 100
+          --ga-population 24
+          --ga-generations 40
+      - name: Upload GA seed-pair result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-8x3-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.algorithm }}
+          path: outputs/results/ga_baseline_K${{ matrix.tasks }}_E2_S${{ matrix.scenario }}_A${{ matrix.algorithm }}_I100_P24_G40.json
+          if-no-files-found: warn
+
+  aggregate-core:
+    runs-on: ubuntu-latest
+    needs: core
+    if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: core-8x3-K${{ matrix.tasks }}-S*-A*
+          path: outputs/results/core-matrix
+          merge-multiple: true
+      - name: Aggregate core 8x3 results
+        run: >-
+          python experiments/aggregate_core_baselines.py
+          --input-dir outputs/results/core-matrix
+          --output outputs/results/core_baseline_K${{ matrix.tasks }}_E2_S45-52_A100-102_I100_8x3.json
+      - name: Upload core aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-8x3-K${{ matrix.tasks }}-aggregate
+          path: outputs/results/core_baseline_K${{ matrix.tasks }}_E2_S45-52_A100-102_I100_8x3.json
+
+  aggregate-ga:
+    runs-on: ubuntu-latest
+    needs: ga
+    if: always()
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ga-8x3-K${{ matrix.tasks }}-S*-A*
+          path: outputs/results/ga-matrix
+          merge-multiple: true
+      - name: Aggregate GA 8x3 results
+        run: >-
+          python experiments/aggregate_ga_baselines.py
+          --input-dir outputs/results/ga-matrix
+          --output outputs/results/ga_baseline_K${{ matrix.tasks }}_E2_S45-52_A100-102_I100_P24_G40_8x3.json
+      - name: Upload GA aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-8x3-K${{ matrix.tasks }}-aggregate
+          path: outputs/results/ga_baseline_K${{ matrix.tasks }}_E2_S45-52_A100-102_I100_P24_G40_8x3.json
