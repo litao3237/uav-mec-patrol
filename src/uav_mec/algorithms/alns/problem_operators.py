@@ -1370,7 +1370,7 @@ def strict_neighbor_recovery(
             break
 
         value = float(objective(current.instance, candidate))
-        finite = np.isfinite(value)
+        finite = bool(np.isfinite(value))
         evaluated.append(
             {
                 "move": label,
