@@ -1,6 +1,8 @@
 """Discrete optimization algorithms."""
 
 from .alns import (
+    AdaptiveESIConfig,
+    AdaptiveESIResult,
     DestroyConfig,
     HybridUavMecALNSResult,
     KKTObjectiveEvaluator,
@@ -10,6 +12,7 @@ from .alns import (
     Stage1CVXObjectiveOracle,
     UavMecALNSConfig,
     UavMecALNSResult,
+    run_uav_mec_adaptive_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
 )
@@ -29,6 +32,8 @@ from .initial import (
 )
 
 __all__ = [
+    "AdaptiveESIConfig",
+    "AdaptiveESIResult",
     "DestroyConfig",
     "HybridUavMecALNSResult",
     "GreedyInitialConfig",
@@ -50,6 +55,7 @@ __all__ = [
     "build_mec_assisted_initial_solution",
     "evaluate_initial_proxy",
     "run_route_ga",
+    "run_uav_mec_adaptive_esi_alns",
     "run_uav_mec_alns",
     "run_uav_mec_hybrid_alns",
 ]
