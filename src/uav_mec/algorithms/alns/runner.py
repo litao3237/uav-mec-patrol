@@ -47,6 +47,8 @@ class _TimeScaledRecordToRecordTravel:
         start_gap: float,
         end_gap: float,
         max_runtime_s: float,
+        *,
+        started_at: float | None = None,
     ) -> None:
         if not (0.0 <= end_gap <= start_gap):
             raise ValueError("Must have 0 <= end_gap <= start_gap")
@@ -56,7 +58,7 @@ class _TimeScaledRecordToRecordTravel:
         self.start_threshold = start_gap * init_obj
         self.end_threshold = end_gap * init_obj
         self.max_runtime_s = max_runtime_s
-        self._started: float | None = None
+        self._started: float | None = started_at
         self.last_threshold = self.start_threshold
 
     def __call__(self, rng, best, current, candidate) -> bool:
