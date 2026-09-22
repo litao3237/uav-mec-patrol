@@ -756,6 +756,7 @@ def energy_guided_intensification(
         "generated_candidates": 0,
         "proxy_ranked_candidates": 0,
         "candidates_evaluated": 0,
+        "exact_cvx_calls": 0,
         "strict_candidates": 0,
         "improvements": 0,
         "accepted_moves": [],
@@ -905,6 +906,9 @@ def energy_guided_intensification(
                 stats["candidates_evaluated"]
             ) + 1
             if new_call:
+                stats["exact_cvx_calls"] = int(
+                    stats["exact_cvx_calls"]
+                ) + 1
                 stats["exact_runtime_s"] = float(
                     stats["exact_runtime_s"]
                 ) + exact_runtime_s
@@ -994,7 +998,8 @@ def energy_guided_intensification(
         stats["accepted_moves"] = accepted
 
     stats["runtime_s"] = perf_counter() - started
-    cvx_count = int(stats["candidates_evaluated"])
+    candidate_count = int(stats["candidates_evaluated"])
+    cvx_count = int(stats["exact_cvx_calls"])
     total_gain = float(stats["exact_improvement_j"])
     exact_runtime = float(stats["exact_runtime_s"])
     stats["energy_gain_per_cvx_j"] = (
@@ -1008,13 +1013,13 @@ def energy_guided_intensification(
         else 0.0
     )
     stats["strict_hit_rate"] = (
-        float(stats["strict_candidates"]) / cvx_count
-        if cvx_count > 0
+        float(stats["strict_candidates"]) / candidate_count
+        if candidate_count > 0
         else 0.0
     )
     stats["accepted_hit_rate"] = (
-        float(stats["improvements"]) / cvx_count
-        if cvx_count > 0
+        float(stats["improvements"]) / candidate_count
+        if candidate_count > 0
         else 0.0
     )
 
