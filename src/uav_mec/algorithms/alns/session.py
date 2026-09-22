@@ -457,15 +457,24 @@ def _evaluate_candidate(
     curr_obj = float(current.objective())
     cand_obj = float(candidate.objective())
 
+    # Match alns<8 exactly: acceptance is evaluated on every candidate before
+    # BEST/BETTER overrides are applied. This matters for stateful acceptance
+    # criteria such as RecordToRecordTravel.
+    accepted = bool(
+        accept(rng, best, current, candidate)
+    )
+    outcome = (
+        Outcome.ACCEPT
+        if accepted
+        else Outcome.REJECT
+    )
+    if cand_obj < curr_obj:
+        outcome = Outcome.BETTER
     if cand_obj < best_obj:
-        return candidate, candidate, Outcome.BEST
+        outcome = Outcome.BEST
 
-    if accept(rng, best, current, candidate):
-        outcome = (
-            Outcome.BETTER
-            if cand_obj < curr_obj
-            else Outcome.ACCEPT
-        )
-        return best, candidate, outcome
-
-    return best, current, Outcome.REJECT
+    if outcome is Outcome.BEST:
+        return candidate, candidate, outcome
+    if outcome is Outcome.REJECT:
+        return best, current, outcome
+    return best, candidate, outcome
