@@ -1,0 +1,147 @@
+name: Paired Checkpoint Fork v7 Unseen
+
+on:
+  push:
+    branches:
+      - experiment/paired-checkpoint-fork-v7
+    paths:
+      - ".github/workflows/paired_checkpoint_fork_v7_unseen.yml"
+  workflow_dispatch:
+
+jobs:
+  paired-unseen:
+    name: K${{ matrix.tasks }} S${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+        scenario: [101, 102, 103, 104, 105, 106, 107, 108]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --dev
+
+      - name: Run frozen paired unseen block
+        run: >
+          uv run python experiments/run_paired_checkpoint_fork_v7.py
+          --tasks ${{ matrix.tasks }}
+          --scenario-seeds ${{ matrix.scenario }}
+          --algorithm-seeds 100,101,102
+          --output outputs/results/paired_v7_unseen_K${{ matrix.tasks }}_S${{ matrix.scenario }}.json
+
+      - name: Upload per-scenario result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paired-v7-unseen-K${{ matrix.tasks }}-S${{ matrix.scenario }}
+          path: outputs/results/paired_v7_unseen_K${{ matrix.tasks }}_S${{ matrix.scenario }}.json
+          if-no-files-found: warn
+
+  aggregate:
+    name: Aggregate unseen results
+    needs: paired-unseen
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download scenario artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: paired-v7-unseen-*
+          path: outputs/results/unseen_parts
+          merge-multiple: true
+
+      - name: Aggregate unseen JSON results
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from statistics import mean
+
+          root = Path("outputs/results/unseen_parts")
+          files = sorted(root.glob("paired_v7_unseen_K*_S*.json"))
+          rows = []
+          sources = []
+          for path in files:
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              rows.extend(payload.get("rows", []))
+              sources.append(path.name)
+
+          aggregate = {}
+          for k in (50, 80):
+              aggregate[str(k)] = {}
+              for arm in (
+                  "continued_b_alns",
+                  "legacy_esi",
+                  "energy_guided_esi",
+              ):
+                  arm_rows = [
+                      a
+                      for row in rows
+                      if int(row["tasks"]) == k
+                      for a in row.get("arms", [])
+                      if a["arm"] == arm
+                  ]
+                  strict = [a for a in arm_rows if a.get("strict")]
+                  gains = [
+                      float(a["delta_energy_j"])
+                      for a in strict
+                      if a.get("delta_energy_j") is not None
+                  ]
+                  jps = [
+                      float(a["gain_j_per_s"])
+                      for a in strict
+                      if a.get("gain_j_per_s") is not None
+                  ]
+                  jpcvx = [
+                      float(a["gain_j_per_cvx"])
+                      for a in strict
+                      if a.get("gain_j_per_cvx") is not None
+                  ]
+                  aggregate[str(k)][arm] = {
+                      "runs": len(arm_rows),
+                      "strict": len(strict),
+                      "positive_delta_runs": sum(x > 1e-9 for x in gains),
+                      "zero_delta_runs": sum(abs(x) <= 1e-9 for x in gains),
+                      "negative_delta_runs": sum(x < -1e-9 for x in gains),
+                      "mean_delta_energy_j": mean(gains) if gains else None,
+                      "mean_gain_j_per_s": mean(jps) if jps else None,
+                      "mean_gain_j_per_cvx": mean(jpcvx) if jpcvx else None,
+                  }
+
+          out = {
+              "experiment": "paired_checkpoint_fork_v7_unseen",
+              "scenario_block": list(range(101, 109)),
+              "expected_parts": 16,
+              "received_parts": len(files),
+              "complete": len(files) == 16,
+              "sources": sources,
+              "rows": rows,
+              "aggregate": aggregate,
+          }
+          out_path = Path(
+              "outputs/results/paired_checkpoint_fork_v7_unseen_aggregate.json"
+          )
+          out_path.parent.mkdir(parents=True, exist_ok=True)
+          out_path.write_text(
+              json.dumps(out, indent=2, ensure_ascii=False),
+              encoding="utf-8",
+          )
+          print(json.dumps(aggregate, indent=2, ensure_ascii=False))
+          PY
+
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: paired-checkpoint-fork-v7-unseen-aggregate
+          path: outputs/results/paired_checkpoint_fork_v7_unseen_aggregate.json
+          if-no-files-found: error
