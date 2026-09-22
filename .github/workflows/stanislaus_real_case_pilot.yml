@@ -8,6 +8,7 @@ on:
 
 # calibrated real-AOI pilot
 # four-km nested-load pilot
+# full-unique-point K59 pilot
 jobs:
   pilot:
     runs-on: ubuntu-latest
@@ -36,17 +37,17 @@ jobs:
           --algorithm-seeds 100
           --iterations 100
           --output outputs/results/stanislaus_real_case_K50_pilot.json
-      - name: Run real-geography K60 pilot
+      - name: Run real-geography K59 pilot
         run: >-
           uv run python experiments/run_real_geography_case.py
           --snapshot outputs/results/stanislaus_real_case_snapshot.json
           --config configs/real_stanislaus.yaml
-          --tasks 60
+          --tasks 59
           --uavs 5
           --scenario-seeds 45
           --algorithm-seeds 100
           --iterations 100
-          --output outputs/results/stanislaus_real_case_K60_pilot.json
+          --output outputs/results/stanislaus_real_case_K59_pilot.json
       - name: Upload pilot
         uses: actions/upload-artifact@v4
         with:
