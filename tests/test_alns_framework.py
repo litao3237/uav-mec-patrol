@@ -6,6 +6,7 @@ from uav_mec.algorithms import (
     AdaptiveESIConfig,
     BudgetAwareTerminalFirstConfig,
     ContinuousESIConfig,
+    EnergyGuidedESIConfig,
     TerminalFirstESIConfig,
     TerminalRecoveryESIConfig,
     GARouteConfig,
@@ -24,6 +25,8 @@ from uav_mec.algorithms import (
     run_uav_mec_terminal_recovery_esi_alns,
     run_uav_mec_alns,
     run_uav_mec_hybrid_alns,
+    energy_guided_intensification,
+    make_energy_guided_intensifier,
 )
 import uav_mec.algorithms.alns.runner as runner_module
 from uav_mec.algorithms.alns import (
@@ -936,3 +939,91 @@ def test_budget_aware_terminal_first_uses_compact_initial_reserve() -> None:
     assert result.final_reserve_s >= result.initial_reserve_s
     assert result.final_reserve_s <= 0.008 + 1e-12
     assert result.final_energy_j == 321.0
+
+
+
+def test_energy_guided_esi_limits_exact_candidate_evaluations() -> None:
+    instance = _small_instance()
+    solution = _initial_solution(instance)
+    state = UavMecState(
+        instance,
+        solution,
+        ProxyObjectiveEvaluator(),
+    )
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+    guide = EnergyGuidedESIConfig(
+        hotspot_task_limit=4,
+        route_options_per_task=4,
+        proxy_pool_limit=6,
+        cvx_shortlist_limit=2,
+        fallback_structural_limit=1,
+    )
+
+    _, stats = energy_guided_intensification(
+        state,
+        config=ProblemOperatorConfig(),
+        objective=oracle,
+        guidance=guide,
+        max_rounds=1,
+    )
+
+    assert int(stats["generated_candidates"]) > 0
+    assert int(stats["candidates_evaluated"]) <= 2
+    assert int(stats["exact_cvx_calls"]) <= 2
+    assert len(stats["hotspot_tasks"]) <= 4
+    assert all(
+        str(move["move"]).startswith(
+            (
+                "energy_",
+                "fallback::",
+            )
+        )
+        for move in stats["evaluated_moves"]
+    )
+
+
+def test_budget_aware_runner_accepts_energy_guided_intensifier() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_budget_aware_terminal_first_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=71,
+        ),
+        budget_aware=BudgetAwareTerminalFirstConfig(
+            total_runtime_s=0.10,
+            initial_reserve_fraction=0.03,
+            max_reserve_fraction=0.08,
+            observed_runtime_multiplier=2.0,
+            stagnation_fraction=0.15,
+            min_exploration_fraction=0.05,
+            elite_pool_fraction=0.15,
+            elite_burst_fraction=0.05,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+        elite_intensifier=make_energy_guided_intensifier(
+            EnergyGuidedESIConfig(
+                hotspot_task_limit=3,
+                route_options_per_task=3,
+                proxy_pool_limit=4,
+                cvx_shortlist_limit=2,
+            )
+        ),
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.final_energy_j == 321.0
+    assert all(
+        event.get("intensifier")
+        in {
+            None,
+            "energy_guided_intensification",
+        }
+        for event in result.events
+    )
