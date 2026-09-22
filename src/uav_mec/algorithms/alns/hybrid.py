@@ -29,8 +29,13 @@ from .state import ObjectiveEvaluator, UavMecState
 class Stage1CVXObjectiveOracle:
     """Cached Stage-1 CVX objective oracle for elite states only."""
 
-    def __init__(self) -> None:
-        self.solver = CVXResourceSolver(run_stage2=False)
+    def __init__(
+        self,
+        solver: CVXResourceSolver | None = None,
+    ) -> None:
+        self.solver = solver or CVXResourceSolver(
+            run_stage2=False
+        )
         self._cache: dict[tuple, ResourceSolveResult] = {}
         self.calls = 0
         self.cache_hits = 0
