@@ -413,15 +413,23 @@ def main() -> None:
                         metrics_stage1_status = _stage1_status(
                             metrics_cvx
                         )
+                        metrics_stage2_status = str(
+                            metrics_cvx.diagnostics.get(
+                                "stage2_status",
+                                "unknown",
+                            )
+                        )
                         if (
                             not metrics_cvx.feasible
                             or metrics_stage1_status != "optimal"
+                            or metrics_stage2_status != "optimal"
                         ):
                             paper_metrics_error = (
                                 "metrics_recompute_not_strict: "
                                 f"stage1={metrics_stage1_status}, "
-                                "stage2="
-                                f"{metrics_cvx.diagnostics.get('stage2_status')}"
+                                f"stage2={metrics_stage2_status}, "
+                                "stage2_errors="
+                                f"{metrics_cvx.diagnostics.get('stage2_solver_errors', [])}"
                             )
                         else:
                             energy_delta = abs(
@@ -441,15 +449,28 @@ def main() -> None:
                                     "does not reproduce final oracle: "
                                     f"delta={energy_delta:.6g} J"
                                 )
-                            paper_metrics = build_paper_metrics(
-                                instance,
-                                result.best_solution,
-                                metrics_cvx,
-                                info=metrics_info,
-                                reference_distance_m=(
-                                    route_seed_distance_m
-                                ),
-                            )
+                            try:
+                                paper_metrics = build_paper_metrics(
+                                    instance,
+                                    result.best_solution,
+                                    metrics_cvx,
+                                    info=metrics_info,
+                                    reference_distance_m=(
+                                        route_seed_distance_m
+                                    ),
+                                )
+                            except (
+                                ValueError,
+                                FloatingPointError,
+                                KeyError,
+                            ) as exc:
+                                paper_metrics_error = (
+                                    "paper_metrics_build_failed: "
+                                    f"{type(exc).__name__}: {exc}; "
+                                    f"stage2={metrics_stage2_status}; "
+                                    "stage2_errors="
+                                    f"{metrics_cvx.diagnostics.get('stage2_solver_errors', [])}"
+                                )
 
                     row = {
                         "K": k,
