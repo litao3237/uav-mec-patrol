@@ -189,11 +189,17 @@ quad [J/CVX].
 **当前 v7 代码状态：**
 
 - [x] 新分支 `experiment/paired-checkpoint-fork-v7` 已创建；
-- [ ] **[IN PROGRESS]** 实现可续跑 ALNS session/checkpoint；不能简单调用两次现有 `run_uav_mec_alns()`，因为那会重置 selector 权重和 RNG；
-- [ ] **[TODO]** 增加 paired-fork 单元测试；
-- [ ] **[TODO]** 先用已观察开发场景做机制验证；
+- [x] 已实现可续跑 `UavMecALNSSession / UavMecALNSCheckpoint`，显式保留 current state、historical best、Roulette Wheel 自适应状态、RNG state 和 RRT 逻辑进度；
+- [x] time-scaled RRT checkpoint 使用暂停逻辑时钟，fork 之间的等待时间不会推进 cooling；
+- [x] continued B-ALNS 的 branch 内 gray-zone Stage-1 CVX 调用与 accepted-CVX hit rate 已单独计数；
+- [x] 已增加 paired-fork 回归测试：同一 checkpoint 的两个独立 fork 在相同 RNG/selector 状态下继续相同迭代数，应得到一致 current/best、operator outcome 统计和 RNG state；
+- [x] 已实现三臂实验脚本 `experiments/run_paired_checkpoint_fork_v7.py`：continued B-ALNS / Legacy ESI / Energy-Guided ESI，共享同一 strict checkpoint，使用冻结的 K=50 12+3 s 与 K=80 36+9 s 预算；
+- [ ] **[VERIFY]** smoke CI `.github/workflows/paired_checkpoint_fork_v7_smoke.yml` 已提交，先运行已观察开发点 K=50/S85/A100；当前会话尚未从 GitHub check/status 接口取得完成结果，因此不标记为通过；
+- [ ] **[TODO]** smoke 通过后扩展到已观察开发场景 S85–92 做 paired marginal-value 机制验证；
 - [ ] **[TODO]** 机制冻结后才选择新的 unseen scenario block；S93–100 已经看过，不能再作为 unseen；
 - [ ] **[TODO]** 若 paired fork 仍不能证明 ESI 的单位时间收益优于 continued B-ALNS，则不再继续增加 ESI 复杂度，论文回到“固定 exploration 后的严格后强化机制”这一较窄主张。
+
+v7 的计时口径固定为：checkpoint 的 strict Stage-1 验证和每条 arm 的最终 correctness verification 属于共同测量开销，不计入 branch wall-clock；算法在 branch 内主动触发的 exact Stage-1 CVX（B-ALNS gray-zone refinement 或 ESI candidate acceptance）计入该 arm 的计算成本与 J/CVX。
 
 ### 新会话应从这里开始
 
