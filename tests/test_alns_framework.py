@@ -4,6 +4,7 @@ import numpy as np
 
 from uav_mec.algorithms import (
     AdaptiveESIConfig,
+    BudgetAwareTerminalFirstConfig,
     ContinuousESIConfig,
     TerminalFirstESIConfig,
     TerminalRecoveryESIConfig,
@@ -17,6 +18,7 @@ from uav_mec.algorithms import (
     build_mec_assisted_initial_solution,
     run_route_ga,
     run_uav_mec_adaptive_esi_alns,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
     run_uav_mec_continuous_esi_alns,
     run_uav_mec_terminal_first_esi_alns,
     run_uav_mec_terminal_recovery_esi_alns,
@@ -887,6 +889,40 @@ def test_terminal_first_returns_strict_terminal_with_fake_oracle() -> None:
             min_exploration_fraction=0.10,
             elite_pool_fraction=0.15,
             elite_burst_fraction=0.05,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.selection_source == "terminal_strict"
+    assert result.final_energy_j == 321.0
+    assert result.total_runtime_s >= 0.0
+    assert result.terminal_certification_runtime_s >= 0.0
+
+
+
+def test_budget_aware_terminal_first_returns_strict_terminal() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_budget_aware_terminal_first_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=67,
+        ),
+        budget_aware=BudgetAwareTerminalFirstConfig(
+            total_runtime_s=0.08,
+            final_cert_reserve_fraction=0.10,
+            checkpoint_fraction=0.40,
+            stagnation_fraction=0.20,
+            min_exploration_fraction=0.10,
+            elite_pool_fraction=0.10,
+            elite_burst_fraction=0.04,
             max_elite_triggers=1,
         ),
         evaluator=ProxyObjectiveEvaluator(),
