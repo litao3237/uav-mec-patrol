@@ -1,0 +1,4 @@
+radius_scale,runs,stage1_strict,energy_mean_j,offload_ratio_mean,contacts_per_uav_mean,route_distance_km_mean,bandwidth_relative_shadow_mean
+0.75,9,9,229060.049,0.131,0.978,11.645,0.004
+1.00,9,9,226768.196,0.122,1.044,11.494,0.005
+1.25,9,9,231151.142,0.119,0.889,11.754,0.004
