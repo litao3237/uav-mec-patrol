@@ -30,7 +30,14 @@ jobs:
         shell: powershell
         run: |
           @'
-          import sys
+          import sys, json, hashlib
+          from pathlib import Path
+          manifest_path = Path("paper_figures/data/experiment_sources.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          for record in manifest["sources"].values():
+              p = Path(record["json_path"])
+              record["json_sha256"] = hashlib.sha256(p.read_bytes()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
           sys.path.insert(0, "paper_figures/scripts")
           import prepare_experiment_data
           import experiment_data
