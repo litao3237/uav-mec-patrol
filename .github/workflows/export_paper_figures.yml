@@ -1,0 +1,26 @@
+name: Export Paper Figures
+
+on:
+  push:
+    branches:
+      - experiment/paired-checkpoint-fork-v7
+    paths:
+      - ".github/workflows/export_paper_figures.yml"
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect selected figures
+        run: |
+          mkdir -p exported_figures
+          cp paper_figures/output/png/fig01_system_model.png exported_figures/
+          cp paper_figures/output/png/fig02_hybrid_alns_framework.png exported_figures/
+          cp paper_figures/output/png/fig02_hybrid_alns_visual.png exported_figures/
+          cp paper_figures/output/png/fig13_stanislaus_case.png exported_figures/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: selected-paper-figures
+          path: exported_figures/
+          if-no-files-found: error
