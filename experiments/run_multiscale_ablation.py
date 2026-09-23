@@ -17,9 +17,7 @@ from uav_mec.instances import build_paper_scale_instance, load_paper_scale_confi
 
 VARIANTS = {
     "full_esi": {},
-    "wo_route_compute_relocation": {
-        "elite_enable_route_compute_relocate": False,
-    },
+    "wo_route_compute_relocation": {"elite_enable_route_compute_relocate": False},
     "wo_contact_operations": {
         "elite_enable_contact_relocate": False,
         "elite_enable_contact_point_replace": False,
@@ -30,9 +28,7 @@ VARIANTS = {
         "elite_enable_batch_split": False,
         "elite_enable_mode_batch_reassign": False,
     },
-    "wo_progressive_widening": {
-        "elite_progressive_widening": False,
-    },
+    "wo_progressive_widening": {"elite_progressive_widening": False},
 }
 
 
@@ -53,24 +49,16 @@ def strict_energy(oracle, instance, solution):
 
 
 def run_variant(instance, seed: int, variant: str):
-    config = UavMecALNSConfig(seed=seed, iterations=100)
-    exploration = run_uav_mec_alns(instance, config=config)
+    exploration = run_uav_mec_alns(
+        instance,
+        config=UavMecALNSConfig(seed=seed, iterations=100),
+    )
     oracle = Stage1CVXObjectiveOracle()
     base = strict_energy(oracle, instance, exploration.best_solution)
-
     if not base["strict"]:
-        return {
-            "variant": variant,
-            **base,
-            "accepted": 0,
-            "cvx_calls": oracle.calls,
-        }
+        return {"variant": variant, **base, "accepted": 0, "cvx_calls": oracle.calls}
 
-    state = UavMecState(
-        instance,
-        deepcopy(exploration.best_solution),
-        oracle,
-    )
+    state = UavMecState(instance, deepcopy(exploration.best_solution), oracle)
     op_config = ProblemOperatorConfig(**VARIANTS[variant])
     final_state, stats = contact_mode_intensification(
         state,
@@ -102,7 +90,7 @@ def main():
     parser.add_argument("--output", default="outputs/results/multiscale_ablation.json")
     args = parser.parse_args()
 
-    cfg = load_paper_scale_instance if False else load_paper_scale_config("configs/baseline.yaml")
+    cfg = load_paper_scale_config("configs/baseline.yaml")
     rows = []
     for k in parse_list(args.tasks):
         for scenario in parse_list(args.scenario_seeds):
