@@ -6,6 +6,9 @@ on:
       - experiment/paired-checkpoint-fork-v7
     paths:
       - ".github/workflows/regenerate_final_paper_figures.yml"
+      - "paper_figures/scripts/**"
+      - "paper_figures/data/**"
+      - "paper_results/**"
   workflow_dispatch:
 
 jobs:
