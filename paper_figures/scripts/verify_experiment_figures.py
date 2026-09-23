@@ -219,7 +219,7 @@ def main() -> None:
         f'- {len(protected)} 个受保护文件 SHA-256 保持一致，包括原有三张概念图、原脚本、12 份汇总 CSV 和 uv.lock。',
         f'- 逐次数据重新聚合后，{statistics["matched_metric_count"]} 项汇总在 CSV 保留精度内一致。',
         '- Fig. 3 使用运行间样本标准差；所有配对按场景/算法种子匹配。',
-        '- Greedy 与 FR-NM 按独立场景去重；K=80 Route-GA 为 3 场景 pilot。',
+        '- GR-MR 与 FTR-NM 按独立场景去重；K=80 RGA-MR 为 3/24 strict，且三个严格运行均来自同一独立场景。',
         '- 所有条件指标保留有效样本数；缺失值未补零，未添加显著性标记。',
         f'- 地理复现：能耗 {map_check["energy_j"]:.6f} J，总距离 {map_check["distance_m"]:.6f} m；相对/绝对误差分别为 {map_check["energy_relative_error"]} / {map_check["distance_error_m"]} m。',
         '- 全部 59 个任务恰好访问一次，5 条 UAV 路线，1 次接触、1 个卸载任务；原始经纬度逐点反投影误差为 0。',
