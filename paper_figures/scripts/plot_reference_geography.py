@@ -127,11 +127,11 @@ def draw_reference_geography(data,registry):
     legend_ax.text(0,.02,'Basemap: USGS The National Map\nUSFS historical fire locations\nMEC servers are modeled deployments',fontsize=8.5,va='bottom')
     rate_ax=fig.add_subplot(grid[1,0]); pair_ax=fig.add_subplot(grid[1,1])
     rows=[r for r in data.tables['real_geography'] if r['record_type']=='method']
-    rate_bars(rate_ax,['Greedy','FR-NM','Generic','Hybrid'],[int(r['strict_count']) for r in rows],
+    rate_bars(rate_ax,['GR-MR','FTR-NM','B-ALNS','ESI-ALNS'],[int(r['strict_count']) for r in rows],
               [int(r['total_count']) for r in rows],colors=[GRAY,GRAY,BLUE,ORANGE])
     panel(rate_ax,'b','Strict feasibility','Strict runs (%)')
     paired_plot(pair_ax,data.pairs(),'c','Common-strict pairs')
-    fig.legend(handles=[Line2D([],[],color=BLUE,marker='o',mfc='white',ls='',label='Generic ALNS'),
-                        Line2D([],[],color=ORANGE,marker='s',ls='',label='Proposed Hybrid')],
+    fig.legend(handles=[Line2D([],[],color=BLUE,marker='o',mfc='white',ls='',label='B-ALNS'),
+                        Line2D([],[],color=ORANGE,marker='s',ls='',label='ESI-ALNS')],
                loc='outside lower center',ncols=2)
     save(fig,'fig13_stanislaus_case','GIS-driven Stanislaus real-geography case',registry)
