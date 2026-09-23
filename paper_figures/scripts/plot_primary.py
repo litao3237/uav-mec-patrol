@@ -59,7 +59,7 @@ def draw_primary(data,registry):
         if v==0: axes[0].plot(0,yi,'|',color=ORANGE,markersize=9)
     axes[0].set_yticks(y,['w/o Route','w/o Contact','w/o Explicit batch','w/o Widening'])
     axes[0].set_ylim(3.6,-1.0); axes[0].set_xlim(0,.83)
-    panel(axes[0],'a','Full-Hybrid advantage',xlabel='Mean paired advantage (%)')
+    panel(axes[0],'a','Full ESI-ALNS advantage',xlabel='Mean paired advantage (%)')
     axes[0].grid(axis='y',visible=False); axes[0].grid(axis='x',color='#E5E9EC',lw=.55)
     axes[1].set_xlim(0,1); axes[1].axis('off'); axes[1].set_title('(b) Paired counts',loc='left')
     for cx,label,key in zip([.15,.50,.85],['Full\nbetter','Equal','Ablated\nbetter'],['full_better','full_equal','ablated_better']):
