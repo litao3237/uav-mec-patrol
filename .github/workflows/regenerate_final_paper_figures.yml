@@ -1,0 +1,41 @@
+name: Regenerate Final Paper Figures
+
+on:
+  push:
+    branches:
+      - experiment/paired-checkpoint-fork-v7
+    paths:
+      - ".github/workflows/regenerate_final_paper_figures.yml"
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Poppler
+        shell: powershell
+        run: choco install poppler -y --no-progress
+      - name: Install figure dependencies
+        shell: powershell
+        run: python -m pip install -r paper_figures/requirements-experiments-lock.txt
+      - name: Regenerate and validate all paper figures
+        shell: powershell
+        run: python paper_figures/scripts/plot_experiments.py
+      - name: Upload validated paper figures
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-paper-figures-regenerated
+          path: |
+            paper_figures/output/png/
+            paper_figures/output/pdf/
+            paper_figures/output/svg/
+            paper_figures/experiment_verification.json
+            paper_figures/experiment_verification.md
+            paper_figures/data/experiment_validation.json
+            paper_figures/data/figure_registry.json
+          if-no-files-found: error
