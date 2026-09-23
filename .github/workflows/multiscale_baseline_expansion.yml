@@ -1,0 +1,44 @@
+name: Multiscale Baseline Expansion
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/multiscale-baseline-expansion
+    paths:
+      - "experiments/run_multiscale_baseline.py"
+      - ".github/workflows/multiscale_baseline_expansion.yml"
+
+jobs:
+  baseline:
+    name: K${{ matrix.tasks }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [30, 40, 60, 70]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --dev
+
+      - name: Run multiscale baseline
+        run: >-
+          uv run python experiments/run_multiscale_baseline.py
+          --tasks ${{ matrix.tasks }}
+          --scenario-seeds 45,46,47,48,49,50,51,52
+          --algorithm-seeds 100,101,102
+          --output outputs/results/multiscale_baseline_K${{ matrix.tasks }}.json
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiscale-baseline-K${{ matrix.tasks }}
+          path: outputs/results/multiscale_baseline_K${{ matrix.tasks }}.json
