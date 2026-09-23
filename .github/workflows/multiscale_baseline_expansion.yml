@@ -1,19 +1,61 @@
-name: Multiscale Baseline Expansion
+name: Multiscale Baseline Corrected
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - experiment/multiscale-baseline-expansion
+      - experiment/multiscale-baseline-corrected
     paths:
       - "experiments/run_multiscale_baseline.py"
       - ".github/workflows/multiscale_baseline_expansion.yml"
 
 jobs:
+  validate-runner:
+    name: Smoke validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Sync environment
+        run: uv sync --dev
+      - name: Run one corrected baseline smoke case
+        run: >
+          uv run python experiments/run_multiscale_baseline.py
+          --tasks 30
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --output outputs/results/multiscale_baseline_smoke.json
+      - name: Validate method identities and counts
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("outputs/results/multiscale_baseline_smoke.json").read_text())
+          assert data["complete"] is True
+          rows = data["rows"]
+          assert len(rows) == 5, len(rows)
+          by = {r["method"]: r for r in rows}
+          assert set(by) == {"GR-MR","FTR-NM","RGA-MR","B-ALNS","ESI-ALNS"}
+          assert by["GR-MR"]["algorithm_seed"] is None
+          assert by["FTR-NM"]["algorithm_seed"] is None
+          assert by["RGA-MR"]["algorithm_seed"] == 100
+          assert by["B-ALNS"]["algorithm_seed"] == 100
+          assert by["ESI-ALNS"]["algorithm_seed"] == 100
+          # A true GA run must expose GA-specific evaluation metadata.
+          assert by["RGA-MR"]["ga_evaluations"] > 0
+          # B-ALNS and ESI are the shared exploration/final pair.
+          assert by["B-ALNS"]["energy_j"] is None or by["ESI-ALNS"]["energy_j"] is None or by["ESI-ALNS"]["energy_j"] <= by["B-ALNS"]["energy_j"] + 1e-6
+          print("Corrected multiscale baseline smoke validation passed.")
+          PY
+
   baseline:
     name: K${{ matrix.tasks }}
+    needs: validate-runner
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
@@ -21,24 +63,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
-
       - name: Sync environment
         run: uv sync --dev
-
-      - name: Run multiscale baseline
-        run: >-
+      - name: Run corrected multiscale baseline
+        run: >
           uv run python experiments/run_multiscale_baseline.py
           --tasks ${{ matrix.tasks }}
           --scenario-seeds 45,46,47,48,49,50,51,52
           --algorithm-seeds 100,101,102
-          --output outputs/results/multiscale_baseline_K${{ matrix.tasks }}.json
-
+          --output outputs/results/multiscale_baseline_corrected_K${{ matrix.tasks }}.json
+      - name: Validate result completeness
+        env:
+          TASKS: ${{ matrix.tasks }}
+        run: |
+          uv run python - <<'PY'
+          import json, os
+          from pathlib import Path
+          k = os.environ["TASKS"]
+          data = json.loads(Path(f"outputs/results/multiscale_baseline_corrected_K{k}.json").read_text())
+          assert data["complete"] is True
+          rows = data["rows"]
+          assert len(rows) == 88, len(rows)
+          counts = {m: sum(r["method"] == m for r in rows) for m in ["GR-MR","FTR-NM","RGA-MR","B-ALNS","ESI-ALNS"]}
+          assert counts == {"GR-MR":8,"FTR-NM":8,"RGA-MR":24,"B-ALNS":24,"ESI-ALNS":24}, counts
+          assert all(r["algorithm_seed"] is None for r in rows if r["method"] in {"GR-MR","FTR-NM"})
+          assert all(r.get("ga_evaluations", 0) > 0 for r in rows if r["method"] == "RGA-MR")
+          print(f"K{k} corrected baseline validation passed.")
+          PY
       - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: multiscale-baseline-K${{ matrix.tasks }}
-          path: outputs/results/multiscale_baseline_K${{ matrix.tasks }}.json
+          name: multiscale-baseline-corrected-K${{ matrix.tasks }}
+          path: outputs/results/multiscale_baseline_corrected_K${{ matrix.tasks }}.json
+          if-no-files-found: error
