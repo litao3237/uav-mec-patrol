@@ -4,7 +4,15 @@
 
 按项目要求，将GitHub各分支的最新成果和进展汇总到`develop`，最终仅保留该分支并设为默认分支。使用真正的merge保留历史，不以覆盖文件或删除未合并提交代替整合。本地`_work/`和`paper_figures/revisions/`原有未跟踪论文资料保持原状，Word/PDF未在本轮修改。
 
-清理前共13个远端分支，无活动Actions作业，无分支保护或ruleset；旧PR #1为develop→main。整合完成后该PR不再适用，将关闭而不向main反向合并。远端清理仅在推送成功且再次确认各分支头均包含于develop后执行；删除使用精确SHA租约防止覆盖并发更新。
+清理前共13个远端分支，无活动Actions作业，无分支保护或ruleset；旧PR #1为develop→main。整合完成后该PR已关闭，未向main反向合并。推送成功并再次确认各分支头均包含于develop后，使用精确SHA租约和原子推送删除其余12个远端分支。本地main及过期远端引用也已清理。
+
+## 最终核验
+
+- GitHub及本地均仅保留`develop`；GitHub默认分支与`origin/HEAD`均为`develop`。
+- 合并提交`31dd81411628d33a1e3c34d7c55a7c8c5a84ef97`已推送，13个原分支头的历史均保留。
+- [远端完整测试](https://github.com/litao3237/uav-mec-patrol/actions/runs/36099931404)通过。
+- [远端论文数据校验](https://github.com/litao3237/uav-mec-patrol/actions/runs/36099931432)通过。
+- 未触发新实验矩阵；本地未跟踪论文资料仍保留。
 
 ## 合并内容及冲突处理
 

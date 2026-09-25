@@ -74,5 +74,29 @@
     "970b97b",
     "3209168"
   ],
-  "all_original_heads_reachable": true
+  "all_original_heads_reachable": true,
+  "remote_cleanup_verified": true,
+  "default_branch_after": "develop",
+  "branches_after": [
+    "develop"
+  ],
+  "deleted_branch_count": 12,
+  "closed_pull_request": 1,
+  "integration_commit": "31dd81411628d33a1e3c34d7c55a7c8c5a84ef97",
+  "ci_checks": [
+    {
+      "name": "tests",
+      "id": 36099931404,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/36099931404"
+    },
+    {
+      "name": "Paper Figure Data Validation",
+      "id": 36099931432,
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/litao3237/uav-mec-patrol/actions/runs/36099931432"
+    }
+  ]
 }
