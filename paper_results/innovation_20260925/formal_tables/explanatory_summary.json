@@ -1,0 +1,2056 @@
+{
+  "phase": "formal",
+  "code_commit": "7faa40a469f7e673d8e2552652e804ca5481d822",
+  "protocol_sha256": "d1d495b9e9533574402d4d3ef2a6931f95a8818dd044b9b51c877589f90ab861",
+  "sources": [
+    {
+      "file": "mechanism_K50_S45.json",
+      "sha256": "9a2a3b965200ff571f3d363963a3851be140a1b8439f488b8b94941647108faf"
+    },
+    {
+      "file": "mechanism_K50_S46.json",
+      "sha256": "ff90530b9721d9e76352531a2693f270dd3c93ec19f1c0bdabefa77fa9cfb2e9"
+    },
+    {
+      "file": "mechanism_K50_S47.json",
+      "sha256": "eb5941fd846cdff31234928e97c19725659df6b13ece8ee7f5fdeb6c38f8ef93"
+    },
+    {
+      "file": "mechanism_K50_S48.json",
+      "sha256": "cf20994e87c0178dcb5dfc047d2dc5c30048b3092061b000cbd7878e8b30b800"
+    },
+    {
+      "file": "mechanism_K50_S49.json",
+      "sha256": "a706abdc2908f828041519067e8a0ac8d830a97bdddaa6bc3f84eb3d9e140c65"
+    },
+    {
+      "file": "mechanism_K50_S50.json",
+      "sha256": "f7266c24eeb364d876831865cf1fbef24af202e36ca5128508146bb629c787db"
+    },
+    {
+      "file": "mechanism_K50_S51.json",
+      "sha256": "c038a6e0d4ae6ddc4e76dce234ed8c86439d5193ebc519b1704ff24d90592a0a"
+    },
+    {
+      "file": "mechanism_K50_S52.json",
+      "sha256": "5d3cb21faaf45c8abddc23905dad637253748f54504695c7ff8f58a58204164e"
+    },
+    {
+      "file": "mechanism_K80_S45.json",
+      "sha256": "1d0cfaf45086dc9da79ea4fb14579542d66f026aca0b33952241ad7a18a38de9"
+    },
+    {
+      "file": "mechanism_K80_S46.json",
+      "sha256": "05988a6399eba506657fbb2e011ea0b648fd1f377275736e2635702adc45613a"
+    },
+    {
+      "file": "mechanism_K80_S47.json",
+      "sha256": "ba6271bd40f35c7067287f4183019cb6eeaa3fc7ebfd4df873e1297bdf8a52cf"
+    },
+    {
+      "file": "mechanism_K80_S48.json",
+      "sha256": "588d8da7761553edd508e64df6149ccd7b14f92b50ddd07bf193facf55d1707d"
+    },
+    {
+      "file": "mechanism_K80_S49.json",
+      "sha256": "2c555c26e1497f92f29ae6ffcd668084d6e26f1b928573c1148d648fe36d11e8"
+    },
+    {
+      "file": "mechanism_K80_S50.json",
+      "sha256": "658252e8bcfcc2c1b692e7f13683a77c8ba7962ac32e44c569a9878ec025882b"
+    },
+    {
+      "file": "mechanism_K80_S51.json",
+      "sha256": "d5b6ed145c5f5f30cc6367f1a7b501b701454c5ac23ae2ea44c0d96874c47ba1"
+    },
+    {
+      "file": "mechanism_K80_S52.json",
+      "sha256": "072f2ea09a70cb409197e054f98dc114832735c4e39b73af2b36852c90ca03e4"
+    }
+  ],
+  "method_runs": 144,
+  "stage_timeline_rows": 576,
+  "scope": "解释指标；时延采用重建最早时序；主能耗百分比和CPU比较以原summary为准。未合格原值仅供审计，不纳入配对。",
+  "summaries": [
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "contacts",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.4166666666666667,
+      "run_equal_mean": 0.4166666666666667,
+      "scenario_bootstrap_percentile_95": [
+        -0.37499999999999994,
+        1.2916666666666667
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 2.3333333333333335
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -0.3333333333333333
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.6666666666666666
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 2.3333333333333335
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.6666666666666666
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -1
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "mean_delay_s",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.14781664405902728,
+      "run_equal_mean": 0.14781664405902717,
+      "scenario_bootstrap_percentile_95": [
+        -6.684339004495823,
+        7.033518039866411
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 15.791290544520725
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -13.202444275269594
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -2.1840006583686127
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 6.4882018478066925
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 9.38718690110563
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -1.5120559182111701
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.9753232582444488
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -14.560968547355904
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "offload_ratio",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.015000000000000001,
+      "run_equal_mean": 0.015000000000000001,
+      "scenario_bootstrap_percentile_95": [
+        -0.009166666666666667,
+        0.044166666666666674
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 0.060000000000000005
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 0.0
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.013333333333333334
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.01333333333333333
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0.09333333333333334
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0.0
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.019999999999999997
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -0.026666666666666665
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "p95_delay_s",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -5.916024697949425,
+      "run_equal_mean": -5.916024697949425,
+      "scenario_bootstrap_percentile_95": [
+        -19.401665278512702,
+        9.503699115674706
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 5.949812908708187
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -31.090092552377826
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 2.644313502867002
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 39.21670917014573
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -23.220326614288467
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -11.844417488242527
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -6.5304841175168535
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -22.45371239289064
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "total_distance_m",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -423.7615868837521,
+      "run_equal_mean": -423.76158688375216,
+      "scenario_bootstrap_percentile_95": [
+        -935.4014597873851,
+        6.274215530844522
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -1139.3491990329287
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -1817.2887812929305
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -276.4448283841648
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 5.027147927595554
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -311.02681804258526
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -18.60468926573655
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 477.1082847511334
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -309.51381173040016
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "energy_j",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 1.6483115241419346,
+      "run_equal_mean": 1.650650418991063,
+      "scenario_bootstrap_percentile_95": [
+        1.4986842710987687,
+        1.7978534877447168
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 1.6076985289012857
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 1.7520785772358067
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": 1.3655966790101957
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 1.390395289422789
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 1.8340009230208427
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 1.6196258807710062
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 1.9687847906316165
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "mean_delay_s",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 1.2034826864386865,
+      "run_equal_mean": 0.9347141420443812,
+      "scenario_bootstrap_percentile_95": [
+        0.24535365091378075,
+        2.0828013839618427
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.4888948553823127
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 1.756707640891591
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": 2.1178080651772007
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -0.20146072814307558
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 2.535096144486355
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.13644380767631029
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 2.568678730364738
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "min_deadline_slack_s",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 0.022035157446591062,
+      "run_equal_mean": 0.02892109914935226,
+      "scenario_bootstrap_percentile_95": [
+        7.378157587958238e-08,
+        0.06598155575713754
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 7.269805261482058e-08
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 2.696137642033136e-07
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": 1.1425481716287322e-07
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0.15381242567250789
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0.00043319160208928526
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 7.603329284696277e-08
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -4.774838657795044e-08
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "normalized_cpu",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -0.7462819909532307,
+      "run_equal_mean": -0.6044238615296549,
+      "scenario_bootstrap_percentile_95": [
+        -1.0500721963220407,
+        -0.4343231351670314
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.5111186853645792
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.2981947307863595
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": -1.345318743376641
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.6823762840838314
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.6728524158438374
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.7141130772173667
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "p95_delay_s",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -0.6519899483038163,
+      "run_equal_mean": -0.7845788867535681,
+      "scenario_bootstrap_percentile_95": [
+        -1.3239793210399988,
+        -0.17662777919289446
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -2.5049694894947074
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.3059774042088179
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": -0.26326797613904773
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -0.7070830974364147
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.0013517366905565116
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.78124396852985
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -3.5965627319001214e-05
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "contacts",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.4166666666666667,
+      "run_equal_mean": 0.4166666666666667,
+      "scenario_bootstrap_percentile_95": [
+        -0.37499999999999994,
+        1.2916666666666667
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 2.3333333333333335
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -0.3333333333333333
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.6666666666666666
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 2.3333333333333335
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.6666666666666666
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -1
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "mean_delay_s",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -3.780689387791778,
+      "run_equal_mean": -3.780689387791778,
+      "scenario_bootstrap_percentile_95": [
+        -11.891083561540569,
+        5.015928018347096
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 18.59903747546943
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -17.04242853835393
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 2.0720767289466075
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -12.039226140267564
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 5.337883062812712
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -12.892867128126122
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 3.9569279780821205
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -18.236918540897477
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "offload_ratio",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.015833333333333335,
+      "run_equal_mean": 0.015833333333333335,
+      "scenario_bootstrap_percentile_95": [
+        -0.010833333333333334,
+        0.0475
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 0.07333333333333333
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 0.0
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 0.0
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.006666666666666667
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0.09333333333333334
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.02
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.019999999999999997
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -0.033333333333333326
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "p95_delay_s",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -11.632375317414121,
+      "run_equal_mean": -11.632375317414123,
+      "scenario_bootstrap_percentile_95": [
+        -27.566147865087068,
+        2.867885998802214
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 7.204503293633707
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -50.55346662710897
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 15.293848114756562
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -42.318094135187756
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -2.2533039624394746
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -1.16485251176213
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 2.714816721365063
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -21.982453432569987
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "total_distance_m",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -2438.148371983384,
+      "run_equal_mean": -2438.148371983384,
+      "scenario_bootstrap_percentile_95": [
+        -2952.8822362474652,
+        -1933.848556781471
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -3376.1568979299295
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -2790.036847163192
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -1444.5452112521627
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -3109.6883754735263
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -3282.672427793877
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -1882.1056911886008
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -1617.0842573170419
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": -2002.897267748743
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "stage2_minus_stage1",
+      "metric": "energy_j",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 1.9311524447610802,
+      "run_equal_mean": 1.9311524447610802,
+      "scenario_bootstrap_percentile_95": [
+        1.855176984290925,
+        2.041521794906917
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 1.9385970457806252
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 1.9005962202791125
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 2.2416391970182303
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 1.8511672664317302
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 1.8383112967712805
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 1.8229526923969388
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 1.9248033946496435
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "stage2_minus_stage1",
+      "metric": "mean_delay_s",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 0.5856264214576916,
+      "run_equal_mean": 0.5856264214576916,
+      "scenario_bootstrap_percentile_95": [
+        0.09403463481895633,
+        1.0891137879503188
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 0.8134099530934407
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 0.9336967253281614
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 0.4542881617254011
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 1.7830057999315727
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -0.2714670084382078
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0.7702260791224944
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.38377476055902093
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "stage2_minus_stage1",
+      "metric": "min_deadline_slack_s",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": 0.030515359266843234,
+      "run_equal_mean": 0.030515359266843234,
+      "scenario_bootstrap_percentile_95": [
+        -7.335488102658669e-08,
+        0.09154577806410202
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 3.1917790010993485e-07
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -3.052036845474504e-09
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -5.588312887994107e-07
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -8.12850089459971e-08
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0.21360638508019747
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 6.026926655522402e-07
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 8.510854740961804e-07
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "stage2_minus_stage1",
+      "metric": "normalized_cpu",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -0.5187929848882045,
+      "run_equal_mean": -0.5187929848882045,
+      "scenario_bootstrap_percentile_95": [
+        -0.7541759048145026,
+        -0.275409748458527
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.6633104838865874
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -0.687461491061667
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.18141998121223957
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -1.0543263509931389
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.6082113317366866
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.4368212553271117
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "comparison": "stage2_minus_stage1",
+      "metric": "p95_delay_s",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -1.1904794897863067,
+      "run_equal_mean": -1.1904794897863067,
+      "scenario_bootstrap_percentile_95": [
+        -1.983539970786012,
+        -0.49476829132492955
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.7362369139692646
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -2.973266125138366
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 1.3885471616958966e-07
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -2.574356135887001
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -0.6031415781126839
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.9013884676361386
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.5449673466154081
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "energy_j",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 1.422533924487046,
+      "run_equal_mean": 1.4388570402044847,
+      "scenario_bootstrap_percentile_95": [
+        1.2539954490002856,
+        1.576627399760279
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 1.4417917975515593
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 1.4957463624887168
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 1.4343146108246099
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 1.3765079933412683
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 1.329140484323337
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 1.542276230766826
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 1.8271702981825608
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 0.9333236184174893
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "mean_delay_s",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.746029544430785,
+      "run_equal_mean": 0.8682250030088231,
+      "scenario_bootstrap_percentile_95": [
+        0.09109313355586095,
+        1.5847609777450853
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 0.9220068997915689
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.27623598791223003
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 1.6604314392057613
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 0.3226484277240047
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 3.195310193944929
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.1411875394583054
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 0.060806943172536876
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 0.22445597897801406
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "min_deadline_slack_s",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 0.0056720304653730125,
+      "run_equal_mean": 0.006482333211150284,
+      "scenario_bootstrap_percentile_95": [
+        -7.555994053554116e-07,
+        0.017016864216645812
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 2.455230211732366e-08
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.3660616104971268e-07
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -4.238460462602234e-07
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 8.270266486457938e-08
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 6.310057187874918e-07
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0.045378276402611085
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -2.2174352238835127e-06
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 6.9471184360736515e-09
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "normalized_cpu",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -0.6481934567296423,
+      "run_equal_mean": -0.6628096011038936,
+      "scenario_bootstrap_percentile_95": [
+        -0.8461062467614378,
+        -0.4734995492188888
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.7580274644159004
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.5147182938780563
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.5481571207807712
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.8504155195092842
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -1.1989636143321614
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.25361691843753853
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.4534439719098888
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.6082047505735382
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "p95_delay_s",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -0.044146654877878944,
+      "run_equal_mean": -0.01700572331795532,
+      "scenario_bootstrap_percentile_95": [
+        -1.1331732672615922,
+        1.529795823999772
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -2.3743612390424196
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.2075129279417638
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.008073982655503187
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.6465711551693781
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 4.865182987592012
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.6396229856686281
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -1.0548402646288462
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.28737367150850446
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "contacts",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -1.3333333333333333,
+      "run_equal_mean": -2,
+      "scenario_bootstrap_percentile_95": [
+        -2.6666666666666665,
+        0.0
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -2.6666666666666665
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "mean_delay_s",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -0.8973125535578721,
+      "run_equal_mean": -1.6426871987176597,
+      "scenario_bootstrap_percentile_95": [
+        -2.388061843877447,
+        0.5934367367617028
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -2.388061843877447
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0.5934367367617028
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "offload_ratio",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -0.01666666666666667,
+      "run_equal_mean": -0.025000000000000005,
+      "scenario_bootstrap_percentile_95": [
+        -0.03333333333333334,
+        0.0
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.03333333333333334
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0.0
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "p95_delay_s",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": 0.4323302297702867,
+      "run_equal_mean": -2.147759402699478,
+      "scenario_bootstrap_percentile_95": [
+        -4.727849035169243,
+        5.592509494709816
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -4.727849035169243
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 5.592509494709816
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "full_minus_restricted",
+      "metric": "total_distance_m",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -636.8360322776695,
+      "run_equal_mean": -372.65786690005507,
+      "scenario_bootstrap_percentile_95": [
+        -1165.1923630328984,
+        -108.47970152244064
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -108.47970152244064
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -1165.1923630328984
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "energy_j",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": 2.3946516712749144,
+      "run_equal_mean": 2.3946516712749144,
+      "scenario_bootstrap_percentile_95": [
+        2.3225427900179056,
+        2.466760552531923
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": 2.3225427900179056
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": 2.466760552531923
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "mean_delay_s",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": 4.811684888603594,
+      "run_equal_mean": 4.811684888603594,
+      "scenario_bootstrap_percentile_95": [
+        2.2851987382490933,
+        7.3381710389580945
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": 7.3381710389580945
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": 2.2851987382490933
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "min_deadline_slack_s",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -2.4426529563470467e-06,
+      "run_equal_mean": -2.4426529563470467e-06,
+      "scenario_bootstrap_percentile_95": [
+        -4.014831773702099e-06,
+        -8.704741389919946e-07
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": -8.704741389919946e-07
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": -4.014831773702099e-06
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "normalized_cpu",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -1.3223727984919291,
+      "run_equal_mean": -1.3223727984919291,
+      "scenario_bootstrap_percentile_95": [
+        -1.4224952308415901,
+        -1.222250366142268
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": -1.4224952308415901
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": -1.222250366142268
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "comparison": "stage2_minus_stage1",
+      "metric": "p95_delay_s",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -9.179065955322585e-06,
+      "run_equal_mean": -9.179065955322585e-06,
+      "scenario_bootstrap_percentile_95": [
+        -1.8348010939917003e-05,
+        -1.0120970728166867e-08
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": -1.8348010939917003e-05
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": -1.0120970728166867e-08
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "contacts",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": 0.0,
+      "run_equal_mean": 0,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "mean_delay_s",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": -4.692770941782129,
+      "run_equal_mean": -4.692770941782129,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -4.692770941782129
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "offload_ratio",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": 0.0,
+      "run_equal_mean": 0.0,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0.0
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "p95_delay_s",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": 0.04553741389275956,
+      "run_equal_mean": 0.04553741389275956,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 0.04553741389275956
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "comparison": "full_minus_restricted",
+      "metric": "total_distance_m",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": -1314.9740073809044,
+      "run_equal_mean": -1314.9740073809044,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -1314.9740073809044
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "energy_j",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 2.371760166946236,
+      "run_equal_mean": 2.355459831777677,
+      "scenario_bootstrap_percentile_95": [
+        2.323876171426097,
+        2.425428059070934
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": 2.5011113405635115
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 2.344815323856892
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": 2.3851560651382897
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 2.2958001233249283
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 2.3263486311479937
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 2.2899062111294675
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": 2.4770016543770907
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 2.353941986031714
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "mean_delay_s",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 2.3345603688785115,
+      "run_equal_mean": 2.2672526938528574,
+      "scenario_bootstrap_percentile_95": [
+        1.920549123815768,
+        2.6996134463881543
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": 3.308999048125969
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 2.1038065424585284
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": 2.437996187345533
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 2.4861582852716424
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 2.4072727503191516
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 2.1604880548613608
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": 1.1301055915359086
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": 2.6416564911099982
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "min_deadline_slack_s",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -9.469666003051694e-06,
+      "run_equal_mean": -6.1046938932512214e-06,
+      "scenario_bootstrap_percentile_95": [
+        -2.340305306939664e-05,
+        -1.383148750437139e-06
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -5.663977725589575e-05
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -3.822227085947816e-07
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -7.85277046588817e-06
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -6.039110189703933e-08
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -1.7520668791348726e-06
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -5.175046643065192e-07
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": -2.61581462268623e-06
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -5.936780326010194e-06
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "normalized_cpu",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -0.9058768885986264,
+      "run_equal_mean": -0.830038229015805,
+      "scenario_bootstrap_percentile_95": [
+        -1.1082863410714472,
+        -0.7138581039517765
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -1.3617920502992953
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.0403100682997624
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -0.7398611840167095
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.9134809911021416
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -1.2292491726949653
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.5842364728518396
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": -0.4913275923930377
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.8867575771312592
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "comparison": "stage2_minus_stage1",
+      "metric": "p95_delay_s",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 2.1675318103205408,
+      "run_equal_mean": 1.2318046776752527,
+      "scenario_bootstrap_percentile_95": [
+        -0.035606353214053144,
+        6.538199254709773
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -1.46249385579722e-06
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 17.435187691921954
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": 4.432445064139756e-05
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -1.2649798501721913e-05
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 6.488749022537377e-07
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 3.748770230534622e-07
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": 1.0007406103795802e-06
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.09496544600844459
+        }
+      ]
+    }
+  ]
+}

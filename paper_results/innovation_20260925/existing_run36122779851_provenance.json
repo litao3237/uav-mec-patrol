@@ -1,0 +1,67 @@
+{
+  "key": "innovation-existing-evidence-archive",
+  "run_id": 36122779851,
+  "artifact_id": 10858578487,
+  "artifact_name": "innovation-existing-evidence-archive",
+  "zip_sha256": "8a1df81b719a5f2a67175c8e8b81c945972bf7ba2b6338319995c2a79d02262f",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "8a1df81b719a5f2a67175c8e8b81c945972bf7ba2b6338319995c2a79d02262f",
+  "files": [
+    {
+      "file": "sources/matched/artifact.zip",
+      "sha256": "dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f",
+      "bytes": 113795
+    },
+    {
+      "file": "sources/matched/matched_runtime_K50-80_S45-52_A100-102_F1-2.csv",
+      "sha256": "9a9afa93fd6808a75596a48de2b3cafe144ee5b6be362977adc30a27e2dba85a",
+      "bytes": 3638
+    },
+    {
+      "file": "sources/matched/matched_runtime_K50-80_S45-52_A100-102_F1-2.json",
+      "sha256": "eec8727762249f29c9a9bc086af8a143b7231bfe3f320e0adf5699f07a306309",
+      "bytes": 1075065
+    },
+    {
+      "file": "sources/matched/provenance.json",
+      "sha256": "4b93f347c177de2a1fb321873e3d5093bab4375b2775c99304ba58961aae9ee5",
+      "bytes": 798
+    },
+    {
+      "file": "sources/v7_dev/artifact.zip",
+      "sha256": "c7a24adf9d9a8143925c751577e7c0e76fe1bb4001755acbd4958f7e0bf7e4a6",
+      "bytes": 59126
+    },
+    {
+      "file": "sources/v7_dev/paired_checkpoint_fork_v7_dev_aggregate.json",
+      "sha256": "63380f66e22391912613fae4b31fd05e5e56fbaef4f56b943334af6ce1b6848a",
+      "bytes": 541900
+    },
+    {
+      "file": "sources/v7_dev/provenance.json",
+      "sha256": "7f47a2cd08a022b58a6a125bd1af18605c11491a1253c7d38e0326de10c69e45",
+      "bytes": 619
+    },
+    {
+      "file": "sources/v7_unseen/artifact.zip",
+      "sha256": "7ff8735d0d6a400e95a284284952f51f7d782fa0d065d372fb2ebe690906e8de",
+      "bytes": 62333
+    },
+    {
+      "file": "sources/v7_unseen/paired_checkpoint_fork_v7_unseen_aggregate.json",
+      "sha256": "977dbd7bbbc939f9d0eb8f6baa322f21e968c00ac7e6ea08871ff13d7b24b316",
+      "bytes": 581309
+    },
+    {
+      "file": "sources/v7_unseen/provenance.json",
+      "sha256": "e1add11cda5a1697fb6c75c641a8a9e39f986f1ac9fe361628bff5fab2873fb8",
+      "bytes": 628
+    },
+    {
+      "file": "summary.json",
+      "sha256": "c0e16649bbe0a3e6cee7d7571b7b667b1a882d82d857a5d4abc9bdeaf83c4da7",
+      "bytes": 247378
+    }
+  ],
+  "code_commit": "7faa40a469f7e673d8e2552652e804ca5481d822"
+}

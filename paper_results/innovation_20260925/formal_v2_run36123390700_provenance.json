@@ -1,0 +1,97 @@
+{
+  "key": "innovation-formal-complete-archive",
+  "run_id": 36123390700,
+  "artifact_id": 10859336559,
+  "artifact_name": "innovation-formal-complete-archive",
+  "zip_sha256": "1c94a1006fc8c4d84bb822792f8713cf32f0fd0b46fcc1cffc7ada70190c4523",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "1c94a1006fc8c4d84bb822792f8713cf32f0fd0b46fcc1cffc7ada70190c4523",
+  "files": [
+    {
+      "file": "parts/mechanism_K50_S45.json",
+      "sha256": "9a2a3b965200ff571f3d363963a3851be140a1b8439f488b8b94941647108faf",
+      "bytes": 8430734
+    },
+    {
+      "file": "parts/mechanism_K50_S47.json",
+      "sha256": "eb5941fd846cdff31234928e97c19725659df6b13ece8ee7f5fdeb6c38f8ef93",
+      "bytes": 7736756
+    },
+    {
+      "file": "parts/mechanism_K50_S46.json",
+      "sha256": "ff90530b9721d9e76352531a2693f270dd3c93ec19f1c0bdabefa77fa9cfb2e9",
+      "bytes": 8381116
+    },
+    {
+      "file": "parts/mechanism_K50_S48.json",
+      "sha256": "cf20994e87c0178dcb5dfc047d2dc5c30048b3092061b000cbd7878e8b30b800",
+      "bytes": 8252073
+    },
+    {
+      "file": "parts/mechanism_K50_S49.json",
+      "sha256": "a706abdc2908f828041519067e8a0ac8d830a97bdddaa6bc3f84eb3d9e140c65",
+      "bytes": 10248563
+    },
+    {
+      "file": "parts/mechanism_K50_S51.json",
+      "sha256": "c038a6e0d4ae6ddc4e76dce234ed8c86439d5193ebc519b1704ff24d90592a0a",
+      "bytes": 8593880
+    },
+    {
+      "file": "parts/mechanism_K50_S50.json",
+      "sha256": "f7266c24eeb364d876831865cf1fbef24af202e36ca5128508146bb629c787db",
+      "bytes": 8941106
+    },
+    {
+      "file": "parts/mechanism_K50_S52.json",
+      "sha256": "5d3cb21faaf45c8abddc23905dad637253748f54504695c7ff8f58a58204164e",
+      "bytes": 8120329
+    },
+    {
+      "file": "parts/mechanism_K80_S45.json",
+      "sha256": "1d0cfaf45086dc9da79ea4fb14579542d66f026aca0b33952241ad7a18a38de9",
+      "bytes": 2522684
+    },
+    {
+      "file": "parts/mechanism_K80_S46.json",
+      "sha256": "05988a6399eba506657fbb2e011ea0b648fd1f377275736e2635702adc45613a",
+      "bytes": 3803711
+    },
+    {
+      "file": "parts/mechanism_K80_S47.json",
+      "sha256": "ba6271bd40f35c7067287f4183019cb6eeaa3fc7ebfd4df873e1297bdf8a52cf",
+      "bytes": 4899171
+    },
+    {
+      "file": "parts/mechanism_K80_S48.json",
+      "sha256": "588d8da7761553edd508e64df6149ccd7b14f92b50ddd07bf193facf55d1707d",
+      "bytes": 8422379
+    },
+    {
+      "file": "parts/mechanism_K80_S49.json",
+      "sha256": "2c555c26e1497f92f29ae6ffcd668084d6e26f1b928573c1148d648fe36d11e8",
+      "bytes": 10699781
+    },
+    {
+      "file": "parts/mechanism_K80_S50.json",
+      "sha256": "658252e8bcfcc2c1b692e7f13683a77c8ba7962ac32e44c569a9878ec025882b",
+      "bytes": 5257435
+    },
+    {
+      "file": "parts/mechanism_K80_S51.json",
+      "sha256": "d5b6ed145c5f5f30cc6367f1a7b501b701454c5ac23ae2ea44c0d96874c47ba1",
+      "bytes": 3972086
+    },
+    {
+      "file": "parts/mechanism_K80_S52.json",
+      "sha256": "072f2ea09a70cb409197e054f98dc114832735c4e39b73af2b36852c90ca03e4",
+      "bytes": 3521875
+    },
+    {
+      "file": "summary.json",
+      "sha256": "aba616a66a2c25827c0bb1f85bb3e59e77a3ffb122d78b20ffa5f7de63f0f5a8",
+      "bytes": 23192
+    }
+  ],
+  "code_commit": "7faa40a469f7e673d8e2552652e804ca5481d822"
+}

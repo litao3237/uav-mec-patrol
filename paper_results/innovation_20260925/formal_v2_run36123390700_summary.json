@@ -1,0 +1,877 @@
+{
+  "complete": true,
+  "phase": "formal",
+  "protocol": {
+    "id": "innovation_mechanism_v2",
+    "methods": [
+      "full",
+      "fixed_task_route",
+      "fixed_contacts"
+    ],
+    "release_s": 0,
+    "uavs": 5,
+    "mecs": 2,
+    "nominal_budgets_s": {
+      "50": 15.0,
+      "80": 45.0
+    },
+    "exploration_fraction": 0.8,
+    "elite_rounds": 2,
+    "rrt_iterations": 100,
+    "energy_tol_rel": 1e-05,
+    "audit_tolerance": {
+      "relative": 1e-06,
+      "time_s": 0.0001,
+      "energy_j": 0.001,
+      "bandwidth_mhz": 1e-06,
+      "cpu_ghz": 1e-07
+    },
+    "order_seed": 20260925,
+    "scenario_seeds_formal": [
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52
+    ],
+    "algorithm_seeds_formal": [
+      100,
+      101,
+      102
+    ],
+    "comparison": "相同初始化和名义搜索预算，候选冻结过滤贯穿探索与ESI；报告拒绝成本",
+    "exploration_operators": "三臂统一使用通用ALNS和直接结构候选配对，修复v1固定路径探索退化",
+    "scope": "受限搜索机制诊断，不等于各受限数学问题的全局最优比较",
+    "timeline_scope": "搜索中的代理评价及ESI稀疏Stage-1观测，不称完整严格能耗收敛轨迹",
+    "stage2_source": "同一最终结构重新执行Stage-1/Stage-2；不回填为历史原始资源",
+    "bootstrap": {
+      "unit": "scenario",
+      "replicates": 10000,
+      "seed": 20260925
+    }
+  },
+  "protocol_sha256": "d1d495b9e9533574402d4d3ef2a6931f95a8818dd044b9b51c877589f90ab861",
+  "code_commit": "7faa40a469f7e673d8e2552652e804ca5481d822",
+  "expected_method_runs": 144,
+  "observed_method_runs": 144,
+  "sources": [
+    {
+      "file": "mechanism_K50_S45.json",
+      "sha256": "9a2a3b965200ff571f3d363963a3851be140a1b8439f488b8b94941647108faf"
+    },
+    {
+      "file": "mechanism_K50_S46.json",
+      "sha256": "ff90530b9721d9e76352531a2693f270dd3c93ec19f1c0bdabefa77fa9cfb2e9"
+    },
+    {
+      "file": "mechanism_K50_S47.json",
+      "sha256": "eb5941fd846cdff31234928e97c19725659df6b13ece8ee7f5fdeb6c38f8ef93"
+    },
+    {
+      "file": "mechanism_K50_S48.json",
+      "sha256": "cf20994e87c0178dcb5dfc047d2dc5c30048b3092061b000cbd7878e8b30b800"
+    },
+    {
+      "file": "mechanism_K50_S49.json",
+      "sha256": "a706abdc2908f828041519067e8a0ac8d830a97bdddaa6bc3f84eb3d9e140c65"
+    },
+    {
+      "file": "mechanism_K50_S50.json",
+      "sha256": "f7266c24eeb364d876831865cf1fbef24af202e36ca5128508146bb629c787db"
+    },
+    {
+      "file": "mechanism_K50_S51.json",
+      "sha256": "c038a6e0d4ae6ddc4e76dce234ed8c86439d5193ebc519b1704ff24d90592a0a"
+    },
+    {
+      "file": "mechanism_K50_S52.json",
+      "sha256": "5d3cb21faaf45c8abddc23905dad637253748f54504695c7ff8f58a58204164e"
+    },
+    {
+      "file": "mechanism_K80_S45.json",
+      "sha256": "1d0cfaf45086dc9da79ea4fb14579542d66f026aca0b33952241ad7a18a38de9"
+    },
+    {
+      "file": "mechanism_K80_S46.json",
+      "sha256": "05988a6399eba506657fbb2e011ea0b648fd1f377275736e2635702adc45613a"
+    },
+    {
+      "file": "mechanism_K80_S47.json",
+      "sha256": "ba6271bd40f35c7067287f4183019cb6eeaa3fc7ebfd4df873e1297bdf8a52cf"
+    },
+    {
+      "file": "mechanism_K80_S48.json",
+      "sha256": "588d8da7761553edd508e64df6149ccd7b14f92b50ddd07bf193facf55d1707d"
+    },
+    {
+      "file": "mechanism_K80_S49.json",
+      "sha256": "2c555c26e1497f92f29ae6ffcd668084d6e26f1b928573c1148d648fe36d11e8"
+    },
+    {
+      "file": "mechanism_K80_S50.json",
+      "sha256": "658252e8bcfcc2c1b692e7f13683a77c8ba7962ac32e44c569a9878ec025882b"
+    },
+    {
+      "file": "mechanism_K80_S51.json",
+      "sha256": "d5b6ed145c5f5f30cc6367f1a7b501b701454c5ac23ae2ea44c0d96874c47ba1"
+    },
+    {
+      "file": "mechanism_K80_S52.json",
+      "sha256": "072f2ea09a70cb409197e054f98dc114832735c4e39b73af2b36852c90ca03e4"
+    }
+  ],
+  "counts": [
+    {
+      "tasks": 50,
+      "method": "full",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 24,
+      "stage2_qualified": 21,
+      "mean_search_runtime_s": 14.740949975958328,
+      "mean_overrun_s": 0.14032235574999716,
+      "mean_freeze_rejections": 0,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 24,
+      "stage2_qualified": 21,
+      "mean_search_runtime_s": 14.397759288249995,
+      "mean_overrun_s": 0.5367356797083325,
+      "mean_freeze_rejections": 243.08333333333334,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 24,
+      "stage2_qualified": 16,
+      "mean_search_runtime_s": 13.048198824249999,
+      "mean_overrun_s": 0.00906155016666658,
+      "mean_freeze_rejections": 191.04166666666666,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 14,
+      "stage2_qualified": 14,
+      "mean_search_runtime_s": 42.769668206666665,
+      "mean_overrun_s": 0.813063234708333,
+      "mean_freeze_rejections": 0,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 3,
+      "stage2_qualified": 0,
+      "mean_search_runtime_s": 37.449015367375,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 45.583333333333336,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "expected": 24,
+      "observed": 24,
+      "stage1_qualified": 6,
+      "stage2_qualified": 4,
+      "mean_search_runtime_s": 37.37088215504166,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 157.91666666666666,
+      "no_structure_variation_runs": 3
+    }
+  ],
+  "mechanism_comparisons": [
+    {
+      "tasks": 50,
+      "reference": "fixed_task_route",
+      "metric": "full_energy_saving_percent",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 19.372078760123102,
+      "run_equal_mean": 19.372078760123102,
+      "scenario_bootstrap_percentile_95": [
+        15.388053735658632,
+        23.44402557659946
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 25.830201034671035
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 21.9490174170917
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 11.601740615109467
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 25.29762029327239
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 26.69545921521733
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 15.540957238652974
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": 12.439970805016898
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": 15.621663461953023
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 100,
+          "difference": 24.997371198714045
+        },
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 101,
+          "difference": 25.44390001855064
+        },
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 102,
+          "difference": 27.049331886748416
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 100,
+          "difference": 22.321838317782298
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 101,
+          "difference": 20.532999855078245
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 102,
+          "difference": 22.992214078414552
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 100,
+          "difference": 5.888523280784406
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 101,
+          "difference": 5.888523280784406
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 102,
+          "difference": 23.02817528375959
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 100,
+          "difference": 24.820198432639458
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 101,
+          "difference": 24.09881614798553
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 102,
+          "difference": 26.97384629919219
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 100,
+          "difference": 26.06468796308781
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 101,
+          "difference": 26.677613035751936
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 102,
+          "difference": 27.344076646812248
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 100,
+          "difference": 13.627339692460515
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 101,
+          "difference": 12.583136336671927
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 102,
+          "difference": 20.41239568682648
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 100,
+          "difference": 10.148366743582425
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 101,
+          "difference": 10.113347532434297
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 102,
+          "difference": 17.058198139033973
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 100,
+          "difference": 9.458380777212291
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 101,
+          "difference": 22.273089940911827
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 102,
+          "difference": 15.133519667734953
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "reference": "fixed_contacts",
+      "metric": "full_energy_saving_percent",
+      "pairs": 24,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": 3.690618371647987,
+      "run_equal_mean": 3.690618371647987,
+      "scenario_bootstrap_percentile_95": [
+        -0.07867856280048434,
+        8.084076403288833
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": 10.323460164469214
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": 15.426372108763017
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": 1.9886318264283585
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 0.1448186030255286
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 2.994915657643238
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": 0.1782742243370559
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -4.420331479682231
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 3,
+          "mean_difference": 2.8888058681997135
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 100,
+          "difference": 5.903959757397792
+        },
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 101,
+          "difference": 11.235555219380753
+        },
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 102,
+          "difference": 13.830865516629098
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 100,
+          "difference": 17.360919038837412
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 101,
+          "difference": 14.243646798972504
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 102,
+          "difference": 14.674550488479134
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 100,
+          "difference": -3.38005202681895
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 101,
+          "difference": -9.98667351989145
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 102,
+          "difference": 19.332621025995476
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 100,
+          "difference": -0.6327513123120243
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 101,
+          "difference": -1.0479648499148753
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 102,
+          "difference": 2.1151719713034853
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 100,
+          "difference": 1.8987229735087972
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 101,
+          "difference": 2.7407894634271375
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 102,
+          "difference": 4.345234535993779
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 100,
+          "difference": -0.8652923128994315
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 101,
+          "difference": -3.0955937669827702
+        },
+        {
+          "scenario_seed": 50,
+          "algorithm_seed": 102,
+          "difference": 4.4957087528933695
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 100,
+          "difference": -10.447549610540403
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 101,
+          "difference": -3.5005733102115495
+        },
+        {
+          "scenario_seed": 51,
+          "algorithm_seed": 102,
+          "difference": 0.6871284817052594
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 100,
+          "difference": -0.09972306826858791
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 101,
+          "difference": 7.072485300613204
+        },
+        {
+          "scenario_seed": 52,
+          "algorithm_seed": 102,
+          "difference": 1.6936553722545242
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "reference": "fixed_task_route",
+      "metric": "full_energy_saving_percent",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": 9.17815051513599,
+      "run_equal_mean": 9.17815051513599,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 9.17815051513599
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 102,
+          "difference": 9.17815051513599
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "reference": "fixed_contacts",
+      "metric": "full_energy_saving_percent",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": 4.766163331763657,
+      "run_equal_mean": 2.97065345326145,
+      "scenario_bootstrap_percentile_95": [
+        1.1751435747592434,
+        8.357183088768071
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": 1.1751435747592434
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": 8.357183088768071
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 100,
+          "difference": -1.2953567265057007
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 101,
+          "difference": -0.8589748853893949
+        },
+        {
+          "scenario_seed": 48,
+          "algorithm_seed": 102,
+          "difference": 5.679762336172826
+        },
+        {
+          "scenario_seed": 49,
+          "algorithm_seed": 102,
+          "difference": 8.357183088768071
+        }
+      ]
+    }
+  ],
+  "resource_stage_comparisons": [
+    {
+      "tasks": 50,
+      "method": "full",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 21,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -0.6481934567296423,
+      "run_equal_mean": -0.6628096011038936,
+      "scenario_bootstrap_percentile_95": [
+        -0.8461062467614378,
+        -0.4734995492188888
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.7580274644159004
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.5147182938780563
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.5481571207807712
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.8504155195092842
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": -1.1989636143321614
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.25361691843753853
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.4534439719098888
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.6082047505735382
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 21,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -0.5187929848882045,
+      "run_equal_mean": -0.5187929848882045,
+      "scenario_bootstrap_percentile_95": [
+        -0.7541759048145026,
+        -0.275409748458527
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.6633104838865874
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 3,
+          "mean_difference": -0.687461491061667
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 3,
+          "mean_difference": -0.18141998121223957
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -1.0543263509931389
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.6082113317366866
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.4368212553271117
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 16,
+      "independent_scenarios": 7,
+      "scenario_equal_mean": -0.7462819909532307,
+      "run_equal_mean": -0.6044238615296549,
+      "scenario_bootstrap_percentile_95": [
+        -1.0500721963220407,
+        -0.4343231351670314
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 3,
+          "mean_difference": -0.5111186853645792
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.2981947307863595
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 1,
+          "mean_difference": -1.345318743376641
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 3,
+          "mean_difference": 0
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.6823762840838314
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 3,
+          "mean_difference": -0.6728524158438374
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.7141130772173667
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 14,
+      "independent_scenarios": 8,
+      "scenario_equal_mean": -0.9058768885986264,
+      "run_equal_mean": -0.830038229015805,
+      "scenario_bootstrap_percentile_95": [
+        -1.1082863410714472,
+        -0.7138581039517765
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -1.3617920502992953
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.0403100682997624
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -0.7398611840167095
+        },
+        {
+          "scenario_seed": 48,
+          "pairs": 3,
+          "mean_difference": -0.9134809911021416
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 1,
+          "mean_difference": -1.2292491726949653
+        },
+        {
+          "scenario_seed": 50,
+          "pairs": 3,
+          "mean_difference": -0.5842364728518396
+        },
+        {
+          "scenario_seed": 51,
+          "pairs": 2,
+          "mean_difference": -0.4913275923930377
+        },
+        {
+          "scenario_seed": 52,
+          "pairs": 2,
+          "mean_difference": -0.8867575771312592
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 0,
+      "independent_scenarios": 0,
+      "scenario_equal_mean": null,
+      "run_equal_mean": null,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": []
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 4,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -1.3223727984919291,
+      "run_equal_mean": -1.3223727984919291,
+      "scenario_bootstrap_percentile_95": [
+        -1.4224952308415901,
+        -1.222250366142268
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 48,
+          "pairs": 2,
+          "mean_difference": -1.4224952308415901
+        },
+        {
+          "scenario_seed": 49,
+          "pairs": 2,
+          "mean_difference": -1.222250366142268
+        }
+      ]
+    }
+  ],
+  "integrity_gate_passed": true,
+  "interpretation": "能耗比较仅限共同Stage-1原数值状态及独立残差均合格子集；所有失败另计。候选拒绝造成的搜索效率差异须并列解释。"
+}

@@ -1,0 +1,395 @@
+{
+  "complete": true,
+  "phase": "pilot",
+  "protocol": {
+    "id": "innovation_mechanism_v2",
+    "methods": [
+      "full",
+      "fixed_task_route",
+      "fixed_contacts"
+    ],
+    "release_s": 0,
+    "uavs": 5,
+    "mecs": 2,
+    "nominal_budgets_s": {
+      "50": 15.0,
+      "80": 45.0
+    },
+    "exploration_fraction": 0.8,
+    "elite_rounds": 2,
+    "rrt_iterations": 100,
+    "energy_tol_rel": 1e-05,
+    "audit_tolerance": {
+      "relative": 1e-06,
+      "time_s": 0.0001,
+      "energy_j": 0.001,
+      "bandwidth_mhz": 1e-06,
+      "cpu_ghz": 1e-07
+    },
+    "order_seed": 20260925,
+    "scenario_seeds_formal": [
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52
+    ],
+    "algorithm_seeds_formal": [
+      100,
+      101,
+      102
+    ],
+    "comparison": "相同初始化和名义搜索预算，候选冻结过滤贯穿探索与ESI；报告拒绝成本",
+    "exploration_operators": "三臂统一使用通用ALNS和直接结构候选配对，修复v1固定路径探索退化",
+    "scope": "受限搜索机制诊断，不等于各受限数学问题的全局最优比较",
+    "timeline_scope": "搜索中的代理评价及ESI稀疏Stage-1观测，不称完整严格能耗收敛轨迹",
+    "stage2_source": "同一最终结构重新执行Stage-1/Stage-2；不回填为历史原始资源",
+    "bootstrap": {
+      "unit": "scenario",
+      "replicates": 10000,
+      "seed": 20260925
+    }
+  },
+  "protocol_sha256": "d1d495b9e9533574402d4d3ef2a6931f95a8818dd044b9b51c877589f90ab861",
+  "code_commit": "7faa40a469f7e673d8e2552652e804ca5481d822",
+  "expected_method_runs": 18,
+  "observed_method_runs": 18,
+  "sources": [
+    {
+      "file": "mechanism_K50_S45.json",
+      "sha256": "8b1839f523949c1b295d886683928bf4d0f27794895087e3d2437e95ded12402"
+    },
+    {
+      "file": "mechanism_K50_S46.json",
+      "sha256": "91e0ec6c68b7f52e61df78269b8912035b9271937ee5453c75f7259d337e9dc3"
+    },
+    {
+      "file": "mechanism_K50_S47.json",
+      "sha256": "4dedc75348628113ba8e1827201936cb895b0cc5848b2bba75fe4c1fb6bf63fe"
+    },
+    {
+      "file": "mechanism_K80_S45.json",
+      "sha256": "4e273f141f2d269b76edf2e278605848d1b788b68f1a659d32582eafead83860"
+    },
+    {
+      "file": "mechanism_K80_S46.json",
+      "sha256": "c615f060f8b5ee6f84907ab72d8d0dc003747b125b43533d9108c2e5ddce3586"
+    },
+    {
+      "file": "mechanism_K80_S47.json",
+      "sha256": "c700ecd854afc711f4ec11ee3eee6f28cf3e61b2d266c10fa95567b1b04bbe32"
+    }
+  ],
+  "counts": [
+    {
+      "tasks": 50,
+      "method": "full",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 3,
+      "stage2_qualified": 1,
+      "mean_search_runtime_s": 14.593446497333327,
+      "mean_overrun_s": 0.14166081366666816,
+      "mean_freeze_rejections": 0,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 3,
+      "stage2_qualified": 3,
+      "mean_search_runtime_s": 13.593153459000002,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 130.33333333333334,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 3,
+      "stage2_qualified": 1,
+      "mean_search_runtime_s": 12.702637200666667,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 225.33333333333334,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 2,
+      "stage2_qualified": 2,
+      "mean_search_runtime_s": 39.98413447466667,
+      "mean_overrun_s": 0.29360064566666705,
+      "mean_freeze_rejections": 0,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 0,
+      "stage2_qualified": 0,
+      "mean_search_runtime_s": 36.56633939266667,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 35.666666666666664,
+      "no_structure_variation_runs": 0
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "expected": 3,
+      "observed": 3,
+      "stage1_qualified": 0,
+      "stage2_qualified": 0,
+      "mean_search_runtime_s": 37.19316160433333,
+      "mean_overrun_s": 0.0,
+      "mean_freeze_rejections": 172.66666666666666,
+      "no_structure_variation_runs": 0
+    }
+  ],
+  "mechanism_comparisons": [
+    {
+      "tasks": 50,
+      "reference": "fixed_task_route",
+      "metric": "full_energy_saving_percent",
+      "pairs": 3,
+      "independent_scenarios": 3,
+      "scenario_equal_mean": 13.17575284809116,
+      "run_equal_mean": 13.175752848091161,
+      "scenario_bootstrap_percentile_95": [
+        5.888523280784406,
+        25.1369539375746
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": 25.136953937574596
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 8.50178132591448
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": 5.888523280784406
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 100,
+          "difference": 25.136953937574596
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 100,
+          "difference": 8.50178132591448
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 100,
+          "difference": 5.888523280784406
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "reference": "fixed_contacts",
+      "metric": "full_energy_saving_percent",
+      "pairs": 3,
+      "independent_scenarios": 3,
+      "scenario_equal_mean": 1.7857558400982612,
+      "run_equal_mean": 1.7857558400982614,
+      "scenario_bootstrap_percentile_95": [
+        -3.38005202681895,
+        6.079076059624925
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": 6.079076059624925
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": 2.6582434874888086
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -3.38005202681895
+        }
+      ],
+      "paired_values": [
+        {
+          "scenario_seed": 45,
+          "algorithm_seed": 100,
+          "difference": 6.079076059624925
+        },
+        {
+          "scenario_seed": 46,
+          "algorithm_seed": 100,
+          "difference": 2.6582434874888086
+        },
+        {
+          "scenario_seed": 47,
+          "algorithm_seed": 100,
+          "difference": -3.38005202681895
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "reference": "fixed_task_route",
+      "metric": "full_energy_saving_percent",
+      "pairs": 0,
+      "independent_scenarios": 0,
+      "scenario_equal_mean": null,
+      "run_equal_mean": null,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [],
+      "paired_values": []
+    },
+    {
+      "tasks": 80,
+      "reference": "fixed_contacts",
+      "metric": "full_energy_saving_percent",
+      "pairs": 0,
+      "independent_scenarios": 0,
+      "scenario_equal_mean": null,
+      "run_equal_mean": null,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [],
+      "paired_values": []
+    }
+  ],
+  "resource_stage_comparisons": [
+    {
+      "tasks": 50,
+      "method": "full",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": -0.22101241078581624,
+      "run_equal_mean": -0.22101241078581624,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -0.22101241078581624
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_task_route",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 3,
+      "independent_scenarios": 3,
+      "scenario_equal_mean": -0.510730652053498,
+      "run_equal_mean": -0.510730652053498,
+      "scenario_bootstrap_percentile_95": [
+        -0.6874614910616671,
+        -0.18141998121223957
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -0.6633104838865874
+        },
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -0.687461491061667
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -0.18141998121223957
+        }
+      ]
+    },
+    {
+      "tasks": 50,
+      "method": "fixed_contacts",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 1,
+      "independent_scenarios": 1,
+      "scenario_equal_mean": -0.5946097701451982,
+      "run_equal_mean": -0.5946097701451982,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": [
+        {
+          "scenario_seed": 45,
+          "pairs": 1,
+          "mean_difference": -0.5946097701451982
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "full",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 2,
+      "independent_scenarios": 2,
+      "scenario_equal_mean": -0.8838115936718958,
+      "run_equal_mean": -0.8838115936718958,
+      "scenario_bootstrap_percentile_95": [
+        -1.027762003327082,
+        -0.7398611840167095
+      ],
+      "per_scenario": [
+        {
+          "scenario_seed": 46,
+          "pairs": 1,
+          "mean_difference": -1.027762003327082
+        },
+        {
+          "scenario_seed": 47,
+          "pairs": 1,
+          "mean_difference": -0.7398611840167095
+        }
+      ]
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_task_route",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 0,
+      "independent_scenarios": 0,
+      "scenario_equal_mean": null,
+      "run_equal_mean": null,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": []
+    },
+    {
+      "tasks": 80,
+      "method": "fixed_contacts",
+      "metric": "stage2_minus_stage1_normalized_cpu",
+      "pairs": 0,
+      "independent_scenarios": 0,
+      "scenario_equal_mean": null,
+      "run_equal_mean": null,
+      "scenario_bootstrap_percentile_95": null,
+      "per_scenario": []
+    }
+  ],
+  "integrity_gate_passed": true,
+  "interpretation": "能耗比较仅限共同Stage-1原数值状态及独立残差均合格子集；所有失败另计。候选拒绝造成的搜索效率差异须并列解释。"
+}

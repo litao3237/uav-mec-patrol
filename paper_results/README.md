@@ -8,6 +8,11 @@ It intentionally does **not** replace `outputs/results/`. Raw per-run JSON,
 logs, and GitHub Actions artifacts remain ignored because they are bulky and
 include intermediate/debug information.
 
+The separately versioned [innovation evidence archive](innovation_20260925/README.md)
+is an exception: it tracks compact original ZIP artifacts and provenance so the
+new mechanism and resource audits remain available after Actions artifacts expire.
+Its additional qualification rules do not rewrite the historical CSV statuses below.
+
 ## Files
 
 | File | Intended figure / use |
