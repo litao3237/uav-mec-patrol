@@ -1,0 +1,294 @@
+{
+  "audit_date": "2026-09-25",
+  "scope": "仅只读数据字段、覆盖与代码可实现性核查；未执行优化器或新实验。",
+  "local_code_revision": "ed2f185b6ebc150fbaaaef35f77b8c0305cc5238",
+  "matched_runtime_artifact": {
+    "id": 10685977508,
+    "name": "matched-runtime-main-aggregate",
+    "digest": "sha256:dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f",
+    "expired": false,
+    "created_at": "2026-09-22T09:13:40Z",
+    "workflow_run": {
+      "id": 35706790157,
+      "repository_id": 1378077601,
+      "head_repository_id": 1378077601,
+      "head_branch": "develop",
+      "head_sha": "b182b64e302b56a737db276cc6cf1399e5e6a4f7"
+    },
+    "download_sha256": "sha256:dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f"
+  },
+  "matched_matrix": {
+    "unique_rows": 96,
+    "complete": true
+  },
+  "primary_1x_coverage": [
+    {
+      "K": 50,
+      "method": "gr_mr",
+      "scheduled_records": 8,
+      "stage1_records": 7,
+      "stage2_records": 6,
+      "stage2_scenarios": 6,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 50,
+      "method": "ftr_nm",
+      "scheduled_records": 8,
+      "stage1_records": 8,
+      "stage2_records": 8,
+      "stage2_scenarios": 8,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 50,
+      "method": "rga_mr",
+      "scheduled_records": 24,
+      "stage1_records": 22,
+      "stage2_records": 19,
+      "stage2_scenarios": 7,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 50,
+      "method": "b_alns",
+      "scheduled_records": 24,
+      "stage1_records": 24,
+      "stage2_records": 19,
+      "stage2_scenarios": 8,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 50,
+      "method": "esi_alns",
+      "scheduled_records": 24,
+      "stage1_records": 24,
+      "stage2_records": 22,
+      "stage2_scenarios": 8,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 80,
+      "method": "gr_mr",
+      "scheduled_records": 8,
+      "stage1_records": 1,
+      "stage2_records": 1,
+      "stage2_scenarios": 1,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 80,
+      "method": "ftr_nm",
+      "scheduled_records": 8,
+      "stage1_records": 1,
+      "stage2_records": 1,
+      "stage2_scenarios": 1,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 80,
+      "method": "rga_mr",
+      "scheduled_records": 24,
+      "stage1_records": 3,
+      "stage2_records": 3,
+      "stage2_scenarios": 1,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 80,
+      "method": "b_alns",
+      "scheduled_records": 24,
+      "stage1_records": 23,
+      "stage2_records": 18,
+      "stage2_scenarios": 7,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    },
+    {
+      "K": 80,
+      "method": "esi_alns",
+      "scheduled_records": 24,
+      "stage1_records": 23,
+      "stage2_records": 19,
+      "stage2_scenarios": 8,
+      "fields_present_in_every_valid_record": {
+        "avg_delay_s": true,
+        "min_deadline_slack_s": true,
+        "cpu_utilization_by_mec": true,
+        "bandwidth_utilization_by_mec": true,
+        "fixed_energy_j": true,
+        "communication_energy_j": true,
+        "local_compute_energy_j": true,
+        "energy_stage1_j": true,
+        "energy_final_j": true
+      }
+    }
+  ],
+  "stage2_b_alns_esi_pairs": [
+    {
+      "K": 50,
+      "valid_stage2_pairs": 18,
+      "independent_scenarios": 8
+    },
+    {
+      "K": 80,
+      "valid_stage2_pairs": 16,
+      "independent_scenarios": 7
+    }
+  ],
+  "sources": [
+    {
+      "path": "_work/innovation_evidence_20260925/matched_runtime/matched_runtime_K50-80_S45-52_A100-102_F1-2.json",
+      "sha256": "eec8727762249f29c9a9bc086af8a143b7231bfe3f320e0adf5699f07a306309",
+      "rows": 96
+    },
+    {
+      "path": "paper_figures/data/raw/dense.json",
+      "sha256": "226f8470b2929de996427479ef3ed2021910c21ec95e88c7bf1bfcd82efc3203",
+      "rows": 54,
+      "paper_metrics_records": 0,
+      "elite_stats_records": 54,
+      "elite_evaluated_moves_records": 54,
+      "elite_timed_move_records": 0
+    },
+    {
+      "path": "paper_figures/data/raw/strong.json",
+      "sha256": "5eeb6680263b1a2d94be2fe07092be822745c81b1914c402775c229ee15e260b",
+      "rows": 45
+    },
+    {
+      "path": "paper_figures/data/raw/geography.json",
+      "sha256": "784e92148b04a6409fc61d39bc438d33358386c767d9bf5ff20990fcc2cabd9f",
+      "rows": 9
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/main_baseline_8x3.csv",
+      "sha256": "024207c9abc2e00db091d7f79fb2eabbe700d5f87bbd5a35a89048a8110f9a2b"
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/multiscale_ablation_summary.csv",
+      "sha256": "a4b67f8177ad0d51d40c05c8dff92b13dfad681171212acaa731c50fa6d8e485"
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/multiscale_baseline_corrected_K30.json",
+      "sha256": "f7b0b6635901aa1251adf8ea048fc0445aa478310cd9d58da3d78bf02b445700",
+      "rows": 88
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/multiscale_baseline_corrected_K40.json",
+      "sha256": "c6349c06126dea703a243f76ca200b8d6140e3951ba08013ea6d5ae5a5edefc3",
+      "rows": 88
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/multiscale_baseline_corrected_K60.json",
+      "sha256": "a6cc53276e371872e62a6c95a318a16f1c152d9ad8adf615465a4d403cfe28f4",
+      "rows": 88
+    },
+    {
+      "path": "paper_figures/revisions/v12/data/multiscale_baseline_corrected_K70.json",
+      "sha256": "539d2388769ab425513efab90eda2f5c8fb74a8fd1ed579cf551ff3393852352",
+      "rows": 88
+    }
+  ],
+  "absence_in_matched_and_dense_exports": [
+    "完整 routes/task_decisions/contact_visits",
+    "stage1_values 与 final_values 双快照",
+    "逐任务采集、上传、完成时间",
+    "带墙钟时间戳的严格 incumbent 能耗轨迹"
+  ],
+  "limitations": [
+    "字段存在不等于全约束可行性认证。",
+    "等预算与固定100迭代主实验不能混为同一协议。",
+    "能耗分项由返回资源重建，不能无检验地按比例拆分 Stage-1 主目标。",
+    "本清单未将历史求解器 optimal 状态当作残差合格证书。"
+  ]
+}
