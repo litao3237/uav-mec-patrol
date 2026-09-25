@@ -1,0 +1,38 @@
+name: Innovation evidence B reanalysis
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  reanalyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      # 使用仓库只读令牌取回固定来源，ZIP及解压文件哈希同时归档。
+      - name: Fetch and verify frozen source artifacts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          uv run python experiments/fetch_innovation_sources.py
+          --output-dir outputs/results/innovation_existing/sources
+      - name: Reanalyze paired QoS and marginal costs without new search
+        run: >-
+          uv run python experiments/reanalyze_innovation_sources.py
+          --source-dir outputs/results/innovation_existing/sources
+          --output outputs/results/innovation_existing/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: innovation-existing-evidence-archive
+          path: outputs/results/innovation_existing/
+          if-no-files-found: error
+          retention-days: 90

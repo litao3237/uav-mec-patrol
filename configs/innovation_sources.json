@@ -1,0 +1,14 @@
+{
+  "repository": "litao3237/uav-mec-patrol",
+  "sources": [
+    {"key": "matched", "run_id": 35706790157, "artifact_id": 10685977508,
+     "artifact_name": "matched-runtime-main-aggregate",
+     "zip_sha256": "dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f"},
+    {"key": "v7_dev", "run_id": 35742584262, "artifact_id": 10699739562,
+     "artifact_name": "paired-checkpoint-fork-v7-dev-aggregate",
+     "zip_sha256": "c7a24adf9d9a8143925c751577e7c0e76fe1bb4001755acbd4958f7e0bf7e4a6"},
+    {"key": "v7_unseen", "run_id": 35745071473, "artifact_id": 10701238868,
+     "artifact_name": "paired-checkpoint-fork-v7-unseen-aggregate",
+     "zip_sha256": "7ff8735d0d6a400e95a284284952f51f7d782fa0d065d372fb2ebe690906e8de"}
+  ]
+}

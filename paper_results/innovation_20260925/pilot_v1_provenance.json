@@ -1,0 +1,47 @@
+{
+  "key": "innovation-pilot-complete-archive",
+  "run_id": 36121819858,
+  "artifact_id": 10858397332,
+  "artifact_name": "innovation-pilot-complete-archive",
+  "zip_sha256": "c800fcfec3c67723789df0e268cba928cbb096fb928f91ee8b079ce13be62952",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "c800fcfec3c67723789df0e268cba928cbb096fb928f91ee8b079ce13be62952",
+  "files": [
+    {
+      "file": "parts/mechanism_K50_S45.json",
+      "sha256": "f700ed3398c8d1d1e73d0a124c42dcd19b4878644dfbfefe595ecf9dd1e3a3d0",
+      "bytes": 2395420
+    },
+    {
+      "file": "parts/mechanism_K50_S46.json",
+      "sha256": "f938fa62bdf619458946ea4f6e5096358b5692a6ba2e7c7396e37e567d78a4e5",
+      "bytes": 2458951
+    },
+    {
+      "file": "parts/mechanism_K50_S47.json",
+      "sha256": "d741e022606f1b91e76c35e9279b07ee5cf7761d362b6d5a7067fa6b36aad12e",
+      "bytes": 1841378
+    },
+    {
+      "file": "parts/mechanism_K80_S45.json",
+      "sha256": "e0dba53a689196b5df2ae5e0e58705fd7a70b2110d3e2fd9f536eefd1f37c66d",
+      "bytes": 1461644
+    },
+    {
+      "file": "parts/mechanism_K80_S46.json",
+      "sha256": "3abe31d086e3ec5966a52d7ac81e60facff3c0d77741974dc11bd66f5882c608",
+      "bytes": 1421103
+    },
+    {
+      "file": "parts/mechanism_K80_S47.json",
+      "sha256": "3d9955bd9c2b1e5098c987cf378ba8f706d27596df1012e1995fb2a5a84f67d8",
+      "bytes": 1428235
+    },
+    {
+      "file": "summary.json",
+      "sha256": "a5cf60cf3faa9656468963a22b9f30a9a800aa00b619b0a38e178f6e2ac69e1c",
+      "bytes": 10754
+    }
+  ],
+  "code_commit": "a4264b7ae5d1dbc9300aadecde3ee8c05c725832"
+}

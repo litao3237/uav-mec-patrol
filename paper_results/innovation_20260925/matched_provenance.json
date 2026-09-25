@@ -1,0 +1,22 @@
+{
+  "key": "matched",
+  "run_id": 35706790157,
+  "artifact_id": 10685977508,
+  "artifact_name": "matched-runtime-main-aggregate",
+  "zip_sha256": "dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "dc907c32a344c906119071950c82676f4c1126ca23d4a6a9f13375e55777711f",
+  "files": [
+    {
+      "file": "matched_runtime_K50-80_S45-52_A100-102_F1-2.json",
+      "sha256": "eec8727762249f29c9a9bc086af8a143b7231bfe3f320e0adf5699f07a306309",
+      "bytes": 1075065
+    },
+    {
+      "file": "matched_runtime_K50-80_S45-52_A100-102_F1-2.csv",
+      "sha256": "9a9afa93fd6808a75596a48de2b3cafe144ee5b6be362977adc30a27e2dba85a",
+      "bytes": 3638
+    }
+  ],
+  "code_commit": "b182b64e302b56a737db276cc6cf1399e5e6a4f7"
+}

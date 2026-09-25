@@ -18,7 +18,7 @@ import numpy as np
 
 from uav_mec.algorithms import (
     ScreenedProxyObjectiveEvaluator, Stage1CVXObjectiveOracle, UavMecALNSConfig,
-    build_greedy_initial_solution, build_mec_assisted_initial_solution, run_uav_mec_alns,
+    build_greedy_initial_solution, build_mec_assisted_initial_solution,
 )
 from uav_mec.algorithms.alns.problem_operators import contact_mode_intensification
 from uav_mec.algorithms.alns.state import UavMecState
@@ -28,16 +28,18 @@ from uav_mec.analysis.mechanism_controls import FrozenDecisions, GuardedEvaluato
 from uav_mec.evaluation import build_event_info
 from uav_mec.instances import build_paper_scale_instance, load_paper_scale_config
 from uav_mec.optimization.resource import CVXResourceSolver
+from innovation_control_search import run_controlled_exploration
 
 METHODS = ("full", "fixed_task_route", "fixed_contacts")
 PROTOCOL = {
-    "id": "innovation_mechanism_v1", "methods": list(METHODS), "release_s": 0,
+    "id": "innovation_mechanism_v2", "methods": list(METHODS), "release_s": 0,
     "uavs": 5, "mecs": 2, "nominal_budgets_s": {"50": 15.0, "80": 45.0},
     "exploration_fraction": 0.8, "elite_rounds": 2, "rrt_iterations": 100,
     "energy_tol_rel": 1e-5, "audit_tolerance": asdict(AuditTolerance()),
     "order_seed": 20260925, "scenario_seeds_formal": list(range(45, 53)),
     "algorithm_seeds_formal": [100, 101, 102],
     "comparison": "相同初始化和名义搜索预算，候选冻结过滤贯穿探索与ESI；报告拒绝成本",
+    "exploration_operators": "三臂统一使用通用ALNS和直接结构候选配对，修复v1固定路径探索退化",
     "scope": "受限搜索机制诊断，不等于各受限数学问题的全局最优比较",
     "timeline_scope": "搜索中的代理评价及ESI稀疏Stage-1观测，不称完整严格能耗收敛轨迹",
     "stage2_source": "同一最终结构重新执行Stage-1/Stage-2；不回填为历史原始资源",
@@ -82,8 +84,9 @@ def run_method(instance, initial, *, method: str, seed: int, budget_s: float) ->
     # 初始目标必须有限；否则inf候选可能破坏接受规则。此检查的成本计入搜索。
     if not math.isfinite(outer(instance, initial)):
         raise RuntimeError("初始代理目标非有限数，不能启动冻结对照")
-    exploration = run_uav_mec_alns(instance, initial_solution=deepcopy(initial),
-                                    config=config, evaluator=outer)
+    exploration, exploration_details = run_controlled_exploration(
+        instance, deepcopy(initial), config, outer, .8 * budget_s,
+    )
     exploration_runtime = perf_counter() - started
     assert frozen.allows(exploration.best_solution), "探索结果违反冻结约束"
     oracle = Stage1CVXObjectiveOracle()
@@ -130,6 +133,7 @@ def run_method(instance, initial, *, method: str, seed: int, budget_s: float) ->
         "overrun_s": max(0.0, search_runtime - budget_s), "exploration_runtime_s": exploration_runtime,
         "resource_recompute_runtime_s": resource_runtime, "audit_runtime_s": audit_runtime,
         "outer_stats": asdict(outer.evaluator.stats), "outer_freeze_stats": outer.summary(),
+        "controlled_exploration": exploration_details,
         "elite_freeze_stats": strict.summary(), "elite_stats": stats,
         "oracle_calls": oracle.calls, "oracle_cache_hits": oracle.cache_hits,
         "oracle_solve_records": oracle.solve_records,

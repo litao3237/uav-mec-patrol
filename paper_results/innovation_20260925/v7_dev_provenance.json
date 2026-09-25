@@ -1,0 +1,17 @@
+{
+  "key": "v7_dev",
+  "run_id": 35742584262,
+  "artifact_id": 10699739562,
+  "artifact_name": "paired-checkpoint-fork-v7-dev-aggregate",
+  "zip_sha256": "c7a24adf9d9a8143925c751577e7c0e76fe1bb4001755acbd4958f7e0bf7e4a6",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "c7a24adf9d9a8143925c751577e7c0e76fe1bb4001755acbd4958f7e0bf7e4a6",
+  "files": [
+    {
+      "file": "paired_checkpoint_fork_v7_dev_aggregate.json",
+      "sha256": "63380f66e22391912613fae4b31fd05e5e56fbaef4f56b943334af6ce1b6848a",
+      "bytes": 541900
+    }
+  ],
+  "code_commit": "cc42d51a457bb0dcb0f399006581d20fc8b1e35b"
+}
