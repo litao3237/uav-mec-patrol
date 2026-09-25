@@ -1,6 +1,9 @@
-"""Discrete optimization algorithms."""
+"""离散优化算法入口；实验性 v5 配置按预算策略区分，保留默认算法入口。"""
 
 from .alns import (
+    CheckpointBudgetAwareTerminalFirstConfig,
+    CheckpointBudgetAwareTerminalFirstResult,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
     AdaptiveESIConfig,
     AdaptiveESIResult,
     BudgetAwareTerminalFirstConfig,
@@ -50,6 +53,9 @@ from .initial import (
 )
 
 __all__ = [
+    "CheckpointBudgetAwareTerminalFirstConfig",
+    "CheckpointBudgetAwareTerminalFirstResult",
+    "run_uav_mec_budget_aware_terminal_first_esi_alns",
     "AdaptiveESIConfig",
     "AdaptiveESIResult",
     "BudgetAwareTerminalFirstConfig",

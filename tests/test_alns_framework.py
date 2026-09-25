@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 
 from uav_mec.algorithms import (
+    CheckpointBudgetAwareTerminalFirstConfig,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
     AdaptiveESIConfig,
     BudgetAwareTerminalFirstConfig,
     ContinuousESIConfig,
@@ -1027,3 +1029,36 @@ def test_budget_aware_runner_accepts_energy_guided_intensifier() -> None:
         }
         for event in result.events
     )
+
+
+def test_budget_aware_terminal_first_returns_strict_terminal() -> None:
+    instance = _small_instance()
+    initial = _initial_solution(instance)
+    oracle = _ConstantEliteOracle(energy_j=321.0)
+
+    result = run_uav_mec_budget_aware_terminal_first_esi_alns(
+        instance,
+        initial_solution=initial,
+        config=UavMecALNSConfig(
+            iterations=100,
+            seed=67,
+        ),
+        budget_aware=CheckpointBudgetAwareTerminalFirstConfig(
+            total_runtime_s=0.08,
+            final_cert_reserve_fraction=0.10,
+            checkpoint_fraction=0.40,
+            stagnation_fraction=0.20,
+            min_exploration_fraction=0.10,
+            elite_pool_fraction=0.10,
+            elite_burst_fraction=0.04,
+            max_elite_triggers=1,
+        ),
+        evaluator=ProxyObjectiveEvaluator(),
+        elite_oracle=oracle,
+    )
+
+    validate_solution(instance, result.best_solution)
+    assert result.selection_source == "terminal_strict"
+    assert result.final_energy_j == 321.0
+    assert result.total_runtime_s >= 0.0
+    assert result.terminal_certification_runtime_s >= 0.0

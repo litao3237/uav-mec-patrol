@@ -1,3 +1,9 @@
+# 两条 v5 分支使用不同预算规则；检查点版本采用明确别名，防止配置被同名导入覆盖。
+from .budget_aware_terminal_first import (
+    BudgetAwareTerminalFirstConfig as CheckpointBudgetAwareTerminalFirstConfig,
+    BudgetAwareTerminalFirstResult as CheckpointBudgetAwareTerminalFirstResult,
+    run_uav_mec_budget_aware_terminal_first_esi_alns,
+)
 from .energy_guided import (
     EnergyGuidedESIConfig,
     energy_guided_intensification,
@@ -70,6 +76,9 @@ from .session import (
 from .state import UavMecState
 
 __all__ = [
+    "CheckpointBudgetAwareTerminalFirstConfig",
+    "CheckpointBudgetAwareTerminalFirstResult",
+    "run_uav_mec_budget_aware_terminal_first_esi_alns",
     "AdaptiveESIConfig",
     "BudgetAwareTerminalFirstConfig",
     "BudgetAwareTerminalFirstResult",
