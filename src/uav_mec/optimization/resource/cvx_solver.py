@@ -264,6 +264,7 @@ def solve_resource_problem(
     energy_tol_rel: float = 1e-6,
     run_stage2: bool = True,
     solver_profile: str = "default",
+    capture_stage2_raw_values: bool = False,
 ) -> ResourceSolveResult:
     info = info or build_event_info(instance, solution)
 
@@ -389,6 +390,8 @@ def solve_resource_problem(
     tol_j = max(1e-5, energy_tol_rel * max(1.0, abs(energy_star)))
     solver2 = None
     stage2_errors: list[str] = []
+    # 新补充实验可保存裁剪前变量，以独立核验真实求解残差；默认不增加归档字段。
+    stage2_raw_values = None
 
     if run_stage2:
         energy_guard = model.total_energy <= energy_star + tol_j
@@ -446,6 +449,8 @@ def solve_resource_problem(
                 continue
 
             final_values = _snapshot_vars(model.variables)
+            if capture_stage2_raw_values:
+                stage2_raw_values = dict(final_values)
             # Reuse the same positive-resource sanitization used after Stage 1.
             # This clips only tiny numerical lower-bound violations while
             # preserving all non-resource Stage-2 values verbatim.
@@ -507,6 +512,8 @@ def solve_resource_problem(
         "problem1_is_dpp": problem1.is_dpp(),
         "solver_profile": solver_profile,
     }
+    if capture_stage2_raw_values:
+        diagnostics["stage2_raw_values"] = stage2_raw_values
 
     return ResourceSolveResult(
         status=stage2_status if final_values is not stage1_values else str(problem1.status),

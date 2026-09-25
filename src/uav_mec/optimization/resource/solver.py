@@ -27,6 +27,8 @@ class CVXResourceSolver:
     energy_tol_rel: float = 1e-6
     run_stage2: bool = True
     solver_profile: str = "default"
+    # 原始变量仅供补充实验的独立残差审计，不改变默认求解/返回行为。
+    capture_stage2_raw_values: bool = False
 
     def solve(
         self,
@@ -44,6 +46,7 @@ class CVXResourceSolver:
             energy_tol_rel=self.energy_tol_rel,
             run_stage2=self.run_stage2,
             solver_profile=self.solver_profile,
+            capture_stage2_raw_values=self.capture_stage2_raw_values,
         )
 
 

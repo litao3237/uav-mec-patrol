@@ -1,0 +1,117 @@
+name: Innovation evidence A and C
+
+# 先导与正式矩阵分别手动启动；结果永不回写或覆盖历史实验归档。
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'pilot：6个场景块/18次方法运行；formal：16个场景块/144次方法运行'
+        required: true
+        default: pilot
+        type: choice
+        options: [pilot, formal]
+
+permissions:
+  contents: read
+
+env:
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      scenarios: ${{ steps.matrix.outputs.scenarios }}
+      seeds: ${{ steps.matrix.outputs.seeds }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - name: Validate invariants and independent residual auditor
+        run: uv run pytest
+      - id: matrix
+        env:
+          PHASE: ${{ inputs.phase }}
+        run: |
+          python - <<'PY'
+          import os
+          phase = os.environ['PHASE']
+          assert phase in ('pilot', 'formal')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('scenarios=' + ('[45,46,47]' if phase == 'pilot' else '[45,46,47,48,49,50,51,52]') + '\n')
+              f.write('seeds=' + ('100' if phase == 'pilot' else '100,101,102') + '\n')
+          PY
+
+  paired:
+    needs: validate
+    name: K${{ matrix.tasks }} S${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        tasks: [50, 80]
+        scenario: ${{ fromJSON(needs.validate.outputs.scenarios) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      # 同一场景的全部方法在同一机器顺序执行，只在独立场景之间并行。
+      - name: Run paired mechanism controls and save full resource snapshots
+        env:
+          TASKS: ${{ matrix.tasks }}
+          SCENARIO: ${{ matrix.scenario }}
+          SEEDS: ${{ needs.validate.outputs.seeds }}
+          PHASE: ${{ inputs.phase }}
+        run: >-
+          uv run python experiments/run_innovation_mechanism.py
+          --tasks "$TASKS" --scenario "$SCENARIO" --algorithm-seeds "$SEEDS"
+          --phase "$PHASE"
+          --output "outputs/results/innovation/mechanism_K${TASKS}_S${SCENARIO}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: innovation-${{ inputs.phase }}-K${{ matrix.tasks }}-S${{ matrix.scenario }}
+          path: outputs/results/innovation/*.json
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    needs: paired
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: innovation-${{ inputs.phase }}-K*-S*
+          path: outputs/results/innovation/parts
+          merge-multiple: true
+      - name: Recheck full snapshots and aggregate by independent scenario
+        env:
+          PHASE: ${{ inputs.phase }}
+        run: >-
+          uv run python experiments/aggregate_innovation_mechanism.py
+          --input-dir outputs/results/innovation/parts --phase "$PHASE"
+          --output outputs/results/innovation/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: innovation-${{ inputs.phase }}-complete-archive
+          path: outputs/results/innovation/
+          if-no-files-found: error
+          retention-days: 90
