@@ -1,11 +1,7 @@
 name: Paired Checkpoint Fork v7 Unseen
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
-  push:
-    branches:
-      - experiment/paired-checkpoint-fork-v7
-    paths:
-      - ".github/workflows/paired_checkpoint_fork_v7_unseen.yml"
   workflow_dispatch:
 
 jobs:

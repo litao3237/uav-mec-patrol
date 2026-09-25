@@ -1,5 +1,9 @@
 # Final Algorithm Freeze
 
+> 2026-09-25 整合说明：本文记录算法冻结时的选择与实验历史。所有相关实验实现和结果现已合入 `develop`，原分支名称改作来源标识，提交SHA仍可追溯。下文“保留在实验分支/以后合入”是历史安排，当前代码组织以[分支整理记录](branch_consolidation_20260925.md)为准；论文主方法仍为原始 ESI-ALNS，实验变体保持显式调用。
+>
+> 数学表述边界以当前[README §0.1](../README.md#experiment-evidence-audit)为准：历史用语 `strict`、`exact` 和 `correctness oracle` 指原数值求解与验收协议，不表示精确算术证明、独立全约束残差认证或全局最优。能耗不增仅针对同一数值评价与接受规则。后续证据补充按[README §6](../README.md#innovation-evidence-plan)执行。
+
 > Status: frozen after the v7 paired-checkpoint unseen validation.
 >
 > Paper-facing branch target: `develop`.

@@ -1,0 +1,78 @@
+{
+  "date": "2026-09-25",
+  "repository": "litao3237/uav-mec-patrol",
+  "target_branch": "develop",
+  "heads_before": [
+    {
+      "name": "develop",
+      "sha": "8157b3fc9bee751d5190ccc8f4e9a69197ac251f",
+      "protected": false
+    },
+    {
+      "name": "experiment/adaptive-esi-stability",
+      "sha": "b26f361d5a6ca197839631ef48f4930f0f60101f",
+      "protected": false
+    },
+    {
+      "name": "experiment/budget-aware-terminal-first-v5",
+      "sha": "f7fa7f09331edc806a961684fc987d6d5314fd3e",
+      "protected": false
+    },
+    {
+      "name": "experiment/budget-utilization-v5",
+      "sha": "a4374a52598bc2fe426bd0990eca2c0bde6decb7",
+      "protected": false
+    },
+    {
+      "name": "experiment/continuous-esi-stability-v2",
+      "sha": "b9e1e847676d65ce27ef4fdfc1f4dbb78f2be41c",
+      "protected": false
+    },
+    {
+      "name": "experiment/energy-guided-esi-v6",
+      "sha": "a662238d1a70941f78c85a6a8aaedf4c10e64f8a",
+      "protected": false
+    },
+    {
+      "name": "experiment/multiscale-ablation-expansion",
+      "sha": "936739fedadafba6d8710a55788b2f56070d1aec",
+      "protected": false
+    },
+    {
+      "name": "experiment/multiscale-baseline-corrected",
+      "sha": "2d2fd7960a14b9c8fd9c0f13abd285ecb7477e46",
+      "protected": false
+    },
+    {
+      "name": "experiment/multiscale-baseline-expansion",
+      "sha": "5d0961f6960d898d5aad7d69665b661160ed57c9",
+      "protected": false
+    },
+    {
+      "name": "experiment/paired-checkpoint-fork-v7",
+      "sha": "139ec2e3dc0bd467f963dba633cd5066f1a71194",
+      "protected": false
+    },
+    {
+      "name": "experiment/terminal-first-stability-v4",
+      "sha": "28a819b8dd4c013d40a4278bdb365de98c7b95d4",
+      "protected": false
+    },
+    {
+      "name": "experiment/terminal-recovery-stability-v3",
+      "sha": "f94b1e7da06a690036c9c72d5180353c98e3e434",
+      "protected": false
+    },
+    {
+      "name": "main",
+      "sha": "84f09160961e97abd2c79e751b4975f35b4a5749",
+      "protected": false
+    }
+  ],
+  "merge_commits": [
+    "b45c657",
+    "970b97b",
+    "3209168"
+  ],
+  "all_original_heads_reachable": true
+}

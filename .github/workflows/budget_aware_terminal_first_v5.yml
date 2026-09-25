@@ -1,18 +1,8 @@
 name: budget-aware-terminal-first-esi-v5
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - experiment/budget-aware-terminal-first-v5
-    paths:
-      - 'src/uav_mec/algorithms/alns/**'
-      - 'src/uav_mec/algorithms/__init__.py'
-      - 'tests/test_alns_framework.py'
-      - 'experiments/run_budget_aware_terminal_first_v5.py'
-      - 'experiments/aggregate_budget_aware_terminal_first_v5.py'
-      - 'docs/budget_aware_terminal_first_v5_protocol.md'
-      - '.github/workflows/budget_aware_terminal_first_v5.yml'
 
 concurrency:
   group: budget-aware-terminal-first-esi-v5

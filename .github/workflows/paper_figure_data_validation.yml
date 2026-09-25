@@ -3,7 +3,7 @@ name: Paper Figure Data Validation
 on:
   push:
     branches:
-      - experiment/paired-checkpoint-fork-v7
+      - develop
     paths:
       - ".github/workflows/paper_figure_data_validation.yml"
       - "paper_figures/data/main_baseline_8x3.csv"

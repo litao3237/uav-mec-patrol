@@ -1,18 +1,8 @@
 name: energy-guided-esi-v6-dev2
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - experiment/energy-guided-esi-v6
-    paths:
-      - 'src/uav_mec/algorithms/alns/**'
-      - 'src/uav_mec/algorithms/__init__.py'
-      - 'tests/test_alns_framework.py'
-      - 'experiments/run_energy_guided_esi_v6_dev2.py'
-      - 'experiments/aggregate_energy_guided_esi_v6_dev2.py'
-      - 'docs/energy_guided_esi_v6_dev_round1_results.md'
-      - '.github/workflows/energy_guided_esi_v6_dev2.yml'
 
 concurrency:
   group: energy-guided-esi-v6-dev2

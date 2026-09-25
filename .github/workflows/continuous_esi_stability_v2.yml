@@ -1,18 +1,8 @@
 name: continuous-esi-stability-v2
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - experiment/continuous-esi-stability-v2
-    paths:
-      - 'src/uav_mec/algorithms/alns/**'
-      - 'src/uav_mec/algorithms/__init__.py'
-      - 'tests/test_alns_framework.py'
-      - 'experiments/run_continuous_esi_stability_v2.py'
-      - 'experiments/aggregate_continuous_esi_stability_v2.py'
-      - 'docs/continuous_esi_stability_v2_protocol.md'
-      - '.github/workflows/continuous_esi_stability_v2.yml'
 
 concurrency:
   group: continuous-esi-stability-v2

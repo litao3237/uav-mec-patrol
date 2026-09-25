@@ -1,17 +1,7 @@
 name: Paired Checkpoint Fork v7 Smoke
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
-  push:
-    branches:
-      - experiment/paired-checkpoint-fork-v7
-    paths:
-      - "src/uav_mec/algorithms/alns/runner.py"
-      - "src/uav_mec/algorithms/alns/session.py"
-      - "src/uav_mec/algorithms/alns/__init__.py"
-      - "src/uav_mec/algorithms/__init__.py"
-      - "tests/test_paired_checkpoint_session.py"
-      - "experiments/run_paired_checkpoint_fork_v7.py"
-      - ".github/workflows/paired_checkpoint_fork_v7_smoke.yml"
   workflow_dispatch:
 
 jobs:

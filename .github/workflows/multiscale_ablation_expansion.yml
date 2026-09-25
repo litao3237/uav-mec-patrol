@@ -1,13 +1,8 @@
 name: Multiscale Ablation Expansion
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - experiment/multiscale-ablation-expansion
-    paths:
-      - 'experiments/run_multiscale_ablation.py'
-      - '.github/workflows/multiscale_ablation_expansion.yml'
 
 jobs:
   validate-runner:

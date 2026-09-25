@@ -2,6 +2,18 @@
 
 核查日期：2026-09-25。对应当前 v16 文稿与本地代码。本轮仅核查数据、读取实现和更新方案，未执行优化器、未启动远端实验、未改变算法接口或历史结果。当前执行顺序见 [README 第 6 节](../README.md#innovation-evidence-plan)。
 
+## 分支整合后的补充核查（2026-09-25）
+
+本说明最初检查的是 `8157b3f` 所在主线的数据与实现。现已合入所有实验分支，需补充以下可复用能力；原数据清单的哈希和字段计数保持原审计范围，不扩充成未经核对的新记录。
+
+- `src/uav_mec/algorithms/alns/session.py` 已实现可续跑 ALNS、共享检查点分叉、随机数/算子选择状态保留及暂停逻辑时钟；`tests/test_paired_checkpoint_session.py` 提供对应回归检查。
+- `experiments/run_paired_checkpoint_fork_v7.py` 已比较 continued B-ALNS、Legacy ESI 和 Energy-Guided ESI，导出检查点状态、各臂终点能耗、边际收益、实际耗时、CVX调用/命中及ESI操作记录。实验B可以扩展该入口，无需从头实现分叉控制。
+- [最终算法冻结记录](final_algorithm_freeze.md)已汇报unseen run `35745071473`（S101–108）：K50/K80 strict checkpoint为24/24、21/24，Energy-Guided ESI相对continued B-ALNS的场景better/equal/worse为3/2/3、3/0/5。该结果支持保留无稳定等时间优势的边界；不把实验变体晋升为论文方法。本轮整合未重新下载该run归档，数值属于已有记录，重分析前仍需核对原文件和哈希。
+- 内存中的checkpoint不等于完整的磁盘快照；当前三臂终点记录也不是逐事件严格能耗轨迹。全变量/逐任务时序持久化、独立全约束残差和冻结决策机制对照仍需补充。
+- 新实验B的两臂先导与正式矩阵仅在已有v7归档不足以回答预定问题时执行；不能把旧三臂结果改名为新两臂协议，也不为追求正收益重复unseen验证。
+
+分支提交映射、同名v5配置兼容处理及验证结果见[分支整理记录](branch_consolidation_20260925.md)。
+
 ## 1. 核查结论
 
 三组补充工作均有实现基础，但不能仅凭现有汇总直接完成全部验证：
@@ -69,7 +81,7 @@ B-ALNS与ESI的共同有效Stage-2子集为 **K50：18对、8场景；K80：16�
 | 五方法终点QoS、能耗分项与计时重分析 | `experiments/run_matched_runtime_comparison.py`、`experiments/aggregate_matched_runtime.py`、`src/uav_mec/analysis/paper_metrics.py` | 对共同有效Stage-2子集配对、分场景汇总，保留缺失原因，补充绘图/汇总入口 | 无需新优化运行即可开始 |
 | 固定任务路径/固定接触的机制对照 | `initial/nearest_mec.py`、`initial/mec_repair.py`、`alns/problem_operators.py` | 贯穿初始化之后全部搜索阶段的冻结约束、受限候选检查与匹配的对照runner | 可实现，需要新对照和运行；不能只关闭ESI的某个开关 |
 | 携带/批次机制诊断 | `evaluation/events.py`、`optimization/resource/reduced.py` | 导出完整方案、批次成员、采集/接触/上传/完成时刻 | 能在现有模型下计算；当前正式导出不足，需要补记录 |
-| 真实能耗—时间轨迹 | `alns/runner.py`、`alns/hybrid.py`、`alns/evaluator.py` | 事件时间戳、结构签名、评价类型、严格可行 incumbent、验证成本 | 可实现，需要新增日志和运行；ALNS代理目标轨迹不能改名为严格能耗 |
+| 真实能耗—时间轨迹 | `alns/session.py`、`alns/runner.py`、`alns/hybrid.py`、`alns/evaluator.py`及v7三臂runner | 事件时间戳、结构签名、评价类型、严格可行 incumbent、验证成本 | 可实现，需要新增日志和运行；ALNS代理目标轨迹不能改名为严格能耗 |
 | 同结构Stage-1/Stage-2比较 | `optimization/resource/result.py`、`cvx_solver.py` | 序列化 `stage1_values`、`final_values`、实例/离散结构、求解状态及实际能耗容差 | 内存中已有双快照，主要缺导出；已有完整快照时只需资源重算，否则须重建运行 |
 | 全约束数值核验 | `resource/problem.py`、`resource/reduced.py`、`evaluation/validator.py` | 独立残差汇总、量纲与容差规则、两阶段能耗保护检查；保存最大违约约束ID | 可实现；`max_qos_violation`只含期限和周期，不是全约束检查 |
 | 固定结构影子价格数值验证 | `stage1_duals`、`resource/problem.py` | 同一结构下容量小扰动及重新求解，保存未舍入对偶值和有效性标记 | 可选小规模支持验证；不能用缺失字段默认0证明不活跃 |
@@ -100,7 +112,7 @@ B-ALNS与ESI的共同有效Stage-2子集为 **K50：18对、8场景；K80：16�
 
 ## 6. 分阶段可执行顺序
 
-1. 归档当前已取回数据；先完成K50/K80等预算记录的配对QoS、CPU占用、三分项能耗与时间重分析，以及dense记录的ESI操作成本分析。无需新增优化运行。
+1. 归档当前已取回数据；先完成K50/K80等预算记录的配对QoS、CPU占用、三分项能耗与时间重分析，以及dense记录的ESI操作成本分析。补核v7三臂归档的来源、字段与边际成本，保留Legacy/Energy-Guided区别。无需新增优化运行。
 2. 实现完整实例/方案/两阶段资源/逐任务时序/事件日志导出，并增加独立数值核验。用原有小规模确定性例及刻意违约例检查核验器覆盖，确认日志不改变关闭日志时的结果。
 3. 冻结机制对照、预算、容差和分析规则；运行小矩阵验证实现及耗时，不以先导收益选择方法或删除场景。
 4. 先做K50/K80的正式配对实验；需要支撑六规模同一协议结论时再扩到K30/40/60/70。增补独立场景数依据估计精度与先导场景变异确定，不因图数不足扩大矩阵。

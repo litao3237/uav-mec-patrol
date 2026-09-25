@@ -1,13 +1,8 @@
 name: Multiscale Baseline Corrected
 
+# 已冻结实验保留手动入口，合并到 develop 不自动重跑实验矩阵。
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - experiment/multiscale-baseline-corrected
-    paths:
-      - "experiments/run_multiscale_baseline.py"
-      - ".github/workflows/multiscale_baseline_expansion.yml"
 
 jobs:
   validate-runner:
