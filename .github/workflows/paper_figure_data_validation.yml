@@ -1,0 +1,45 @@
+name: Paper Figure Data Validation
+
+on:
+  push:
+    branches:
+      - experiment/paired-checkpoint-fork-v7
+    paths:
+      - ".github/workflows/paper_figure_data_validation.yml"
+      - "paper_figures/data/main_baseline_8x3.csv"
+      - "paper_figures/data/paired_K50.csv"
+      - "paper_figures/data/paired_K80.csv"
+      - "paper_figures/scripts/experiment_data.py"
+      - "paper_results/baseline_summary.csv"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Validate publication data interface
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "paper_figures/scripts")
+          import experiment_data
+          experiment_data.preserve_existing = lambda: None
+          data = experiment_data.ExperimentData()
+          assert len(data.pairs(50)) == 24
+          assert len(data.pairs(80)) == 21
+          print("K50 pairs:", len(data.pairs(50)))
+          print("K80 pairs:", len(data.pairs(80)))
+          print("K50 ESI better/equal/worse:",
+                sum(r["generic_j"]-r["hybrid_j"] > 1e-3 for r in data.pairs(50)),
+                sum(abs(r["generic_j"]-r["hybrid_j"]) <= 1e-3 for r in data.pairs(50)),
+                sum(r["generic_j"]-r["hybrid_j"] < -1e-3 for r in data.pairs(50)))
+          print("K80 ESI better/equal/worse:",
+                sum(r["generic_j"]-r["hybrid_j"] > 1e-3 for r in data.pairs(80)),
+                sum(abs(r["generic_j"]-r["hybrid_j"]) <= 1e-3 for r in data.pairs(80)),
+                sum(r["generic_j"]-r["hybrid_j"] < -1e-3 for r in data.pairs(80)))
+          PY

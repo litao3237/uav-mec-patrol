@@ -1,0 +1,48 @@
+name: Paired Checkpoint Fork v7 Smoke
+
+on:
+  push:
+    branches:
+      - experiment/paired-checkpoint-fork-v7
+    paths:
+      - "src/uav_mec/algorithms/alns/runner.py"
+      - "src/uav_mec/algorithms/alns/session.py"
+      - "src/uav_mec/algorithms/alns/__init__.py"
+      - "src/uav_mec/algorithms/__init__.py"
+      - "tests/test_paired_checkpoint_session.py"
+      - "experiments/run_paired_checkpoint_fork_v7.py"
+      - ".github/workflows/paired_checkpoint_fork_v7_smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  test-and-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --dev
+
+      - name: Paired checkpoint unit tests
+        run: uv run pytest tests/test_paired_checkpoint_session.py
+
+      - name: One-pair v7 mechanism smoke
+        run: >
+          uv run python experiments/run_paired_checkpoint_fork_v7.py
+          --tasks 50
+          --scenario-seeds 85
+          --algorithm-seeds 100
+          --output outputs/results/paired_checkpoint_fork_v7_smoke.json
+
+      - name: Upload smoke result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paired-checkpoint-fork-v7-smoke
+          path: outputs/results/paired_checkpoint_fork_v7_smoke.json
+          if-no-files-found: warn

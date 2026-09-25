@@ -1,0 +1,102 @@
+name: Multiscale Ablation Expansion
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/multiscale-ablation-expansion
+    paths:
+      - 'experiments/run_multiscale_ablation.py'
+      - '.github/workflows/multiscale_ablation_expansion.yml'
+
+jobs:
+  validate-runner:
+    name: Smoke validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Sync environment
+        run: uv sync --dev
+      - name: Run one paired ablation smoke case
+        run: >
+          uv run python experiments/run_multiscale_ablation.py
+          --tasks 30
+          --scenario-seeds 45
+          --algorithm-seeds 100
+          --output outputs/results/multiscale_ablation_smoke.json
+      - name: Validate smoke semantics
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("outputs/results/multiscale_ablation_smoke.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          expected = {"full", "no-route", "no-contact", "no-batch", "no-widening"}
+          assert data["complete"] is True
+          assert data["protocol"]["shared_exploration"] is True
+          assert set(data["protocol"]["profiles"]) == expected
+          assert len(data["rows"]) == 5
+          assert {row["profile"] for row in data["rows"]} == expected
+          assert all(row["base_stage1_status"] == data["rows"][0]["base_stage1_status"] for row in data["rows"])
+          base_values = {row["base_energy_j"] for row in data["rows"]}
+          assert len(base_values) == 1, base_values
+          assert all("pending_execution" not in json.dumps(row) for row in data["rows"])
+          print("Smoke validation passed.")
+          PY
+
+  ablation:
+    name: K${{ matrix.tasks }}
+    needs: validate-runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [30, 50, 70, 80]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Sync environment
+        run: uv sync --dev
+      - name: Run paired multiscale ablation
+        run: >
+          uv run python experiments/run_multiscale_ablation.py
+          --tasks ${{ matrix.tasks }}
+          --scenario-seeds 45,46,47
+          --algorithm-seeds 100,101,102
+          --iterations 100
+          --elite-rounds 2
+          --output outputs/results/multiscale_ablation_K${{ matrix.tasks }}.json
+      - name: Validate result completeness
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+          import os
+
+          k = os.environ["TASKS"]
+          path = Path(f"outputs/results/multiscale_ablation_K{k}.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          assert data["complete"] is True
+          assert data["protocol"]["shared_exploration"] is True
+          assert len(data["rows"]) == 45
+          assert len(data["aggregate"]) == 5
+          assert len(data["paired"]) == 4
+          print(f"K{k} validation passed.")
+          PY
+        env:
+          TASKS: ${{ matrix.tasks }}
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiscale-ablation-corrected-K${{ matrix.tasks }}
+          path: outputs/results/multiscale_ablation_K${{ matrix.tasks }}.json
+          if-no-files-found: error

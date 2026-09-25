@@ -29,11 +29,18 @@ from .state import ObjectiveEvaluator, UavMecState
 class Stage1CVXObjectiveOracle:
     """Cached Stage-1 CVX objective oracle for elite states only."""
 
-    def __init__(self) -> None:
-        self.solver = CVXResourceSolver(run_stage2=False)
+    def __init__(
+        self,
+        solver: CVXResourceSolver | None = None,
+    ) -> None:
+        self.solver = solver or CVXResourceSolver(
+            run_stage2=False
+        )
         self._cache: dict[tuple, ResourceSolveResult] = {}
         self.calls = 0
         self.cache_hits = 0
+        self.solve_runtimes_s: list[float] = []
+        self.solve_records: list[dict[str, Any]] = []
 
     def solve(
         self,
@@ -47,10 +54,34 @@ class Stage1CVXObjectiveOracle:
 
         self.calls += 1
         info = build_event_info(instance, solution)
+        started = perf_counter()
         result = self.solver.solve(
             instance,
             solution,
             info,
+        )
+        runtime_s = perf_counter() - started
+        self.solve_runtimes_s.append(runtime_s)
+        self.solve_records.append(
+            {
+                "runtime_s": runtime_s,
+                "status": str(
+                    result.diagnostics.get(
+                        "stage1_status",
+                        result.status,
+                    )
+                ),
+                "energy_j": (
+                    float(result.energy_stage1_j)
+                    if result.feasible
+                    else None
+                ),
+                "contacts": len(solution.contact_visits),
+                "offloaded_tasks": sum(
+                    decision.mode.value == "offload"
+                    for decision in solution.task_decisions.values()
+                ),
+            }
         )
         self._cache[key] = result
         return result

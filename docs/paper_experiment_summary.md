@@ -234,6 +234,53 @@ Primary 1x Stage-2 strict coverage is 19/24 (RGA-MR), 19/24 (B-ALNS), and 22/24
 Stage-2 records are explicit `optimal_inaccurate`/diagnostic exclusions and do
 not invalidate strict Stage-1 energy results.
 
+### 5.4 Paired-checkpoint marginal-value validation
+
+The final fairness validation removes the remaining trajectory confounder in
+independent wall-clock runs. A B-ALNS prefix is run once, its full search state
+is checkpointed, and three branches receive the same additional wall-clock
+budget:
+
+1. continued B-ALNS;
+2. legacy ESI;
+3. Energy-Guided ESI.
+
+The continuation branch preserves current state, historical best, adaptive
+Roulette Wheel state, RNG state, and logical RRT progress. All branches start
+from the same strict checkpoint and use the same Stage-1 CVX correctness oracle.
+
+Frozen budgets:
+
+- K=50: 12 s prefix + 3 s branch;
+- K=80: 36 s prefix + 9 s branch.
+
+The v7 development block (S85--92) showed a positive K=80 Energy-Guided ESI
+signal, but that signal was **not** reproduced in the frozen unseen block
+S101--108.
+
+Unseen results:
+
+| K | Strict checkpoints | Continued B-ALNS mean delta-E | Energy-Guided ESI mean delta-E | Scenario ESI vs B better/equal/worse |
+|---:|---:|---:|---:|---:|
+| 50 | 24/24 | 634.4 J | 994.6 J | 3 / 2 / 3 |
+| 80 | 21/24 | **3547.7 J** | 2748.6 J | 3 / 0 / 5 |
+
+For K=80, Energy-Guided ESI also had lower scenario-level marginal efficiency:
+the mean ESI-minus-B difference was about **-1475.7 J** in marginal energy and
+**-103.0 J/s** in marginal energy-per-second.
+
+Therefore the paired-checkpoint experiment confirms the same conclusion as the
+matched-runtime experiment, under a stricter control:
+
+> The evidence supports ESI as a monotone post-refinement mechanism after a
+> fixed completed exploration, but does not support a claim that spending the
+> same additional wall-clock budget on ESI is consistently better than
+> continuing B-ALNS.
+
+Energy-Guided ESI is not promoted to the paper-facing algorithm. The final
+algorithm remains the original legacy ESI-ALNS on `develop`. The definitive
+algorithm/claim freeze is recorded in `docs/final_algorithm_freeze.md`.
+
 
 ---
 

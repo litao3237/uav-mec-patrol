@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, field
+from time import perf_counter
 from typing import Any
 
 import numpy as np
@@ -30,6 +31,155 @@ from .problem_operators import (
 )
 from .state import ObjectiveEvaluator, UavMecState
 
+
+class _TimeScaledRecordToRecordTravel:
+    """RRT whose threshold follows elapsed wall-clock time.
+
+    The stock ALNS RRT cools once per iteration. Under a wall-clock stopping
+    rule, scenario-dependent operator/evaluator costs then change the effective
+    cooling schedule. This experimental criterion keeps the start/end gap tied
+    to the fraction of the requested runtime that has elapsed.
+    """
+
+    def __init__(
+        self,
+        init_obj: float,
+        start_gap: float,
+        end_gap: float,
+        max_runtime_s: float,
+        *,
+        started_at: float | None = None,
+    ) -> None:
+        if not (0.0 <= end_gap <= start_gap):
+            raise ValueError("Must have 0 <= end_gap <= start_gap")
+        if max_runtime_s <= 0.0:
+            raise ValueError("max_runtime_s must be positive")
+
+        self.start_threshold = start_gap * init_obj
+        self.end_threshold = end_gap * init_obj
+        self.max_runtime_s = max_runtime_s
+        self._started: float | None = started_at
+        self._elapsed_offset_s = 0.0
+        self.elapsed_s = 0.0
+        self.last_threshold = self.start_threshold
+
+    def checkpoint_copy(self) -> "_TimeScaledRecordToRecordTravel":
+        """Return a paused copy whose logical cooling progress is preserved.
+
+        Wall-clock time spent between paired fork arms must not advance the
+        acceptance schedule. The returned criterion resumes from the exact
+        logical elapsed search time when it is called again.
+        """
+
+        copied = deepcopy(self)
+        now = perf_counter()
+        elapsed = self._elapsed_offset_s
+        if self._started is not None:
+            elapsed += max(0.0, now - self._started)
+
+        copied._elapsed_offset_s = min(
+            copied.max_runtime_s,
+            elapsed,
+        )
+        copied.elapsed_s = copied._elapsed_offset_s
+        copied._started = None
+        return copied
+
+    def __call__(self, rng, best, current, candidate) -> bool:
+        del rng, current
+        now = perf_counter()
+        if self._started is None:
+            self._started = now
+
+        elapsed = (
+            self._elapsed_offset_s
+            + max(0.0, now - self._started)
+        )
+        self.elapsed_s = elapsed
+        progress = min(1.0, elapsed / self.max_runtime_s)
+        threshold = (
+            self.start_threshold
+            + (self.end_threshold - self.start_threshold) * progress
+        )
+        self.last_threshold = threshold
+        return (
+            candidate.objective() - best.objective()
+            <= threshold
+        )
+
+
+class _MaxRuntimeOrStagnation:
+    """Stop on total runtime or lack of best-objective improvement."""
+
+    def __init__(
+        self,
+        max_runtime_s: float,
+        *,
+        stagnation_runtime_s: float | None = None,
+        min_runtime_s: float = 0.0,
+        improvement_tol: float = 1e-12,
+    ) -> None:
+        if max_runtime_s < 0.0:
+            raise ValueError("max_runtime_s must be non-negative")
+        if (
+            stagnation_runtime_s is not None
+            and stagnation_runtime_s <= 0.0
+        ):
+            raise ValueError(
+                "stagnation_runtime_s must be positive"
+            )
+        if min_runtime_s < 0.0:
+            raise ValueError("min_runtime_s must be non-negative")
+
+        self.max_runtime_s = max_runtime_s
+        self.stagnation_runtime_s = stagnation_runtime_s
+        self.min_runtime_s = min_runtime_s
+        self.improvement_tol = improvement_tol
+
+        self._started: float | None = None
+        self._last_improvement: float | None = None
+        self._best_objective: float | None = None
+        self.stop_reason: str | None = None
+        self.elapsed_s: float = 0.0
+        self.last_improvement_elapsed_s: float = 0.0
+
+    def __call__(self, rng, best, current) -> bool:
+        del rng, current
+        now = perf_counter()
+        best_obj = float(best.objective())
+
+        if self._started is None:
+            self._started = now
+            self._last_improvement = now
+            self._best_objective = best_obj
+
+        assert self._started is not None
+        assert self._last_improvement is not None
+        assert self._best_objective is not None
+
+        if best_obj < self._best_objective - self.improvement_tol:
+            self._best_objective = best_obj
+            self._last_improvement = now
+
+        self.elapsed_s = now - self._started
+        self.last_improvement_elapsed_s = (
+            self._last_improvement - self._started
+        )
+
+        if self.elapsed_s >= self.max_runtime_s:
+            self.stop_reason = "runtime"
+            return True
+
+        if (
+            self.stagnation_runtime_s is not None
+            and self.elapsed_s >= self.min_runtime_s
+            and now - self._last_improvement
+            >= self.stagnation_runtime_s
+        ):
+            self.stop_reason = "stagnation"
+            return True
+
+        return False
 
 
 def _filter_operator_profile(
@@ -173,6 +323,9 @@ class UavMecALNSConfig:
     rrt_start_gap: float = 0.02
     rrt_end_gap: float = 0.0
     max_runtime_s: float | None = None
+    time_scaled_rrt: bool = False
+    stagnation_runtime_s: float | None = None
+    min_runtime_s: float = 0.0
 
 
 @dataclass
@@ -184,6 +337,9 @@ class UavMecALNSResult:
     raw_result: Any
     evaluator: ObjectiveEvaluator
     operator_pair_counts: dict[str, list[int]]
+    stop_reason: str = "iterations"
+    stop_elapsed_s: float | None = None
+    last_improvement_elapsed_s: float | None = None
 
 
 def run_uav_mec_alns(
@@ -192,12 +348,18 @@ def run_uav_mec_alns(
     initial_solution: DiscreteSolution | None = None,
     config: UavMecALNSConfig | None = None,
     evaluator: ObjectiveEvaluator | None = None,
+    acceptance_criterion: Any | None = None,
+    stopping_criterion: Any | None = None,
 ) -> UavMecALNSResult:
     """Run the external ALNS framework on the UAV-MEC discrete problem.
 
     The mature ALNS package owns operator selection, adaptive weights,
     acceptance and stopping. This project supplies only the domain state,
     destroy/repair operators, and screened P1-R objective evaluation.
+
+    Experimental wall-clock controls are opt-in. Existing fixed-iteration and
+    legacy MaxRuntime behaviour remain unchanged unless the corresponding
+    config flags are enabled.
     """
 
     cfg = config or UavMecALNSConfig()
@@ -205,6 +367,26 @@ def run_uav_mec_alns(
         raise ValueError("ALNS iterations must be positive")
     if cfg.max_runtime_s is not None and cfg.max_runtime_s < 0:
         raise ValueError("ALNS max_runtime_s must be non-negative")
+    if cfg.time_scaled_rrt and cfg.max_runtime_s is None:
+        raise ValueError(
+            "time_scaled_rrt requires max_runtime_s"
+        )
+    if (
+        cfg.stagnation_runtime_s is not None
+        and cfg.max_runtime_s is None
+    ):
+        raise ValueError(
+            "stagnation_runtime_s requires max_runtime_s"
+        )
+    if (
+        cfg.stagnation_runtime_s is not None
+        and cfg.stagnation_runtime_s <= 0.0
+    ):
+        raise ValueError(
+            "stagnation_runtime_s must be positive"
+        )
+    if cfg.min_runtime_s < 0.0:
+        raise ValueError("min_runtime_s must be non-negative")
 
     if initial_solution is None:
         route_seed = build_greedy_initial_solution(instance)
@@ -266,17 +448,43 @@ def run_uav_mec_alns(
             name for name, _ in repair_operators
         ],
     )
-    accept = RecordToRecordTravel.autofit(
-        initial_objective,
-        cfg.rrt_start_gap,
-        cfg.rrt_end_gap,
-        cfg.iterations,
-    )
-    stop = (
-        MaxRuntime(cfg.max_runtime_s)
-        if cfg.max_runtime_s is not None
-        else MaxIterations(cfg.iterations)
-    )
+
+    if acceptance_criterion is not None:
+        accept = acceptance_criterion
+    elif cfg.time_scaled_rrt:
+        assert cfg.max_runtime_s is not None
+        accept = _TimeScaledRecordToRecordTravel(
+            initial_objective,
+            cfg.rrt_start_gap,
+            cfg.rrt_end_gap,
+            cfg.max_runtime_s,
+        )
+    else:
+        accept = RecordToRecordTravel.autofit(
+            initial_objective,
+            cfg.rrt_start_gap,
+            cfg.rrt_end_gap,
+            cfg.iterations,
+        )
+
+    tracked_stop: _MaxRuntimeOrStagnation | None = None
+    if stopping_criterion is not None:
+        stop = stopping_criterion
+        stop_reason = "custom"
+    elif cfg.max_runtime_s is None:
+        stop = MaxIterations(cfg.iterations)
+        stop_reason = "iterations"
+    elif cfg.stagnation_runtime_s is not None:
+        tracked_stop = _MaxRuntimeOrStagnation(
+            cfg.max_runtime_s,
+            stagnation_runtime_s=cfg.stagnation_runtime_s,
+            min_runtime_s=cfg.min_runtime_s,
+        )
+        stop = tracked_stop
+        stop_reason = "runtime"
+    else:
+        stop = MaxRuntime(cfg.max_runtime_s)
+        stop_reason = "runtime"
 
     raw_result = engine.iterate(
         initial_state,
@@ -291,6 +499,33 @@ def run_uav_mec_alns(
         )
     validate_solution(instance, best_state.solution)
 
+    stop_elapsed_s = None
+    last_improvement_elapsed_s = None
+    if tracked_stop is not None:
+        stop_reason = tracked_stop.stop_reason or stop_reason
+        stop_elapsed_s = tracked_stop.elapsed_s
+        last_improvement_elapsed_s = (
+            tracked_stop.last_improvement_elapsed_s
+        )
+    elif stopping_criterion is not None:
+        stop_reason = str(
+            getattr(
+                stopping_criterion,
+                "stop_reason",
+                stop_reason,
+            )
+        )
+        stop_elapsed_s = getattr(
+            stopping_criterion,
+            "elapsed_s",
+            None,
+        )
+        last_improvement_elapsed_s = getattr(
+            stopping_criterion,
+            "last_improvement_elapsed_s",
+            None,
+        )
+
     return UavMecALNSResult(
         initial_solution=deepcopy(initial_solution),
         best_solution=deepcopy(best_state.solution),
@@ -299,4 +534,9 @@ def run_uav_mec_alns(
         raw_result=raw_result,
         evaluator=objective_evaluator,
         operator_pair_counts=select.pair_counts,
+        stop_reason=stop_reason,
+        stop_elapsed_s=stop_elapsed_s,
+        last_improvement_elapsed_s=(
+            last_improvement_elapsed_s
+        ),
     )
