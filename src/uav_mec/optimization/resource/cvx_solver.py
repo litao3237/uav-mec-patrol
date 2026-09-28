@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Any
+from statistics import mean
+from time import perf_counter
 import warnings
 
 import cvxpy as cp
@@ -255,6 +257,81 @@ def _snapshot_duals(named_constraints: dict[str, Any]) -> dict[str, float]:
     return snapshot
 
 
+def solve_stage2_realization(
+    instance: Instance,
+    solution: DiscreteSolution,
+    info: EventInfo,
+    *,
+    energy_star_j: float,
+    energy_tolerance_j: float,
+    verbose: bool = False,
+    solver_profile: str = "default",
+) -> dict[str, Any]:
+    """固定Stage-1能耗锚点，在等价缩放模型上求Stage-2并核验全部物理约束。
+
+    仅接受optimal且原始/重建两套残差都合格的解。固定重试顺序对所有方法
+    一致；失败保留诊断，不放宽能耗容差，也不把Stage-1回退冒充第二阶段。
+    """
+    # 延迟导入避免analysis包初始化与resource后端形成循环依赖。
+    from uav_mec.analysis.constraint_audit import audit_both_timelines
+
+    if (not np.isfinite(energy_star_j) or not np.isfinite(energy_tolerance_j)
+            or energy_tolerance_j < 0):
+        raise ValueError("Stage-2能耗锚点与容差必须有限，且容差非负")
+    available = _solver_candidates(solver_profile)
+    # CPU目标乘正数不改变最优解；备用尺度用于内点法退化时的固定数值重试。
+    schedule = [(s, scale) for s in available for scale in
+                ((1.0, 100.0) if s == "CLARABEL" else (1.0,))]
+    attempts = []
+    outcome: dict[str, Any] = {"accepted": False, "status": "solver_error",
+                              "solver": None, "raw_values": None, "energy_j": None}
+    for solver, objective_scale in schedule:
+        model = build_resource_model(instance, solution, info, numerical_scaling=True)
+        # 1 kJ=1000 J：改变数值表示，不改变能耗保护上限。
+        energy_guard = (model.total_energy - energy_star_j - energy_tolerance_j) / 1000.0 <= 0
+        problem = cp.Problem(cp.Minimize(objective_scale * model.normalized_mec_cpu),
+                             model.constraints + [energy_guard])
+        kwargs = _solver_kwargs(solver, verbose, solver_profile)
+        if solver == "CLARABEL":
+            kwargs.update(max_iter=300, tol_gap_abs=1e-9, tol_gap_rel=1e-9, tol_feas=1e-9)
+        elif solver == "SCS":
+            kwargs.update(eps=1e-8, max_iters=200000)
+        started = perf_counter()
+        attempt: dict[str, Any] = {"solver": solver, "objective_scale": objective_scale}
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message="Solution may be inaccurate.*", category=UserWarning)
+                problem.solve(solver=solver, **kwargs)
+        except cp.error.SolverError as exc:
+            attempt.update(status="solver_error", error=str(exc), accepted=False)
+            outcome.update(accepted=False, status="solver_error", solver=solver,
+                           raw_values=None, energy_j=None)
+        else:
+            status = str(problem.status)
+            values = None
+            audit = None
+            if status in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
+                values = _snapshot_vars(model.variables)
+                audit = audit_both_timelines(instance, solution, values,
+                                            energy_limit_j=energy_star_j + energy_tolerance_j)
+            passed = audit is not None and all(a["passed"] for a in audit.values())
+            accepted = status == cp.OPTIMAL and passed
+            attempt.update(status=status, accepted=accepted,
+                           iterations=problem.solver_stats.num_iters,
+                           audit={k: {f: v.get(f) for f in
+                                      ("passed", "max_normalized_violation", "worst_constraint", "reason")}
+                                  for k, v in (audit or {}).items()})
+            outcome.update(accepted=accepted, status="invalid_residual" if status == cp.OPTIMAL and not passed else status,
+                           solver=solver, raw_values=values,
+                           energy_j=_value(model.total_energy.value) if values is not None else None)
+        attempt["runtime_s"] = perf_counter() - started
+        attempts.append(attempt)
+        if outcome["accepted"]:
+            break
+    outcome["attempts"] = attempts
+    return outcome
+
+
 def solve_resource_problem(
     instance: Instance,
     solution: DiscreteSolution,
@@ -393,88 +470,28 @@ def solve_resource_problem(
     # 新补充实验可保存裁剪前变量，以独立核验真实求解残差；默认不增加归档字段。
     stage2_raw_values = None
 
+    stage2_attempts: list[dict[str, Any]] = []
+    stage2_accepted = False
     if run_stage2:
-        energy_guard = model.total_energy <= energy_star + tol_j
-        problem2 = cp.Problem(
-            cp.Minimize(model.normalized_mec_cpu),
-            model.constraints + [energy_guard],
+        stage2 = solve_stage2_realization(
+            instance, solution, info, energy_star_j=energy_star,
+            energy_tolerance_j=tol_j, verbose=verbose, solver_profile=solver_profile,
         )
-
-        stage2_excluded: set[str] = set()
-        stage2_valid = False
-        stage2_status = "solver_error"
-        final_values = stage1_values
-        final_energy = energy_star
-        solver_final = solver1
-
-        while True:
-            solver2, solve_errors = _solve_with_fallback(
-                problem2,
-                verbose=verbose,
-                preferred_solver=solver1,
-                excluded_solvers=stage2_excluded,
-                solver_profile=solver_profile,
-            )
-            stage2_errors.extend(solve_errors)
-
-            if solver2 is None:
-                stage2_status = "solver_error"
-                break
-
-            if problem2.status not in (
-                cp.OPTIMAL,
-                cp.OPTIMAL_INACCURATE,
-            ):
-                stage2_status = str(problem2.status)
-                break
-
-            (
-                stage2_bandwidth,
-                stage2_mec_cpu,
-                stage2_local_cpu,
-                stage2_primal_violations,
-            ) = _stage1_resource_values(model)
-
-            if stage2_primal_violations:
-                stage2_errors.append(
-                    f"{solver2}: invalid Stage-2 resource primal: "
-                    + "; ".join(stage2_primal_violations)
-                )
-                stage2_excluded.add(solver2)
-                if len(stage2_excluded) >= len(
-                    _solver_candidates(solver_profile)
-                ):
-                    stage2_status = "invalid_primal"
-                    break
-                continue
-
-            final_values = _snapshot_vars(model.variables)
-            if capture_stage2_raw_values:
-                stage2_raw_values = dict(final_values)
-            # Reuse the same positive-resource sanitization used after Stage 1.
-            # This clips only tiny numerical lower-bound violations while
-            # preserving all non-resource Stage-2 values verbatim.
-            final_values["bandwidth_mhz"] = {
-                str(key): value
-                for key, value in stage2_bandwidth.items()
-            }
-            final_values["mec_cpu_ghz"] = {
-                str(key): value
-                for key, value in stage2_mec_cpu.items()
-            }
-            final_values["local_cpu_ghz"] = {
-                str(key): value
-                for key, value in stage2_local_cpu.items()
-            }
-            final_energy = _value(model.total_energy.value)
-            stage2_status = str(problem2.status)
+        solver2 = stage2["solver"]
+        stage2_status = stage2["status"]
+        stage2_attempts = stage2["attempts"]
+        stage2_accepted = stage2["accepted"]
+        stage2_errors = [f"{a['solver']}: {a.get('error', a['status'])}"
+                         for a in stage2_attempts if not a["accepted"]]
+        if capture_stage2_raw_values:
+            stage2_raw_values = stage2["raw_values"]
+        if stage2_accepted:
+            # 完整残差已经核验；直接返回未裁剪变量，不再事后修改最优资源。
+            final_values = stage2["raw_values"]
+            final_energy = stage2["energy_j"]
             solver_final = solver2
-            stage2_valid = True
-            break
-
-        if not stage2_valid:
-            # Stage 1 remains the correctness result. A numerically invalid
-            # lexicographic realization must never replace its valid primal.
+        else:
+            # 保留Stage-1返回兼容性；Stage-2状态及accepted明确记录失败。
             final_values = stage1_values
             final_energy = energy_star
             solver_final = solver1
@@ -491,6 +508,9 @@ def solve_resource_problem(
         "stage2_solver": solver2,
         "stage1_solver_errors": stage1_errors,
         "stage2_solver_errors": stage2_errors,
+        "stage2_accepted": stage2_accepted,
+        "stage2_attempts": stage2_attempts,
+        "stage2_formulation": "dimensionless_rate_epigraph_v1" if run_stage2 else "skipped",
         "energy_tolerance_j": tol_j,
         "avg_delay_stage1_s": stage1_avg_delay,
         "avg_delay_stage1_reduced_s": stage1_reduced.avg_delay_s,
@@ -499,10 +519,12 @@ def solve_resource_problem(
         "stage1_cycle_violation_s": stage1_reduced.cycle_violation_s,
         "stage1_battery_violation_j": stage1_reduced.battery_violation_j,
         "return_times_stage1_s": stage1_return_times,
-        "avg_delay_final_s": _value(model.avg_delay_expr.value),
+        # 最终诊断必须来自实际返回快照，不能读失败Stage-2遗留的模型变量。
+        "avg_delay_final_s": mean(final_values["task_completion_s"][t] - instance.tasks[t].release_s
+                                  for t in instance.tasks),
         "return_times_final_s": {
-            u: _value(expr.value if hasattr(expr, "value") else expr)
-            for u, expr in model.return_time.items()
+            u: info.base_return_s[u] + sum(final_values["tau_s"][v] for v in info.contact_order[u])
+            for u in instance.uavs
         },
         "fixed_energy_j": {
             u: info.fixed_flight_energy_j[u] + info.fixed_collection_energy_j[u]

@@ -25,6 +25,8 @@ def build_resource_model(
     instance: Instance,
     solution: DiscreteSolution,
     info: EventInfo,
+    *,
+    numerical_scaling: bool = False,
 ) -> CvxResourceModel:
     """Build the convex P1-R model for a fixed discrete solution.
 
@@ -39,6 +41,13 @@ def build_resource_model(
 
     named: dict[str, Any] = {}
     constraints: list[Any] = []
+    # Stage-2的近最优能耗切片很窄，使用无量纲内部变量改善锥规划条件数。
+    # 默认Stage-1仍使用原模型；对外变量表达式始终保留秒/MHz/GHz物理单位。
+    time_scale = max(1.0, instance.cycle_s) if numerical_scaling else 1.0
+
+    def variable(name: str, scale: float = 1.0) -> Any:
+        value = cp.Variable(nonneg=True, name=name)
+        return scale * value if numerical_scaling else value
 
     def cvx_sum(terms: list[Any] | tuple[Any, ...]) -> Any:
         """Return a scalar CVXPY expression even when *terms* is empty.
@@ -68,17 +77,39 @@ def build_resource_model(
                 f"Named constraint {name!r} is not a CVXPY constraint: "
                 f"{type(con).__name__}"
             )
+        if numerical_scaling:
+            # 只乘正尺度，不放宽任何可行域；缩放后的乘子仅属于Stage-2。
+            if name.startswith("upload_epi::"):
+                scale = 1.0
+            elif name.startswith("battery::"):
+                scale = max(1.0, instance.uavs[name.split("::")[-1]].energy_budget_j)
+            elif name.startswith(("b_lower::", "bandwidth_cap::")):
+                scale = instance.mecs[name.split("::")[-1]].bandwidth_mhz
+            elif name.startswith(("F_lower::", "mec_cpu_cap::")):
+                scale = instance.mecs[name.split("::")[-1]].cpu_ghz
+            elif name.startswith(("local_upper::", "local_lower::")):
+                scale = instance.uavs[info.task_owner[name.split("::")[-1]]].local_cpu_ghz
+            else:
+                scale = time_scale
+            con = con.expr / scale <= 0
         constraints.append(con)
         named[name] = con
         return con
 
-    tau = {visit_id: cp.Variable(nonneg=True, name=f"tau_{visit_id}") for visit_id in info.batch_tasks}
+    upload_scales = {}
+    if numerical_scaling:
+        for visit_id, batch in info.batch_tasks.items():
+            mec = instance.mecs[visit_mec_id(instance, solution, visit_id)]
+            rate_at_capacity = mec.bandwidth_mhz * math.log1p(
+                gamma_mhz(instance, solution, visit_id) / mec.bandwidth_mhz) / math.log(2.0)
+            upload_scales[visit_id] = sum(instance.tasks[t].data_mbit for t in batch) / rate_at_capacity
+    tau = {v: variable(f"tau_{v}", upload_scales.get(v, 1.0)) for v in info.batch_tasks}
     b = {
-        pair: cp.Variable(nonneg=True, name=f"b_{pair[0]}_{pair[1]}")
+        pair: variable(f"b_{pair[0]}_{pair[1]}", instance.mecs[pair[1]].bandwidth_mhz)
         for pair in info.active_uav_mec_pairs
     }
     F = {
-        pair: cp.Variable(nonneg=True, name=f"F_{pair[0]}_{pair[1]}")
+        pair: variable(f"F_{pair[0]}_{pair[1]}", instance.mecs[pair[1]].cpu_ghz)
         for pair in info.active_uav_mec_pairs
     }
 
@@ -87,11 +118,12 @@ def build_resource_model(
         for task_id, decision in solution.task_decisions.items()
         if decision.mode is ExecutionMode.LOCAL
     ]
-    f_local = {task_id: cp.Variable(nonneg=True, name=f"fU_{task_id}") for task_id in local_tasks}
-    s_local = {task_id: cp.Variable(nonneg=True, name=f"sU_{task_id}") for task_id in local_tasks}
-    c_task = {task_id: cp.Variable(nonneg=True, name=f"c_{task_id}") for task_id in instance.tasks}
-    S_batch = {visit_id: cp.Variable(nonneg=True, name=f"SE_{visit_id}") for visit_id in info.batch_tasks}
-    C_batch = {visit_id: cp.Variable(nonneg=True, name=f"CE_{visit_id}") for visit_id in info.batch_tasks}
+    f_local = {task_id: variable(f"fU_{task_id}", instance.uavs[info.task_owner[task_id]].local_cpu_ghz)
+               for task_id in local_tasks}
+    s_local = {task_id: variable(f"sU_{task_id}", time_scale) for task_id in local_tasks}
+    c_task = {task_id: variable(f"c_{task_id}", time_scale) for task_id in instance.tasks}
+    S_batch = {visit_id: variable(f"SE_{visit_id}", time_scale) for visit_id in info.batch_tasks}
+    C_batch = {visit_id: variable(f"CE_{visit_id}", time_scale) for visit_id in info.batch_tasks}
 
     variables = {
         "tau_s": tau,
@@ -120,10 +152,25 @@ def build_resource_model(
         pair = (visit.uav_id, mec_id)
         gamma = gamma_mhz(instance, solution, visit_id)
         # -rel_entr(b, b+gamma) = b*ln(1+gamma/b).
-        rate_mbps = -cp.rel_entr(b[pair], b[pair] + gamma) / ln2
+        if numerical_scaling:
+            # 恒等变换消除高SNR下指数锥中约1e4的第二参数：
+            # -rel_entr(x,x+g) = x*ln(g)-rel_entr(x,1+x/g)。
+            # 这里x=b/B、g=gamma/B，避免改变香农速率或引入近似。
+            capacity = instance.mecs[mec_id].bandwidth_mhz
+            x, g = b[pair] / capacity, gamma / capacity
+            rate_mbps = capacity * (x * math.log(g) - cp.rel_entr(x, 1 + x / g)) / ln2
+        else:
+            rate_mbps = -cp.rel_entr(b[pair], b[pair] + gamma) / ln2
         data_mbit = sum(instance.tasks[t].data_mbit for t in batch)
-        upload_time = data_mbit * cp.inv_pos(rate_mbps)
-        add(f"upload_epi::{visit_id}", upload_time - tau[visit_id] <= 0)
+        if numerical_scaling:
+            # tau>=D/R 与 1/(tau/t_min)<=R/R_max 完全等价。
+            # 两侧均约为1，避免对指数锥输出再取倒数形成尺度悬殊的嵌套锥。
+            rate_at_capacity = data_mbit / upload_scales[visit_id]
+            add(f"upload_epi::{visit_id}", cp.inv_pos(tau[visit_id] / upload_scales[visit_id])
+                - rate_mbps / rate_at_capacity <= 0)
+        else:
+            upload_time = data_mbit * cp.inv_pos(rate_mbps)
+            add(f"upload_epi::{visit_id}", upload_time - tau[visit_id] <= 0)
 
     # MEC capacities.
     for mec_id, mec in instance.mecs.items():

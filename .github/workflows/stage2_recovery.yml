@@ -1,0 +1,95 @@
+name: Fixed-snapshot Stage-2 recovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - run: uv run pytest
+
+  replay:
+    needs: validate
+    name: Recover K${{ matrix.tasks }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        tasks: [30, 40, 50, 60, 70, 80]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - uses: actions/download-artifact@v4
+        with:
+          name: six-scale-formal-complete-archive
+          run-id: 36382512068
+          github-token: ${{ github.token }}
+          path: outputs/source
+      - name: Recompute Stage-2 with unchanged structure and energy anchor
+        env:
+          TASKS: ${{ matrix.tasks }}
+        run: >-
+          uv run python experiments/replay_multiscale_stage2.py
+          --source-root outputs/source --tasks "$TASKS" --output-dir outputs/replay
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage2-replay-K${{ matrix.tasks }}
+          path: outputs/replay/
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    needs: replay
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - uses: actions/download-artifact@v4
+        with:
+          name: six-scale-formal-complete-archive
+          run-id: 36382512068
+          github-token: ${{ github.token }}
+          path: outputs/source
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stage2-replay-K*
+          path: outputs/replay
+          merge-multiple: true
+      - run: >-
+          uv run python experiments/replay_multiscale_stage2.py
+          --source-root outputs/source --output-dir outputs/replay --aggregate-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage2-recovery-complete-archive
+          path: outputs/replay/
+          if-no-files-found: error
+          retention-days: 90
