@@ -1,0 +1,152 @@
+name: Six-scale five-method metrics
+
+# 一个正式请求先完成独立先导验收，通过后自动执行48个场景块。
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'formal：先导验收后自动运行六规模528条记录；pilot：仅15条先导'
+        required: true
+        default: formal
+        type: choice
+        options: [pilot, formal]
+
+permissions:
+  contents: read
+
+env:
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - run: uv run pytest
+
+  pilot:
+    needs: validate
+    name: Pilot K${{ matrix.tasks }} S45
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [30, 50, 80]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - name: Save pilot snapshots
+        env:
+          TASKS: ${{ matrix.tasks }}
+        run: >-
+          uv run python experiments/run_multiscale_metrics.py
+          --tasks "$TASKS" --scenario 45 --phase pilot
+          --output "outputs/pilot/metrics_K${TASKS}_S45.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: six-scale-pilot-K${{ matrix.tasks }}-S45
+          path: outputs/pilot/*.json
+          if-no-files-found: error
+          retention-days: 90
+
+  pilot-gate:
+    needs: pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: six-scale-pilot-K*-S*
+          path: outputs/pilot/parts
+          merge-multiple: true
+      # 数值未合格是结果，不是技术失败；不按收益大小选择是否扩展。
+      - run: >-
+          uv run python experiments/aggregate_multiscale_metrics.py
+          --input-dir outputs/pilot/parts --phase pilot --output outputs/pilot/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: six-scale-pilot-archive
+          path: outputs/pilot/
+          retention-days: 90
+
+  formal:
+    needs: pilot-gate
+    if: inputs.phase == 'formal'
+    name: Formal K${{ matrix.tasks }} S${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        tasks: [30, 40, 50, 60, 70, 80]
+        scenario: [45, 46, 47, 48, 49, 50, 51, 52]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      # 所有同场景方法在同一runner顺序运行；仅场景块之间并行。
+      - name: Run five methods with complete two-stage snapshots
+        env:
+          TASKS: ${{ matrix.tasks }}
+          SCENARIO: ${{ matrix.scenario }}
+        run: >-
+          uv run python experiments/run_multiscale_metrics.py
+          --tasks "$TASKS" --scenario "$SCENARIO" --phase formal
+          --output "outputs/formal/metrics_K${TASKS}_S${SCENARIO}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: six-scale-formal-K${{ matrix.tasks }}-S${{ matrix.scenario }}
+          path: outputs/formal/*.json
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    needs: formal
+    if: always() && inputs.phase == 'formal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - run: uv sync --frozen --dev
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: six-scale-formal-K*-S*
+          path: outputs/formal/parts
+          merge-multiple: true
+      - name: Check all 528 records and reconstruct residuals
+        run: >-
+          uv run python experiments/aggregate_multiscale_metrics.py
+          --input-dir outputs/formal/parts --phase formal --output outputs/formal/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: six-scale-formal-complete-archive
+          path: outputs/formal/
+          if-no-files-found: error
+          retention-days: 90
