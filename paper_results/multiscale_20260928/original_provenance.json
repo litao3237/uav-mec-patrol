@@ -1,0 +1,262 @@
+{
+  "key": "six-scale-formal-complete-archive",
+  "run_id": 36382512068,
+  "artifact_id": 10953856945,
+  "artifact_name": "six-scale-formal-complete-archive",
+  "zip_sha256": "c5bdd0a5593093f8bfc7769545e951099ecedc3698094a4b21020ba6e8bf101a",
+  "repository": "litao3237/uav-mec-patrol",
+  "verified_zip_sha256": "c5bdd0a5593093f8bfc7769545e951099ecedc3698094a4b21020ba6e8bf101a",
+  "files": [
+    {
+      "file": "parts/metrics_K30_S45.json",
+      "sha256": "3ac89a57a8e4910624837aa6fe8bd6699402cc2653b96627c5f91e4107c43d29",
+      "bytes": 4746435
+    },
+    {
+      "file": "parts/metrics_K30_S46.json",
+      "sha256": "d716fd5a5c4bf88c5ffa83bb82db0fb231d7f6ff908e16a1769de922f3722a1a",
+      "bytes": 4337902
+    },
+    {
+      "file": "parts/metrics_K30_S47.json",
+      "sha256": "3d11415b5624734e1c74117333d253576e1f703284dbbe3c3b275353f5635b0b",
+      "bytes": 4780385
+    },
+    {
+      "file": "parts/metrics_K30_S48.json",
+      "sha256": "91224d9f1b15545eaa9e333d573c00aaefdcb214c4f2857d2a67562d9e6e2d75",
+      "bytes": 4725312
+    },
+    {
+      "file": "parts/metrics_K30_S49.json",
+      "sha256": "9325baae7c45d6545845a66a8874e97e7e058e76b25b87b5791e7366a2c5add7",
+      "bytes": 4776128
+    },
+    {
+      "file": "parts/metrics_K30_S51.json",
+      "sha256": "8b75878931c70324932577ab80344de38220203c386280dd3b23595d03c92579",
+      "bytes": 4761772
+    },
+    {
+      "file": "parts/metrics_K30_S50.json",
+      "sha256": "0fbfd5c6210dfc77327d921359c0f818c6e4974e67c7fc0740963a81cc38fc77",
+      "bytes": 4742376
+    },
+    {
+      "file": "parts/metrics_K30_S52.json",
+      "sha256": "bfad8490874ce81052b6a843ef2b44c7521ffbd97366fa78f7bab0604172bb02",
+      "bytes": 4828354
+    },
+    {
+      "file": "parts/metrics_K40_S45.json",
+      "sha256": "dcd8c7d2e3e17b4f32a48d8f7e47e6953ed4922e278ab4fb690fb1b19bd3e8d3",
+      "bytes": 6184168
+    },
+    {
+      "file": "parts/metrics_K40_S46.json",
+      "sha256": "76045ff896865966281d4651dfa0d6201e232a6f4eb7f0140f56b90caaf4a2bf",
+      "bytes": 6223905
+    },
+    {
+      "file": "parts/metrics_K40_S47.json",
+      "sha256": "7223948da884d9057043785657c6ad142fa18285f484cdf88b6e388df0dc3eb0",
+      "bytes": 6210331
+    },
+    {
+      "file": "parts/metrics_K40_S48.json",
+      "sha256": "5b06d6ba1244afabac3f9fbbab1a6aef8e117febaa56ed549a5c8e575b584aac",
+      "bytes": 6229751
+    },
+    {
+      "file": "parts/metrics_K40_S49.json",
+      "sha256": "1460746a22a52ed581c03e58ee8e299f5d282d6dda268dfa7f020a83619121f9",
+      "bytes": 6242395
+    },
+    {
+      "file": "parts/metrics_K40_S50.json",
+      "sha256": "0adddcdeaed81888315e954578974c3a3055314d367b25555a52b67cee4d21a9",
+      "bytes": 6293545
+    },
+    {
+      "file": "parts/metrics_K40_S51.json",
+      "sha256": "0bb7d8403ae8098675f26822bac82a3bf1277e916ad0051bcd30fd89ce7fc147",
+      "bytes": 6242887
+    },
+    {
+      "file": "parts/metrics_K40_S52.json",
+      "sha256": "a33a783c00148f67cbd4d167f4b6553caa1de6a787811140956f9b012559c605",
+      "bytes": 6234129
+    },
+    {
+      "file": "parts/metrics_K50_S45.json",
+      "sha256": "b277695d880bbe05dbbedd8f5527cea472dacc1defffb5bfa539502032cba74e",
+      "bytes": 7726748
+    },
+    {
+      "file": "parts/metrics_K50_S46.json",
+      "sha256": "68b8884c5ee5b1f363a467ac0d9c363dd1cb65b9eaad89b0f8c4c97a13a28e8a",
+      "bytes": 7837887
+    },
+    {
+      "file": "parts/metrics_K50_S47.json",
+      "sha256": "aef1012025f5bffc530ca6dfa41c2b59421c40b0157d98aaeb11bd7d8f9865e3",
+      "bytes": 6875405
+    },
+    {
+      "file": "parts/metrics_K50_S49.json",
+      "sha256": "7537492331394b4e80e3f325ef97d3f16358ddc45d30e52a55bd1933c44357e2",
+      "bytes": 7803736
+    },
+    {
+      "file": "parts/metrics_K50_S48.json",
+      "sha256": "418af35d8f57256dd1f7083fb5d2d4b22ccfd5da36c98e315b377b48ff56883a",
+      "bytes": 7860988
+    },
+    {
+      "file": "parts/metrics_K50_S50.json",
+      "sha256": "950ce8561459d05bb3b8c36ab076d6951d03bad6f54c662f9f070f4f7c3118a2",
+      "bytes": 7671373
+    },
+    {
+      "file": "parts/metrics_K50_S51.json",
+      "sha256": "b6b03c30ae1a0e1a70c7f6a54b42441566b051ef739b2f0ea246dee9cec16667",
+      "bytes": 7758767
+    },
+    {
+      "file": "parts/metrics_K50_S52.json",
+      "sha256": "4ded99e21995a5f25b1726e6a7f4917a2cf005baa0071d6a0f3f0d148aedcac0",
+      "bytes": 7802295
+    },
+    {
+      "file": "parts/metrics_K60_S45.json",
+      "sha256": "9284ea8e084eb502503bae11d1db2a4239f1e7ad4c8f4735514a8af368b189ae",
+      "bytes": 8434797
+    },
+    {
+      "file": "parts/metrics_K60_S46.json",
+      "sha256": "807855b29d625e20f6843ccf5dce2e0a405dd08f159548b2c30a0fbb0b77b9a1",
+      "bytes": 9236268
+    },
+    {
+      "file": "parts/metrics_K60_S47.json",
+      "sha256": "e32474c1a0de3d28365f292e22c877ab6bdd2a035ba219fa25c028690e6be23a",
+      "bytes": 5288212
+    },
+    {
+      "file": "parts/metrics_K60_S48.json",
+      "sha256": "cc2ef094787bdae9f8c7922a113929d6a11d76f8b55e1634386c35597b9fd37f",
+      "bytes": 9142682
+    },
+    {
+      "file": "parts/metrics_K60_S50.json",
+      "sha256": "657af408a521cbac796b591d8dfeeeb2605008c59b6a95df32cd0b5301bf098b",
+      "bytes": 8210374
+    },
+    {
+      "file": "parts/metrics_K60_S49.json",
+      "sha256": "7207e5528e82349d01adfc82a9722a7cde73b8eb9b4c5ac2395456c60e347127",
+      "bytes": 9285306
+    },
+    {
+      "file": "parts/metrics_K60_S52.json",
+      "sha256": "c6ebfccc126762ab33d9f436b9f418dd1bba251114f98dbd17123394ffe149b6",
+      "bytes": 9242949
+    },
+    {
+      "file": "parts/metrics_K60_S51.json",
+      "sha256": "7b8cd620400bc16b164418c514f538e9cd0139040789e4c534e5c562684d7d20",
+      "bytes": 5237966
+    },
+    {
+      "file": "parts/metrics_K70_S45.json",
+      "sha256": "3cb27b037a71baa48c30bfb5561b07d95a7d0e1c1454e1f970e232fa20f84800",
+      "bytes": 6004621
+    },
+    {
+      "file": "parts/metrics_K70_S46.json",
+      "sha256": "559723dcfa0209f68212ede0d88a466e90a347dbf67ae0a1f1d758c89b78924a",
+      "bytes": 10686136
+    },
+    {
+      "file": "parts/metrics_K70_S47.json",
+      "sha256": "a15f333406d5e5435b6d91e7660f5743738651d5f28a493c9d8c3baf070c2523",
+      "bytes": 6036029
+    },
+    {
+      "file": "parts/metrics_K70_S48.json",
+      "sha256": "e0475260b3a086a6fc35de7a63c8dac65864edc6529ad9d0e14b4152e4840870",
+      "bytes": 10710664
+    },
+    {
+      "file": "parts/metrics_K70_S49.json",
+      "sha256": "39fd655fe37689c5c0c7432b01dbf1b0d478fb62a57f697a4a5048b9e4cea3db",
+      "bytes": 6090857
+    },
+    {
+      "file": "parts/metrics_K70_S50.json",
+      "sha256": "70ac4ccf7d69cd13b20875170ca1e3fda1dd3b7b369d0caa6a7c4156b4e19f59",
+      "bytes": 8830237
+    },
+    {
+      "file": "parts/metrics_K70_S51.json",
+      "sha256": "86f0bd35213922f819d158e43cd805031f298375c6866b26b77ada3f89fd9a3b",
+      "bytes": 6161006
+    },
+    {
+      "file": "parts/metrics_K70_S52.json",
+      "sha256": "d606a4c0a77672718b2878a28a7bc34367476f3c88964c8c5458199acab0cc0b",
+      "bytes": 6568144
+    },
+    {
+      "file": "parts/metrics_K80_S45.json",
+      "sha256": "2392320d7884b95455f1b83770f764521cecf62483e6388966b2ffa177c80344",
+      "bytes": 7027943
+    },
+    {
+      "file": "parts/metrics_K80_S46.json",
+      "sha256": "9311de16364e8ca869c17b6562cda43554eaee32cc42a66a19273b6ea767a6a6",
+      "bytes": 6931696
+    },
+    {
+      "file": "parts/metrics_K80_S47.json",
+      "sha256": "2247c8b133d5c694647244ee1e37ace1fc248a677191efede2d1eae0621be6c3",
+      "bytes": 6892073
+    },
+    {
+      "file": "parts/metrics_K80_S48.json",
+      "sha256": "4ba2ce77a9071bd3756aae2e679a7137389c0ddc97438b91cf8f92e3b03c9f02",
+      "bytes": 6870423
+    },
+    {
+      "file": "parts/metrics_K80_S50.json",
+      "sha256": "5c3a04a306724bece9aba221a1682265f58da1855190e69a3ac1db179439356a",
+      "bytes": 6881929
+    },
+    {
+      "file": "parts/metrics_K80_S51.json",
+      "sha256": "e8cee3ec414af652b64c3db385571bcb8ca0280a59ae7859b00ccfa09d026e27",
+      "bytes": 6926563
+    },
+    {
+      "file": "parts/metrics_K80_S52.json",
+      "sha256": "8cc4c1a176bdb6d2188e0793dd725be8d87f1231195713d0d0cdc1fc3c50ef86",
+      "bytes": 2561074
+    },
+    {
+      "file": "parts/metrics_K80_S49.json",
+      "sha256": "5faf3c55164d684ee15edbb6b6b9e055efdc0a13a42cadeba5ca82710f65cc38",
+      "bytes": 11004174
+    },
+    {
+      "file": "summary.csv",
+      "sha256": "cd42241e665bb14aa3b06e11d4357a146911c0f6548cc079d5736a28da3cf1c9",
+      "bytes": 131524
+    },
+    {
+      "file": "summary.json",
+      "sha256": "88f58c189b9ca89049c6f24a1e6a6f514341454019a0d23c7186cdcbaae8743e",
+      "bytes": 2013140
+    }
+  ],
+  "code_commit": "d83a282041eee5d94d8b77c94f0c6c764c58f19a"
+}

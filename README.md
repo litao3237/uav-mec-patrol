@@ -843,7 +843,7 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 
 **2026-09-28六规模补充：** 根据主性能图需要，新增[六规模五算法完整指标协议](docs/multiscale_metrics_protocol.md)，使用K=30/40/50/60/70/80、S45–52及随机算法三次重复，正式矩阵为48个场景块、528条方法记录。保留原版算法与固定搜索配置，补齐两阶段资源、时延、CPU分配、能耗分项及一致计时；确定性基线每场景一次。新工作流先验收15条先导再自动运行正式矩阵，保留所有失败与负结果；新结果不拼入旧协议，也不作为等时间优势证据。
 
-**已启动：** [Actions运行36382512068](https://github.com/litao3237/uav-mec-patrol/actions/runs/36382512068)，固定代码`d83a282`，当前结果待验收；见[执行记录](docs/multiscale_metrics_results.md)。
+**已完成并修复：** [原运行36382512068](https://github.com/litao3237/uav-mec-patrol/actions/runs/36382512068)528/528条记录完整；Stage-2数值模型修复后，[固定结构复验36389184769](https://github.com/litao3237/uav-mec-patrol/actions/runs/36389184769)将两阶段合格数从216提升至441，225条失败全部恢复、旧成功零退化。原Stage-1能耗/方案和全部验收容差未变，本地复验与远端一致。87条原Stage-1未合格记录仍排除；K80五方法共同QoS仍仅1个场景，不作充分总体排名。见[执行记录](docs/multiscale_metrics_results.md)、[修复报告](docs/stage2_numerical_repair.md)及[最终绘图源数据](paper_results/multiscale_20260928/stage2_v2_metrics.csv)。
 
 **执行状态：A/C协议v2先导18/18完成，冻结规则、导出及离线复核通过；[正式144次运行](https://github.com/litao3237/uav-mec-patrol/actions/runs/36123390700)已在冻结代码`7faa40a`完成，Stage-1合格95/144、Stage-2合格76/144，失败样本保留。B的96组等预算、96组v7及54次dense重分析已完成，远端与本地summary逐字段一致，无需新增优化运行。固定协议见[执行协议](docs/innovation_execution_protocol.md)，结果与负结果见[执行记录](docs/innovation_execution_results.md)。v1先导保留作为探索缺陷记录，与v2及正式样本分开；本地试运行不计入正式样本。**
 

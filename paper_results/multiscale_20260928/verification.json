@@ -1,0 +1,70 @@
+{
+  "source_run": 36382512068,
+  "final_replay_run": 36389184769,
+  "repair_code": "cdd7bc70546981b148c846119c83f3d1cfe67173",
+  "records": 528,
+  "independent_audit_recomputed": true,
+  "local_remote_summary_exact_match": true,
+  "stage1_snapshot_and_energy_unchanged": true,
+  "energy_and_audit_tolerances_unchanged": true,
+  "stage2_transitions": {
+    "False->True": 225,
+    "True->True": 216,
+    "False->False": 87
+  },
+  "stage1_qualified": 441,
+  "both_stages_qualified": 441,
+  "source_search_timing_not_combined_with_replay_timing": true,
+  "files": [
+    {
+      "file": "original_provenance.json",
+      "sha256": "4acb8de8afca4b7daed0e46d5165caa3fe11875e25a7bfe026ea74077774a6c9",
+      "bytes": 8894
+    },
+    {
+      "file": "original_run36382512068.zip",
+      "sha256": "c5bdd0a5593093f8bfc7769545e951099ecedc3698094a4b21020ba6e8bf101a",
+      "bytes": 27974428
+    },
+    {
+      "file": "original_summary.json",
+      "sha256": "88f58c189b9ca89049c6f24a1e6a6f514341454019a0d23c7186cdcbaae8743e",
+      "bytes": 2013140
+    },
+    {
+      "file": "stage2_v1_provenance.json",
+      "sha256": "a94effb8b558140c9d5ffbd9a7d44bddd501c4b0f2d9591cd61f94fa505bdd28",
+      "bytes": 8403
+    },
+    {
+      "file": "stage2_v1_run36387755679.zip",
+      "sha256": "58d9d24844c2771c1851371decee042638e22c6eae452b55b3cc2ad4589e74bd",
+      "bytes": 27834302
+    },
+    {
+      "file": "stage2_v1_summary.json",
+      "sha256": "203803521c3d17025632ffce5f9861e15c6d50e5f60018eaf16058711937b9f3",
+      "bytes": 1989834
+    },
+    {
+      "file": "stage2_v2_metrics.csv",
+      "sha256": "9bafb56d3479f08d570ea172764212df976c528d999dc7a8f0c67eecfcc1426f",
+      "bytes": 281338
+    },
+    {
+      "file": "stage2_v2_provenance.json",
+      "sha256": "ee2668eb92fea59394f166efb93f71f02e913751ba81266cdd1ae7f60d5ab6ba",
+      "bytes": 8403
+    },
+    {
+      "file": "stage2_v2_run36389184769.zip",
+      "sha256": "983fd6aed796b181d01b99d66eaac6246b6c6c5988937155a57b47f4fbdd9cd9",
+      "bytes": 27848133
+    },
+    {
+      "file": "stage2_v2_summary.json",
+      "sha256": "928c34c929eeba62bd1510547831a80a27742295b9a4104cd59221a24195cf14",
+      "bytes": 2008071
+    }
+  ]
+}
