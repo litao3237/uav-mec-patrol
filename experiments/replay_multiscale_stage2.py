@@ -27,10 +27,11 @@ SOURCE = {
     "summary_sha256": "88f58c189b9ca89049c6f24a1e6a6f514341454019a0d23c7186cdcbaae8743e",
 }
 PROTOCOL = {
-    "id": "stage2_fixed_snapshot_repair_v1", "source": SOURCE,
+    "id": "stage2_fixed_snapshot_repair_v2", "source": SOURCE,
     "formulation": "dimensionless_rate_epigraph_v1", "energy_unit_j": 1000.0,
     "unchanged": ["discrete_solution", "stage1_snapshot", "stage1_energy", "energy_tolerance", "audit_tolerance"],
     "acceptance": "optimal plus saved/reconstructed independent residuals",
+    "clarabel_retries": [[1.0, .99], [100.0, .99], [1.0, .95], [1.0, .8], [100.0, .8]],
     "skip": "stage1_not_qualified", "scope": "固定结构资源重算，不是新的外层搜索或泛化实验",
     "timing": "单独保存Stage-2复算耗时；不把原runner搜索与新机器耗时拼成端到端速度",
 }

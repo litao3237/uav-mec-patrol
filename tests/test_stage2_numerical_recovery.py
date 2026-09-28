@@ -43,10 +43,11 @@ def test_scaled_upload_constraint_preserves_exact_shannon_boundary():
                     assert np.sign(residual) == np.sign(1 - factor)
 
 
-def test_archived_high_load_failure_recovers_without_relaxing_energy_guard():
-    data = json.loads((Path(__file__).parent / "fixtures/stage2_high_load_regression.json").read_text(encoding="utf-8"))
+@pytest.mark.parametrize("fixture", ["stage2_high_load_regression.json", "stage2_boundary_regression.json",
+                                     "stage2_previous_success_regression.json"])
+def test_archived_cases_recover_without_relaxing_energy_guard(fixture):
+    data = json.loads((Path(__file__).parent / "fixtures" / fixture).read_text(encoding="utf-8"))
     instance, solution = restore_instance(data["instance"]), restore_solution(data["solution"])
-    assert data["old_stage2_qualified"] is False
     result = solve_stage2_realization(instance, solution, build_event_info(instance, solution),
                                      energy_star_j=data["energy_star_j"],
                                      energy_tolerance_j=data["energy_tolerance_j"])

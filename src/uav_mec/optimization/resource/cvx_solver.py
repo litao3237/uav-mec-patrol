@@ -280,12 +280,15 @@ def solve_stage2_realization(
         raise ValueError("Stage-2能耗锚点与容差必须有限，且容差非负")
     available = _solver_candidates(solver_profile)
     # CPU目标乘正数不改变最优解；备用尺度用于内点法退化时的固定数值重试。
-    schedule = [(s, scale) for s in available for scale in
-                ((1.0, 100.0) if s == "CLARABEL" else (1.0,))]
+    # 默认接近锥边界的0.99步长可能停在退化点；仅失败时按固定顺序缩短步长。
+    # 每个策略仍使用同一1e-9精度和独立残差判据，不按方法或收益选择策略。
+    schedule = [(s, scale, step) for s in available for scale, step in
+                (((1.0, .99), (100.0, .99), (1.0, .95), (1.0, .8), (100.0, .8))
+                 if s == "CLARABEL" else ((1.0, None),))]
     attempts = []
     outcome: dict[str, Any] = {"accepted": False, "status": "solver_error",
                               "solver": None, "raw_values": None, "energy_j": None}
-    for solver, objective_scale in schedule:
+    for solver, objective_scale, max_step_fraction in schedule:
         model = build_resource_model(instance, solution, info, numerical_scaling=True)
         # 1 kJ=1000 J：改变数值表示，不改变能耗保护上限。
         energy_guard = (model.total_energy - energy_star_j - energy_tolerance_j) / 1000.0 <= 0
@@ -293,11 +296,13 @@ def solve_stage2_realization(
                              model.constraints + [energy_guard])
         kwargs = _solver_kwargs(solver, verbose, solver_profile)
         if solver == "CLARABEL":
-            kwargs.update(max_iter=300, tol_gap_abs=1e-9, tol_gap_rel=1e-9, tol_feas=1e-9)
+            kwargs.update(max_iter=300, tol_gap_abs=1e-9, tol_gap_rel=1e-9, tol_feas=1e-9,
+                          max_step_fraction=max_step_fraction)
         elif solver == "SCS":
             kwargs.update(eps=1e-8, max_iters=200000)
         started = perf_counter()
-        attempt: dict[str, Any] = {"solver": solver, "objective_scale": objective_scale}
+        attempt: dict[str, Any] = {"solver": solver, "objective_scale": objective_scale,
+                                   "max_step_fraction": max_step_fraction}
         try:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", message="Solution may be inaccurate.*", category=UserWarning)
