@@ -1,0 +1,4 @@
+# 原始归档和审计文件按字节核对SHA256，禁止Windows检出时自动转换换行。
+*.json -text
+*.csv -text
+*.zip binary
