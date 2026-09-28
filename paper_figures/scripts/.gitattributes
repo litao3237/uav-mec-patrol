@@ -1,0 +1,4 @@
+# 绘图清单记录脚本字节哈希，固定这三个脚本的 LF 换行以支持跨平台复核。
+prepare_multiscale_plot_data.py text eol=lf
+plot_multiscale_20260928.py text eol=lf
+qa_multiscale_figures.py text eol=lf

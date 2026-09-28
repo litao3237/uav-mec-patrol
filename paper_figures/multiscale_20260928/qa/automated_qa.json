@@ -1,0 +1,297 @@
+{
+  "audits": [
+    {
+      "name": "source",
+      "returncode": 0,
+      "report": "source.json",
+      "summary": {
+        "ready": true,
+        "strict": false,
+        "counts": {
+          "PASS": 21,
+          "WARN": 0,
+          "FAIL": 0
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig01_energy_common_font",
+      "returncode": 0,
+      "report": "fig01_energy_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig01_energy_common_collision",
+      "returncode": 0,
+      "report": "fig01_energy_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig02_qualification_font",
+      "returncode": 0,
+      "report": "fig02_qualification.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig02_qualification_collision",
+      "returncode": 0,
+      "report": "fig02_qualification.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig03_p95_delay_common_font",
+      "returncode": 0,
+      "report": "fig03_p95_delay_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig03_p95_delay_common_collision",
+      "returncode": 0,
+      "report": "fig03_p95_delay_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig04_cpu_common_font",
+      "returncode": 0,
+      "report": "fig04_cpu_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig04_cpu_common_collision",
+      "returncode": 0,
+      "report": "fig04_cpu_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig05_construction_search_time_font",
+      "returncode": 0,
+      "report": "fig05_construction_search_time.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig05_construction_search_time_collision",
+      "returncode": 0,
+      "report": "fig05_construction_search_time.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig06_paired_energy_saving_font",
+      "returncode": 0,
+      "report": "fig06_paired_energy_saving.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig06_paired_energy_saving_collision",
+      "returncode": 0,
+      "report": "fig06_paired_energy_saving.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "fig07_stage2_cpu_reduction_font",
+      "returncode": 0,
+      "report": "fig07_stage2_cpu_reduction.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "fig07_stage2_cpu_reduction_collision",
+      "returncode": 0,
+      "report": "fig07_stage2_cpu_reduction.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "figS01_mean_delay_common_font",
+      "returncode": 0,
+      "report": "figS01_mean_delay_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "figS01_mean_delay_common_collision",
+      "returncode": 0,
+      "report": "figS01_mean_delay_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "figS02_offload_common_font",
+      "returncode": 0,
+      "report": "figS02_offload_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "figS02_offload_common_collision",
+      "returncode": 0,
+      "report": "figS02_offload_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "figS03_energy_conditional_font",
+      "returncode": 0,
+      "report": "figS03_energy_conditional.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "figS03_energy_conditional_collision",
+      "returncode": 0,
+      "report": "figS03_energy_conditional.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    },
+    {
+      "name": "figS04_route_common_font",
+      "returncode": 0,
+      "report": "figS04_route_common.font.json",
+      "summary": null,
+      "stderr": ""
+    },
+    {
+      "name": "figS04_route_common_collision",
+      "returncode": 0,
+      "report": "figS04_route_common.collision.json",
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "stderr": ""
+    }
+  ],
+  "geometry": [
+    {
+      "figure": "fig01_energy_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig02_qualification",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig03_p95_delay_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig04_cpu_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig05_construction_search_time",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig06_paired_energy_saving",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "fig07_stage2_cpu_reduction",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "figS01_mean_delay_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "figS02_offload_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "figS03_energy_conditional",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    },
+    {
+      "figure": "figS04_route_common",
+      "width_mm": 88.89999999999999,
+      "height_mm": 71.99999796549479,
+      "raster_dpi": 600
+    }
+  ],
+  "all_passed": true
+}

@@ -12,6 +12,7 @@
 - 历史实验与图表冻结（当前增补方案见第 6 节）：[`docs/final_experiment_figure_plan.md`](docs/final_experiment_figure_plan.md)
 - 历史论文中文初稿 v1（不作为当前 v16 文稿）：[`docs/paper_draft_v1.md`](docs/paper_draft_v1.md)
 - 论文图件与重建入口：[`paper_figures/README.md`](paper_figures/README.md)
+- 最新六规模五算法图包（2026-09-28）：[11 张单栏小图与整理数据](paper_figures/multiscale_20260928/README.md) / [合订 PDF](paper_figures/multiscale_20260928/all_figures.pdf)
 - 当前指标、实验覆盖与证据缺口：[实验完整性核查](#experiment-evidence-audit)
 - 当前创新点补充实验方案：[第 6 节](#innovation-evidence-plan)；逐项数据与代码可实现性见 [核查说明](docs/innovation_experiment_feasibility.md)
 
@@ -25,7 +26,7 @@
 当前代码版本：**v0.6.0**
 主开发分支：**develop**
 
-**当前阶段（2026-09-25）：六规模五方法固定配置主比较、多规模消融及 K50/K80 等预算比较已完成。v16 主文有 8 图、补充材料有 4 图；图数不作为实验充分性的判断标准。创新证据补充已进入执行：既有数据重分析完成，完整快照与独立残差核验已实现，修正后的先导通过实现验收，144次受控机制/两阶段资源运行已完成并通过完整性验收。最新来源与结果见[执行记录](docs/innovation_execution_results.md)。**
+**当前阶段（2026-09-28）：六规模五算法 528 条补充记录已完成，Stage-2 修复后 441 条通过两阶段核验。已整理数据并生成 11 张统一的六规模独立小图，2,100 条汇总对照及全部图稿字号/碰撞检查通过，见[最新图包](paper_figures/multiscale_20260928/README.md)。K80 五算法共同有效样本仅 1 个场景，图中明确标注。v16 主文仍保留原版 8 图、补充材料 4 图，本轮新图尚未嵌入 Word；图数不作为实验充分性的判断标准。既有多规模消融、等预算比较及 144 次受控机制实验结果继续保留，见[此前执行记录](docs/innovation_execution_results.md)。**
 
 下文历史记录中的“完成”表示对应设置和当时清单已经执行，不表示所有方法、所有指标与所有场景均已覆盖。当前实验范围、结论边界和后续优先级以本节核查及第 6 节为准。
 
@@ -844,6 +845,8 @@ exploration best state 分叉为 Full Hybrid 与 `no-route` elite refinement，
 **2026-09-28六规模补充：** 根据主性能图需要，新增[六规模五算法完整指标协议](docs/multiscale_metrics_protocol.md)，使用K=30/40/50/60/70/80、S45–52及随机算法三次重复，正式矩阵为48个场景块、528条方法记录。保留原版算法与固定搜索配置，补齐两阶段资源、时延、CPU分配、能耗分项及一致计时；确定性基线每场景一次。新工作流先验收15条先导再自动运行正式矩阵，保留所有失败与负结果；新结果不拼入旧协议，也不作为等时间优势证据。
 
 **已完成并修复：** [原运行36382512068](https://github.com/litao3237/uav-mec-patrol/actions/runs/36382512068)528/528条记录完整；Stage-2数值模型修复后，[固定结构复验36389184769](https://github.com/litao3237/uav-mec-patrol/actions/runs/36389184769)将两阶段合格数从216提升至441，225条失败全部恢复、旧成功零退化。原Stage-1能耗/方案和全部验收容差未变，本地复验与远端一致。87条原Stage-1未合格记录仍排除；K80五方法共同QoS仍仅1个场景，不作充分总体排名。见[执行记录](docs/multiscale_metrics_results.md)、[修复报告](docs/stage2_numerical_repair.md)及[最终绘图源数据](paper_results/multiscale_20260928/stage2_v2_metrics.csv)。
+
+**数据与图稿已完成：** [新图包](paper_figures/multiscale_20260928/README.md)提供10张六规模五算法图与1张六规模配对收益图，统一单栏88.9×72 mm、PDF/SVG及600 dpi PNG/TIFF。整理了528条逐运行数据、306个绘图统计点、有效分母与场景均值，保留87条失败；完整重建的2,100条原汇总均一致。全部11图通过字号和碰撞审计，短图注与使用边界已给出。图号待Word嵌入时统一；本轮未修改模型图、算法图、文稿或实验实现。
 
 **执行状态：A/C协议v2先导18/18完成，冻结规则、导出及离线复核通过；[正式144次运行](https://github.com/litao3237/uav-mec-patrol/actions/runs/36123390700)已在冻结代码`7faa40a`完成，Stage-1合格95/144、Stage-2合格76/144，失败样本保留。B的96组等预算、96组v7及54次dense重分析已完成，远端与本地summary逐字段一致，无需新增优化运行。固定协议见[执行协议](docs/innovation_execution_protocol.md)，结果与负结果见[执行记录](docs/innovation_execution_results.md)。v1先导保留作为探索缺陷记录，与v2及正式样本分开；本地试运行不计入正式样本。**
 

@@ -1,0 +1,485 @@
+{
+  "figures": [
+    {
+      "name": "fig01_energy_common",
+      "scope": "common",
+      "metric": "stage1_energy_j",
+      "ylabel": "UAV energy (kJ)",
+      "scale": 0.001,
+      "limits": [
+        0,
+        320
+      ],
+      "caption": "不同任务规模下的 UAV 能耗（五算法共同有效样本）。",
+      "role": "主比较：能耗",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig01_energy_common.pdf",
+          "sha256": "40c53fa47e39f13398acc0bade04647171d4d9b48ae483948e322dcdb8862ec4"
+        },
+        "svg": {
+          "path": "svg/fig01_energy_common.svg",
+          "sha256": "d261fe943edb94916aabb5a3c719c56b565b8c2d05f052db080af8c36cd1329b"
+        },
+        "png": {
+          "path": "png/fig01_energy_common.png",
+          "sha256": "6567150389e8118a20eaa2970b5af66347a8e211fe3b0ba32f8306e9d1e55b33"
+        },
+        "tiff": {
+          "path": "tiff/fig01_energy_common.tiff",
+          "sha256": "5b1984f3f84844efb638321a1677bf339d1ad9d4094f8e21fa8cf8bca7ba821d"
+        }
+      }
+    },
+    {
+      "name": "fig02_qualification",
+      "scope": "conditional",
+      "metric": "both_stages_qualified_rate",
+      "ylabel": "Qualified runs (%)",
+      "scale": 100,
+      "limits": [
+        0,
+        108
+      ],
+      "caption": "不同任务规模下的两阶段数值验收合格率。",
+      "role": "主比较：有效解覆盖与失败边界",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig02_qualification.pdf",
+          "sha256": "b8a2fb5ebf09b90be796bf37b6784487d0a25d06d0061c59006cc2cc5d8f3748"
+        },
+        "svg": {
+          "path": "svg/fig02_qualification.svg",
+          "sha256": "be18ad05b2a2faf8830f37a3f157796de0c81af8cae0eb0ed02024cf8f3fb038"
+        },
+        "png": {
+          "path": "png/fig02_qualification.png",
+          "sha256": "41e6f81f1549d8c785368eb27567989b63a3379167dc1d0c6ba40776977381c8"
+        },
+        "tiff": {
+          "path": "tiff/fig02_qualification.tiff",
+          "sha256": "fcf04df166966f98298da0f518b21be97670d5a8b8d4d180743d78a912e175b6"
+        }
+      }
+    },
+    {
+      "name": "fig03_p95_delay_common",
+      "scope": "common",
+      "metric": "p95_delay_s",
+      "ylabel": "P95 task delay (s)",
+      "scale": 1,
+      "limits": [
+        0,
+        430
+      ],
+      "caption": "不同任务规模下的运行内 P95 任务时延（共同有效样本）。",
+      "role": "性能边界：尾部时延",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig03_p95_delay_common.pdf",
+          "sha256": "8b9c9a1e0eea2204f9ec560e425dd487c6088555a7c6dbd360114bb2cd114760"
+        },
+        "svg": {
+          "path": "svg/fig03_p95_delay_common.svg",
+          "sha256": "5e39ee7bebe61c9b2bdd5a9d950739eb36e13261833f042de9cf2516cd13fd82"
+        },
+        "png": {
+          "path": "png/fig03_p95_delay_common.png",
+          "sha256": "a24034d89db21740d794c2c36b551ce972afadd67be4c82fd2deabaab9990df7"
+        },
+        "tiff": {
+          "path": "tiff/fig03_p95_delay_common.tiff",
+          "sha256": "738484aa34ea84b3848a88bfc5584dc7d5b61a2c755d228a5856aa7009e33024"
+        }
+      }
+    },
+    {
+      "name": "fig04_cpu_common",
+      "scope": "common",
+      "metric": "normalized_mec_cpu",
+      "ylabel": "Normalized MEC CPU allocation",
+      "scale": 1,
+      "limits": [
+        0,
+        1.6
+      ],
+      "caption": "不同任务规模下的 Stage-2 归一化 MEC CPU 分配量（共同有效样本）。",
+      "role": "资源代价：CPU 分配",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig04_cpu_common.pdf",
+          "sha256": "9cd0da54386c03844284c4040e6bade0890e332e2011cf2643758580efae2b51"
+        },
+        "svg": {
+          "path": "svg/fig04_cpu_common.svg",
+          "sha256": "133f1b107e4b5684168924a1f3c399f4c54586ee85d4e16f2968a977f64c3e09"
+        },
+        "png": {
+          "path": "png/fig04_cpu_common.png",
+          "sha256": "118ff7486e34f52291fa49fd208f331e1c5cb97d5edc54a25e5faea8a22ea994"
+        },
+        "tiff": {
+          "path": "tiff/fig04_cpu_common.tiff",
+          "sha256": "fdb649ad4cc48b65858504f06cc355635f2d9edee344f6f1a72f6d44b8d8d652"
+        }
+      }
+    },
+    {
+      "name": "fig05_construction_search_time",
+      "scope": "conditional",
+      "metric": "original_construction_search_s",
+      "ylabel": "Construction + search time (s)",
+      "scale": 1,
+      "limits": [
+        0.002,
+        100
+      ],
+      "caption": "不同任务规模下的初始化与搜索耗时（对数纵轴）。",
+      "role": "计算代价：固定搜索配置",
+      "kind": "line",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig05_construction_search_time.pdf",
+          "sha256": "e36b58c8cd4952730b8b11f0241d8dbec98f3fe62ab3c496b92ae1e2935becc7"
+        },
+        "svg": {
+          "path": "svg/fig05_construction_search_time.svg",
+          "sha256": "86c274bf38e109a8cb8e29fa8385f77482dfff4bbde4595dbe41ccef4d95c031"
+        },
+        "png": {
+          "path": "png/fig05_construction_search_time.png",
+          "sha256": "603e9dce61151b326f7e833e1a0b8faa87ae8f733be493f7603124f5d3ced737"
+        },
+        "tiff": {
+          "path": "tiff/fig05_construction_search_time.tiff",
+          "sha256": "35ab2d23fed5f08ec36448e7e4d9c35f9f7ac96e7a43b7fc6ed6542d6dab3eeb"
+        }
+      }
+    },
+    {
+      "name": "fig06_paired_energy_saving",
+      "scope": "paired",
+      "metric": "stage1_energy_j",
+      "ylabel": "Energy saving vs B-ALNS (kJ)",
+      "scale": -0.001,
+      "limits": [
+        0,
+        7.8
+      ],
+      "caption": "ESI-ALNS 相对 B-ALNS 的配对节能量；点为场景均值。",
+      "role": "增量证据：同轨迹探索后的精英强化",
+      "kind": "paired_bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig06_paired_energy_saving.pdf",
+          "sha256": "f60842024e9989d6f84aebe4ac38a15f753e5a1a0c63676553cae4d207e9359a"
+        },
+        "svg": {
+          "path": "svg/fig06_paired_energy_saving.svg",
+          "sha256": "13a9827d8452c8c2fecf00c30cd74710e0d2b3cfba324a258b3bfba668d133f0"
+        },
+        "png": {
+          "path": "png/fig06_paired_energy_saving.png",
+          "sha256": "29a19b6f3fdaa6533c93e655b190aab1b94d1b9062aada5db843be06391fdd11"
+        },
+        "tiff": {
+          "path": "tiff/fig06_paired_energy_saving.tiff",
+          "sha256": "206dcebeefc356952b223e62518e4a3db580211d13c8695f7864eb78b3e700b2"
+        }
+      }
+    },
+    {
+      "name": "fig07_stage2_cpu_reduction",
+      "scope": "common",
+      "metric": "cpu_stage2_minus_stage1",
+      "ylabel": "Reduction in normalized MEC CPU",
+      "scale": -1,
+      "limits": [
+        0,
+        1.65
+      ],
+      "caption": "同一离散结构下 Stage-2 相对 Stage-1 的 CPU 分配减少量。",
+      "role": "机制证据：能耗容差内的资源细化",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/fig07_stage2_cpu_reduction.pdf",
+          "sha256": "72014e177f4d65cc131da76e78c614270171bb6c63f32baf75c0c7e4a88835d7"
+        },
+        "svg": {
+          "path": "svg/fig07_stage2_cpu_reduction.svg",
+          "sha256": "af165e047f3e75e8b508ac74d32b6fab0f51078e21420dc203e00af34571f86f"
+        },
+        "png": {
+          "path": "png/fig07_stage2_cpu_reduction.png",
+          "sha256": "0c9687af9d5bdb4361071d460a76f0c3a96e7b3bc92eac3f188562356374548e"
+        },
+        "tiff": {
+          "path": "tiff/fig07_stage2_cpu_reduction.tiff",
+          "sha256": "65e0ddc3cf9f3a656b852d4931db7cfa0272e55065368625947049cea5a6920a"
+        }
+      }
+    },
+    {
+      "name": "figS01_mean_delay_common",
+      "scope": "common",
+      "metric": "mean_delay_s",
+      "ylabel": "Mean task delay (s)",
+      "scale": 1,
+      "limits": [
+        0,
+        260
+      ],
+      "caption": "不同任务规模下的平均任务时延（共同有效样本）。",
+      "role": "补充：平均时延",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/figS01_mean_delay_common.pdf",
+          "sha256": "819d373b27d4cc29e942f95ec1511d55cb43192658e601f349e2eabebd07179d"
+        },
+        "svg": {
+          "path": "svg/figS01_mean_delay_common.svg",
+          "sha256": "24f0e7027d5b616e72904d3bce9ce5274a63bc9f0ef2d88a1d3023b62f28fe1f"
+        },
+        "png": {
+          "path": "png/figS01_mean_delay_common.png",
+          "sha256": "7f479762f9d9166a4341b697ff3614dee8c52b91436e91ebb49ca38e6fed11c3"
+        },
+        "tiff": {
+          "path": "tiff/figS01_mean_delay_common.tiff",
+          "sha256": "0652818ea655e499a8d95a1365e25c77bcb6382be407aea64840c08b21271f1c"
+        }
+      }
+    },
+    {
+      "name": "figS02_offload_common",
+      "scope": "common",
+      "metric": "offload_ratio",
+      "ylabel": "Offloaded tasks (%)",
+      "scale": 100,
+      "limits": [
+        0,
+        21
+      ],
+      "caption": "不同任务规模下的任务卸载比例（共同有效样本）。",
+      "role": "补充：卸载结构",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/figS02_offload_common.pdf",
+          "sha256": "2377394a58f684ba59480bdaa4680510f5c455a0587371534246e3804d8a8043"
+        },
+        "svg": {
+          "path": "svg/figS02_offload_common.svg",
+          "sha256": "2ce04b8563b22068b34aae75d32ba198afc0d592ab53a6d9c47b79756b375d0b"
+        },
+        "png": {
+          "path": "png/figS02_offload_common.png",
+          "sha256": "775053bc30e5768805b6d6f23f44f9df1d9d0bdb4d81cdcb431e6247d29ccee6"
+        },
+        "tiff": {
+          "path": "tiff/figS02_offload_common.tiff",
+          "sha256": "e6213c8ac559732a7cddc7f1674459aabe1c26b8d41c1223c4bd733e4ae114bf"
+        }
+      }
+    },
+    {
+      "name": "figS03_energy_conditional",
+      "scope": "conditional",
+      "metric": "stage1_energy_j",
+      "ylabel": "UAV energy (kJ)",
+      "scale": 0.001,
+      "limits": [
+        0,
+        320
+      ],
+      "caption": "不同任务规模下各算法自身有效样本的条件能耗均值。",
+      "role": "补充：共同子集筛选对结果的影响",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/figS03_energy_conditional.pdf",
+          "sha256": "236043c144a4394fd730491db693dc42c82c2a96f92f335b07fed18fcc2fb908"
+        },
+        "svg": {
+          "path": "svg/figS03_energy_conditional.svg",
+          "sha256": "e8093e82b13e67bf8d52e3e912ac110384bc4a268d3efbc7dd0f9dc06c79aa66"
+        },
+        "png": {
+          "path": "png/figS03_energy_conditional.png",
+          "sha256": "27a8e05a7d8605eb0736c05a63f9f17f355097996c1a756915d372ac7e29ca73"
+        },
+        "tiff": {
+          "path": "tiff/figS03_energy_conditional.tiff",
+          "sha256": "1e25c05ea91461f5fe9c4200fabfba642150b10648cadb01d1f459edfa19c741"
+        }
+      }
+    },
+    {
+      "name": "figS04_route_common",
+      "scope": "common",
+      "metric": "total_distance_m",
+      "ylabel": "Total flight distance (km)",
+      "scale": 0.001,
+      "limits": [
+        0,
+        16.5
+      ],
+      "caption": "不同任务规模下的总飞行路径长度（共同有效样本）。",
+      "role": "补充：路径结构与主要能耗来源",
+      "kind": "bar",
+      "width_mm": 88.9,
+      "height_mm": 72.0,
+      "png_dpi": 600,
+      "font": "Arial",
+      "minimum_font_pt": 6.5,
+      "exports": {
+        "pdf": {
+          "path": "pdf/figS04_route_common.pdf",
+          "sha256": "95e4ba40331b68ab34b0cebc2752c857f3e5adef1b5d651c5f6eebaf20455622"
+        },
+        "svg": {
+          "path": "svg/figS04_route_common.svg",
+          "sha256": "0565869bc50bd1b48dfd3daee74a0f3793c3420a1717570cb303057ae1b78ff9"
+        },
+        "png": {
+          "path": "png/figS04_route_common.png",
+          "sha256": "95a3c2f63d7444202a9625ffd9df78f9c32e50761a4fb990632214ed959de04d"
+        },
+        "tiff": {
+          "path": "tiff/figS04_route_common.tiff",
+          "sha256": "548dbb474327a5b3cbcd59d1eae6105a3dea3980e3ce26fde4265cc2473ee368"
+        }
+      }
+    }
+  ],
+  "source_verification": {
+    "source_files": [
+      {
+        "file": "paper_results/multiscale_20260928/original_provenance.json",
+        "sha256": "4acb8de8afca4b7daed0e46d5165caa3fe11875e25a7bfe026ea74077774a6c9"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/original_run36382512068.zip",
+        "sha256": "c5bdd0a5593093f8bfc7769545e951099ecedc3698094a4b21020ba6e8bf101a"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/original_summary.json",
+        "sha256": "88f58c189b9ca89049c6f24a1e6a6f514341454019a0d23c7186cdcbaae8743e"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v1_provenance.json",
+        "sha256": "a94effb8b558140c9d5ffbd9a7d44bddd501c4b0f2d9591cd61f94fa505bdd28"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v1_run36387755679.zip",
+        "sha256": "58d9d24844c2771c1851371decee042638e22c6eae452b55b3cc2ad4589e74bd"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v1_summary.json",
+        "sha256": "203803521c3d17025632ffce5f9861e15c6d50e5f60018eaf16058711937b9f3"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v2_metrics.csv",
+        "sha256": "9bafb56d3479f08d570ea172764212df976c528d999dc7a8f0c67eecfcc1426f"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v2_provenance.json",
+        "sha256": "ee2668eb92fea59394f166efb93f71f02e913751ba81266cdd1ae7f60d5ab6ba"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v2_run36389184769.zip",
+        "sha256": "983fd6aed796b181d01b99d66eaac6246b6c6c5988937155a57b47f4fbdd9cd9"
+      },
+      {
+        "file": "paper_results/multiscale_20260928/stage2_v2_summary.json",
+        "sha256": "928c34c929eeba62bd1510547831a80a27742295b9a4104cd59221a24195cf14"
+      }
+    ],
+    "records": 528,
+    "qualified": 441,
+    "matrix_complete": true,
+    "bootstrap_seed": 20260928,
+    "bootstrap_replicates": 10000,
+    "summary_entries_cross_checked": 2100,
+    "summary_match": true,
+    "common_scenes": [
+      8,
+      8,
+      7,
+      5,
+      3,
+      1
+    ],
+    "all_failed_records_retained": 87,
+    "new_experiments_or_solver_calls": false,
+    "original_search_and_replay_times_combined": false
+  },
+  "python": "3.14.5",
+  "libraries": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.3",
+    "pymupdf": "1.28.2",
+    "pillow": "12.3.0"
+  },
+  "scripts": {
+    "plot_multiscale_20260928.py": "f62dc9b4d5d6b7d04e2b24c758f83bbc886086377405f6226c89849936691eb5",
+    "prepare_multiscale_plot_data.py": "e28d24969eec8cc7fd13d80df5f4928859e48f3bc29d96c54b85e94724ebfe91",
+    "qa_multiscale_figures.py": "47964ee8ac2212267c91c71c332570566b246557e85550d894e0a268edef51ab"
+  }
+}

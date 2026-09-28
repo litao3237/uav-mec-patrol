@@ -1,0 +1,10 @@
+# 精确保存绘图输入、哈希清单与脚本验收记录的字节，避免换行转换破坏来源校验。
+# Windows 导出保留 CRLF；按行检查时将 CR 视作换行，而非正文尾随空格。
+*.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+*.csv -text whitespace=trailing-space,space-before-tab,cr-at-eol
+# Matplotlib 的 SVG path 序列化含合法尾随空格，图稿内容由哈希及专门的图形审计验证。
+*.svg -text -whitespace
+*.pdf binary
+*.png binary
+*.tiff binary
+*.zip binary

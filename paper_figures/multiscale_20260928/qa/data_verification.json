@@ -1,0 +1,62 @@
+{
+  "source_files": [
+    {
+      "file": "paper_results/multiscale_20260928/original_provenance.json",
+      "sha256": "4acb8de8afca4b7daed0e46d5165caa3fe11875e25a7bfe026ea74077774a6c9"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/original_run36382512068.zip",
+      "sha256": "c5bdd0a5593093f8bfc7769545e951099ecedc3698094a4b21020ba6e8bf101a"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/original_summary.json",
+      "sha256": "88f58c189b9ca89049c6f24a1e6a6f514341454019a0d23c7186cdcbaae8743e"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v1_provenance.json",
+      "sha256": "a94effb8b558140c9d5ffbd9a7d44bddd501c4b0f2d9591cd61f94fa505bdd28"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v1_run36387755679.zip",
+      "sha256": "58d9d24844c2771c1851371decee042638e22c6eae452b55b3cc2ad4589e74bd"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v1_summary.json",
+      "sha256": "203803521c3d17025632ffce5f9861e15c6d50e5f60018eaf16058711937b9f3"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v2_metrics.csv",
+      "sha256": "9bafb56d3479f08d570ea172764212df976c528d999dc7a8f0c67eecfcc1426f"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v2_provenance.json",
+      "sha256": "ee2668eb92fea59394f166efb93f71f02e913751ba81266cdd1ae7f60d5ab6ba"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v2_run36389184769.zip",
+      "sha256": "983fd6aed796b181d01b99d66eaac6246b6c6c5988937155a57b47f4fbdd9cd9"
+    },
+    {
+      "file": "paper_results/multiscale_20260928/stage2_v2_summary.json",
+      "sha256": "928c34c929eeba62bd1510547831a80a27742295b9a4104cd59221a24195cf14"
+    }
+  ],
+  "records": 528,
+  "qualified": 441,
+  "matrix_complete": true,
+  "bootstrap_seed": 20260928,
+  "bootstrap_replicates": 10000,
+  "summary_entries_cross_checked": 2100,
+  "summary_match": true,
+  "common_scenes": [
+    8,
+    8,
+    7,
+    5,
+    3,
+    1
+  ],
+  "all_failed_records_retained": 87,
+  "new_experiments_or_solver_calls": false,
+  "original_search_and_replay_times_combined": false
+}

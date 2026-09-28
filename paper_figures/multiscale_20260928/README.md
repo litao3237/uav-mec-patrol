@@ -1,0 +1,105 @@
+# 六规模五算法实验图与整理数据
+
+本图包基于 2026-09-28 正式实验及 Stage-2 修复 v2 的冻结数据，包含 **11 张独立小图：10 张六规模五算法对比图、1 张六规模配对收益图**。横轴均为任务数 K=30、40、50、60、70、80。图号为图包内编号，嵌入论文时按主文顺序重新编号。
+
+## 图稿与短图注
+
+每图提供可编辑 PDF/SVG、600 dpi PNG/TIFF；物理尺寸统一为 88.9×72 mm。PDF 字体嵌入，SVG 保留文字。原始模型图、算法图及 Word 文稿未在本轮替换。
+
+| 图 | 短图注 | 形式与用途 |
+|---|---|---|
+| [01](pdf/fig01_energy_common.pdf) | 不同任务规模下的 UAV 能耗（五算法共同有效样本）。 | 分组柱状图，主要能耗比较 |
+| [02](pdf/fig02_qualification.pdf) | 不同任务规模下的两阶段数值验收合格率。 | 分组柱状图，保留全部失败分母 |
+| [03](pdf/fig03_p95_delay_common.pdf) | 不同任务规模下的运行内 P95 任务时延（共同有效样本）。 | 分组柱状图，展示尾部时延边界 |
+| [04](pdf/fig04_cpu_common.pdf) | 不同任务规模下的 Stage-2 归一化 MEC CPU 分配量（共同有效样本）。 | 分组柱状图，展示资源代价 |
+| [05](pdf/fig05_construction_search_time.pdf) | 不同任务规模下的初始化与搜索耗时（对数纵轴）。 | 折线图，展示固定配置的计算成本 |
+| [06](pdf/fig06_paired_energy_saving.pdf) | ESI-ALNS 相对 B-ALNS 的配对节能量；点为场景均值。 | 柱状图加场景点，突出强化的增量收益 |
+| [07](pdf/fig07_stage2_cpu_reduction.pdf) | 同一离散结构下 Stage-2 相对 Stage-1 的 CPU 分配减少量。 | 分组柱状图，验证资源细化作用 |
+| [S01](pdf/figS01_mean_delay_common.pdf) | 不同任务规模下的平均任务时延（共同有效样本）。 | 补充的平均时延图 |
+| [S02](pdf/figS02_offload_common.pdf) | 不同任务规模下的任务卸载比例（共同有效样本）。 | 补充的结构统计图 |
+| [S03](pdf/figS03_energy_conditional.pdf) | 不同任务规模下各算法自身有效样本的条件能耗均值。 | 与图 01 对照，揭示样本集合差异 |
+| [S04](pdf/figS04_route_common.pdf) | 不同任务规模下的总飞行路径长度（共同有效样本）。 | 补充的路径统计图 |
+
+[合订预览 PDF](all_figures.pdf) 每页一图，保持原定物理尺寸。正文建议以图 01、02、05、06、07 为主要证据；时延和 CPU 图用于讨论性能代价与边界。S 系列作为补充或备选，不为达到图数而全部加入正文。
+
+## 统一统计说明
+
+可放在论文实验设置中，避免每张图使用长图注：
+
+> 每个任务规模包含 8 个场景。GR-MR、FTR-NM 每场景运行一次，RGA-MR、B-ALNS、ESI-ALNS 每场景包含 3 个算法种子。先平均场景内重复，再对场景等权平均；误差线为场景 bootstrap 的描述性 95% 分位区间（10,000 次重采样，固定种子 20260928），不表示显著性检验。共同有效比较要求同一场景—种子块中的五种算法均通过相应阶段验收。图中 n 为独立场景数，n=1 时不估计区间。数值未合格记录不填零，但计入合格率分母。
+
+确定性算法在匹配不同算法种子时复用同一结果，不增加独立场景数。五算法共同有效块在六规模下分别为 23、24、21、14、7、2，对应 **8、8、7、5、3、1 个独立场景**。不同 K 的有效集合不同，因此柱高变化不能单独归因于规模变化。
+
+图 02 和图 05 使用每规模全部 8 个场景；合格率的运行分母分别为 8/8/24/24/24。图 06 只要求 B/ESI 配对同时有效，各规模均保有 8 个独立场景，有效配对块数分别为 23、24、23、23、22、21。零收益场景全部保留。图 S03 使用各方法自己的有效集合，不能忽略样本差异直接作总体排名。
+
+合格率表示 `optimal` 且原始变量和重建时序都通过独立残差核验的运行比例，不是任务成功率，也不证明未合格案例在数学上不可行。修复后 Stage-1 合格率与两阶段合格率相同，故仅绘制一张合格率图。
+
+## 样本覆盖
+
+单元格为“两阶段合格运行数 / 计划运行数（有效独立场景数）”。总计 528 条记录，441 条合格；87 条原 Stage-1 未合格记录完整保留。
+
+| K | GR-MR | FTR-NM | RGA-MR | B-ALNS | ESI-ALNS | 五算法共同场景数 |
+|---|---|---|---|---|---|---:|
+| 30 | 8/8（8） | 8/8（8） | 24/24（8） | 23/24（8） | 23/24（8） | 8 |
+| 40 | 8/8（8） | 8/8（8） | 24/24（8） | 24/24（8） | 24/24（8） | 8 |
+| 50 | 7/8（7） | 8/8（8） | 24/24（8） | 24/24（8） | 23/24（8） | 7 |
+| 60 | 6/8（6） | 5/8（5） | 18/24（6） | 23/24（8） | 23/24（8） | 5 |
+| 70 | 3/8（3） | 3/8（3） | 9/24（3） | 22/24（8） | 22/24（8） | 3 |
+| 80 | 1/8（1） | 1/8（1） | 3/24（1） | 21/24（8） | 21/24（8） | 1 |
+
+K=80 的五算法共同能耗、时延及 CPU 图仅描述一个场景。它们不能支持高负载总体排名。图 06 的 B/ESI 配对比较仍有每规模 8 个场景，但这是同一实验下的更宽配对子集，并非增加独立实验。
+
+## 指标与来源
+
+| 指标 | 定义与单位 |
+|---|---|
+| UAV 能耗 | Stage-1 目标值，源单位 J，作图转换为 kJ；不以 Stage-2 值替换优化目标 |
+| 平均/P95 时延 | 根据 Stage-2 资源重建最早时序，单位 s；先在每次运行的任务内计算，再作场景汇总，任务不是独立重复 |
+| 归一化 MEC CPU | 所有活动 UAV–MEC 对的分配 CPU / 对应 MEC 容量之和，无量纲；可能超过 1，不是百分比或实测利用率 |
+| Stage-2 CPU 减少量 | 同一结构的 Stage-1 归一化 CPU 减 Stage-2 归一化 CPU；原数据存储相反方向，图中同时反转均值和区间 |
+| 配对节能量 | 同场景、同算法种子的 B-ALNS Stage-1 能耗减 ESI-ALNS 能耗；先求差再场景等权，不用两条条件均值相减 |
+| 初始化与搜索时间 | `original_initialization_s + original_search_s`，来自同一次原搜索运行，包含失败运行；排除最终资源重算与独立验收，不是端到端求解时间 |
+| 卸载比例 | 卸载任务数 / 全部任务数，作图乘 100 |
+| 路径长度 | 全部 UAV 的飞行路径之和，源单位 m，作图转换为 km |
+
+原搜索运行：[36382512068](https://github.com/litao3237/uav-mec-patrol/actions/runs/36382512068)，代码 `d83a282041eee5d94d8b77c94f0c6c764c58f19a`。Stage-2 固定结构复验：[36389184769](https://github.com/litao3237/uav-mec-patrol/actions/runs/36389184769)，代码 `cdd7bc70546981b148c846119c83f3d1cfe67173`。本轮绘图不重新搜索、不修改算法或容差。
+
+源 CSV SHA256：`9bafb56d3479f08d570ea172764212df976c528d999dc7a8f0c67eecfcc1426f`。全部 10 个冻结源文件的哈希、2,100 条归档汇总的中心值/场景组成/区间均已核对，详见 [数据验收](qa/data_verification.json)。
+
+本轮仍为固定搜索配置比较。B/ESI 共享探索轨迹，ESI 多执行精英强化；不能由这些图声称等时间预算下稳定优于所有基线。原有等时间预算未见一致优势的结果应在论文中保留。
+
+## 数据文件
+
+| 文件 | 内容 |
+|---|---|
+| [run_metrics.csv](data/run_metrics.csv) | 528 条记录、状态与来源哈希，原指标及独立计时分项 |
+| [failed_records.csv](data/failed_records.csv) | 87 条未合格记录，不删除或填零 |
+| [sample_coverage.csv](data/sample_coverage.csv) | 每方法每规模的合格数、分母、独立场景及共同块数 |
+| [all_statistics.csv](data/all_statistics.csv) | 条件、五方法共同有效、ESI 与四基线配对三套完整汇总，保留场景等权与运行等权 |
+| [all_scenario_means.csv](data/all_scenario_means.csv) | 上述汇总对应的场景均值及场景内重复数 |
+| [plotted_points.csv](data/plotted_points.csv) | 11 图的 306 个统计点，含单位变换、区间及有效分母 |
+| [plotted_scenario_means.csv](data/plotted_scenario_means.csv) | 306 个统计点所对应的 1,844 条场景均值 |
+
+`all_statistics.csv` 的 `valid_observations` 在条件集合中为实际方法运行数，在共同/配对集合中为匹配块数。两者不能直接视为独立样本数。`independent_scenarios` 才是本次不确定性计算的抽样单位。
+
+原 CSV 中 `stage2_component_*_j_j` 是已有合法字段名，数值单位仍为 J。原归档中的无前缀计时汇总槽位在修复统计中为空，完整保留其空值；真实原实验计时使用 `original_*` 列。`stage2_replay_s` 单列保存，不与原搜索耗时相加。
+
+## 当前结果可支持的表述
+
+- 在该固定搜索配置及有效样本上，ALNS 方法能耗低于三个构造/GA 基线；高负载合格率较高。K=80 的跨五方法数值比较受共同场景数限制。
+- ESI 相对 B-ALNS 的场景等权配对节能均值在六规模下分别为 0.417、0.291、2.084、1.379、2.648、1.414 kJ；同时 ESI 初始化加搜索更耗时，不能仅展示收益而隐藏成本。
+- Stage-2 在原能耗容差约束下减少同一结构的 CPU 分配量；这不意味着 ESI 的 CPU 分配量始终比其他算法低。
+- 平均时延和 P95 时延没有一致优势，不能写成“全面改善 QoS”。K=30 的 ESI 合格率也低于三个基线，K=50 低于 B-ALNS，图中均保留。
+
+## 重建与验收
+
+在仓库根目录执行，`--qa-scripts` 指向已安装的 `nature-figure` 的 `scripts` 目录：
+
+```powershell
+uv run --no-project --python 3.14.5 --with-requirements paper_figures/multiscale_20260928/requirements.txt python -X utf8 paper_figures/scripts/plot_multiscale_20260928.py --qa-scripts <nature-figure脚本目录>
+uv run --no-project --python 3.14.5 --with-requirements paper_figures/multiscale_20260928/requirements.txt python -X utf8 paper_figures/scripts/qa_multiscale_figures.py --qa-scripts <nature-figure脚本目录>
+```
+
+精确运行时版本以 [figure_manifest.json](figure_manifest.json) 为准；字体需要 Arial。脚本分别负责数据整理、统一绘图和图稿验收。绘图步骤输出的清单还包含脚本及每个 PDF/SVG/PNG/TIFF 的 SHA256。
+
+本轮 source preflight、11 张 PDF 字号及碰撞审计均通过：0 FAIL、0 WARN。所有图已逐张检查彩色/灰度版本，图例位于绘图区外；单图多面板对齐检查为不适用。具体检查见 [视觉核查](qa/visual_review.md) 和 [自动验收](qa/automated_qa.json)。
