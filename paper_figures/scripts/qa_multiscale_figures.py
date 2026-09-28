@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pymupdf
-from PIL import Image
+from PIL import Image, ImageDraw
 from prepare_multiscale_plot_data import ROOT, require, sha256, write_json
 
 
@@ -23,6 +23,20 @@ def audit_job(job: tuple) -> dict:
     write_json(destination, report)
     return {"name": name, "returncode": result.returncode, "report": destination.name,
             "summary": report.get("summary", report.get("verdict")), "stderr": result.stderr}
+
+
+def render_final_size_review(out: Path, figures: list[dict]) -> None:
+    """由本轮 PDF 刷新原尺寸核查页；低分辨率仅用于屏幕核查，正式图仍为 600 dpi。"""
+    canvas = Image.new("RGB", (1050, 1240), "#E8EBEE")
+    labels = ImageDraw.Draw(canvas)
+    for index, spec in enumerate(figures):
+        with pymupdf.open(out / "pdf" / f"{spec['name']}.pdf") as source:
+            pixmap = source[0].get_pixmap(dpi=96, alpha=False)
+            picture = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
+            x, y = 5 + index % 3 * 350, 25 + index // 3 * 310
+            canvas.paste(picture, (x, y))
+            labels.text((x, y - 18), spec["name"], fill="#252A30")
+    canvas.save(out / "qa/final_size_96dpi.png")
 
 
 def main() -> None:
@@ -66,6 +80,7 @@ def main() -> None:
     for result in results:
         print(result["name"], result["returncode"], result["summary"])
     require(all(result["returncode"] == 0 for result in results), "存在审计失败，见 qa/automated_qa.json")
+    render_final_size_review(out, manifest["figures"])
 
 
 if __name__ == "__main__":

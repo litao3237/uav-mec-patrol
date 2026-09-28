@@ -21,19 +21,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig01_energy_common.pdf",
-          "sha256": "40c53fa47e39f13398acc0bade04647171d4d9b48ae483948e322dcdb8862ec4"
+          "sha256": "6c932d378cecfac01610381ac247215b47bdd929a11efb6ba0b34e605bd5f1d7"
         },
         "svg": {
           "path": "svg/fig01_energy_common.svg",
-          "sha256": "d261fe943edb94916aabb5a3c719c56b565b8c2d05f052db080af8c36cd1329b"
+          "sha256": "3cc1588f4d0066550da08a3b515dbad88e323ac60756eb5551f3195c630497b0"
         },
         "png": {
           "path": "png/fig01_energy_common.png",
-          "sha256": "6567150389e8118a20eaa2970b5af66347a8e211fe3b0ba32f8306e9d1e55b33"
+          "sha256": "384c5ca2bf530b789937f68cd74798f3c84613dd9d72fd93994a8c1aada234dd"
         },
         "tiff": {
           "path": "tiff/fig01_energy_common.tiff",
-          "sha256": "5b1984f3f84844efb638321a1677bf339d1ad9d4094f8e21fa8cf8bca7ba821d"
+          "sha256": "b7f6ed759c5f29efb03f7c69287de29debc206c35e62d6a3796381d67335b2d6"
         }
       }
     },
@@ -58,19 +58,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig02_qualification.pdf",
-          "sha256": "b8a2fb5ebf09b90be796bf37b6784487d0a25d06d0061c59006cc2cc5d8f3748"
+          "sha256": "ab58b0580ae3ba7af85e46ab8f0dda0514531a07428b4742270d886d278081f8"
         },
         "svg": {
           "path": "svg/fig02_qualification.svg",
-          "sha256": "be18ad05b2a2faf8830f37a3f157796de0c81af8cae0eb0ed02024cf8f3fb038"
+          "sha256": "727c9402330129ab6c097c895c60ad0550643cf02d6e1b9f378c0dbeb2e2098f"
         },
         "png": {
           "path": "png/fig02_qualification.png",
-          "sha256": "41e6f81f1549d8c785368eb27567989b63a3379167dc1d0c6ba40776977381c8"
+          "sha256": "f68d6b82b4269e87d451b4d4e88531037cf88705243b812eb41badc3e4262217"
         },
         "tiff": {
           "path": "tiff/fig02_qualification.tiff",
-          "sha256": "fcf04df166966f98298da0f518b21be97670d5a8b8d4d180743d78a912e175b6"
+          "sha256": "12d7f7243471e936e3dc947c45d82a0c848fe23083ab966fa72a3a6ff7477220"
         }
       }
     },
@@ -95,19 +95,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig03_p95_delay_common.pdf",
-          "sha256": "8b9c9a1e0eea2204f9ec560e425dd487c6088555a7c6dbd360114bb2cd114760"
+          "sha256": "1aa3fb93a11a9756f5a62857a3df28d9f75047f1e2525c6498e5262a266f29dc"
         },
         "svg": {
           "path": "svg/fig03_p95_delay_common.svg",
-          "sha256": "5e39ee7bebe61c9b2bdd5a9d950739eb36e13261833f042de9cf2516cd13fd82"
+          "sha256": "25e4e3c1298f021cd2548a5e735ac770fa8b6decde71d0d96baeae7f0bad8718"
         },
         "png": {
           "path": "png/fig03_p95_delay_common.png",
-          "sha256": "a24034d89db21740d794c2c36b551ce972afadd67be4c82fd2deabaab9990df7"
+          "sha256": "31f3e93abc5b6267aad6aff32e31bbba11e7743db7f2336e18772cd635329847"
         },
         "tiff": {
           "path": "tiff/fig03_p95_delay_common.tiff",
-          "sha256": "738484aa34ea84b3848a88bfc5584dc7d5b61a2c755d228a5856aa7009e33024"
+          "sha256": "0fb8afb5d14b11ea759da48160e9eae7a554355e28abbca4068f5cca20e6c353"
         }
       }
     },
@@ -132,19 +132,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig04_cpu_common.pdf",
-          "sha256": "9cd0da54386c03844284c4040e6bade0890e332e2011cf2643758580efae2b51"
+          "sha256": "7bf177f61b7bfc87f66d3cbc67834a44a632ce3c2c12e40c839a1dce309a9059"
         },
         "svg": {
           "path": "svg/fig04_cpu_common.svg",
-          "sha256": "133f1b107e4b5684168924a1f3c399f4c54586ee85d4e16f2968a977f64c3e09"
+          "sha256": "862323fe2ef3abc0914b26fa3cf5cb99e2d2be83e2bcf927dd668d32fa62070c"
         },
         "png": {
           "path": "png/fig04_cpu_common.png",
-          "sha256": "118ff7486e34f52291fa49fd208f331e1c5cb97d5edc54a25e5faea8a22ea994"
+          "sha256": "a8e9a6f8076fe9dc168170cc2c555e6c9f7e998ea7da6df6038d979ad5e4ccbb"
         },
         "tiff": {
           "path": "tiff/fig04_cpu_common.tiff",
-          "sha256": "fdb649ad4cc48b65858504f06cc355635f2d9edee344f6f1a72f6d44b8d8d652"
+          "sha256": "0ac2ef5fb72681538fd68f155f8eb2dd498978c4cea305fa9064f915884b29f7"
         }
       }
     },
@@ -169,19 +169,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig05_construction_search_time.pdf",
-          "sha256": "e36b58c8cd4952730b8b11f0241d8dbec98f3fe62ab3c496b92ae1e2935becc7"
+          "sha256": "9a56af2ff06d4648e721ade566cb0484e426a52385c2d2d28431b17608b982be"
         },
         "svg": {
           "path": "svg/fig05_construction_search_time.svg",
-          "sha256": "86c274bf38e109a8cb8e29fa8385f77482dfff4bbde4595dbe41ccef4d95c031"
+          "sha256": "77074ad2832d57959dc011d525ece5a2bdd1fbb76b3ee514846104d22286f40a"
         },
         "png": {
           "path": "png/fig05_construction_search_time.png",
-          "sha256": "603e9dce61151b326f7e833e1a0b8faa87ae8f733be493f7603124f5d3ced737"
+          "sha256": "1f098fca2eaf008a2b1efa3b814e6809101dbdb97d7a9da3bee8dfe5ff24af44"
         },
         "tiff": {
           "path": "tiff/fig05_construction_search_time.tiff",
-          "sha256": "35ab2d23fed5f08ec36448e7e4d9c35f9f7ac96e7a43b7fc6ed6542d6dab3eeb"
+          "sha256": "574da54f1cacff80d65e3a02cf29a7121921aff1cfbb8e750418032873e5d3a3"
         }
       }
     },
@@ -206,19 +206,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig06_paired_energy_saving.pdf",
-          "sha256": "f60842024e9989d6f84aebe4ac38a15f753e5a1a0c63676553cae4d207e9359a"
+          "sha256": "a00d38517acfaf36e08fda8440dbf486bbb8f0ec7d358cc064306cd88dea4df6"
         },
         "svg": {
           "path": "svg/fig06_paired_energy_saving.svg",
-          "sha256": "13a9827d8452c8c2fecf00c30cd74710e0d2b3cfba324a258b3bfba668d133f0"
+          "sha256": "d2721b4a3a7e0c3cec481730fb3002b769d08518c4556050204ca0f8a6b6b0e7"
         },
         "png": {
           "path": "png/fig06_paired_energy_saving.png",
-          "sha256": "29a19b6f3fdaa6533c93e655b190aab1b94d1b9062aada5db843be06391fdd11"
+          "sha256": "f1e686e0d03f888ef6ad65394b14752be34c0e9b81d982982b22e7bbda3580cc"
         },
         "tiff": {
           "path": "tiff/fig06_paired_energy_saving.tiff",
-          "sha256": "206dcebeefc356952b223e62518e4a3db580211d13c8695f7864eb78b3e700b2"
+          "sha256": "5664bce8435d1f78819b6443df42984b8a54584875c42c91fc07dc38067ad87e"
         }
       }
     },
@@ -243,19 +243,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/fig07_stage2_cpu_reduction.pdf",
-          "sha256": "72014e177f4d65cc131da76e78c614270171bb6c63f32baf75c0c7e4a88835d7"
+          "sha256": "c05ad26f6a790a4b4b0e51fe15b270563eb7ed35b66b91cadbdf7984bf9cbc3c"
         },
         "svg": {
           "path": "svg/fig07_stage2_cpu_reduction.svg",
-          "sha256": "af165e047f3e75e8b508ac74d32b6fab0f51078e21420dc203e00af34571f86f"
+          "sha256": "a6c048e4e08843e5308f755180bb118df970eced693e736eb35ff6e21d18481a"
         },
         "png": {
           "path": "png/fig07_stage2_cpu_reduction.png",
-          "sha256": "0c9687af9d5bdb4361071d460a76f0c3a96e7b3bc92eac3f188562356374548e"
+          "sha256": "7002ef48457ead7e7667002c4b5267350642e532ff6c0b260de14acaeefdc57c"
         },
         "tiff": {
           "path": "tiff/fig07_stage2_cpu_reduction.tiff",
-          "sha256": "65e0ddc3cf9f3a656b852d4931db7cfa0272e55065368625947049cea5a6920a"
+          "sha256": "27741a428becd5d306ba73afea05e908b0477566d578851028ca4136af0c323e"
         }
       }
     },
@@ -280,19 +280,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/figS01_mean_delay_common.pdf",
-          "sha256": "819d373b27d4cc29e942f95ec1511d55cb43192658e601f349e2eabebd07179d"
+          "sha256": "8e9a6a75d707721475ef07ee34ab814fea3865b7a3feef19f47b0ba09c1029c8"
         },
         "svg": {
           "path": "svg/figS01_mean_delay_common.svg",
-          "sha256": "24f0e7027d5b616e72904d3bce9ce5274a63bc9f0ef2d88a1d3023b62f28fe1f"
+          "sha256": "d8356ba0a4d8ebdf72482e2609777b4d85722241f21c7d342ff00c039ebeb389"
         },
         "png": {
           "path": "png/figS01_mean_delay_common.png",
-          "sha256": "7f479762f9d9166a4341b697ff3614dee8c52b91436e91ebb49ca38e6fed11c3"
+          "sha256": "daacfd3ff46962a85cb514a8fb79b42148d5107ccc3bbcb95ed7b9c0fae5380d"
         },
         "tiff": {
           "path": "tiff/figS01_mean_delay_common.tiff",
-          "sha256": "0652818ea655e499a8d95a1365e25c77bcb6382be407aea64840c08b21271f1c"
+          "sha256": "e173481afee03b92083a909eaf810df15b9cdb47b8367277219eba9f36f03b82"
         }
       }
     },
@@ -317,19 +317,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/figS02_offload_common.pdf",
-          "sha256": "2377394a58f684ba59480bdaa4680510f5c455a0587371534246e3804d8a8043"
+          "sha256": "e108f206f79338498b2b90bcd2b013ad4769b1932985d35d380df00459291668"
         },
         "svg": {
           "path": "svg/figS02_offload_common.svg",
-          "sha256": "2ce04b8563b22068b34aae75d32ba198afc0d592ab53a6d9c47b79756b375d0b"
+          "sha256": "ee4834a82b20951fc05f241c51de7c9679df1d0882893bb12e510df06757396b"
         },
         "png": {
           "path": "png/figS02_offload_common.png",
-          "sha256": "775053bc30e5768805b6d6f23f44f9df1d9d0bdb4d81cdcb431e6247d29ccee6"
+          "sha256": "1823d0297490d7f253c63024e8c3ffa946c88141c89fd867072c9714efccea82"
         },
         "tiff": {
           "path": "tiff/figS02_offload_common.tiff",
-          "sha256": "e6213c8ac559732a7cddc7f1674459aabe1c26b8d41c1223c4bd733e4ae114bf"
+          "sha256": "6e99bf5334695398303158eaace8ecf6480c72a2649c98fbc242c5b718dcfb9b"
         }
       }
     },
@@ -354,19 +354,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/figS03_energy_conditional.pdf",
-          "sha256": "236043c144a4394fd730491db693dc42c82c2a96f92f335b07fed18fcc2fb908"
+          "sha256": "9143b1347c31864a8d52af890fabc9b9a6db6fc3664dcd96d08ae23590ccef0f"
         },
         "svg": {
           "path": "svg/figS03_energy_conditional.svg",
-          "sha256": "e8093e82b13e67bf8d52e3e912ac110384bc4a268d3efbc7dd0f9dc06c79aa66"
+          "sha256": "566977f9c7896cd30b9a307e7e37816d786f76736ab14b7d88bbb87674c1f4b1"
         },
         "png": {
           "path": "png/figS03_energy_conditional.png",
-          "sha256": "27a8e05a7d8605eb0736c05a63f9f17f355097996c1a756915d372ac7e29ca73"
+          "sha256": "d578508c8eac30266e722fdb7ad17b46f39120b4fde8675b0db4cf04da580b60"
         },
         "tiff": {
           "path": "tiff/figS03_energy_conditional.tiff",
-          "sha256": "1e25c05ea91461f5fe9c4200fabfba642150b10648cadb01d1f459edfa19c741"
+          "sha256": "7f086ed4a4b60741c96e5213321590f5d2bf2750079350c918c375830f444b30"
         }
       }
     },
@@ -391,19 +391,19 @@
       "exports": {
         "pdf": {
           "path": "pdf/figS04_route_common.pdf",
-          "sha256": "95e4ba40331b68ab34b0cebc2752c857f3e5adef1b5d651c5f6eebaf20455622"
+          "sha256": "5919cbcceab6a57b81feb04dd81de789c7598c4da788ecac6e59653572c4137a"
         },
         "svg": {
           "path": "svg/figS04_route_common.svg",
-          "sha256": "0565869bc50bd1b48dfd3daee74a0f3793c3420a1717570cb303057ae1b78ff9"
+          "sha256": "4362c7e1811ef0daa1e21f7b0f0f967cf9b4a7fc9bcff8349534aa06fcca4f9c"
         },
         "png": {
           "path": "png/figS04_route_common.png",
-          "sha256": "95a3c2f63d7444202a9625ffd9df78f9c32e50761a4fb990632214ed959de04d"
+          "sha256": "3417f213fc36b6f15cd0900f5a9cd6fc84b2a1f9e3976cfd994ba9da250c2c91"
         },
         "tiff": {
           "path": "tiff/figS04_route_common.tiff",
-          "sha256": "548dbb474327a5b3cbcd59d1eae6105a3dea3980e3ce26fde4265cc2473ee368"
+          "sha256": "fb58da84fb06f9f0bde41c83a1f32cddaac713bbae90ef9670db3ef66b484c35"
         }
       }
     }
@@ -470,6 +470,15 @@
     "new_experiments_or_solver_calls": false,
     "original_search_and_replay_times_combined": false
   },
+  "style_revision": "simplified_auxiliary_marks",
+  "style": {
+    "pattern_step_pt": 11.0,
+    "pattern_alpha": 0.48,
+    "pattern_width_pt": 0.3,
+    "error_width_pt": 0.45,
+    "scenario_point_area_pt2": 6.0,
+    "scenario_point_alpha": 0.85
+  },
   "python": "3.14.5",
   "libraries": {
     "matplotlib": "3.11.2",
@@ -478,8 +487,8 @@
     "pillow": "12.3.0"
   },
   "scripts": {
-    "plot_multiscale_20260928.py": "f62dc9b4d5d6b7d04e2b24c758f83bbc886086377405f6226c89849936691eb5",
+    "plot_multiscale_20260928.py": "380dcb31ea81a319a920382953b503679bec5db49fdbeb87a10895710b9e8291",
     "prepare_multiscale_plot_data.py": "e28d24969eec8cc7fd13d80df5f4928859e48f3bc29d96c54b85e94724ebfe91",
-    "qa_multiscale_figures.py": "47964ee8ac2212267c91c71c332570566b246557e85550d894e0a268edef51ab"
+    "qa_multiscale_figures.py": "8e0d4a4c4d91138765cff91b50ec52a420508bca52bc11f2416c8199a9a3075f"
   }
 }

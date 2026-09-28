@@ -38,6 +38,15 @@ HEIGHT_MM = 72.0
 COLORS = ("#8C939B", "#A49AB6", "#76A79A", "#477FA6", "#D27B3E")
 MARKERS = ("o", "s", "^", "D", "v")
 LINESTYLES = ("--", ":", "-.", "--", "-")
+# 辅助元素只承担不确定性和灰度辨识功能，用较细、较疏的笔画避免压过柱高。
+PATTERN_COLOR = "#606871"
+PATTERN_ALPHA = 0.48
+PATTERN_WIDTH_PT = 0.30
+PATTERN_STEP_PT = 11.0
+ERROR_WIDTH_PT = 0.45
+SCENARIO_POINT_AREA_PT2 = 6.0
+SCENARIO_POINT_COLOR = "#68727C"
+SCENARIO_POINT_ALPHA = 0.85
 
 
 def pattern_geometry(x: float, y: float, width: float, height: float, kind: int, step: float):
@@ -65,7 +74,7 @@ class MethodPatch(Rectangle):
 
     def __init__(self, method_index: int):
         super().__init__((0, 0), 1, 1, facecolor=COLORS[method_index], edgecolor="#41464C",
-                         linewidth=0.45, label=METHODS[method_index])
+                         linewidth=0.35, label=METHODS[method_index])
         self.method_index = method_index
 
 
@@ -77,12 +86,13 @@ class MethodPatchHandler(HandlerPatch):
         rect = artists[0]
         x, y = rect.get_xy()
         segments, dots = pattern_geometry(x + 0.4, y + 0.4, rect.get_width() - 0.8,
-                                          rect.get_height() - 0.8, handle.method_index, 4)
+                                          rect.get_height() - 0.8, handle.method_index, 7)
         if segments:
-            artists.append(LineCollection(segments, transform=trans, color="#41464C", linewidths=0.4))
+            artists.append(LineCollection(segments, transform=trans, color=PATTERN_COLOR,
+                                          linewidths=PATTERN_WIDTH_PT, alpha=PATTERN_ALPHA))
         if dots:
             artists.append(Line2D(*zip(*dots), transform=trans, linestyle="none", marker="o",
-                                  markersize=0.7, color="#41464C"))
+                                  markersize=0.65, color=PATTERN_COLOR, alpha=PATTERN_ALPHA))
         return artists
 
 
@@ -91,15 +101,16 @@ def pattern_bar(ax, rect, kind: int, dpi: float) -> None:
     box = rect.get_window_extent()
     margin = 0.4 * dpi / 72
     segments, dots = pattern_geometry(box.x0 + margin, box.y0 + margin,
-                                      box.width - 2 * margin, box.height - 2 * margin, kind, 6 * dpi / 72)
+                                      box.width - 2 * margin, box.height - 2 * margin, kind, PATTERN_STEP_PT * dpi / 72)
     inverse = ax.transData.inverted()
     if segments:
         ax.add_collection(LineCollection([inverse.transform(segment) for segment in segments],
-                                         color="#41464C", linewidths=0.4, zorder=3.2))
+                                         color=PATTERN_COLOR, linewidths=PATTERN_WIDTH_PT,
+                                         alpha=PATTERN_ALPHA, zorder=3.2))
     if dots:
         values = inverse.transform(dots)
         ax.plot(values[:, 0], values[:, 1], linestyle="none", marker="o", markersize=0.65,
-                color="#41464C", zorder=3.2)
+                color=PATTERN_COLOR, alpha=PATTERN_ALPHA, zorder=3.2)
 
 
 @dataclass(frozen=True)
@@ -180,9 +191,10 @@ def point(row: dict, spec: FigureSpec) -> dict:
 def decorate(fig, ax, spec: FigureSpec, points: list[dict]) -> None:
     """图例放在独立顶端留白中，样本数写入刻度，避免与柱体和误差线碰撞。"""
     if spec.kind == "paired_bar":
-        handles = [Patch(facecolor=COLORS[-1], edgecolor="#41464C", linewidth=0.5, label="ESI-ALNS"),
-                   Line2D([], [], marker="o", color="#444B52", linestyle="none", markersize=3,
-                          markerfacecolor="white", label="Scenario mean")]
+        handles = [Patch(facecolor=COLORS[-1], edgecolor="#41464C", linewidth=0.35, label="ESI-ALNS"),
+                   Line2D([], [], marker="o", color=SCENARIO_POINT_COLOR, linestyle="none",
+                          markersize=np.sqrt(SCENARIO_POINT_AREA_PT2), markeredgewidth=0.4,
+                          markerfacecolor="white", alpha=SCENARIO_POINT_ALPHA, label="Scenario mean")]
     elif spec.kind == "line":
         handles = [Line2D([], [], color=color, marker=marker, linestyle=style, markersize=3.3,
                           markerfacecolor="white", linewidth=1.1, label=method)
@@ -253,14 +265,14 @@ def draw(spec: FigureSpec, stats: dict) -> tuple[object, list[dict], list[dict]]
             x += offset
             bars = ax.bar(x, y, width=0.52 if spec.kind == "paired_bar" else 0.131,
                           color=COLORS[-1] if spec.kind == "paired_bar" else COLORS[i],
-                          edgecolor="#41464C", linewidth=0.45, zorder=3)
+                          edgecolor="#41464C", linewidth=0.35, zorder=3)
             if spec.kind != "paired_bar":
                 patterned_bars.extend((bar, i) for bar in bars)
         has_interval = np.array([p["ci_low"] is not None for p in data])
         ax.errorbar(x[has_interval], y[has_interval],
                     yerr=np.vstack((y - low, high - y))[:, has_interval], fmt="none",
-                    ecolor=COLORS[i] if spec.kind == "line" else "#30363D",
-                    elinewidth=0.65, capsize=1.0, capthick=0.65, zorder=5)
+                    ecolor=COLORS[i] if spec.kind == "line" else "#4F555D",
+                    elinewidth=ERROR_WIDTH_PT, capsize=0.75, capthick=ERROR_WIDTH_PT, alpha=0.9, zorder=5)
         for j, row in enumerate(rows):
             for index, scene in enumerate(row["per_scenario"]):
                 value = scene["mean"] * spec.scale
@@ -271,8 +283,8 @@ def draw(spec: FigureSpec, stats: dict) -> tuple[object, list[dict], list[dict]]
                     # 仅为分散场景点设置固定横向偏移；横坐标仍归属同一真实规模。
                     require(spec.limits[0] <= value <= spec.limits[1], "配对场景点超出纵轴")
                     ax.scatter(j + np.linspace(-0.19, 0.19, len(row["per_scenario"]))[index], value,
-                               s=10, facecolors="white", edgecolors="#3B4248", linewidths=0.65,
-                               zorder=6, clip_on=False)
+                               s=SCENARIO_POINT_AREA_PT2, facecolors="white", edgecolors=SCENARIO_POINT_COLOR,
+                               linewidths=0.4, alpha=SCENARIO_POINT_ALPHA, zorder=6, clip_on=False)
     decorate(fig, ax, spec, points)
     fig.canvas.draw()
     for rect, method_index in patterned_bars:
@@ -344,6 +356,10 @@ def main() -> None:
     write_csv(args.output / "data/plotted_points.csv", points)
     write_csv(args.output / "data/plotted_scenario_means.csv", scenes)
     write_json(args.output / "figure_manifest.json", {"figures": registry, "source_verification": audit,
+               "style_revision": "simplified_auxiliary_marks",
+               "style": {"pattern_step_pt": PATTERN_STEP_PT, "pattern_alpha": PATTERN_ALPHA,
+                         "pattern_width_pt": PATTERN_WIDTH_PT, "error_width_pt": ERROR_WIDTH_PT,
+                         "scenario_point_area_pt2": SCENARIO_POINT_AREA_PT2, "scenario_point_alpha": SCENARIO_POINT_ALPHA},
                "python": sys.version.split()[0],
                "libraries": {key: importlib.metadata.version(key) for key in ("matplotlib", "numpy", "pymupdf", "pillow")},
                "scripts": {name: sha256(Path(__file__).with_name(name)) for name in (

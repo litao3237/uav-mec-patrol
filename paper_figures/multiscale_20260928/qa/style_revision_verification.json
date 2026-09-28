@@ -1,0 +1,45 @@
+{
+  "base_commit": "04e0a2b",
+  "all_statistics_byte_identical": true,
+  "files": [
+    {
+      "file": "data/all_scenario_means.csv",
+      "sha256": "26308d24d0a844cb3d45e5e75593e00e4f07221b0fad9aed4d48342d038c393b",
+      "unchanged": true
+    },
+    {
+      "file": "data/all_statistics.csv",
+      "sha256": "887deec700dc27db18810b39b0760eac521561a53c0f2767d44053c8668bf30b",
+      "unchanged": true
+    },
+    {
+      "file": "data/failed_records.csv",
+      "sha256": "4048adbeb17a8fbfe3baab537b2e71eea3a7c3dcf7ad4c9c6a757ceceb23e833",
+      "unchanged": true
+    },
+    {
+      "file": "data/plotted_points.csv",
+      "sha256": "64d5596d48e0d1280d520884afbadaddb71d16b161fe05cac51e54aeccc0462e",
+      "unchanged": true
+    },
+    {
+      "file": "data/plotted_scenario_means.csv",
+      "sha256": "8b52bc767dbd60d2b9d647ae6794b404ef4e6fb21c69a95c430f529b94f4ceb3",
+      "unchanged": true
+    },
+    {
+      "file": "data/run_metrics.csv",
+      "sha256": "5a26cb6f5d892914921c43c82d42826d24716d1c53f1e500e973ae8776bcab52",
+      "unchanged": true
+    },
+    {
+      "file": "data/sample_coverage.csv",
+      "sha256": "74af03d883cb011990fbf57ac3d7152530fe725170722a25c1352884b9ec2dfe",
+      "unchanged": true
+    }
+  ],
+  "plotted_points": 306,
+  "plotted_scenario_means": 1844,
+  "paired_scenario_points_retained": 48,
+  "only_visual_style_changed": true
+}
