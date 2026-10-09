@@ -365,6 +365,7 @@ class _ConstantEliteOracle:
             final_values={"fake": {"x": 1.0}},
             diagnostics={
                 "stage1_status": self.stage1_status,
+                "stage1_qualified": self.stage1_status == "optimal",
             },
         )
 

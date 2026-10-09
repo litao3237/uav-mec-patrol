@@ -1,0 +1,79 @@
+name: v25 七算法带宽与GIS补充实验
+
+# 专用实验分支触发；不修改默认分支，不将论文稿件放入公开仓库。
+on:
+  push:
+    branches: [codex/v25-extension-actions-20261009]
+    paths: ['.github/workflows/v25_extension_cloud.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: utf-8
+  PYTHONPATH: src
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      # 保留上传的冻结源码原始字节，避免自动换行转换触发哈希不一致。
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - run: uv pip install --python python -r configs/v25_cloud_requirements.txt
+      - name: 核对冻结源码、输入及依赖版本
+        run: python experiments/run_v25_cloud.py preflight
+      - name: 验证基线搜索和两阶段验收回归
+        # 仅检查本次实际使用的搜索器和验收逻辑；历史终端恢复变体不参与七算法实验。
+        run: >-
+          python -m pytest tests/test_metaheuristic_route.py tests/test_esi_stage1_acceptance.py
+          tests/test_alns_framework.py::test_destroy_repair_round_trip_is_complete_and_valid
+          tests/test_alns_framework.py::test_short_external_alns_run_returns_valid_best_state
+          tests/test_alns_framework.py::test_problem_specific_repairs_restore_complete_valid_solution
+          tests/test_alns_framework.py::test_contact_mode_intensification_is_monotone_for_supplied_objective
+          tests/test_alns_framework.py::test_hybrid_runner_uses_generic_exploration_and_nonworsening_elite
+          tests/test_alns_framework.py::test_stage1_elite_oracle_rejects_inaccurate_candidate_value
+          tests/test_alns_framework.py::test_hybrid_skips_elite_refinement_without_strict_stage1_optimum
+          tests/test_alns_framework.py::test_elite_progressive_widening_can_be_disabled_for_ablation
+          tests/test_alns_framework.py::test_route_ga_wall_clock_budget_returns_initial_population_best
+
+  experiment:
+    needs: validate
+    name: ${{ matrix.key }}
+    runs-on: windows-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        key: [bandwidth_1.5_S45, bandwidth_1.5_S46, bandwidth_1.5_S47, gis_1_S45, gis_1_S46, gis_1_S47]
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - run: uv pip install --python python -r configs/v25_cloud_requirements.txt
+      - name: 执行七算法并独立复核完整残差
+        env:
+          SCENARIO_KEY: ${{ matrix.key }}
+        run: python experiments/run_v25_cloud.py run --key "$env:SCENARIO_KEY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v25-extension-${{ matrix.key }}
+          path: |
+            outputs/v25_extension/
+            configs/v25_cloud_execution.json
+            configs/v25_cloud_requirements.txt
+          if-no-files-found: error
+          retention-days: 90

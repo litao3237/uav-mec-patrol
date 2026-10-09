@@ -1461,6 +1461,11 @@ def contact_mode_intensification(
         return float(objective(current.instance, solution))
 
     current_value = value(current.solution)
+    if not np.isfinite(current_value):
+        # 不合格基线没有可比较的精英能耗，不允许以无穷值计算收益或继续扩展。
+        stats["skipped"] = "initial_objective_not_finite"
+        stats["runtime_s"] = perf_counter() - started
+        return current, stats
 
     for _ in range(max_rounds):
         if time_exhausted():
@@ -1520,6 +1525,10 @@ def contact_mode_intensification(
                 }
             )
             evaluated_labels.add(label)
+
+            if not finite_candidate:
+                # 拒绝数值不合格候选并保留本轮已合格精英，避免 inf-inf 生成 NaN。
+                return True
 
             scale = max(
                 1.0,
