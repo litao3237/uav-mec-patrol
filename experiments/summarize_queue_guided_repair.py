@@ -35,7 +35,11 @@ def aggregate(payloads):
                 }),
                 "arm_attempts":len(answers),
                 "precheck_passing":sum(
-                    int(x.get("queue_precheck_passing",x.get("old_precheck_passing",0)) or 0)>0
+                    int(
+                        x.get("queue_precheck_passing")
+                        or x.get("old_precheck_passing")
+                        or 0
+                    ) > 0
                     for x in answers
                 ),
                 "strict_both_recovered":sum(x.get("strict_both_recovered",False) for x in answers),
