@@ -1,0 +1,123 @@
+name: P0 operator and bound diagnostics
+on:
+  push:
+    branches: ['experiment/p0-contact-budget-diagnostics']
+    paths:
+      - 'src/uav_mec/algorithms/alns/problem_operators.py'
+      - 'src/uav_mec/optimization/resource/energy_lower_bound.py'
+      - 'experiments/run_p0_contact_diagnostics.py'
+      - 'experiments/run_p0_candidate_diagnostics.py'
+      - 'tests/test_p0_contact_budget_diagnostics.py'
+      - '.github/workflows/p0-contact-diagnostics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Python syntax and undefined-name check
+        run: uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+      - name: Original and new diagnostic unit tests
+        run: |
+          uv run --no-sync python -m pytest tests/test_p0_contact_budget_diagnostics.py tests/test_p0_integrated.py tests/test_alns_framework.py
+      - name: K30 single-seed smoke (shared B-ALNS, same ESI rounds)
+        run: |
+          uv run --no-sync python experiments/run_p0_contact_diagnostics.py --tasks 30 --scenarios 45 --seeds 100 --iterations 30 --elite-rounds 2 --geometric-pool 5 --with-stage2 --output outputs/contact-smoke.json
+      - name: Keep diagnostic outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contact-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  contact_ablation:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Same-checkpoint contact-family ablation and replacement
+        run: |
+          uv run --no-sync python experiments/run_p0_contact_diagnostics.py --tasks ${{ matrix.tasks }} --scenarios "47,49" --seeds "103,104" --iterations 100 --elite-rounds 2 --geometric-pool 10 --with-stage2 --output "outputs/contact-diagnostic-K${{ matrix.tasks }}.json"
+      - name: Keep full and partial diagnostic records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contact-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  candidate_rank:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Audit energy lower bound and limited proxy-rank coverage
+        run: |
+          uv run --no-sync python experiments/run_p0_candidate_diagnostics.py --tasks ${{ matrix.tasks }} --scenarios 47 --seeds 103 --iterations 100 --widen-limit 12 --new-cvx-limit 12 --geometric-pool 10 --output "outputs/candidate-K${{ matrix.tasks }}.json"
+      - name: Keep all evaluated candidate energies
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
