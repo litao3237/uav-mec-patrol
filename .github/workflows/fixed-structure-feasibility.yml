@@ -1,0 +1,138 @@
+name: Fixed-structure UAV-MEC coupling and feasibility
+on:
+  push:
+    branches: ['experiment/fixed-structure-feasibility']
+    paths:
+      - 'experiments/run_fixed_structure_replay.py'
+      - 'experiments/summarize_fixed_structure_replay.py'
+      - 'tests/test_fixed_structure_replay.py'
+      - '.github/workflows/fixed-structure-feasibility.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged solver environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Static tests and exact-structure recovery contracts
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_fixed_structure_replay.py tests/test_model_sensitivity.py tests/test_resource_solver.py
+      - name: Download EXACT K50 S61 frozen sensitivity source from previous Actions
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K50-S61-38043248604
+          path: input/
+      - name: Replay Stage-1 + Stage-2 with original routes fixed (smoke)
+        run: |
+          uv run --no-sync python experiments/run_fixed_structure_replay.py --input input/sensitivity-K50_S61.json --output outputs/fixed-smoke.json
+      - name: Upload complete/partial smoke snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-replay-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50,80]
+        scenario: ['61','62','63','64']
+    runs-on: windows-latest
+    timeout-minutes: 140
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged solver environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download source frozen-discrete structure and parameter variants
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38043248604
+          path: input/
+      - name: Strictly replay same D through every physical parameter perturbation
+        run: |
+          uv run --no-sync python experiments/run_fixed_structure_replay.py --input "input/sensitivity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --output "outputs/fixed-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Upload all successes and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-replay-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: replay
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install numerical analysis environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Gather all completed and partial fixed-D replay matrices
+        uses: actions/download-artifact@v4
+        with:
+          pattern: fixed-replay-K*-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Summarize monotonicity, infeasibility, and dynamic-vs-fixed differences
+        run: |
+          uv run --no-sync python experiments/summarize_fixed_structure_replay.py --input-dir outputs/collected --output-dir outputs/fixed-summary
+      - name: Preserve complete or partial summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-replay-summary-${{ github.run_id }}
+          path: outputs/fixed-summary/
+          if-no-files-found: warn
+          retention-days: 90
