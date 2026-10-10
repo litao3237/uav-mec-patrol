@@ -1,0 +1,136 @@
+name: Queue-certificate-driven UAV-MEC feasibility repair probe
+on:
+  push:
+    branches: ['experiment/queue-guided-repair']
+    paths:
+      - 'experiments/_legacy_rescue_reference.py'
+      - 'experiments/run_queue_guided_repair.py'
+      - 'experiments/summarize_queue_guided_repair.py'
+      - 'tests/test_queue_guided_repair.py'
+      - '.github/workflows/queue-guided-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original frozen solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate queue-certificate repair and baseline regression
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_queue_guided_repair.py tests/test_queue_aware_precheck.py tests/test_resource_solver.py
+      - name: Fetch archived genuine K80 S64 failed structures
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S64-38043248604
+          path: input/
+      - name: Bounded one-step smoke, no relaxed CVX acceptance
+        run: |
+          uv run --no-sync python experiments/run_queue_guided_repair.py --input input/sensitivity-K80_S64.json --output outputs/queue-repair-smoke.json --beam-width 1 --depth 1 --exact-limit 1
+      - name: Keep original and revised results, even failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-repair-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  probe:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['61','62','63','64']
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download immutable high-load failed structure source
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S${{ matrix.scenario }}-38043248604
+          path: input/
+      - name: Old vs FIFO/EDF rank vs dependency-repair strict diagnostics
+        run: |
+          uv run --no-sync python experiments/run_queue_guided_repair.py --input "input/sensitivity-K80_S${{ matrix.scenario }}.json" --output "outputs/queue-repair-K80_S${{ matrix.scenario }}.json" --beam-width 2 --depth 2 --exact-limit 3
+      - name: Save all exact solver, failed and timed outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-repair-K80-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: probe
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install analysis dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Collect successful and partial per-scenario artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: queue-repair-K80-S*-${{ github.run_id }}
+          path: outputs/collected
+          merge-multiple: true
+      - name: Strict feasibility recovery, proxy admission, and CPU summary
+        run: |
+          uv run --no-sync python experiments/summarize_queue_guided_repair.py --input-dir outputs/collected --output-dir outputs/repair-summary
+      - name: Preserve report, even if the matrix was incomplete
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-repair-summary-${{ github.run_id }}
+          path: outputs/repair-summary
+          if-no-files-found: warn
+          retention-days: 90
