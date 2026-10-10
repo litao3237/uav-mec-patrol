@@ -1,0 +1,88 @@
+name: Online FIFO-EDF queue screening under matched end-to-end budget
+on:
+  push:
+    branches: ['experiment/online-queue-certificate']
+    paths:
+      - 'src/uav_mec/algorithms/alns/queue_evaluator.py'
+      - 'experiments/run_online_queue_budget.py'
+      - 'tests/test_online_queue_screen.py'
+      - '.github/workflows/online-queue-budget.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen paper numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify syntax, evaluator equivalence, and proven FIFO-EDF lower bound
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_online_queue_screen.py tests/test_queue_aware_precheck.py tests/test_alns_framework.py tests/test_resource_solver.py
+      - name: K50 S69 A115 live-search time-budget smoke
+        run: |
+          uv run --no-sync python experiments/run_online_queue_budget.py --tasks 50 --scenarios 69 --seeds 115 --profiles baseline,compute_x1p5 --output outputs/queue-online-smoke.json
+      - name: Save smoke and partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: online-queue-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  paired:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50,80]
+        scenario: ['69','70']
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged paper resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Strict paired runtime test on truly live ALNS/ESI trajectories
+        run: |
+          uv run --no-sync python experiments/run_online_queue_budget.py --tasks ${{ matrix.tasks }} --scenarios ${{ matrix.scenario }} --seeds "115,116" --profiles baseline,compute_x1p5,deadline_x0p9 --output "outputs/online-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Preserve complete and failed results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: online-queue-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
