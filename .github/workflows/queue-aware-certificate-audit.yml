@@ -1,0 +1,151 @@
+name: FIFO-EDF optimistic UAV-MEC feasibility certificate audit
+on:
+  push:
+    branches: ['experiment/queue-aware-feasibility-bound']
+    paths:
+      - 'src/uav_mec/optimization/resource/queue_aware_precheck.py'
+      - 'experiments/run_queue_bound_audit.py'
+      - 'experiments/summarize_queue_bound_audit.py'
+      - 'tests/test_queue_aware_precheck.py'
+      - '.github/workflows/queue-aware-certificate-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original solver dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Check queue bound's mathematical and numerical invariants
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_queue_aware_precheck.py tests/test_resource_solver.py tests/test_model_sensitivity.py
+      - name: Download frozen original K50 S61 source
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K50-S61-38043248604
+          path: input/original
+      - name: Download STRICT previous fixed-structure replay
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38045837175
+          github-token: ${{ github.token }}
+          name: fixed-replay-K50-S61-38045837175
+          path: input/fixed
+      - name: Audit 56 frozen original and fixed solutions without rerunning CVX
+        run: |
+          uv run --no-sync python experiments/run_queue_bound_audit.py --source input/original/sensitivity-K50_S61.json --fixed input/fixed/fixed-K50_S61.json --output outputs/queue-smoke.json
+      - name: Preserve smoke or failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-cert-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  audit:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50,80]
+        scenario: ['61','62','63','64']
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Frozen environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download exact original parameter variants
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38043248604
+          path: input/original/
+      - name: Download audited fixed-structure replay outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38045837175
+          github-token: ${{ github.token }}
+          name: fixed-replay-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38045837175
+          path: input/fixed/
+      - name: Independent optimistic queue bound vs frozen original CVX solution
+        run: |
+          uv run --no-sync python experiments/run_queue_bound_audit.py --source "input/original/sensitivity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --fixed "input/fixed/fixed-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --output "outputs/queue-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Archive all results, including failure witnesses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-cert-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: audit
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install aggregation environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Fetch all original+fixed audit results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: queue-cert-K*-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate reliable new-only rejections and check no false exclusions
+        run: |
+          uv run --no-sync python experiments/summarize_queue_bound_audit.py --input-dir outputs/collected --output-dir outputs/queue-summary
+      - name: Preserve full or partial summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: queue-cert-summary-${{ github.run_id }}
+          path: outputs/queue-summary/
+          if-no-files-found: warn
+          retention-days: 90
