@@ -50,6 +50,9 @@ class ProblemOperatorConfig:
     elite_positions_per_contact: int = 2
     elite_points_per_mec: int = 1
     elite_route_options_per_task: int = 2
+    # Opt-in P0 variants; defaults reproduce frozen develop experiments.
+    elite_diversify_route_uavs: bool = False
+    elite_route_shortlist_quota: int = 0
     elite_family_quota: int = 1
     elite_min_improvement_rel: float = 1e-4
     elite_min_improvement_j: float = 1.0
@@ -1024,6 +1027,63 @@ def _elite_route_tasks(
     return result
 
 
+
+def _choose_elite_route_options(
+    options,
+    *,
+    original_uav: str,
+    original_position: int,
+    originally_local: bool,
+    limit: int,
+    diversify_uavs: bool,
+):
+    """Preserve legacy ranking by default; in P0 reserve cross-UAV candidates.
+
+    The one-slot-per-different-UAV rule prevents the globally cheapest two
+    insertions from both staying on the original UAV. It never returns more
+    than the original per-task candidate budget.
+    """
+    if limit <= 0:
+        return []
+    if not diversify_uavs:
+        return options[:limit]
+
+    # Reinserting an originally local task at precisely its old index is a
+    # no-op: discard only that case. Offloaded tasks may lose contacts when
+    # destroyed, so their original-position reinsertion is not necessarily
+    # the original structure and must remain eligible.
+    available = [
+        option for option in options
+        if not (
+            originally_local
+            and option.uav_id == original_uav
+            and option.position == original_position
+        )
+    ]
+
+    selected = []
+    local = next(
+        (option for option in available if option.uav_id == original_uav),
+        None,
+    )
+    if local is not None:
+        selected.append(local)
+    selected_uavs = set()
+    for option in available:
+        if len(selected) >= limit:
+            break
+        if option.uav_id == original_uav or option.uav_id in selected_uavs:
+            continue
+        selected.append(option)
+        selected_uavs.add(option.uav_id)
+    for option in available:
+        if len(selected) >= limit:
+            break
+        if option not in selected:
+            selected.append(option)
+    return selected
+
+
 def _route_compute_relocate_candidates(
     state: UavMecState,
     *,
@@ -1043,9 +1103,26 @@ def _route_compute_relocate_candidates(
             destroyed,
             task_id,
         )
-        for option in options[
-            : config.elite_route_options_per_task
-        ]:
+        original_route = next(
+            route for route in state.solution.routes.values()
+            if task_id in route.task_ids()
+        )
+        original_position = next(
+            idx for idx, stop in enumerate(original_route.stops)
+            if stop.kind is StopType.TASK and stop.ref_id == task_id
+        )
+        selected_options = _choose_elite_route_options(
+            options,
+            original_uav=original_route.uav_id,
+            original_position=original_position,
+            originally_local=(
+                state.solution.task_decisions[task_id].mode
+                is ExecutionMode.LOCAL
+            ),
+            limit=config.elite_route_options_per_task,
+            diversify_uavs=config.elite_diversify_route_uavs,
+        )
+        for option in selected_options:
             candidate_state = destroyed.copy()
             _apply_local_insertion(
                 candidate_state,
@@ -1077,6 +1154,7 @@ def _structural_elite_candidates(
     state: UavMecState,
     *,
     config: ProblemOperatorConfig,
+    trace: dict | None = None,
 ) -> list[tuple[str, DiscreteSolution]]:
     candidates: list[tuple[str, DiscreteSolution]] = []
 
@@ -1222,84 +1300,79 @@ def _structural_elite_candidates(
             return "mode_batch"
         return "other"
 
-    # A global proxy top-k can starve an entire structural family even when
-    # that family contains the exact-CVX improving move. Preserve one (or the
-    # configured quota) from each family first, then fill the remaining budget
-    # by the global proxy ranking.
-    selected: list[
-        tuple[tuple[float, ...], str, DiscreteSolution]
-    ] = []
+    # Freeze the old selection policy when the experimental quota is zero.
+    # P0 otherwise reserves route candidates before distributing remaining
+    # slots among the other operation families.
+    selected = []
     selected_signatures: set[str] = set()
     per_family: dict[str, int] = {}
 
-    for item in ranked:
+    def add_to_shortlist(item) -> bool:
         _, label, candidate = item
-        fam = family(label)
-        if per_family.get(fam, 0) >= config.elite_family_quota:
-            continue
         signature = repr(
             (
                 label,
                 tuple(
-                    (
-                        uav_id,
-                        candidate.routes[uav_id].labels(),
-                    )
+                    (uav_id, candidate.routes[uav_id].labels())
                     for uav_id in sorted(candidate.routes)
                 ),
                 tuple(
                     sorted(
-                        (
-                            task_id,
-                            decision.mode.value,
-                            decision.contact_visit_id,
-                        )
-                        for task_id, decision
-                        in candidate.task_decisions.items()
+                        (task_id, decision.mode.value, decision.contact_visit_id)
+                        for task_id, decision in candidate.task_decisions.items()
                     )
                 ),
             )
         )
         if signature in selected_signatures:
-            continue
+            return False
         selected.append(item)
         selected_signatures.add(signature)
+        fam = family(label)
         per_family[fam] = per_family.get(fam, 0) + 1
+        return True
+
+    if config.elite_route_shortlist_quota > 0:
+        quota = min(
+            config.elite_route_shortlist_quota,
+            config.elite_shortlist_limit,
+        )
+        for item in ranked:
+            if per_family.get("route", 0) >= quota:
+                break
+            if family(item[1]) == "route":
+                add_to_shortlist(item)
+
+    for item in ranked:
         if len(selected) >= config.elite_shortlist_limit:
             break
+        fam = family(item[1])
+        if per_family.get(fam, 0) >= config.elite_family_quota:
+            continue
+        add_to_shortlist(item)
 
     if len(selected) < config.elite_shortlist_limit:
         for item in ranked:
-            _, label, candidate = item
-            signature = repr(
-                (
-                    label,
-                    tuple(
-                        (
-                            uav_id,
-                            candidate.routes[uav_id].labels(),
-                        )
-                        for uav_id in sorted(candidate.routes)
-                    ),
-                    tuple(
-                        sorted(
-                            (
-                                task_id,
-                                decision.mode.value,
-                                decision.contact_visit_id,
-                            )
-                            for task_id, decision
-                            in candidate.task_decisions.items()
-                        )
-                    ),
-                )
-            )
-            if signature in selected_signatures:
-                continue
-            selected.append(item)
-            selected_signatures.add(signature)
             if len(selected) >= config.elite_shortlist_limit:
                 break
+            add_to_shortlist(item)
+
+    if trace is not None:
+        generated_by_family = {}
+        shortlist_by_family = {}
+        for _, label, _ in ranked:
+            fam = family(label)
+            generated_by_family[fam] = generated_by_family.get(fam, 0) + 1
+        for _, label, _ in selected:
+            fam = family(label)
+            shortlist_by_family[fam] = shortlist_by_family.get(fam, 0) + 1
+        trace.update(
+            raw_candidates=len(candidates),
+            unique_candidates=len(ranked),
+            generated_by_family=generated_by_family,
+            shortlist_by_family=shortlist_by_family,
+            shortlist_size=len(selected),
+        )
 
     selected.sort(key=lambda item: item[0])
     return [
@@ -1395,10 +1468,14 @@ def contact_mode_intensification(
         if time_exhausted():
             break
         stats["rounds"] = int(stats["rounds"]) + 1
+        selection_trace = {}
         shortlist = _structural_elite_candidates(
             current,
             config=config,
+            trace=selection_trace,
         )
+        selection_trace["round"] = int(stats["rounds"])
+        stats.setdefault("selection_traces", []).append(selection_trace)
         if not shortlist:
             break
 
