@@ -1,0 +1,137 @@
+name: High-load UAV-MEC certificate-guided repair probe
+on:
+  push:
+    branches: ['experiment/highload-feasibility-rescue']
+    paths:
+      - 'experiments/run_highload_rescue_probe.py'
+      - 'experiments/summarize_highload_rescue.py'
+      - 'tests/test_highload_rescue_probe.py'
+      - '.github/workflows/highload-rescue-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged paper numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify all new and baseline contracts
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_highload_rescue_probe.py tests/test_model_sensitivity.py tests/test_resource_solver.py
+      - name: Load frozen K80 S64 failure certificates (not new search)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S64-38043248604
+          path: input/
+      - name: Smoke original vs guided one-step repair with strict validation
+        run: |
+          uv run --no-sync python experiments/run_highload_rescue_probe.py --input input/sensitivity-K80_S64.json --output outputs/rescue-smoke.json --beam-width 1 --depth 1 --exact-limit 1
+      - name: Preserve success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  probe:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['61','62','63','64']
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Load EXACT previously failed source solutions
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S${{ matrix.scenario }}-38043248604
+          path: input/
+      - name: Paired bounded feasibility repair diagnostic
+        run: |
+          uv run --no-sync python experiments/run_highload_rescue_probe.py --input "input/sensitivity-K80_S${{ matrix.scenario }}.json" --output "outputs/rescue-K80_S${{ matrix.scenario }}.json" --beam-width 2 --depth 2 --exact-limit 3
+      - name: Archive complete and partial strict resource audits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-K80-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: probe
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install analysis dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Fetch each raw scenario artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: rescue-K80-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Summarize strict recovered feasibility and precheck bottlenecks
+        run: |
+          uv run --no-sync python experiments/summarize_highload_rescue.py --input-dir outputs/collected --output-dir outputs/rescue-summary
+      - name: Preserve summary and partial failure diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-summary-${{ github.run_id }}
+          path: outputs/rescue-summary/
+          if-no-files-found: warn
+          retention-days: 90
