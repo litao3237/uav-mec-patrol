@@ -23,7 +23,7 @@ from summarize_elastic_diagnosis import aggregate
 
 def test_explicit_groups_and_recovered_original_constraint_units():
     instance,sol=build_small_instance()
-    assert PROTOCOLS == ("qos_only", "qos_plus_mec_capacity")
+    assert PROTOCOLS == ("qos_only", "qos_plus_mec_capacity", "mec_capacity_only")
     assert QOS_GROUPS == {"deadline","avg_delay","cycle","battery"}
     assert CAPACITY_GROUPS == {"bandwidth_cap","mec_cpu_cap"}
     assert constraint_family("deadline::S1")=="deadline"
