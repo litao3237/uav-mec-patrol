@@ -1,0 +1,85 @@
+name: P0 integrated neighborhood replacement
+on:
+  push:
+    branches: ['experiment/p0-integrated-replacement']
+    paths:
+      - 'src/uav_mec/algorithms/alns/problem_operators.py'
+      - 'src/uav_mec/algorithms/alns/elite_route_neighborhoods.py'
+      - 'experiments/run_p0_integrated.py'
+      - 'tests/test_p0_integrated.py'
+      - '.github/workflows/p0-integrated.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Lint Python
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: Regression and integrated ESI tests
+        run: uv run --no-sync python -m pytest tests/test_p0_integrated.py tests/test_alns_framework.py
+      - name: Fixed-budget K30 smoke comparison
+        run: |
+          uv run --no-sync python experiments/run_p0_integrated.py --tasks 30 --scenarios 45 --seeds 100 --iterations 100 --elite-rounds 2 --geometric-pool 5 --with-stage2 --output outputs/p0-integrated-smoke.json
+      - name: Keep smoke logs and snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-integrated-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  paired:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Direct replacement fixed-search-budget comparison
+        run: |
+          uv run --no-sync python experiments/run_p0_integrated.py --tasks ${{ matrix.tasks }} --scenarios "45,46" --seeds "100,101" --iterations 100 --elite-rounds 2 --geometric-pool 12 --with-stage2 --output "outputs/p0-integrated-K${{ matrix.tasks }}.json"
+      - name: Keep validated and partial runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-integrated-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
