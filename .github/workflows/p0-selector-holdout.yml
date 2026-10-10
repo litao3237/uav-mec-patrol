@@ -1,0 +1,87 @@
+name: P0 protected ESI selector holdout
+on:
+  push:
+    branches: ['experiment/p0-protected-elite-selection']
+    paths:
+      - 'src/uav_mec/algorithms/alns/problem_operators.py'
+      - 'src/uav_mec/algorithms/alns/elite_candidate_selection.py'
+      - 'experiments/run_p0_selector_budget.py'
+      - 'tests/test_p0_selector.py'
+      - '.github/workflows/p0-selector-holdout.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Static checks
+        run: uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+      - name: New and existing ESI regression tests
+        run: |
+          uv run --no-sync python -m pytest tests/test_p0_selector.py tests/test_p0_matched_budget.py tests/test_p0_contact_budget_diagnostics.py tests/test_p0_integrated.py tests/test_alns_framework.py
+      - name: K50 initial smoke with one fresh scenario and seed
+        run: |
+          uv run --no-sync python experiments/run_p0_selector_budget.py --tasks 50 --scenarios 53 --seeds 107 --geometric-pool 8 --output outputs/p0-selector-smoke.json
+      - name: Save smoke/failure context
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-selector-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  holdout:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+        scenario: ['53', '54', '55', '56']
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Paired end-to-end wall-clock 2-seed holdout, preserve every outcome
+        run: |
+          uv run --no-sync python experiments/run_p0_selector_budget.py --tasks ${{ matrix.tasks }} --scenarios ${{ matrix.scenario }} --seeds "107,108" --geometric-pool 8 --output "outputs/p0-selector-K${{ matrix.tasks }}-S${{ matrix.scenario }}.json"
+      - name: Preserve complete and failed sample snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-selector-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
