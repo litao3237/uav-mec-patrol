@@ -1082,6 +1082,7 @@ def _structural_elite_candidates(
     state: UavMecState,
     *,
     config: ProblemOperatorConfig,
+    trace: dict | None = None,
 ) -> list[tuple[str, DiscreteSolution]]:
     candidates: list[tuple[str, DiscreteSolution]] = []
 
@@ -1331,6 +1332,23 @@ def _structural_elite_candidates(
                 break
 
     selected.sort(key=lambda item: item[0])
+    if trace is not None:
+        def count_family(labels):
+            counts: dict[str, int] = {}
+            for label in labels:
+                fam = family(label)
+                counts[fam] = counts.get(fam, 0) + 1
+            return counts
+
+        trace.update(
+            generated_total=len(candidates),
+            unique_ranked_total=len(ranked),
+            shortlisted_total=len(selected),
+            generated_by_family=count_family(label for label, _ in candidates),
+            ranked_by_family=count_family(label for _, label, _ in ranked),
+            selected_by_family=count_family(label for _, label, _ in selected),
+            shortlisted_labels=[label for _, label, _ in selected],
+        )
     return [
         (label, candidate)
         for _, label, candidate in selected
@@ -1426,10 +1444,14 @@ def contact_mode_intensification(
         if time_exhausted():
             break
         stats["rounds"] = int(stats["rounds"]) + 1
+        shortlist_trace: dict = {}
         shortlist = _structural_elite_candidates(
             current,
             config=config,
+            trace=shortlist_trace,
         )
+        shortlist_trace["round"] = int(stats["rounds"])
+        stats.setdefault("selection_traces", []).append(shortlist_trace)
         if not shortlist:
             break
 
