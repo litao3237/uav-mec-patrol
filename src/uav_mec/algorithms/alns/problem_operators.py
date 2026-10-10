@@ -55,6 +55,11 @@ class ProblemOperatorConfig:
     # Empty default preserves the published algorithm exactly.
     elite_interroute_families: tuple[str, ...] = ()
     elite_interroute_geometry_pool: int = 12
+    # Opt-in budget-aware selection. All new policies keep the same six-slot
+    # strict-CVX ESI shortlist and at most two refinement rounds.
+    elite_selection_policy: str = "legacy"
+    elite_reuse_cross_proxy_scores: bool = False
+    elite_cross_min_remaining_s: float = 0.0
     elite_family_quota: int = 1
     elite_min_improvement_rel: float = 1e-4
     elite_min_improvement_j: float = 1.0
@@ -1083,8 +1088,14 @@ def _structural_elite_candidates(
     *,
     config: ProblemOperatorConfig,
     trace: dict | None = None,
+    deadline: float | None = None,
 ) -> list[tuple[str, DiscreteSolution]]:
+    generation_started = perf_counter()
     candidates: list[tuple[str, DiscreteSolution]] = []
+    cross_precomputed_keys: dict[int, tuple[float, ...]] = {}
+    cross_proxy_cache_hits = 0
+    cross_generation_s = 0.0
+    cross_skipped_for_budget = False
 
     if config.elite_enable_contact_relocate:
         for visit_id in state.solution.contact_visits:
@@ -1161,26 +1172,36 @@ def _structural_elite_candidates(
             )
 
     if config.elite_interroute_families:
-        from .elite_route_neighborhoods import (
-            CrossRouteConfig,
-            _shortlist as _cross_route_shortlist,
+        cross_skipped_for_budget = bool(
+            deadline is not None
+            and config.elite_cross_min_remaining_s > 0.0
+            and deadline - perf_counter() < config.elite_cross_min_remaining_s
         )
+        if not cross_skipped_for_budget:
+            from .elite_route_neighborhoods import (
+                CrossRouteConfig,
+                _shortlist as _cross_route_shortlist,
+            )
 
-        # New moves replace part of the *same* six-slot shortlist.
-        # CVX solves and max-rounds are not increased by this option.
-        cross_moves, _ = _cross_route_shortlist(
-            state.instance,
-            state.solution,
-            CrossRouteConfig(
-                geometric_pool_per_family=config.elite_interroute_geometry_pool,
-                cvx_per_round=config.elite_shortlist_limit,
-            ),
-            config.elite_interroute_families,
-        )
-        candidates.extend(
-            (label, candidate)
-            for _, label, candidate, _, _ in cross_moves
-        )
+            # Candidate enumeration/reconstruction consumes *the same* ESI
+            # wall-clock budget; it is not appended as a postprocessing phase.
+            cross_started = perf_counter()
+            cross_moves, _ = _cross_route_shortlist(
+                state.instance,
+                state.solution,
+                CrossRouteConfig(
+                    geometric_pool_per_family=config.elite_interroute_geometry_pool,
+                    cvx_per_round=config.elite_shortlist_limit,
+                ),
+                config.elite_interroute_families,
+            )
+            cross_generation_s = perf_counter() - cross_started
+            for key, label, candidate, _, _ in cross_moves:
+                candidates.append((label, candidate))
+                if config.elite_reuse_cross_proxy_scores:
+                    # The cross shortlist already calculated exactly the same
+                    # precheck/proxy tuple; reuse, never approximate it.
+                    cross_precomputed_keys[id(candidate)] = tuple(key)
 
     ranked: list[
         tuple[tuple[float, ...], str, DiscreteSolution]
@@ -1222,9 +1243,14 @@ def _structural_elite_candidates(
         if signature in seen:
             continue
         seen.add(signature)
+        precomputed_key = cross_precomputed_keys.get(id(candidate))
+        if precomputed_key is not None:
+            cross_proxy_cache_hits += 1
         ranked.append(
             (
-                _proxy_precheck_key(state, candidate),
+                precomputed_key
+                if precomputed_key is not None
+                else _proxy_precheck_key(state, candidate),
                 label,
                 candidate,
             )
@@ -1251,6 +1277,38 @@ def _structural_elite_candidates(
         if label == "task_mode_or_batch_reassign":
             return "mode_batch"
         return "other"
+
+    if config.elite_selection_policy != "legacy":
+        from .elite_candidate_selection import select_protected_elite_candidates
+        selected, policy_trace = select_protected_elite_candidates(
+            ranked,
+            family,
+            limit=config.elite_shortlist_limit,
+            family_quota=config.elite_family_quota,
+            policy=config.elite_selection_policy,
+        )
+        if trace is not None:
+            def count_family(labels):
+                counts: dict[str, int] = {}
+                for label in labels:
+                    fam = family(label)
+                    counts[fam] = counts.get(fam, 0) + 1
+                return counts
+            trace.update(
+                generated_total=len(candidates),
+                unique_ranked_total=len(ranked),
+                shortlisted_total=len(selected),
+                generated_by_family=count_family(label for label, _ in candidates),
+                ranked_by_family=count_family(label for _, label, _ in ranked),
+                selected_by_family=count_family(label for _, label, _ in selected),
+                shortlisted_labels=[label for _, label, _ in selected],
+                selection_details=policy_trace,
+                cross_generation_s=cross_generation_s,
+                cross_skipped_for_budget=cross_skipped_for_budget,
+                cross_proxy_cache_hits=cross_proxy_cache_hits,
+                generation_runtime_s=perf_counter() - generation_started,
+            )
+        return [(label, candidate) for _, label, candidate in selected]
 
     # A global proxy top-k can starve an entire structural family even when
     # that family contains the exact-CVX improving move. Preserve one (or the
@@ -1348,6 +1406,11 @@ def _structural_elite_candidates(
             ranked_by_family=count_family(label for _, label, _ in ranked),
             selected_by_family=count_family(label for _, label, _ in selected),
             shortlisted_labels=[label for _, label, _ in selected],
+            selection_policy="legacy",
+            cross_generation_s=cross_generation_s,
+            cross_skipped_for_budget=cross_skipped_for_budget,
+            cross_proxy_cache_hits=cross_proxy_cache_hits,
+            generation_runtime_s=perf_counter() - generation_started,
         )
     return [
         (label, candidate)
@@ -1449,6 +1512,7 @@ def contact_mode_intensification(
             current,
             config=config,
             trace=shortlist_trace,
+            deadline=deadline if config.elite_selection_policy != "legacy" else None,
         )
         shortlist_trace["round"] = int(stats["rounds"])
         stats.setdefault("selection_traces", []).append(shortlist_trace)
