@@ -50,6 +50,11 @@ class ProblemOperatorConfig:
     elite_positions_per_contact: int = 2
     elite_points_per_mec: int = 1
     elite_route_options_per_task: int = 2
+    # P0 integrated experiment: replace selected legacy families with
+    # cross-UAV route candidates *within* the same elite shortlist and rounds.
+    # Empty default preserves the published algorithm exactly.
+    elite_interroute_families: tuple[str, ...] = ()
+    elite_interroute_geometry_pool: int = 12
     elite_family_quota: int = 1
     elite_min_improvement_rel: float = 1e-4
     elite_min_improvement_j: float = 1.0
@@ -1154,6 +1159,28 @@ def _structural_elite_candidates(
                 ("task_mode_or_batch_reassign", mode_candidate)
             )
 
+    if config.elite_interroute_families:
+        from .elite_route_neighborhoods import (
+            CrossRouteConfig,
+            _shortlist as _cross_route_shortlist,
+        )
+
+        # New moves replace part of the *same* six-slot shortlist.
+        # CVX solves and max-rounds are not increased by this option.
+        cross_moves, _ = _cross_route_shortlist(
+            state.instance,
+            state.solution,
+            CrossRouteConfig(
+                geometric_pool_per_family=config.elite_interroute_geometry_pool,
+                cvx_per_round=config.elite_shortlist_limit,
+            ),
+            config.elite_interroute_families,
+        )
+        candidates.extend(
+            (label, candidate)
+            for _, label, candidate, _, _ in cross_moves
+        )
+
     ranked: list[
         tuple[tuple[float, ...], str, DiscreteSolution]
     ] = []
@@ -1205,6 +1232,8 @@ def _structural_elite_candidates(
     ranked.sort(key=lambda item: item[0])
 
     def family(label: str) -> str:
+        if label.startswith(("swap::", "two_opt_star::", "block_relocate::")):
+            return label.split("::", 1)[0]
         if label.startswith("route_compute_relocate::"):
             return "route"
         if (
@@ -1309,6 +1338,8 @@ def _structural_elite_candidates(
 
 
 def _elite_move_family(label: str) -> str:
+    if label.startswith(("swap::", "two_opt_star::", "block_relocate::")):
+        return label.split("::", 1)[0]
     if label.startswith("route_compute_relocate::"):
         return "route"
     if (
