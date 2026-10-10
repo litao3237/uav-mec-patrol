@@ -1,0 +1,125 @@
+name: UAV-MEC coupling parameter sensitivity
+on:
+  push:
+    branches: ['experiment/model-coupling-sensitivity']
+    paths:
+      - 'experiments/run_model_sensitivity.py'
+      - 'experiments/summarize_model_sensitivity.py'
+      - 'tests/test_model_sensitivity.py'
+      - 'tests/test_model_sensitivity_aggregate.py'
+      - '.github/workflows/model-coupling-sensitivity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Check Python syntax and undefined names
+        run: uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+      - name: Model sensitivity, aggregation and original algorithm regression tests
+        run: |
+          uv run --no-sync python -m pytest tests/test_model_sensitivity.py tests/test_model_sensitivity_aggregate.py tests/test_alns_framework.py tests/test_resource_solver.py
+      - name: Small 30-task model-perturbation and Stage1/Stage2 smoke
+        run: |
+          uv run --no-sync python experiments/run_model_sensitivity.py --tasks 30 --scenario 61 --seeds 111 --iterations 20 --elite-rounds 1 --profiles "baseline,compute_x1p5,deadline_x0p9,bandwidth_x0p5" --output outputs/sensitivity-smoke.json
+      - name: Upload smoke and failed checkpoints
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-sensitivity-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  sensitivity:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+        scenario: ['61', '62', '63', '64']
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: One-factor-at-a-time seven-profile paired UAV-MEC experiment
+        run: |
+          uv run --no-sync python experiments/run_model_sensitivity.py --tasks ${{ matrix.tasks }} --scenario ${{ matrix.scenario }} --seeds "111,112" --iterations 100 --elite-rounds 2 --output "outputs/sensitivity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Upload complete or failed raw solver snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-sensitivity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: sensitivity
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install aggregation dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Fetch all complete or partial raw result artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: model-sensitivity-K*-S*-${{ github.run_id }}
+          path: outputs/collected
+          merge-multiple: true
+      - name: Aggregate strict-validity and physical coupling sensitivity by independent scenario
+        run: |
+          uv run --no-sync python experiments/summarize_model_sensitivity.py --input-dir outputs/collected --output-dir outputs/sensitivity-summary --tasks "50,80" --scenarios "61,62,63,64"
+      - name: Upload final report, tables and even partial aggregates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-sensitivity-summary-${{ github.run_id }}
+          path: outputs/sensitivity-summary/
+          if-no-files-found: warn
+          retention-days: 90
