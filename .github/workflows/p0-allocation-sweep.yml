@@ -1,0 +1,84 @@
+name: P0 exploration/ESI budget allocation holdout
+on:
+  push:
+    branches: ['experiment/p0-time-allocation-sweep']
+    paths:
+      - 'experiments/run_p0_allocation_sweep.py'
+      - 'tests/test_p0_allocation_sweep.py'
+      - '.github/workflows/p0-allocation-sweep.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Frozen dependency environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Lint syntax and undefined names
+        run: uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+      - name: Validate old and new ESI budgets
+        run: uv run --no-sync python -m pytest tests/test_p0_allocation_sweep.py tests/test_p0_selector.py tests/test_p0_matched_budget.py tests/test_alns_framework.py
+      - name: K50 S57 A109 smoke (all allocations)
+        run: |
+          uv run --no-sync python experiments/run_p0_allocation_sweep.py --tasks 50 --scenarios 57 --seeds 109 --geometric-pool 8 --output "outputs/allocation-smoke.json"
+      - name: Save pilot and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-allocation-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  holdout:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+        scenario: ['57','58','59','60']
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Two nested seeds on one independent scenario; nominal end-to-end caps
+        run: |
+          uv run --no-sync python experiments/run_p0_allocation_sweep.py --tasks ${{ matrix.tasks }} --scenarios ${{ matrix.scenario }} --seeds "109,110" --geometric-pool 8 --output "outputs/allocation-K${{ matrix.tasks }}-S${{ matrix.scenario }}.json"
+      - name: Preserve raw, partial and failed samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-allocation-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
