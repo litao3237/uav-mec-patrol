@@ -1,0 +1,52 @@
+name: P0 cross-UAV elite experiment
+on:
+  push:
+    branches: ['experiment/p0-cross-uav-elite']
+    paths:
+      - 'src/uav_mec/algorithms/alns/problem_operators.py'
+      - 'experiments/run_p0_pilot.py'
+      - 'tests/test_p0_elite.py'
+      - '.github/workflows/p0-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  p0-pilot:
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Check Python names and syntax
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: Focused P0 and ALNS regression tests
+        run: uv run --no-sync python -m pytest tests/test_p0_elite.py tests/test_alns_framework.py
+      - name: Run fixed-checkpoint P0 comparison with strict Stage-1 and Stage-2 checks
+        run: |
+          uv run --no-sync python experiments/run_p0_pilot.py --tasks ${{ matrix.tasks }} --scenarios "45,46" --seeds "100,101" --iterations 100 --elite-rounds 2 --with-stage2 --output "outputs/p0/K${{ matrix.tasks }}.json"
+      - name: Upload all results including partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/p0/
+          if-no-files-found: warn
+          retention-days: 90
