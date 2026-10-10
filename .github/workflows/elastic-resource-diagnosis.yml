@@ -1,0 +1,146 @@
+name: Elastic fixed-D continuous resource-conflict diagnosis
+on:
+  push:
+    branches: ['experiment/elastic-resource-diagnostics']
+    paths:
+      - 'src/uav_mec/optimization/resource/elastic_diagnosis.py'
+      - 'experiments/run_elastic_diagnosis.py'
+      - 'experiments/summarize_elastic_diagnosis.py'
+      - 'tests/test_elastic_diagnosis.py'
+      - '.github/workflows/elastic-resource-diagnosis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Static and original-vs-elastic numerical control tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_elastic_diagnosis.py tests/test_queue_aware_precheck.py tests/test_resource_solver.py
+      - name: Download actual K50 S61 frozen valid and failed candidates
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K50-S61-38043248604
+          path: input/
+      - name: Control plus two stresses diagnostic smoke, no ALNS retuning
+        run: |
+          uv run --no-sync python experiments/run_elastic_diagnosis.py --input input/sensitivity-K50_S61.json --profiles baseline,compute_x1p5,deadline_x0p9 --output outputs/elastic-smoke.json
+      - name: Preserve smoke evidence and all failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  diagnose:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tasks: 50
+            scenario: '61'
+          - tasks: 80
+            scenario: '61'
+          - tasks: 80
+            scenario: '62'
+          - tasks: 80
+            scenario: '63'
+          - tasks: 80
+            scenario: '64'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged source solver dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download exact already archived Stage1/Stage2 resource solver states
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38043248604
+          path: input/
+      - name: Solve QoS-only and MEC-capacity counterfactual elastic P1-R models
+        run: |
+          uv run --no-sync python experiments/run_elastic_diagnosis.py --input "input/sensitivity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --output "outputs/elastic-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Persist completed or failed stress/control outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: diagnose
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install analysis dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Download all original and partial diagnostic artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: elastic-K*-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate resource conflict families and strict feasibility controls
+        run: |
+          uv run --no-sync python experiments/summarize_elastic_diagnosis.py --input-dir outputs/collected --output-dir outputs/elastic-summary
+      - name: Keep report even on incomplete matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-summary-${{ github.run_id }}
+          path: outputs/elastic-summary/
+          if-no-files-found: warn
+          retention-days: 90
