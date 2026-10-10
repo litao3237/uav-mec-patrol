@@ -1,0 +1,84 @@
+name: P0 round-2 cross-route neighborhoods
+on:
+  push:
+    branches: ['experiment/p0-cross-uav-elite']
+    paths:
+      - 'src/uav_mec/algorithms/alns/elite_route_neighborhoods.py'
+      - 'experiments/run_p0_round2.py'
+      - 'tests/test_p0_round2.py'
+      - '.github/workflows/p0-round2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Static checks
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: New and original ESI tests
+        run: uv run --no-sync python -m pytest tests/test_p0_round2.py tests/test_p0_elite.py tests/test_alns_framework.py
+      - name: Tiny smoke (K30, one seed)
+        run: |
+          uv run --no-sync python experiments/run_p0_round2.py --tasks 30 --scenarios 45 --seeds 100 --geometry-pool 5 --cvx-per-round 3 --extra-rounds 1 --with-stage2 --output outputs/p0r2-smoke.json
+      - name: Preserve smoke evidence even if failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0r2-smoke-${{ github.run_id }}
+          path: outputs/p0r2-smoke.json
+          if-no-files-found: warn
+          retention-days: 90
+  experiment:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Paired ESI elite P0 round-2 full pilot
+        run: |
+          uv run --no-sync python experiments/run_p0_round2.py --tasks ${{ matrix.tasks }} --scenarios "45,46" --seeds "100,101" --iterations 100 --elite-rounds 2 --geometry-pool 12 --cvx-per-round 6 --extra-rounds 2 --with-stage2 --output "outputs/p0r2-K${{ matrix.tasks }}.json"
+      - name: Preserve completed and failed result snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0r2-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
