@@ -1,0 +1,84 @@
+name: P0 matched nominal end-to-end budget
+on:
+  push:
+    branches: ['experiment/p0-matched-budget']
+    paths:
+      - 'experiments/run_p0_matched_budget.py'
+      - 'tests/test_p0_matched_budget.py'
+      - '.github/workflows/p0-matched-budget.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 50
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen solver environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Syntax check
+        run: uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+      - name: All focused tests
+        run: |
+          uv run --no-sync python -m pytest tests/test_p0_matched_budget.py tests/test_p0_contact_budget_diagnostics.py tests/test_p0_integrated.py tests/test_alns_framework.py
+      - name: Run small matched-budget smoke at K50
+        run: |
+          uv run --no-sync python experiments/run_p0_matched_budget.py --tasks 50 --scenarios 50 --seeds 105 --geometric-pool 8 --output outputs/p0-budget-smoke.json
+      - name: Preserve smoke and failure snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matched-budget-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  paired:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [50, 80]
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen solver environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Nominal end-to-end budget, 2 scenarios x 2 fresh algorithm seeds
+        run: |
+          uv run --no-sync python experiments/run_p0_matched_budget.py --tasks ${{ matrix.tasks }} --scenarios "50,51" --seeds "105,106" --geometric-pool 10 --output "outputs/p0-budget-K${{ matrix.tasks }}.json"
+      - name: Persist full results and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-budget-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
