@@ -1,0 +1,161 @@
+name: MEC capacity-only elastic conflict isolation
+on:
+  push:
+    branches: ['experiment/elastic-capacity-isolation']
+    paths:
+      - 'src/uav_mec/optimization/resource/elastic_diagnosis.py'
+      - 'experiments/run_capacity_only_diagnosis.py'
+      - 'experiments/summarize_capacity_only_diagnosis.py'
+      - 'tests/test_capacity_only_diagnosis.py'
+      - 'tests/test_elastic_diagnosis.py'
+      - '.github/workflows/elastic-capacity-isolation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged source solver environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Unit tests contrasting hard QoS and soft MEC capacity
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_capacity_only_diagnosis.py tests/test_elastic_diagnosis.py tests/test_resource_solver.py
+      - name: Fetch unchanged original K50 S61 resource snapshots
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K50-S61-38043248604
+          path: input/original/
+      - name: Fetch independently audited previous QoS elastic diagnoses
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38050123790
+          github-token: ${{ github.token }}
+          name: elastic-K50-S61-38050123790
+          path: input/elastic/
+      - name: Pilot capacity-only resource expansion counterfactual
+        run: |
+          uv run --no-sync python experiments/run_capacity_only_diagnosis.py --source input/original/sensitivity-K50_S61.json --previous input/elastic/elastic-K50_S61.json --output outputs/capacity-smoke.json
+      - name: Preserve numerical diagnosis or source failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  isolate:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tasks: 50
+            scenario: '61'
+          - tasks: 80
+            scenario: '61'
+          - tasks: 80
+            scenario: '62'
+          - tasks: 80
+            scenario: '63'
+          - tasks: 80
+            scenario: '64'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen mathematical model dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Fetch unchanged Stage1/2 source discrete solutions
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38043248604
+          path: input/original/
+      - name: Fetch corresponding existing elastic QoS conflict indicators
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38050123790
+          github-token: ${{ github.token }}
+          name: elastic-K${{ matrix.tasks }}-S${{ matrix.scenario }}-38050123790
+          path: input/elastic/
+      - name: Keep deadlines, battery and cycle hard and relax ONLY MEC capacity
+        run: |
+          uv run --no-sync python experiments/run_capacity_only_diagnosis.py --source "input/original/sensitivity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --previous "input/elastic/elastic-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json" --output "outputs/capacity-K${{ matrix.tasks }}_S${{ matrix.scenario }}.json"
+      - name: Preserve complete and partial resource conflict diagnoses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-K${{ matrix.tasks }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: isolate
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install report environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Download all existing and partial capacity-only results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: capacity-K*-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate resource-only versus schedule-only counterfactuals
+        run: |
+          uv run --no-sync python experiments/summarize_capacity_only_diagnosis.py --input-dir outputs/collected --output-dir outputs/capacity-summary
+      - name: Preserve full or partial report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-summary-${{ github.run_id }}
+          path: outputs/capacity-summary/
+          if-no-files-found: warn
+          retention-days: 90
