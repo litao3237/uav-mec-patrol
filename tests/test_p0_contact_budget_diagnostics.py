@@ -1,8 +1,12 @@
 """Contract tests for the fixed-structure UAV energy lower bound and P0 profile."""
 from copy import deepcopy
-from dataclasses import replace
+from pathlib import Path
+import sys
 
 import pytest
+
+# The experiment CLI modules use repository-local imports by design.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
 
 from uav_mec.algorithms.initial import evaluate_initial_proxy
 from uav_mec.algorithms.alns.problem_operators import (
@@ -17,7 +21,7 @@ from uav_mec.optimization.resource.energy_lower_bound import (
     fixed_structure_energy_lower_bound,
     can_certify_no_meaningful_improvement,
 )
-from experiments.run_p0_contact_diagnostics import profile_config
+from run_p0_contact_diagnostics import profile_config
 
 
 def test_energy_lower_bound_cannot_exceed_reduced_feasible_proxy():
