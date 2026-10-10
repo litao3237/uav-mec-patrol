@@ -1,0 +1,72 @@
+[
+  {
+    "path": "archive_manifest.json",
+    "size": 23929,
+    "sha256": "00ef75a4649dd2f1824fc359d7cd71b2ba464e9ffef5a5ebad5571434c7e71f6"
+  },
+  {
+    "path": "ablation/summary.json",
+    "size": 10252,
+    "sha256": "d493aa0a598cb1c9563b4db7ce302b60108d4eee37a3526c9cc7d93b938c7db5"
+  },
+  {
+    "path": "budget/frozen_source_hashes.json",
+    "size": 7129,
+    "sha256": "e9a2088902284a156641b937d8993ad1d4b30320805407ba3f411d11511d6b4a"
+  },
+  {
+    "path": "budget/summary.json",
+    "size": 13986,
+    "sha256": "ca790ac56a2c78ebe80bcecbffffe03ae3808aa5685150f711f8c6759ccc8ecb"
+  },
+  {
+    "path": "extension/cloud_ingest.json",
+    "size": 3717,
+    "sha256": "c7cc77ba04908fa27005e4a3a0034f8c443049a698f7324c9187572fb1144e6b"
+  },
+  {
+    "path": "extension/execution_complete.json",
+    "size": 177,
+    "sha256": "07c0bc1151674001348dddf06fb297fa8b8cda78a6b5504f2234df7495aba35b"
+  },
+  {
+    "path": "extension/frozen_protocol.json",
+    "size": 50469,
+    "sha256": "d2f11a3c0fc221897775da4614a95293ef2fd1928c43945db88d614410f964cb"
+  },
+  {
+    "path": "extension/summary.csv",
+    "size": 125791,
+    "sha256": "7934fb8d0c4fbd97afd910c9f111d869fc41048e0810a9045d7a8af770643b47"
+  },
+  {
+    "path": "extension/summary.json",
+    "size": 1494117,
+    "sha256": "51fa6748d0e4a098a2295a2c63d7ff0a611d164d2eb0f5dd720bf9d91ba55015"
+  },
+  {
+    "path": "main/execution_summary.json",
+    "size": 115,
+    "sha256": "5f7c7cf9057cb2b53e5d179c9f8ac9871898ea511b26a5a2413bb73c2e4fde5a"
+  },
+  {
+    "path": "main/frozen_protocol.json",
+    "size": 9020,
+    "sha256": "fbd74116edf9f34207da01524d7c6f4bf7c4a234defc20dd143344b7bbf756d9"
+  },
+  {
+    "path": "main/summary.csv",
+    "size": 275261,
+    "sha256": "1a52e16d7af0e829d1830e1e6c18a97190a133d86e59e5c134df646436c1ed4a"
+  },
+  {
+    "path": "main/summary.json",
+    "size": 3606748,
+    "sha256": "5cd472fc160cdaa0880a4bf7c69712fff05c2bfb97d212168027442eedd4a26d"
+  },
+  {
+    "path": "reference/strong.json",
+    "size": 34237,
+    "sha256": "5eeb6680263b1a2d94be2fe07092be822745c81b1914c402775c229ee15e260b"
+  }
+]

@@ -1,5 +1,9 @@
-# 归档文本固定为LF，确保跨平台检出后的清单哈希一致；原始ZIP不转换字节。
-paper_results/innovation_20260925/** text eol=lf
-paper_results/innovation_20260925/archives/*.zip -text
-experiments/aggregate_innovation_mechanism.py text eol=lf
-experiments/export_innovation_tables.py text eol=lf
+# 源码使用一致换行；结果和图件固定字节，保证跨平台 SHA-256 一致。
+* text=auto eol=lf
+results/** -text
+figures/** -text
+data/** -text
+*.zip -text
+*.pdf -text
+*.png -text
+*.tiff -text

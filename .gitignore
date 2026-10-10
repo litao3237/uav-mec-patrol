@@ -4,9 +4,11 @@ __pycache__/
 .pytest_cache/
 .coverage
 .DS_Store
-outputs/results/*
-outputs/logs/*
-outputs/figures/*
-!outputs/results/.gitkeep
-!outputs/logs/.gitkeep
-!outputs/figures/.gitkeep
+outputs/
+_work/
+paper_manuscript/
+paper_figures/
+.ruff_cache/
+*.egg-info/
+dist/
+build/

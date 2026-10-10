@@ -1,0 +1,22 @@
+﻿level,method,metric,mean,ci_low,ci_high,independent_scenarios,observations,subset,unit,source_metric,transform
+0.5,GR-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,GR-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,GR-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,FTR-NM,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,FTR-NM,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,FTR-NM,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,RGA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,RGA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,RGA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,SA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,SA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,SA-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,DPSO-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,DPSO-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,DPSO-MR,stage2_energy_kj,nan,nan,nan,0,0,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,B-ALNS,stage2_energy_kj,232.1018377475562,225.2648682255727,236.14013483941253,3,8,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,B-ALNS,stage2_energy_kj,230.03855288933534,218.07356469614234,246.84755365232022,3,9,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,B-ALNS,stage2_energy_kj,229.2185751145686,216.25871781144394,243.30729165618595,3,9,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+0.5,ESI-ALNS,stage2_energy_kj,231.33844702384852,224.1754039029606,234.9394269909015,3,8,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.0,ESI-ALNS,stage2_energy_kj,226.76842237791715,216.09152415534365,241.62044600389652,3,9,method_conditional_summaries,kJ,stage2_energy_j,x / 1000
+1.5,ESI-ALNS,stage2_energy_kj,227.1607259033561,213.66770526116957,240.74037974713244,3,9,method_conditional_summaries,kJ,stage2_energy_j,x / 1000

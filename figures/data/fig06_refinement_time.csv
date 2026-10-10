@@ -1,0 +1,7 @@
+﻿tasks,mean,ci_low,ci_high,independent_scenarios,observations,metric,unit,source_metric,transform
+30,3.9983601041409806,3.476348445818682,4.502420442790753,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity
+40,5.881809324996236,5.19888452499678,6.7017725226107965,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity
+50,7.417410229177524,6.142802396763243,8.753846216675203,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity
+60,9.906404995825142,8.558683585699569,11.454432508335838,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity
+70,11.98307497499627,10.518444195438496,13.459408129177367,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity
+80,15.407598483288893,12.30661706329726,18.634454575759445,8,24,elite_phase_time_s,s,elite_phase_runtime_s,identity

@@ -1,0 +1,10 @@
+﻿scenario,algorithm_seed,gap_pct,scenario_mean_pct,metric,unit,source_metric,transform
+45,100,8.609938666630788,9.695224777546237,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+45,101,11.865796999377134,9.695224777546237,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+45,102,8.609938666630788,9.695224777546237,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+46,100,0.07057154644746766,0.07057154644746766,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+46,101,0.07057154644746766,0.07057154644746766,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+46,102,0.07057154644746766,0.07057154644746766,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+47,100,9.20335097035401,8.136903416045195,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+47,101,11.539480776757612,8.136903416045195,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity
+47,102,3.6678785010239623,8.136903416045195,gap_to_archived_reference_percent,%,gap_to_best_known_pct,identity

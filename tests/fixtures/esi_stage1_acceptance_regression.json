@@ -1,0 +1,5243 @@
+{
+  "source_run": "36382512068",
+  "source_commit": "d83a282041eee5d94d8b77c94f0c6c764c58f19a",
+  "cases": [
+    {
+      "case": "K50_S47_A101_B-ALNS",
+      "source_file": "metrics_K50_S47.json",
+      "source_sha256": "aef1012025f5bffc530ca6dfa41c2b59421c40b0157d98aaeb11bd7d8f9865e3",
+      "instance": {
+        "depot_xy": [
+          100.0,
+          100.0
+        ],
+        "tasks": {
+          "S1": {
+            "task_id": "S1",
+            "x": 357.77240559476735,
+            "y": 432.9787961504941,
+            "data_mb": 2.3610125907687225,
+            "cycles_per_bit": 937.3878963513013,
+            "release_s": 0.0,
+            "deadline_s": 339.73998568639365,
+            "collect_s": 1.0
+          },
+          "S2": {
+            "task_id": "S2",
+            "x": 396.71878539725293,
+            "y": 59.27237364112891,
+            "data_mb": 2.2555978221884403,
+            "cycles_per_bit": 809.4639449041078,
+            "release_s": 0.0,
+            "deadline_s": 265.9420524545966,
+            "collect_s": 1.0
+          },
+          "S3": {
+            "task_id": "S3",
+            "x": 273.2543750475604,
+            "y": 946.9501695078229,
+            "data_mb": 2.4446583328513256,
+            "cycles_per_bit": 1018.6751097712986,
+            "release_s": 0.0,
+            "deadline_s": 412.63268013915433,
+            "collect_s": 1.0
+          },
+          "S4": {
+            "task_id": "S4",
+            "x": 882.78882252391,
+            "y": 564.8654801442582,
+            "data_mb": 1.690140856155943,
+            "cycles_per_bit": 1009.3078390179655,
+            "release_s": 0.0,
+            "deadline_s": 312.13478043377233,
+            "collect_s": 1.0
+          },
+          "S5": {
+            "task_id": "S5",
+            "x": 939.4530695108091,
+            "y": 51.93354769429419,
+            "data_mb": 2.1225016947850333,
+            "cycles_per_bit": 1075.0405411525148,
+            "release_s": 0.0,
+            "deadline_s": 355.67560897428154,
+            "collect_s": 1.0
+          },
+          "S6": {
+            "task_id": "S6",
+            "x": 555.4788225300531,
+            "y": 751.4223851870296,
+            "data_mb": 1.7158575755791943,
+            "cycles_per_bit": 1136.24955633029,
+            "release_s": 0.0,
+            "deadline_s": 412.1916916101877,
+            "collect_s": 1.0
+          },
+          "S7": {
+            "task_id": "S7",
+            "x": 53.86776775479014,
+            "y": 340.57094167194646,
+            "data_mb": 2.0885158906508696,
+            "cycles_per_bit": 953.4314766773753,
+            "release_s": 0.0,
+            "deadline_s": 344.7231027956117,
+            "collect_s": 1.0
+          },
+          "S8": {
+            "task_id": "S8",
+            "x": 262.72114107917776,
+            "y": 642.856139220799,
+            "data_mb": 3.643335071808646,
+            "cycles_per_bit": 1170.8055576658494,
+            "release_s": 0.0,
+            "deadline_s": 399.71260607447186,
+            "collect_s": 1.0
+          },
+          "S9": {
+            "task_id": "S9",
+            "x": 229.81175521156945,
+            "y": 734.4118221531799,
+            "data_mb": 3.319224068894839,
+            "cycles_per_bit": 1041.8620686323911,
+            "release_s": 0.0,
+            "deadline_s": 368.9738289790094,
+            "collect_s": 1.0
+          },
+          "S10": {
+            "task_id": "S10",
+            "x": 294.8655835090856,
+            "y": 762.0184813258311,
+            "data_mb": 1.7169488774786907,
+            "cycles_per_bit": 1022.1064148009061,
+            "release_s": 0.0,
+            "deadline_s": 294.5861435253157,
+            "collect_s": 1.0
+          },
+          "S11": {
+            "task_id": "S11",
+            "x": 531.3770143893983,
+            "y": 58.50540984115142,
+            "data_mb": 1.936619935096908,
+            "cycles_per_bit": 1111.8657302721676,
+            "release_s": 0.0,
+            "deadline_s": 294.34387646640744,
+            "collect_s": 1.0
+          },
+          "S12": {
+            "task_id": "S12",
+            "x": 721.0026110606126,
+            "y": 787.630054146793,
+            "data_mb": 2.819034526808612,
+            "cycles_per_bit": 1050.9628738207596,
+            "release_s": 0.0,
+            "deadline_s": 284.7755309073337,
+            "collect_s": 1.0
+          },
+          "S13": {
+            "task_id": "S13",
+            "x": 485.9828418717769,
+            "y": 943.8498134864813,
+            "data_mb": 3.9560993669725,
+            "cycles_per_bit": 1023.217219558961,
+            "release_s": 0.0,
+            "deadline_s": 327.39954518328784,
+            "collect_s": 1.0
+          },
+          "S14": {
+            "task_id": "S14",
+            "x": 961.8824231884165,
+            "y": 545.1129219090238,
+            "data_mb": 3.412996361288505,
+            "cycles_per_bit": 833.1103565532111,
+            "release_s": 0.0,
+            "deadline_s": 295.3349869848957,
+            "collect_s": 1.0
+          },
+          "S15": {
+            "task_id": "S15",
+            "x": 800.1500293434644,
+            "y": 544.9899612177145,
+            "data_mb": 3.3470077619374687,
+            "cycles_per_bit": 974.2451678680736,
+            "release_s": 0.0,
+            "deadline_s": 412.8263865161848,
+            "collect_s": 1.0
+          },
+          "S16": {
+            "task_id": "S16",
+            "x": 51.85437637179277,
+            "y": 274.41290306468034,
+            "data_mb": 2.932875289215916,
+            "cycles_per_bit": 1006.7865727650944,
+            "release_s": 0.0,
+            "deadline_s": 368.83984464190183,
+            "collect_s": 1.0
+          },
+          "S17": {
+            "task_id": "S17",
+            "x": 472.9376262265831,
+            "y": 699.8584006189634,
+            "data_mb": 3.3954278070875477,
+            "cycles_per_bit": 925.9972239420695,
+            "release_s": 0.0,
+            "deadline_s": 251.50200950984467,
+            "collect_s": 1.0
+          },
+          "S18": {
+            "task_id": "S18",
+            "x": 253.29877050899063,
+            "y": 352.1257789013678,
+            "data_mb": 3.981391213467299,
+            "cycles_per_bit": 1183.2593019807791,
+            "release_s": 0.0,
+            "deadline_s": 372.02197486998796,
+            "collect_s": 1.0
+          },
+          "S19": {
+            "task_id": "S19",
+            "x": 189.6103344187232,
+            "y": 904.1262521649107,
+            "data_mb": 1.3836288474146512,
+            "cycles_per_bit": 854.6639464212045,
+            "release_s": 0.0,
+            "deadline_s": 388.81860660412775,
+            "collect_s": 1.0
+          },
+          "S20": {
+            "task_id": "S20",
+            "x": 350.29282947111943,
+            "y": 396.6662176233659,
+            "data_mb": 1.800595524398699,
+            "cycles_per_bit": 800.180758990721,
+            "release_s": 0.0,
+            "deadline_s": 269.5276447723255,
+            "collect_s": 1.0
+          },
+          "S21": {
+            "task_id": "S21",
+            "x": 84.47793986259867,
+            "y": 39.89274452386695,
+            "data_mb": 1.125115621248746,
+            "cycles_per_bit": 872.4716894005096,
+            "release_s": 0.0,
+            "deadline_s": 339.59844880106243,
+            "collect_s": 1.0
+          },
+          "S22": {
+            "task_id": "S22",
+            "x": 491.3439264379627,
+            "y": 771.7603285756583,
+            "data_mb": 3.435068432123098,
+            "cycles_per_bit": 1011.3099528956146,
+            "release_s": 0.0,
+            "deadline_s": 348.9489978709866,
+            "collect_s": 1.0
+          },
+          "S23": {
+            "task_id": "S23",
+            "x": 29.58785077358513,
+            "y": 90.89159375516601,
+            "data_mb": 3.507318775741023,
+            "cycles_per_bit": 1168.7427864773401,
+            "release_s": 0.0,
+            "deadline_s": 308.40167011614506,
+            "collect_s": 1.0
+          },
+          "S24": {
+            "task_id": "S24",
+            "x": 852.406101560729,
+            "y": 862.4384900716419,
+            "data_mb": 1.7035037885362567,
+            "cycles_per_bit": 824.4940560422216,
+            "release_s": 0.0,
+            "deadline_s": 269.6666376590619,
+            "collect_s": 1.0
+          },
+          "S25": {
+            "task_id": "S25",
+            "x": 105.04518248602125,
+            "y": 71.73634204327828,
+            "data_mb": 2.643567077241812,
+            "cycles_per_bit": 895.6471848864902,
+            "release_s": 0.0,
+            "deadline_s": 408.86659035178195,
+            "collect_s": 1.0
+          },
+          "S26": {
+            "task_id": "S26",
+            "x": 533.4918295231207,
+            "y": 547.9311293107868,
+            "data_mb": 3.287283024337007,
+            "cycles_per_bit": 1047.594925338928,
+            "release_s": 0.0,
+            "deadline_s": 425.6358225848544,
+            "collect_s": 1.0
+          },
+          "S27": {
+            "task_id": "S27",
+            "x": 97.47503921717936,
+            "y": 491.6038156226806,
+            "data_mb": 2.669565209422614,
+            "cycles_per_bit": 1181.294602497206,
+            "release_s": 0.0,
+            "deadline_s": 321.9260140894074,
+            "collect_s": 1.0
+          },
+          "S28": {
+            "task_id": "S28",
+            "x": 359.5929592128381,
+            "y": 310.6997983287873,
+            "data_mb": 3.5328750780163314,
+            "cycles_per_bit": 995.7020538975619,
+            "release_s": 0.0,
+            "deadline_s": 272.63737329420843,
+            "collect_s": 1.0
+          },
+          "S29": {
+            "task_id": "S29",
+            "x": 951.9975698557517,
+            "y": 132.38374164077285,
+            "data_mb": 2.3837940019284036,
+            "cycles_per_bit": 1114.742858570118,
+            "release_s": 0.0,
+            "deadline_s": 395.7597269357592,
+            "collect_s": 1.0
+          },
+          "S30": {
+            "task_id": "S30",
+            "x": 437.1996079183145,
+            "y": 561.3726224097618,
+            "data_mb": 3.290242790423003,
+            "cycles_per_bit": 826.4766030955794,
+            "release_s": 0.0,
+            "deadline_s": 389.5604717118533,
+            "collect_s": 1.0
+          },
+          "S31": {
+            "task_id": "S31",
+            "x": 772.3950960976346,
+            "y": 490.59416891857035,
+            "data_mb": 1.3423855845991977,
+            "cycles_per_bit": 898.0478774076373,
+            "release_s": 0.0,
+            "deadline_s": 390.82526474892893,
+            "collect_s": 1.0
+          },
+          "S32": {
+            "task_id": "S32",
+            "x": 180.24092766686263,
+            "y": 41.6902846411924,
+            "data_mb": 1.2945574373961182,
+            "cycles_per_bit": 983.7880520215554,
+            "release_s": 0.0,
+            "deadline_s": 330.39512601422996,
+            "collect_s": 1.0
+          },
+          "S33": {
+            "task_id": "S33",
+            "x": 285.71542242549805,
+            "y": 543.1236316157581,
+            "data_mb": 3.085837871339361,
+            "cycles_per_bit": 1167.4862176888705,
+            "release_s": 0.0,
+            "deadline_s": 420.8500441971106,
+            "collect_s": 1.0
+          },
+          "S34": {
+            "task_id": "S34",
+            "x": 201.71397321774316,
+            "y": 672.4158593682386,
+            "data_mb": 1.122658553089303,
+            "cycles_per_bit": 905.3046361871153,
+            "release_s": 0.0,
+            "deadline_s": 334.38294640978137,
+            "collect_s": 1.0
+          },
+          "S35": {
+            "task_id": "S35",
+            "x": 85.72738687340379,
+            "y": 774.5564301660158,
+            "data_mb": 3.637592602987508,
+            "cycles_per_bit": 1083.6244660317789,
+            "release_s": 0.0,
+            "deadline_s": 355.3050794148247,
+            "collect_s": 1.0
+          },
+          "S36": {
+            "task_id": "S36",
+            "x": 535.6704169106432,
+            "y": 779.1550185343928,
+            "data_mb": 2.7353846127919184,
+            "cycles_per_bit": 964.8383193313728,
+            "release_s": 0.0,
+            "deadline_s": 370.40516302959156,
+            "collect_s": 1.0
+          },
+          "S37": {
+            "task_id": "S37",
+            "x": 882.3705902447927,
+            "y": 723.0684206427414,
+            "data_mb": 1.27433656104914,
+            "cycles_per_bit": 1175.681492992284,
+            "release_s": 0.0,
+            "deadline_s": 339.73052341969463,
+            "collect_s": 1.0
+          },
+          "S38": {
+            "task_id": "S38",
+            "x": 312.7974491482701,
+            "y": 935.1547837216068,
+            "data_mb": 2.616974953627045,
+            "cycles_per_bit": 944.0489943358101,
+            "release_s": 0.0,
+            "deadline_s": 267.08382432845065,
+            "collect_s": 1.0
+          },
+          "S39": {
+            "task_id": "S39",
+            "x": 915.7979948032887,
+            "y": 840.6391188318163,
+            "data_mb": 3.2319252511738243,
+            "cycles_per_bit": 944.2117126293331,
+            "release_s": 0.0,
+            "deadline_s": 310.4606168337915,
+            "collect_s": 1.0
+          },
+          "S40": {
+            "task_id": "S40",
+            "x": 850.5404142604559,
+            "y": 908.6839775456721,
+            "data_mb": 2.9018129663266774,
+            "cycles_per_bit": 907.1654357145292,
+            "release_s": 0.0,
+            "deadline_s": 285.4099523436326,
+            "collect_s": 1.0
+          },
+          "S41": {
+            "task_id": "S41",
+            "x": 220.8390579104526,
+            "y": 837.0035171126605,
+            "data_mb": 3.4629218388594385,
+            "cycles_per_bit": 1182.8065553293047,
+            "release_s": 0.0,
+            "deadline_s": 327.6441236459317,
+            "collect_s": 1.0
+          },
+          "S42": {
+            "task_id": "S42",
+            "x": 764.6747525247475,
+            "y": 324.7540035114473,
+            "data_mb": 3.023481772574136,
+            "cycles_per_bit": 862.110655249019,
+            "release_s": 0.0,
+            "deadline_s": 333.84597972117933,
+            "collect_s": 1.0
+          },
+          "S43": {
+            "task_id": "S43",
+            "x": 46.42273013169447,
+            "y": 851.525696211357,
+            "data_mb": 2.5606706165793085,
+            "cycles_per_bit": 1045.623695297948,
+            "release_s": 0.0,
+            "deadline_s": 402.27991049282235,
+            "collect_s": 1.0
+          },
+          "S44": {
+            "task_id": "S44",
+            "x": 302.20325066452483,
+            "y": 310.95203726659963,
+            "data_mb": 3.800192687729326,
+            "cycles_per_bit": 969.2350755234249,
+            "release_s": 0.0,
+            "deadline_s": 337.05520314484414,
+            "collect_s": 1.0
+          },
+          "S45": {
+            "task_id": "S45",
+            "x": 937.194942721185,
+            "y": 503.2213728685467,
+            "data_mb": 2.539705505887447,
+            "cycles_per_bit": 925.1958744370664,
+            "release_s": 0.0,
+            "deadline_s": 251.65213857090026,
+            "collect_s": 1.0
+          },
+          "S46": {
+            "task_id": "S46",
+            "x": 604.5338798027292,
+            "y": 858.4631112526941,
+            "data_mb": 3.5675013058264775,
+            "cycles_per_bit": 1165.6220573026237,
+            "release_s": 0.0,
+            "deadline_s": 353.57447956071144,
+            "collect_s": 1.0
+          },
+          "S47": {
+            "task_id": "S47",
+            "x": 591.047561334493,
+            "y": 619.0489596187498,
+            "data_mb": 2.385478249571802,
+            "cycles_per_bit": 1023.3254229411491,
+            "release_s": 0.0,
+            "deadline_s": 370.3554668004941,
+            "collect_s": 1.0
+          },
+          "S48": {
+            "task_id": "S48",
+            "x": 381.93375693195605,
+            "y": 61.0843695280613,
+            "data_mb": 2.838957121873874,
+            "cycles_per_bit": 872.58472628558,
+            "release_s": 0.0,
+            "deadline_s": 261.52787199088766,
+            "collect_s": 1.0
+          },
+          "S49": {
+            "task_id": "S49",
+            "x": 414.57854552462555,
+            "y": 235.44303509037246,
+            "data_mb": 1.5277319311493731,
+            "cycles_per_bit": 1039.1752612527998,
+            "release_s": 0.0,
+            "deadline_s": 248.30355713069565,
+            "collect_s": 1.0
+          },
+          "S50": {
+            "task_id": "S50",
+            "x": 153.52658564982207,
+            "y": 89.87476749557285,
+            "data_mb": 2.1673386246134605,
+            "cycles_per_bit": 953.7478610853184,
+            "release_s": 0.0,
+            "deadline_s": 381.0343209052256,
+            "collect_s": 1.0
+          }
+        },
+        "mecs": {
+          "E1": {
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0,
+            "bandwidth_mhz": 4.0,
+            "cpu_ghz": 5.0,
+            "radius_m": 200.0
+          },
+          "E2": {
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0,
+            "bandwidth_mhz": 5.0,
+            "cpu_ghz": 6.5,
+            "radius_m": 300.0
+          }
+        },
+        "uavs": {
+          "U1": {
+            "uav_id": "U1",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U2": {
+            "uav_id": "U2",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U3": {
+            "uav_id": "U3",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U4": {
+            "uav_id": "U4",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U5": {
+            "uav_id": "U5",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          }
+        },
+        "contact_points": {
+          "E1_C": {
+            "point_id": "E1_C",
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0
+          },
+          "E1_R1_A00": {
+            "point_id": "E1_R1_A00",
+            "mec_id": "E1",
+            "x": 192.3879532511287,
+            "y": 138.26834323650897
+          },
+          "E1_R1_A01": {
+            "point_id": "E1_R1_A01",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A02": {
+            "point_id": "E1_R1_A02",
+            "mec_id": "E1",
+            "x": 61.731656763491024,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A03": {
+            "point_id": "E1_R1_A03",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 138.268343236509
+          },
+          "E1_R1_A04": {
+            "point_id": "E1_R1_A04",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 61.73165676349103
+          },
+          "E1_R1_A05": {
+            "point_id": "E1_R1_A05",
+            "mec_id": "E1",
+            "x": 61.73165676349097,
+            "y": 7.61204674887135
+          },
+          "E1_R1_A06": {
+            "point_id": "E1_R1_A06",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 7.612046748871336
+          },
+          "E1_R1_A07": {
+            "point_id": "E1_R1_A07",
+            "mec_id": "E1",
+            "x": 192.38795325112864,
+            "y": 61.73165676349096
+          },
+          "E1_R2_A00": {
+            "point_id": "E1_R2_A00",
+            "mec_id": "E1",
+            "x": 270.0,
+            "y": 100.0
+          },
+          "E1_R2_A01": {
+            "point_id": "E1_R2_A01",
+            "mec_id": "E1",
+            "x": 220.20815280171308,
+            "y": 220.20815280171308
+          },
+          "E1_R2_A02": {
+            "point_id": "E1_R2_A02",
+            "mec_id": "E1",
+            "x": 100.00000000000001,
+            "y": 270.0
+          },
+          "E2_C": {
+            "point_id": "E2_C",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0
+          },
+          "E2_R1_A00": {
+            "point_id": "E2_R1_A00",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A01": {
+            "point_id": "E2_R1_A01",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A02": {
+            "point_id": "E2_R1_A02",
+            "mec_id": "E2",
+            "x": 792.5974851452365,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A03": {
+            "point_id": "E2_R1_A03",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A04": {
+            "point_id": "E2_R1_A04",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 192.59748514523653
+          },
+          "E2_R1_A05": {
+            "point_id": "E2_R1_A05",
+            "mec_id": "E2",
+            "x": 792.5974851452364,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A06": {
+            "point_id": "E2_R1_A06",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A07": {
+            "point_id": "E2_R1_A07",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 192.59748514523645
+          },
+          "E2_R2_A02": {
+            "point_id": "E2_R2_A02",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 505.0
+          },
+          "E2_R2_A03": {
+            "point_id": "E2_R2_A03",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 430.3122292025696
+          },
+          "E2_R2_A04": {
+            "point_id": "E2_R2_A04",
+            "mec_id": "E2",
+            "x": 595.0,
+            "y": 250.00000000000003
+          },
+          "E2_R2_A05": {
+            "point_id": "E2_R2_A05",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 69.6877707974304
+          }
+        },
+        "cycle_s": 450.0,
+        "avg_delay_budget_s": 300.0,
+        "max_contacts_per_uav": 3,
+        "reference_gain_db": -50.0,
+        "pathloss_exp": 2.3,
+        "noise_psd_dbm_per_hz": -164.0
+      },
+      "solution": {
+        "routes": {
+          "U1": {
+            "uav_id": "U1",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S1"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S30"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S20"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U2": {
+            "uav_id": "U2",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S23"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S16"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S7"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S27"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S35"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S43"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S19"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S3"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S38"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S41"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S10"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S9"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S34"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S8"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S33"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U3": {
+            "uav_id": "U3",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S50"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S32"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S48"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S2"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S11"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S5"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S29"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S45"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S14"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S4"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S15"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S31"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S42"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S49"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U3_1"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U4": {
+            "uav_id": "U4",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S21"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S25"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S28"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U5": {
+            "uav_id": "U5",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S18"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S17"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S22"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S6"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S36"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S13"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S46"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S12"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S40"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S24"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S39"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S37"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S47"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S26"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S44"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U5_2"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U5_1"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          }
+        },
+        "contact_visits": {
+          "G_U5_1": {
+            "visit_id": "G_U5_1",
+            "uav_id": "U5",
+            "point_id": "E1_C"
+          },
+          "G_U5_2": {
+            "visit_id": "G_U5_2",
+            "uav_id": "U5",
+            "point_id": "E1_R2_A01"
+          },
+          "G_U3_1": {
+            "visit_id": "G_U3_1",
+            "uav_id": "U3",
+            "point_id": "E2_R2_A04"
+          }
+        },
+        "task_decisions": {
+          "S30": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S11": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S5": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S1": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S28": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S20": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S50": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S18": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S27": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S17": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S29": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S16": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S8": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S23": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S21": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S35": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S48": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S22": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S47": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S19": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S43": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S3": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S2": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S6": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S45": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S39": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S9": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S40": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S26": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S14": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S15": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S13": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S42": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S38": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S44": {
+            "mode": "offload",
+            "contact_visit_id": "G_U5_1"
+          },
+          "S37": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S4": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S46": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S34": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S10": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S24": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S12": {
+            "mode": "offload",
+            "contact_visit_id": "G_U5_2"
+          },
+          "S31": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S49": {
+            "mode": "offload",
+            "contact_visit_id": "G_U3_1"
+          },
+          "S7": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S41": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S33": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S36": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S32": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S25": {
+            "mode": "local",
+            "contact_visit_id": null
+          }
+        },
+        "metadata": {
+          "builder": "parallel_greedy_insertion_2opt_mec_repair",
+          "phase": "mec_assisted_initial_solution",
+          "mec_repair_steps": 1,
+          "mec_repair_moves": [
+            {
+              "step": 1,
+              "type": "insert_contact",
+              "task_id": "S49",
+              "point_id": "E2_R2_A04",
+              "insert_pos": 15,
+              "detour_m": 355.73853022450015
+            }
+          ],
+          "proxy_initial_score": [
+            1.0,
+            0.06611156042582661,
+            0.06611156042582661,
+            179420.72071863175,
+            9337.749746064885
+          ],
+          "proxy_final_score": [
+            0.0,
+            0.0,
+            0.0,
+            185935.22836829358,
+            9693.488276289385
+          ],
+          "proxy_feasible": true,
+          "offloaded_tasks": 3,
+          "contact_visits": 3
+        }
+      },
+      "result": {
+        "status": "optimal",
+        "solver": "CLARABEL",
+        "is_dcp": true,
+        "energy_stage1_j": 185532.7805455369,
+        "energy_final_j": 185532.7805455369,
+        "stage1_values": {
+          "tau_s": {
+            "G_U5_1": 0.6727795045748469,
+            "G_U5_2": 1.02110384949015,
+            "G_U3_1": 0.6192641454162107
+          },
+          "bandwidth_mhz": {
+            "('U3', 'E2')": 4.999999999952369,
+            "('U5', 'E1')": 3.9999999999879665
+          },
+          "mec_cpu_ghz": {
+            "('U3', 'E2')": 5.961501126851125,
+            "('U5', 'E1')": 4.491768843395779
+          },
+          "local_cpu_ghz": {
+            "S30": 0.2251869169834346,
+            "S11": 0.7014813264344245,
+            "S5": 0.7014813461672799,
+            "S1": 0.2251865284686704,
+            "S28": 0.20697203109605763,
+            "S20": 0.22518694515800347,
+            "S50": 0.701481263647549,
+            "S18": 0.8945898047561466,
+            "S27": 0.8651337548089834,
+            "S17": 0.9521447189529071,
+            "S29": 0.7014813587061942,
+            "S16": 0.865133734095478,
+            "S8": 0.7279818943146129,
+            "S23": 0.865133725217758,
+            "S21": 0.20696934595970568,
+            "S35": 0.8651337650754256,
+            "S48": 0.701481302363989,
+            "S22": 0.9521447455880047,
+            "S47": 0.5261666643927183,
+            "S19": 0.8651336956371323,
+            "S43": 0.8651337600490914,
+            "S3": 0.8651337632708066,
+            "S2": 0.7014813069342396,
+            "S6": 0.9521447032957868,
+            "S45": 0.7014813668869156,
+            "S39": 0.5984455037549503,
+            "S9": 0.865133644888486,
+            "S40": 0.9521447731783211,
+            "S26": 0.4983674167738932,
+            "S14": 0.7014813630545943,
+            "S15": 0.7014813434890377,
+            "S13": 0.9521448083865038,
+            "S42": 0.7014813680734937,
+            "S38": 0.8651337651338356,
+            "S37": 0.5261667604484792,
+            "S4": 0.7014813561464129,
+            "S46": 0.9521448141300161,
+            "S34": 0.8651336003130498,
+            "S10": 0.865133730936259,
+            "S24": 0.9521446352137044,
+            "S31": 0.7014813410724712,
+            "S7": 0.8651337198274579,
+            "S41": 0.8651337610064563,
+            "S33": 0.7279818802396693,
+            "S36": 0.9521447540328563,
+            "S32": 0.7014812695045199,
+            "S25": 0.20697022160164275
+          },
+          "local_start_s": {
+            "S30": 121.73538550044466,
+            "S11": 93.61992028607646,
+            "S5": 118.1766548132782,
+            "S1": 43.10955853444273,
+            "S28": 136.66959226687445,
+            "S20": 218.34166169253044,
+            "S50": 6.44758268028051,
+            "S18": 30.5072739217347,
+            "S27": 91.72339215787844,
+            "S17": 72.636242199787,
+            "S29": 144.1990188662636,
+            "S16": 46.00526938669079,
+            "S8": 334.3829464093328,
+            "S23": 8.099882973556248,
+            "S21": 7.207911511692105,
+            "S35": 120.88459832308429,
+            "S48": 44.545988211598804,
+            "S22": 99.05371140159858,
+            "S47": 333.2399183561193,
+            "S19": 182.09392800297618,
+            "S43": 157.334770551547,
+            "S3": 193.02900263689315,
+            "S2": 72.79741119337812,
+            "S6": 128.24186927778243,
+            "S45": 174.5042272052387,
+            "S39": 269.66663766014426,
+            "S9": 293.00647953127617,
+            "S40": 235.74781783635402,
+            "S26": 370.35546678299346,
+            "S14": 201.30151839482374,
+            "S15": 253.18343899883118,
+            "S13": 166.7977412600306,
+            "S42": 304.11944988348046,
+            "S38": 216.05723435270892,
+            "S37": 310.4606168311013,
+            "S4": 233.72892434411736,
+            "S46": 200.80894593423443,
+            "S34": 324.9846477623337,
+            "S10": 276.77865810710745,
+            "S24": 257.86566796360836,
+            "S31": 290.37109816483036,
+            "S7": 73.30999090715775,
+            "S41": 238.90274262337732,
+            "S33": 381.2592435705479,
+            "S36": 144.6229290250739,
+            "S32": 30.021635871271002,
+            "S25": 45.150980770892836
+          },
+          "task_completion_s": {
+            "S1": 121.73538547320982,
+            "S2": 93.61992028502324,
+            "S3": 216.05723435215307,
+            "S4": 253.18343899779498,
+            "S5": 144.1990188652214,
+            "S6": 144.6229290246801,
+            "S7": 91.72339215731712,
+            "S8": 381.25924356957404,
+            "S9": 324.9846477617696,
+            "S10": 293.00647953071274,
+            "S11": 118.17665481223,
+            "S12": 283.8894089318322,
+            "S13": 200.80894593384124,
+            "S14": 233.72892434308127,
+            "S15": 290.37109816379507,
+            "S16": 73.30999090659427,
+            "S17": 99.0537114012037,
+            "S18": 72.63624219926868,
+            "S19": 193.02900263633668,
+            "S20": 269.527644743868,
+            "S21": 45.15098074523179,
+            "S22": 128.24186927738833,
+            "S23": 46.00526938612289,
+            "S24": 269.6666376584958,
+            "S25": 136.6695922384241,
+            "S26": 425.63582258185636,
+            "S27": 120.88459832252471,
+            "S28": 272.6373732645804,
+            "S29": 174.50422720420028,
+            "S30": 218.3416616646093,
+            "S31": 304.11944988244517,
+            "S32": 44.545988210520996,
+            "S33": 420.85004419606014,
+            "S34": 334.38294640836676,
+            "S35": 157.3347705509889,
+            "S36": 166.79774125963712,
+            "S37": 333.2399183536567,
+            "S38": 238.9027426228207,
+            "S39": 310.4606168286708,
+            "S40": 257.86566796321495,
+            "S41": 276.7786581065506,
+            "S42": 333.84597972008396,
+            "S43": 182.093928002419,
+            "S44": 328.92084530824275,
+            "S45": 201.3015183937869,
+            "S46": 235.74781783596086,
+            "S47": 370.35546678006415,
+            "S48": 72.79741119231802,
+            "S49": 248.0623436752064,
+            "S50": 30.021635870170318
+          },
+          "batch_start_s": {
+            "G_U5_1": 312.4342590148016,
+            "G_U5_2": 277.23015139298053,
+            "G_U3_1": 245.5567748063409
+          },
+          "batch_finish_s": {
+            "G_U5_1": 682.6026402558684,
+            "G_U5_2": 298.07113529224614,
+            "G_U3_1": 601.5002747204222
+          }
+        },
+        "final_values": {
+          "tau_s": {
+            "G_U5_1": 0.6727795045748469,
+            "G_U5_2": 1.02110384949015,
+            "G_U3_1": 0.6192641454162107
+          },
+          "bandwidth_mhz": {
+            "('U3', 'E2')": 4.999999999952369,
+            "('U5', 'E1')": 3.9999999999879665
+          },
+          "mec_cpu_ghz": {
+            "('U3', 'E2')": 5.961501126851125,
+            "('U5', 'E1')": 4.491768843395779
+          },
+          "local_cpu_ghz": {
+            "S30": 0.2251869169834346,
+            "S11": 0.7014813264344245,
+            "S5": 0.7014813461672799,
+            "S1": 0.2251865284686704,
+            "S28": 0.20697203109605763,
+            "S20": 0.22518694515800347,
+            "S50": 0.701481263647549,
+            "S18": 0.8945898047561466,
+            "S27": 0.8651337548089834,
+            "S17": 0.9521447189529071,
+            "S29": 0.7014813587061942,
+            "S16": 0.865133734095478,
+            "S8": 0.7279818943146129,
+            "S23": 0.865133725217758,
+            "S21": 0.20696934595970568,
+            "S35": 0.8651337650754256,
+            "S48": 0.701481302363989,
+            "S22": 0.9521447455880047,
+            "S47": 0.5261666643927183,
+            "S19": 0.8651336956371323,
+            "S43": 0.8651337600490914,
+            "S3": 0.8651337632708066,
+            "S2": 0.7014813069342396,
+            "S6": 0.9521447032957868,
+            "S45": 0.7014813668869156,
+            "S39": 0.5984455037549503,
+            "S9": 0.865133644888486,
+            "S40": 0.9521447731783211,
+            "S26": 0.4983674167738932,
+            "S14": 0.7014813630545943,
+            "S15": 0.7014813434890377,
+            "S13": 0.9521448083865038,
+            "S42": 0.7014813680734937,
+            "S38": 0.8651337651338356,
+            "S37": 0.5261667604484792,
+            "S4": 0.7014813561464129,
+            "S46": 0.9521448141300161,
+            "S34": 0.8651336003130498,
+            "S10": 0.865133730936259,
+            "S24": 0.9521446352137044,
+            "S31": 0.7014813410724712,
+            "S7": 0.8651337198274579,
+            "S41": 0.8651337610064563,
+            "S33": 0.7279818802396693,
+            "S36": 0.9521447540328563,
+            "S32": 0.7014812695045199,
+            "S25": 0.20697022160164275
+          },
+          "local_start_s": {
+            "S30": 121.73538550044466,
+            "S11": 93.61992028607646,
+            "S5": 118.1766548132782,
+            "S1": 43.10955853444273,
+            "S28": 136.66959226687445,
+            "S20": 218.34166169253044,
+            "S50": 6.44758268028051,
+            "S18": 30.5072739217347,
+            "S27": 91.72339215787844,
+            "S17": 72.636242199787,
+            "S29": 144.1990188662636,
+            "S16": 46.00526938669079,
+            "S8": 334.3829464093328,
+            "S23": 8.099882973556248,
+            "S21": 7.207911511692105,
+            "S35": 120.88459832308429,
+            "S48": 44.545988211598804,
+            "S22": 99.05371140159858,
+            "S47": 333.2399183561193,
+            "S19": 182.09392800297618,
+            "S43": 157.334770551547,
+            "S3": 193.02900263689315,
+            "S2": 72.79741119337812,
+            "S6": 128.24186927778243,
+            "S45": 174.5042272052387,
+            "S39": 269.66663766014426,
+            "S9": 293.00647953127617,
+            "S40": 235.74781783635402,
+            "S26": 370.35546678299346,
+            "S14": 201.30151839482374,
+            "S15": 253.18343899883118,
+            "S13": 166.7977412600306,
+            "S42": 304.11944988348046,
+            "S38": 216.05723435270892,
+            "S37": 310.4606168311013,
+            "S4": 233.72892434411736,
+            "S46": 200.80894593423443,
+            "S34": 324.9846477623337,
+            "S10": 276.77865810710745,
+            "S24": 257.86566796360836,
+            "S31": 290.37109816483036,
+            "S7": 73.30999090715775,
+            "S41": 238.90274262337732,
+            "S33": 381.2592435705479,
+            "S36": 144.6229290250739,
+            "S32": 30.021635871271002,
+            "S25": 45.150980770892836
+          },
+          "task_completion_s": {
+            "S1": 121.73538547320982,
+            "S2": 93.61992028502324,
+            "S3": 216.05723435215307,
+            "S4": 253.18343899779498,
+            "S5": 144.1990188652214,
+            "S6": 144.6229290246801,
+            "S7": 91.72339215731712,
+            "S8": 381.25924356957404,
+            "S9": 324.9846477617696,
+            "S10": 293.00647953071274,
+            "S11": 118.17665481223,
+            "S12": 283.8894089318322,
+            "S13": 200.80894593384124,
+            "S14": 233.72892434308127,
+            "S15": 290.37109816379507,
+            "S16": 73.30999090659427,
+            "S17": 99.0537114012037,
+            "S18": 72.63624219926868,
+            "S19": 193.02900263633668,
+            "S20": 269.527644743868,
+            "S21": 45.15098074523179,
+            "S22": 128.24186927738833,
+            "S23": 46.00526938612289,
+            "S24": 269.6666376584958,
+            "S25": 136.6695922384241,
+            "S26": 425.63582258185636,
+            "S27": 120.88459832252471,
+            "S28": 272.6373732645804,
+            "S29": 174.50422720420028,
+            "S30": 218.3416616646093,
+            "S31": 304.11944988244517,
+            "S32": 44.545988210520996,
+            "S33": 420.85004419606014,
+            "S34": 334.38294640836676,
+            "S35": 157.3347705509889,
+            "S36": 166.79774125963712,
+            "S37": 333.2399183536567,
+            "S38": 238.9027426228207,
+            "S39": 310.4606168286708,
+            "S40": 257.86566796321495,
+            "S41": 276.7786581065506,
+            "S42": 333.84597972008396,
+            "S43": 182.093928002419,
+            "S44": 328.92084530824275,
+            "S45": 201.3015183937869,
+            "S46": 235.74781783596086,
+            "S47": 370.35546678006415,
+            "S48": 72.79741119231802,
+            "S49": 248.0623436752064,
+            "S50": 30.021635870170318
+          },
+          "batch_start_s": {
+            "G_U5_1": 312.4342590148016,
+            "G_U5_2": 277.23015139298053,
+            "G_U3_1": 245.5567748063409
+          },
+          "batch_finish_s": {
+            "G_U5_1": 682.6026402558684,
+            "G_U5_2": 298.07113529224614,
+            "G_U3_1": 601.5002747204222
+          }
+        },
+        "stage1_duals": {
+          "b_lower::U3::E2": 1.5685948422106128e-10,
+          "F_lower::U3::E2": 1.31118081423164e-10,
+          "b_lower::U5::E1": 1.9575568644255472e-10,
+          "F_lower::U5::E1": 1.7353397574988988e-10,
+          "upload_epi::G_U5_1": 200.09999999881765,
+          "upload_epi::G_U5_2": 200.1000000000949,
+          "upload_epi::G_U3_1": 200.10000000188188,
+          "bandwidth_cap::E1": 67.3841037606603,
+          "mec_cpu_cap::E1": 1.5887075729783332e-09,
+          "bandwidth_cap::E2": 16.312101218576505,
+          "mec_cpu_cap::E2": 1.465113922417817e-09,
+          "local_release::S1": 0.0228378971583483,
+          "local_complete::S1": 0.022837897171195644,
+          "local_upper::S1": 1.0730970003966666e-09,
+          "local_lower::S1": 3.1708079977545826e-09,
+          "local_release::S30": 1.2291322282404401e-11,
+          "local_fifo::S30": 0.022837897180215817,
+          "local_complete::S30": 0.022837897193459973,
+          "local_upper::S30": 1.0703966347321746e-09,
+          "local_lower::S30": 3.245974915760247e-09,
+          "local_release::S20": 5.614177501314875e-12,
+          "local_fifo::S20": 0.022837897197894096,
+          "local_complete::S20": 0.022837897201029283,
+          "local_upper::S20": 1.0874390652333425e-09,
+          "local_lower::S20": 3.2529282779159222e-09,
+          "local_release::S23": 1.29502964803626,
+          "local_complete::S23": 1.2950296481266421,
+          "local_upper::S23": 6.4863811686950015e-09,
+          "local_lower::S23": 8.950309867951578e-10,
+          "local_release::S16": 4.236142204469947e-11,
+          "local_fifo::S16": 1.2950296481453032,
+          "local_complete::S16": 1.2950296481974515,
+          "local_upper::S16": 6.472187548798933e-09,
+          "local_lower::S16": 8.947095480238181e-10,
+          "local_release::S7": 2.0501473139814033e-11,
+          "local_fifo::S7": 1.295029648210042,
+          "local_complete::S7": 1.2950296482341512,
+          "local_upper::S7": 6.327625635999004e-09,
+          "local_lower::S7": 8.957980859959206e-10,
+          "local_release::S27": 1.957412513818312e-11,
+          "local_fifo::S27": 1.2950296482440486,
+          "local_complete::S27": 1.2950296482649741,
+          "local_upper::S27": 6.686134395231835e-09,
+          "local_lower::S27": 8.930521987516117e-10,
+          "local_release::S35": 1.968973631683338e-11,
+          "local_fifo::S35": 1.2950296482721695,
+          "local_complete::S35": 1.2950296482911212,
+          "local_upper::S35": 6.964382079902158e-09,
+          "local_lower::S35": 8.911966993030461e-10,
+          "local_release::S43": 1.1801307452845218e-11,
+          "local_fifo::S43": 1.2950296482968267,
+          "local_complete::S43": 1.2950296483065025,
+          "local_upper::S43": 6.667540277322226e-09,
+          "local_lower::S43": 8.931681937752158e-10,
+          "local_release::S19": 1.0463295471369348e-11,
+          "local_fifo::S19": 1.295029648311837,
+          "local_complete::S19": 1.2950296483197878,
+          "local_upper::S19": 6.177336294231588e-09,
+          "local_lower::S19": 8.972989303764762e-10,
+          "local_release::S3": 1.0361566411497342e-11,
+          "local_fifo::S3": 1.2950296483241694,
+          "local_complete::S3": 1.2950296483315331,
+          "local_upper::S3": 6.67055268477416e-09,
+          "local_lower::S3": 8.931674651430976e-10,
+          "local_release::S38": 8.376612917213644e-12,
+          "local_fifo::S38": 1.2950296483357657,
+          "local_complete::S38": 1.2950296483407195,
+          "local_upper::S38": 6.6865053060000795e-09,
+          "local_lower::S38": 8.930643259512118e-10,
+          "local_release::S41": 7.686473206721682e-12,
+          "local_fifo::S41": 1.2950296483209236,
+          "local_complete::S41": 1.2950296483247132,
+          "local_upper::S41": 7.171976557921943e-09,
+          "local_lower::S41": 8.892109864790524e-10,
+          "local_release::S10": 6.1240148562834835e-12,
+          "local_fifo::S10": 1.295029648317022,
+          "local_complete::S10": 1.2950296483190515,
+          "local_upper::S10": 6.4034832651027105e-09,
+          "local_lower::S10": 8.950287461225495e-10,
+          "local_release::S9": 5.750759251979064e-12,
+          "local_fifo::S9": 1.2950296478083683,
+          "local_complete::S9": 1.2950296478096857,
+          "local_upper::S9": 6.674416364905494e-09,
+          "local_lower::S9": 8.904644535139472e-10,
+          "local_release::S34": 4.8890238118648435e-12,
+          "local_fifo::S34": 1.2950296477993422,
+          "local_complete::S34": 1.2950296478000716,
+          "local_upper::S34": 6.136546204460338e-09,
+          "local_lower::S34": 8.969977616634735e-10,
+          "local_release::S8": 4.82933859513998e-12,
+          "local_fifo::S8": 0.7715990896003372,
+          "local_complete::S8": 0.7715990896005205,
+          "local_upper::S8": 3.0346466368044267e-09,
+          "local_lower::S8": 1.060269494815254e-09,
+          "local_release::S33": 3.959808114523076e-12,
+          "local_fifo::S33": 0.7715990895659236,
+          "local_complete::S33": 0.7715990895650291,
+          "local_upper::S33": 2.9955927254502717e-09,
+          "local_lower::S33": 1.062532125696147e-09,
+          "local_release::S50": 0.6903642604263573,
+          "local_complete::S50": 0.6903642605380924,
+          "local_upper::S50": 2.679956595059464e-09,
+          "local_lower::S50": 1.1069742430035249e-09,
+          "local_release::S32": 4.39999963008322e-11,
+          "local_fifo::S32": 0.69036426056593,
+          "local_complete::S32": 0.6903642606284608,
+          "local_upper::S32": 2.7298796443008426e-09,
+          "local_lower::S32": 1.0997439395241064e-09,
+          "local_release::S48": 7.000020978929365e-11,
+          "local_fifo::S48": 0.6903642606472564,
+          "local_complete::S48": 0.6903642607273209,
+          "local_upper::S48": 2.8076721772339588e-09,
+          "local_lower::S48": 1.0943082240513437e-09,
+          "local_release::S2": 2.100558221075428e-11,
+          "local_fifo::S2": 0.6903642607383851,
+          "local_complete::S2": 0.6903642607630637,
+          "local_upper::S2": 2.8190108408451356e-09,
+          "local_lower::S2": 1.092230223064012e-09,
+          "local_release::S11": 1.7894336700961392e-11,
+          "local_fifo::S11": 0.6903642607713301,
+          "local_complete::S11": 0.6903642607905569,
+          "local_upper::S11": 2.846339005116369e-09,
+          "local_lower::S11": 1.090987013650918e-09,
+          "local_release::S5": 2.96752733714549e-11,
+          "local_fifo::S5": 0.6903642607973124,
+          "local_complete::S5": 0.6903642608266435,
+          "local_upper::S5": 2.875037687897986e-09,
+          "local_lower::S5": 1.0894835734097545e-09,
+          "local_release::S29": 1.8073521669679752e-11,
+          "local_fifo::S29": 0.6903642608330174,
+          "local_complete::S29": 0.6903642608495528,
+          "local_upper::S29": 2.9085121043968738e-09,
+          "local_lower::S29": 1.0881373620182704e-09,
+          "local_release::S45": 2.2176572147048708e-11,
+          "local_fifo::S45": 0.6903642608552238,
+          "local_complete::S45": 0.6903642608749831,
+          "local_upper::S45": 2.9177219215572887e-09,
+          "local_lower::S45": 1.0871076703266374e-09,
+          "local_release::S14": 1.3942224688475867e-11,
+          "local_fifo::S14": 0.6903642608677836,
+          "local_complete::S14": 0.6903642608786656,
+          "local_upper::S14": 2.9465864848461773e-09,
+          "local_lower::S14": 1.0860140641337668e-09,
+          "local_release::S4": 9.892954999831464e-12,
+          "local_fifo::S4": 0.6903642608739975,
+          "local_complete::S4": 0.6903642608804602,
+          "local_upper::S4": 2.8929602971704943e-09,
+          "local_lower::S4": 1.0873011392683326e-09,
+          "local_release::S15": 8.785175324860428e-12,
+          "local_fifo::S15": 0.6903642608748006,
+          "local_complete::S15": 0.6903642608797118,
+          "local_upper::S15": 2.9818401353024553e-09,
+          "local_lower::S15": 1.0840828825038282e-09,
+          "local_release::S31": 6.5961089837904335e-12,
+          "local_fifo::S31": 0.6903642608808723,
+          "local_complete::S31": 0.6903642608835581,
+          "local_upper::S31": 2.8708921326736586e-09,
+          "local_lower::S31": 1.0877081213637911e-09,
+          "local_release::S42": 6.808083946087387e-12,
+          "local_fifo::S42": 0.6903642608816344,
+          "local_complete::S42": 0.6903642608841548,
+          "local_upper::S42": 2.933259265828773e-09,
+          "local_lower::S42": 1.0865652238452414e-09,
+          "local_release::S21": 0.017731840276494146,
+          "local_complete::S21": 0.017731840385214814,
+          "local_upper::S21": 1.1067517487918912e-09,
+          "local_lower::S21": 3.0752555181656772e-09,
+          "local_release::S25": 2.46865065264061e-11,
+          "local_fifo::S25": 0.01773184041054428,
+          "local_complete::S25": 0.017731840452336618,
+          "local_upper::S25": 1.0683264150154888e-09,
+          "local_lower::S25": 3.385557342346048e-09,
+          "local_release::S28": 9.075828088179809e-12,
+          "local_fifo::S28": 0.017731840472699757,
+          "local_complete::S28": 0.01773184049332552,
+          "local_upper::S28": 1.0232019136733263e-09,
+          "local_lower::S28": 3.7000334613701025e-09,
+          "local_release::S18": 1.4318643216494154,
+          "local_complete::S18": 1.431864321670221,
+          "local_upper::S18": 8.209785302811387e-09,
+          "local_lower::S18": 8.675936226308154e-10,
+          "local_release::S17": 0.2945256733957527,
+          "local_fifo::S17": 1.43186432168305,
+          "local_complete::S17": 1.7263899950823705,
+          "local_upper::S17": 2.246374708306787e-08,
+          "local_lower::S17": 8.149470198137019e-10,
+          "local_release::S22": 4.343341123101689e-11,
+          "local_fifo::S22": 1.7263899950897654,
+          "local_complete::S22": 1.7263899951339325,
+          "local_upper::S22": 2.3288738163874694e-08,
+          "local_lower::S22": 8.152419715640362e-10,
+          "local_release::S6": 1.9853447311443482e-11,
+          "local_fifo::S6": 1.726389995141185,
+          "local_complete::S6": 1.726389995160183,
+          "local_upper::S6": 1.9608401610224894e-08,
+          "local_lower::S6": 8.164010749698139e-10,
+          "local_release::S36": 1.5212148526869884e-11,
+          "local_fifo::S36": 1.726389995167238,
+          "local_complete::S36": 1.726389995180851,
+          "local_upper::S36": 2.087995265125289e-08,
+          "local_lower::S36": 8.167058436590605e-10,
+          "local_release::S13": 1.4116251840169202e-11,
+          "local_fifo::S13": 1.7263899951863853,
+          "local_complete::S13": 1.7263899951981,
+          "local_upper::S13": 2.424373737883688e-08,
+          "local_lower::S13": 8.164430342388813e-10,
+          "local_release::S46": 1.0606643479861143e-11,
+          "local_fifo::S46": 1.72638999520061,
+          "local_complete::S46": 1.7263899952080086,
+          "local_upper::S46": 2.4527717246759946e-08,
+          "local_lower::S46": 8.165088860691588e-10,
+          "local_release::S40": 1.0394344470594903e-11,
+          "local_fifo::S40": 1.7263899952094799,
+          "local_complete::S40": 1.726389995216192,
+          "local_upper::S40": 2.0710921175289694e-08,
+          "local_lower::S40": 8.172452361123597e-10,
+          "local_release::S24": 8.523778668172402e-12,
+          "local_fifo::S24": 1.7263899951956452,
+          "local_complete::S24": 1.7263899952004265,
+          "local_upper::S24": 1.930248253908259e-08,
+          "local_lower::S24": 8.15382606237421e-10,
+          "local_release::S39": 8.135721063842464e-12,
+          "local_fifo::S39": 0.4286507662398766,
+          "local_complete::S39": 0.4286507662439391,
+          "local_upper::S39": 2.19661395796502e-09,
+          "local_lower::S39": 1.254704260207836e-09,
+          "local_release::S37": 6.364556812036272e-12,
+          "local_fifo::S37": 0.29133967542200323,
+          "local_complete::S37": 0.2913396754241821,
+          "local_upper::S37": 1.7817558031076067e-09,
+          "local_lower::S37": 1.4399553607669808e-09,
+          "local_release::S47": 6.857172099938528e-12,
+          "local_fifo::S47": 0.29133967531601,
+          "local_complete::S47": 0.29133967531829563,
+          "local_upper::S47": 1.748808841097781e-09,
+          "local_lower::S47": 1.444742876092436e-09,
+          "local_release::S26": 5.5323549975733235e-12,
+          "local_fifo::S26": 0.24755919883554403,
+          "local_complete::S26": 0.2475591988362573,
+          "local_upper::S26": 1.6273682274288004e-09,
+          "local_lower::S26": 1.5186413180063714e-09,
+          "batch_arrival::G_U5_1": 4.178228003042157e-11,
+          "batch_fifo::G_U5_1": 5.346225604663949e-11,
+          "mec_task_complete::G_U5_1::1::S44": 8.814615428434202e-11,
+          "batch_complete::G_U5_1": 2.0360058775272225e-12,
+          "batch_arrival::G_U5_2": 8.86780983631286e-10,
+          "mec_task_complete::G_U5_2::1::S12": 8.339916059618053e-10,
+          "batch_complete::G_U5_2": 5.133041201244277e-11,
+          "batch_arrival::G_U3_1": 3.2037750562043306e-09,
+          "mec_task_complete::G_U3_1::1::S49": 3.2012279397458823e-09,
+          "batch_complete::G_U3_1": 2.1168002842513158e-12,
+          "deadline::S1": 3.5877426512516856e-12,
+          "deadline::S2": 4.5759002946490095e-12,
+          "deadline::S3": 3.978450743196903e-12,
+          "deadline::S4": 1.3374283623486515e-11,
+          "deadline::S5": 3.7216487793249854e-12,
+          "deadline::S6": 2.924273163388266e-12,
+          "deadline::S7": 3.0948943439390772e-12,
+          "deadline::S8": 4.1613614918490545e-11,
+          "deadline::S9": 1.7578579729321795e-11,
+          "deadline::S10": 5.178627938552859e-10,
+          "deadline::S11": 4.475403172429526e-12,
+          "deadline::S12": 8.39552449224663e-10,
+          "deadline::S13": 6.175497196887789e-12,
+          "deadline::S14": 1.2790832053649586e-11,
+          "deadline::S15": 6.384055626181e-12,
+          "deadline::S16": 2.6476291637499467e-12,
+          "deadline::S17": 5.1323746973670705e-12,
+          "deadline::S18": 2.6133792601316344e-12,
+          "deadline::S19": 3.995206305182218e-12,
+          "deadline::S20": 0.022837897205827924,
+          "deadline::S21": 2.694911841058514e-12,
+          "deadline::S22": 3.54393880717329e-12,
+          "deadline::S23": 2.9815164628012302e-12,
+          "deadline::S24": 1.2977392289679575,
+          "deadline::S25": 2.857640733568551e-12,
+          "deadline::S26": 0.24755919884046915,
+          "deadline::S27": 3.891477658905164e-12,
+          "deadline::S28": 0.017731840498364387,
+          "deadline::S29": 3.551988386150299e-12,
+          "deadline::S30": 4.536195142115406e-12,
+          "deadline::S31": 9.030304309998771e-12,
+          "deadline::S32": 2.7481387827775356e-12,
+          "deadline::S33": 0.7715990895692711,
+          "deadline::S34": 0.5234305582065346,
+          "deadline::S35": 3.947648145520869e-12,
+          "deadline::S36": 3.842981119098807e-12,
+          "deadline::S37": 1.1506091263528319e-10,
+          "deadline::S38": 2.7661425810885785e-11,
+          "deadline::S39": 0.13731109082927226,
+          "deadline::S40": 2.8263197960908797e-11,
+          "deadline::S41": 1.5249880523321153e-11,
+          "deadline::S42": 0.6903642608886975,
+          "deadline::S43": 3.549208086245434e-12,
+          "deadline::S44": 9.342946700747467e-11,
+          "deadline::S45": 1.579734780125458e-11,
+          "deadline::S46": 6.630414323311562e-12,
+          "deadline::S47": 0.04378047648964833,
+          "deadline::S48": 4.172682636984949e-12,
+          "deadline::S49": 3.206383154529338e-09,
+          "deadline::S50": 2.233018003665363e-12,
+          "avg_delay": 8.864016338790227e-12,
+          "cycle::U1": 2.354139839613381e-12,
+          "cycle::U2": 3.5821560354093893e-12,
+          "cycle::U3": 5.115734825937977e-12,
+          "cycle::U4": 2.122368045754697e-12,
+          "cycle::U5": 5.0200073956610155e-12,
+          "battery::U1": 1.5189371598777898e-13,
+          "battery::U2": 1.3653335200941807e-13,
+          "battery::U3": 8.062185770405154e-15,
+          "battery::U4": 1.5779947948889688e-13,
+          "battery::U5": 1.461645895417572e-14
+        },
+        "diagnostics": {
+          "stage1_status": "optimal",
+          "stage1_solver": "CLARABEL",
+          "energy_tolerance_j": 0.18553278054553687
+        }
+      }
+    },
+    {
+      "case": "K50_S47_A101_ESI-ALNS",
+      "source_file": "metrics_K50_S47.json",
+      "source_sha256": "aef1012025f5bffc530ca6dfa41c2b59421c40b0157d98aaeb11bd7d8f9865e3",
+      "instance": {
+        "depot_xy": [
+          100.0,
+          100.0
+        ],
+        "tasks": {
+          "S1": {
+            "task_id": "S1",
+            "x": 357.77240559476735,
+            "y": 432.9787961504941,
+            "data_mb": 2.3610125907687225,
+            "cycles_per_bit": 937.3878963513013,
+            "release_s": 0.0,
+            "deadline_s": 339.73998568639365,
+            "collect_s": 1.0
+          },
+          "S2": {
+            "task_id": "S2",
+            "x": 396.71878539725293,
+            "y": 59.27237364112891,
+            "data_mb": 2.2555978221884403,
+            "cycles_per_bit": 809.4639449041078,
+            "release_s": 0.0,
+            "deadline_s": 265.9420524545966,
+            "collect_s": 1.0
+          },
+          "S3": {
+            "task_id": "S3",
+            "x": 273.2543750475604,
+            "y": 946.9501695078229,
+            "data_mb": 2.4446583328513256,
+            "cycles_per_bit": 1018.6751097712986,
+            "release_s": 0.0,
+            "deadline_s": 412.63268013915433,
+            "collect_s": 1.0
+          },
+          "S4": {
+            "task_id": "S4",
+            "x": 882.78882252391,
+            "y": 564.8654801442582,
+            "data_mb": 1.690140856155943,
+            "cycles_per_bit": 1009.3078390179655,
+            "release_s": 0.0,
+            "deadline_s": 312.13478043377233,
+            "collect_s": 1.0
+          },
+          "S5": {
+            "task_id": "S5",
+            "x": 939.4530695108091,
+            "y": 51.93354769429419,
+            "data_mb": 2.1225016947850333,
+            "cycles_per_bit": 1075.0405411525148,
+            "release_s": 0.0,
+            "deadline_s": 355.67560897428154,
+            "collect_s": 1.0
+          },
+          "S6": {
+            "task_id": "S6",
+            "x": 555.4788225300531,
+            "y": 751.4223851870296,
+            "data_mb": 1.7158575755791943,
+            "cycles_per_bit": 1136.24955633029,
+            "release_s": 0.0,
+            "deadline_s": 412.1916916101877,
+            "collect_s": 1.0
+          },
+          "S7": {
+            "task_id": "S7",
+            "x": 53.86776775479014,
+            "y": 340.57094167194646,
+            "data_mb": 2.0885158906508696,
+            "cycles_per_bit": 953.4314766773753,
+            "release_s": 0.0,
+            "deadline_s": 344.7231027956117,
+            "collect_s": 1.0
+          },
+          "S8": {
+            "task_id": "S8",
+            "x": 262.72114107917776,
+            "y": 642.856139220799,
+            "data_mb": 3.643335071808646,
+            "cycles_per_bit": 1170.8055576658494,
+            "release_s": 0.0,
+            "deadline_s": 399.71260607447186,
+            "collect_s": 1.0
+          },
+          "S9": {
+            "task_id": "S9",
+            "x": 229.81175521156945,
+            "y": 734.4118221531799,
+            "data_mb": 3.319224068894839,
+            "cycles_per_bit": 1041.8620686323911,
+            "release_s": 0.0,
+            "deadline_s": 368.9738289790094,
+            "collect_s": 1.0
+          },
+          "S10": {
+            "task_id": "S10",
+            "x": 294.8655835090856,
+            "y": 762.0184813258311,
+            "data_mb": 1.7169488774786907,
+            "cycles_per_bit": 1022.1064148009061,
+            "release_s": 0.0,
+            "deadline_s": 294.5861435253157,
+            "collect_s": 1.0
+          },
+          "S11": {
+            "task_id": "S11",
+            "x": 531.3770143893983,
+            "y": 58.50540984115142,
+            "data_mb": 1.936619935096908,
+            "cycles_per_bit": 1111.8657302721676,
+            "release_s": 0.0,
+            "deadline_s": 294.34387646640744,
+            "collect_s": 1.0
+          },
+          "S12": {
+            "task_id": "S12",
+            "x": 721.0026110606126,
+            "y": 787.630054146793,
+            "data_mb": 2.819034526808612,
+            "cycles_per_bit": 1050.9628738207596,
+            "release_s": 0.0,
+            "deadline_s": 284.7755309073337,
+            "collect_s": 1.0
+          },
+          "S13": {
+            "task_id": "S13",
+            "x": 485.9828418717769,
+            "y": 943.8498134864813,
+            "data_mb": 3.9560993669725,
+            "cycles_per_bit": 1023.217219558961,
+            "release_s": 0.0,
+            "deadline_s": 327.39954518328784,
+            "collect_s": 1.0
+          },
+          "S14": {
+            "task_id": "S14",
+            "x": 961.8824231884165,
+            "y": 545.1129219090238,
+            "data_mb": 3.412996361288505,
+            "cycles_per_bit": 833.1103565532111,
+            "release_s": 0.0,
+            "deadline_s": 295.3349869848957,
+            "collect_s": 1.0
+          },
+          "S15": {
+            "task_id": "S15",
+            "x": 800.1500293434644,
+            "y": 544.9899612177145,
+            "data_mb": 3.3470077619374687,
+            "cycles_per_bit": 974.2451678680736,
+            "release_s": 0.0,
+            "deadline_s": 412.8263865161848,
+            "collect_s": 1.0
+          },
+          "S16": {
+            "task_id": "S16",
+            "x": 51.85437637179277,
+            "y": 274.41290306468034,
+            "data_mb": 2.932875289215916,
+            "cycles_per_bit": 1006.7865727650944,
+            "release_s": 0.0,
+            "deadline_s": 368.83984464190183,
+            "collect_s": 1.0
+          },
+          "S17": {
+            "task_id": "S17",
+            "x": 472.9376262265831,
+            "y": 699.8584006189634,
+            "data_mb": 3.3954278070875477,
+            "cycles_per_bit": 925.9972239420695,
+            "release_s": 0.0,
+            "deadline_s": 251.50200950984467,
+            "collect_s": 1.0
+          },
+          "S18": {
+            "task_id": "S18",
+            "x": 253.29877050899063,
+            "y": 352.1257789013678,
+            "data_mb": 3.981391213467299,
+            "cycles_per_bit": 1183.2593019807791,
+            "release_s": 0.0,
+            "deadline_s": 372.02197486998796,
+            "collect_s": 1.0
+          },
+          "S19": {
+            "task_id": "S19",
+            "x": 189.6103344187232,
+            "y": 904.1262521649107,
+            "data_mb": 1.3836288474146512,
+            "cycles_per_bit": 854.6639464212045,
+            "release_s": 0.0,
+            "deadline_s": 388.81860660412775,
+            "collect_s": 1.0
+          },
+          "S20": {
+            "task_id": "S20",
+            "x": 350.29282947111943,
+            "y": 396.6662176233659,
+            "data_mb": 1.800595524398699,
+            "cycles_per_bit": 800.180758990721,
+            "release_s": 0.0,
+            "deadline_s": 269.5276447723255,
+            "collect_s": 1.0
+          },
+          "S21": {
+            "task_id": "S21",
+            "x": 84.47793986259867,
+            "y": 39.89274452386695,
+            "data_mb": 1.125115621248746,
+            "cycles_per_bit": 872.4716894005096,
+            "release_s": 0.0,
+            "deadline_s": 339.59844880106243,
+            "collect_s": 1.0
+          },
+          "S22": {
+            "task_id": "S22",
+            "x": 491.3439264379627,
+            "y": 771.7603285756583,
+            "data_mb": 3.435068432123098,
+            "cycles_per_bit": 1011.3099528956146,
+            "release_s": 0.0,
+            "deadline_s": 348.9489978709866,
+            "collect_s": 1.0
+          },
+          "S23": {
+            "task_id": "S23",
+            "x": 29.58785077358513,
+            "y": 90.89159375516601,
+            "data_mb": 3.507318775741023,
+            "cycles_per_bit": 1168.7427864773401,
+            "release_s": 0.0,
+            "deadline_s": 308.40167011614506,
+            "collect_s": 1.0
+          },
+          "S24": {
+            "task_id": "S24",
+            "x": 852.406101560729,
+            "y": 862.4384900716419,
+            "data_mb": 1.7035037885362567,
+            "cycles_per_bit": 824.4940560422216,
+            "release_s": 0.0,
+            "deadline_s": 269.6666376590619,
+            "collect_s": 1.0
+          },
+          "S25": {
+            "task_id": "S25",
+            "x": 105.04518248602125,
+            "y": 71.73634204327828,
+            "data_mb": 2.643567077241812,
+            "cycles_per_bit": 895.6471848864902,
+            "release_s": 0.0,
+            "deadline_s": 408.86659035178195,
+            "collect_s": 1.0
+          },
+          "S26": {
+            "task_id": "S26",
+            "x": 533.4918295231207,
+            "y": 547.9311293107868,
+            "data_mb": 3.287283024337007,
+            "cycles_per_bit": 1047.594925338928,
+            "release_s": 0.0,
+            "deadline_s": 425.6358225848544,
+            "collect_s": 1.0
+          },
+          "S27": {
+            "task_id": "S27",
+            "x": 97.47503921717936,
+            "y": 491.6038156226806,
+            "data_mb": 2.669565209422614,
+            "cycles_per_bit": 1181.294602497206,
+            "release_s": 0.0,
+            "deadline_s": 321.9260140894074,
+            "collect_s": 1.0
+          },
+          "S28": {
+            "task_id": "S28",
+            "x": 359.5929592128381,
+            "y": 310.6997983287873,
+            "data_mb": 3.5328750780163314,
+            "cycles_per_bit": 995.7020538975619,
+            "release_s": 0.0,
+            "deadline_s": 272.63737329420843,
+            "collect_s": 1.0
+          },
+          "S29": {
+            "task_id": "S29",
+            "x": 951.9975698557517,
+            "y": 132.38374164077285,
+            "data_mb": 2.3837940019284036,
+            "cycles_per_bit": 1114.742858570118,
+            "release_s": 0.0,
+            "deadline_s": 395.7597269357592,
+            "collect_s": 1.0
+          },
+          "S30": {
+            "task_id": "S30",
+            "x": 437.1996079183145,
+            "y": 561.3726224097618,
+            "data_mb": 3.290242790423003,
+            "cycles_per_bit": 826.4766030955794,
+            "release_s": 0.0,
+            "deadline_s": 389.5604717118533,
+            "collect_s": 1.0
+          },
+          "S31": {
+            "task_id": "S31",
+            "x": 772.3950960976346,
+            "y": 490.59416891857035,
+            "data_mb": 1.3423855845991977,
+            "cycles_per_bit": 898.0478774076373,
+            "release_s": 0.0,
+            "deadline_s": 390.82526474892893,
+            "collect_s": 1.0
+          },
+          "S32": {
+            "task_id": "S32",
+            "x": 180.24092766686263,
+            "y": 41.6902846411924,
+            "data_mb": 1.2945574373961182,
+            "cycles_per_bit": 983.7880520215554,
+            "release_s": 0.0,
+            "deadline_s": 330.39512601422996,
+            "collect_s": 1.0
+          },
+          "S33": {
+            "task_id": "S33",
+            "x": 285.71542242549805,
+            "y": 543.1236316157581,
+            "data_mb": 3.085837871339361,
+            "cycles_per_bit": 1167.4862176888705,
+            "release_s": 0.0,
+            "deadline_s": 420.8500441971106,
+            "collect_s": 1.0
+          },
+          "S34": {
+            "task_id": "S34",
+            "x": 201.71397321774316,
+            "y": 672.4158593682386,
+            "data_mb": 1.122658553089303,
+            "cycles_per_bit": 905.3046361871153,
+            "release_s": 0.0,
+            "deadline_s": 334.38294640978137,
+            "collect_s": 1.0
+          },
+          "S35": {
+            "task_id": "S35",
+            "x": 85.72738687340379,
+            "y": 774.5564301660158,
+            "data_mb": 3.637592602987508,
+            "cycles_per_bit": 1083.6244660317789,
+            "release_s": 0.0,
+            "deadline_s": 355.3050794148247,
+            "collect_s": 1.0
+          },
+          "S36": {
+            "task_id": "S36",
+            "x": 535.6704169106432,
+            "y": 779.1550185343928,
+            "data_mb": 2.7353846127919184,
+            "cycles_per_bit": 964.8383193313728,
+            "release_s": 0.0,
+            "deadline_s": 370.40516302959156,
+            "collect_s": 1.0
+          },
+          "S37": {
+            "task_id": "S37",
+            "x": 882.3705902447927,
+            "y": 723.0684206427414,
+            "data_mb": 1.27433656104914,
+            "cycles_per_bit": 1175.681492992284,
+            "release_s": 0.0,
+            "deadline_s": 339.73052341969463,
+            "collect_s": 1.0
+          },
+          "S38": {
+            "task_id": "S38",
+            "x": 312.7974491482701,
+            "y": 935.1547837216068,
+            "data_mb": 2.616974953627045,
+            "cycles_per_bit": 944.0489943358101,
+            "release_s": 0.0,
+            "deadline_s": 267.08382432845065,
+            "collect_s": 1.0
+          },
+          "S39": {
+            "task_id": "S39",
+            "x": 915.7979948032887,
+            "y": 840.6391188318163,
+            "data_mb": 3.2319252511738243,
+            "cycles_per_bit": 944.2117126293331,
+            "release_s": 0.0,
+            "deadline_s": 310.4606168337915,
+            "collect_s": 1.0
+          },
+          "S40": {
+            "task_id": "S40",
+            "x": 850.5404142604559,
+            "y": 908.6839775456721,
+            "data_mb": 2.9018129663266774,
+            "cycles_per_bit": 907.1654357145292,
+            "release_s": 0.0,
+            "deadline_s": 285.4099523436326,
+            "collect_s": 1.0
+          },
+          "S41": {
+            "task_id": "S41",
+            "x": 220.8390579104526,
+            "y": 837.0035171126605,
+            "data_mb": 3.4629218388594385,
+            "cycles_per_bit": 1182.8065553293047,
+            "release_s": 0.0,
+            "deadline_s": 327.6441236459317,
+            "collect_s": 1.0
+          },
+          "S42": {
+            "task_id": "S42",
+            "x": 764.6747525247475,
+            "y": 324.7540035114473,
+            "data_mb": 3.023481772574136,
+            "cycles_per_bit": 862.110655249019,
+            "release_s": 0.0,
+            "deadline_s": 333.84597972117933,
+            "collect_s": 1.0
+          },
+          "S43": {
+            "task_id": "S43",
+            "x": 46.42273013169447,
+            "y": 851.525696211357,
+            "data_mb": 2.5606706165793085,
+            "cycles_per_bit": 1045.623695297948,
+            "release_s": 0.0,
+            "deadline_s": 402.27991049282235,
+            "collect_s": 1.0
+          },
+          "S44": {
+            "task_id": "S44",
+            "x": 302.20325066452483,
+            "y": 310.95203726659963,
+            "data_mb": 3.800192687729326,
+            "cycles_per_bit": 969.2350755234249,
+            "release_s": 0.0,
+            "deadline_s": 337.05520314484414,
+            "collect_s": 1.0
+          },
+          "S45": {
+            "task_id": "S45",
+            "x": 937.194942721185,
+            "y": 503.2213728685467,
+            "data_mb": 2.539705505887447,
+            "cycles_per_bit": 925.1958744370664,
+            "release_s": 0.0,
+            "deadline_s": 251.65213857090026,
+            "collect_s": 1.0
+          },
+          "S46": {
+            "task_id": "S46",
+            "x": 604.5338798027292,
+            "y": 858.4631112526941,
+            "data_mb": 3.5675013058264775,
+            "cycles_per_bit": 1165.6220573026237,
+            "release_s": 0.0,
+            "deadline_s": 353.57447956071144,
+            "collect_s": 1.0
+          },
+          "S47": {
+            "task_id": "S47",
+            "x": 591.047561334493,
+            "y": 619.0489596187498,
+            "data_mb": 2.385478249571802,
+            "cycles_per_bit": 1023.3254229411491,
+            "release_s": 0.0,
+            "deadline_s": 370.3554668004941,
+            "collect_s": 1.0
+          },
+          "S48": {
+            "task_id": "S48",
+            "x": 381.93375693195605,
+            "y": 61.0843695280613,
+            "data_mb": 2.838957121873874,
+            "cycles_per_bit": 872.58472628558,
+            "release_s": 0.0,
+            "deadline_s": 261.52787199088766,
+            "collect_s": 1.0
+          },
+          "S49": {
+            "task_id": "S49",
+            "x": 414.57854552462555,
+            "y": 235.44303509037246,
+            "data_mb": 1.5277319311493731,
+            "cycles_per_bit": 1039.1752612527998,
+            "release_s": 0.0,
+            "deadline_s": 248.30355713069565,
+            "collect_s": 1.0
+          },
+          "S50": {
+            "task_id": "S50",
+            "x": 153.52658564982207,
+            "y": 89.87476749557285,
+            "data_mb": 2.1673386246134605,
+            "cycles_per_bit": 953.7478610853184,
+            "release_s": 0.0,
+            "deadline_s": 381.0343209052256,
+            "collect_s": 1.0
+          }
+        },
+        "mecs": {
+          "E1": {
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0,
+            "bandwidth_mhz": 4.0,
+            "cpu_ghz": 5.0,
+            "radius_m": 200.0
+          },
+          "E2": {
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0,
+            "bandwidth_mhz": 5.0,
+            "cpu_ghz": 6.5,
+            "radius_m": 300.0
+          }
+        },
+        "uavs": {
+          "U1": {
+            "uav_id": "U1",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U2": {
+            "uav_id": "U2",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U3": {
+            "uav_id": "U3",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U4": {
+            "uav_id": "U4",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U5": {
+            "uav_id": "U5",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          }
+        },
+        "contact_points": {
+          "E1_C": {
+            "point_id": "E1_C",
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0
+          },
+          "E1_R1_A00": {
+            "point_id": "E1_R1_A00",
+            "mec_id": "E1",
+            "x": 192.3879532511287,
+            "y": 138.26834323650897
+          },
+          "E1_R1_A01": {
+            "point_id": "E1_R1_A01",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A02": {
+            "point_id": "E1_R1_A02",
+            "mec_id": "E1",
+            "x": 61.731656763491024,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A03": {
+            "point_id": "E1_R1_A03",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 138.268343236509
+          },
+          "E1_R1_A04": {
+            "point_id": "E1_R1_A04",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 61.73165676349103
+          },
+          "E1_R1_A05": {
+            "point_id": "E1_R1_A05",
+            "mec_id": "E1",
+            "x": 61.73165676349097,
+            "y": 7.61204674887135
+          },
+          "E1_R1_A06": {
+            "point_id": "E1_R1_A06",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 7.612046748871336
+          },
+          "E1_R1_A07": {
+            "point_id": "E1_R1_A07",
+            "mec_id": "E1",
+            "x": 192.38795325112864,
+            "y": 61.73165676349096
+          },
+          "E1_R2_A00": {
+            "point_id": "E1_R2_A00",
+            "mec_id": "E1",
+            "x": 270.0,
+            "y": 100.0
+          },
+          "E1_R2_A01": {
+            "point_id": "E1_R2_A01",
+            "mec_id": "E1",
+            "x": 220.20815280171308,
+            "y": 220.20815280171308
+          },
+          "E1_R2_A02": {
+            "point_id": "E1_R2_A02",
+            "mec_id": "E1",
+            "x": 100.00000000000001,
+            "y": 270.0
+          },
+          "E2_C": {
+            "point_id": "E2_C",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0
+          },
+          "E2_R1_A00": {
+            "point_id": "E2_R1_A00",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A01": {
+            "point_id": "E2_R1_A01",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A02": {
+            "point_id": "E2_R1_A02",
+            "mec_id": "E2",
+            "x": 792.5974851452365,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A03": {
+            "point_id": "E2_R1_A03",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A04": {
+            "point_id": "E2_R1_A04",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 192.59748514523653
+          },
+          "E2_R1_A05": {
+            "point_id": "E2_R1_A05",
+            "mec_id": "E2",
+            "x": 792.5974851452364,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A06": {
+            "point_id": "E2_R1_A06",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A07": {
+            "point_id": "E2_R1_A07",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 192.59748514523645
+          },
+          "E2_R2_A02": {
+            "point_id": "E2_R2_A02",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 505.0
+          },
+          "E2_R2_A03": {
+            "point_id": "E2_R2_A03",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 430.3122292025696
+          },
+          "E2_R2_A04": {
+            "point_id": "E2_R2_A04",
+            "mec_id": "E2",
+            "x": 595.0,
+            "y": 250.00000000000003
+          },
+          "E2_R2_A05": {
+            "point_id": "E2_R2_A05",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 69.6877707974304
+          }
+        },
+        "cycle_s": 450.0,
+        "avg_delay_budget_s": 300.0,
+        "max_contacts_per_uav": 3,
+        "reference_gain_db": -50.0,
+        "pathloss_exp": 2.3,
+        "noise_psd_dbm_per_hz": -164.0
+      },
+      "solution": {
+        "routes": {
+          "U1": {
+            "uav_id": "U1",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S1"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S20"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S28"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U2": {
+            "uav_id": "U2",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S23"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S16"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S7"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S27"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S35"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S43"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S19"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S3"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S38"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S41"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S10"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S9"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S34"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S8"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S33"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U3": {
+            "uav_id": "U3",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S50"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S32"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S48"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S2"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S11"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S5"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S29"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S45"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S14"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S4"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S15"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S31"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S42"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S49"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U3_1"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U4": {
+            "uav_id": "U4",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S21"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S25"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U5": {
+            "uav_id": "U5",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S18"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S30"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S17"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S22"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S6"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S36"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S13"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S46"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S12"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S40"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S24"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S39"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S37"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S47"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S26"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S44"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U5_3"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U5_2"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U5_1"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          }
+        },
+        "contact_visits": {
+          "G_U5_1": {
+            "visit_id": "G_U5_1",
+            "uav_id": "U5",
+            "point_id": "E1_C"
+          },
+          "G_U5_2": {
+            "visit_id": "G_U5_2",
+            "uav_id": "U5",
+            "point_id": "E1_R2_A01"
+          },
+          "G_U3_1": {
+            "visit_id": "G_U3_1",
+            "uav_id": "U3",
+            "point_id": "E2_R2_A04"
+          },
+          "G_U5_3": {
+            "visit_id": "G_U5_3",
+            "uav_id": "U5",
+            "point_id": "E1_R2_A01"
+          }
+        },
+        "task_decisions": {
+          "S11": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S5": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S1": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S20": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S50": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S18": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S27": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S17": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S29": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S16": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S8": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S23": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S21": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S35": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S48": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S22": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S47": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S19": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S43": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S3": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S2": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S6": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S45": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S39": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S9": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S40": {
+            "mode": "offload",
+            "contact_visit_id": "G_U5_3"
+          },
+          "S26": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S14": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S15": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S13": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S42": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S38": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S44": {
+            "mode": "offload",
+            "contact_visit_id": "G_U5_1"
+          },
+          "S37": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S4": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S46": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S34": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S10": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S24": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S12": {
+            "mode": "offload",
+            "contact_visit_id": "G_U5_2"
+          },
+          "S31": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S49": {
+            "mode": "offload",
+            "contact_visit_id": "G_U3_1"
+          },
+          "S7": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S41": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S33": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S36": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S32": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S25": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S28": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S30": {
+            "mode": "local",
+            "contact_visit_id": null
+          }
+        },
+        "metadata": {
+          "builder": "parallel_greedy_insertion_2opt_mec_repair",
+          "phase": "mec_assisted_initial_solution",
+          "mec_repair_steps": 1,
+          "mec_repair_moves": [
+            {
+              "step": 1,
+              "type": "insert_contact",
+              "task_id": "S40",
+              "point_id": "E1_R2_A01",
+              "insert_pos": 17,
+              "detour_m": 0.0
+            }
+          ],
+          "proxy_initial_score": [
+            1.0,
+            0.02923872857771958,
+            0.02923872857771958,
+            169520.52102760694,
+            8781.560090695682
+          ],
+          "proxy_final_score": [
+            1.0,
+            0.009160841528637144,
+            0.009160841528637144,
+            169709.78427194568,
+            8781.560090695682
+          ],
+          "proxy_feasible": false,
+          "offloaded_tasks": 4,
+          "contact_visits": 4
+        }
+      },
+      "result": {
+        "status": "optimal",
+        "solver": "SCS",
+        "is_dcp": true,
+        "energy_stage1_j": 168656.3294884225,
+        "energy_final_j": 168656.3294884225,
+        "stage1_values": {
+          "tau_s": {
+            "G_U5_1": 7.185873256374665e-05,
+            "G_U5_2": 0.00010090633713163104,
+            "G_U3_1": 0.0003790388172835482,
+            "G_U5_3": 0.0
+          },
+          "bandwidth_mhz": {
+            "('U3', 'E2')": 5.0006179164517945,
+            "('U5', 'E1')": 4.000799241567261
+          },
+          "mec_cpu_ghz": {
+            "('U3', 'E2')": 3.821992846132503,
+            "('U5', 'E1')": 5.004339708252542
+          },
+          "local_cpu_ghz": {
+            "S11": 0.7014682026176728,
+            "S5": 0.7014682006253911,
+            "S1": 0.2499612938810905,
+            "S20": 0.24996129782588444,
+            "S50": 0.70146820399475,
+            "S18": 0.9460229241448618,
+            "S27": 0.8656199103770885,
+            "S17": 0.9460222563684245,
+            "S29": 0.7014681951131482,
+            "S16": 0.8656198593719251,
+            "S8": 0.7279838374013312,
+            "S23": 0.8656201313673016,
+            "S21": 0.06669592443153645,
+            "S35": 0.8656200964909889,
+            "S48": 0.7014681977228603,
+            "S22": 0.9460224087140665,
+            "S47": 0.5261560707150877,
+            "S19": 0.865619299590396,
+            "S43": 0.8656197865068338,
+            "S3": 0.8656197348026491,
+            "S2": 0.7014682079678765,
+            "S6": 0.9460216233164327,
+            "S45": 0.7014681995813943,
+            "S39": 0.5984077464014362,
+            "S9": 0.8656199847102499,
+            "S26": 0.4983588097420341,
+            "S14": 0.7014681925099061,
+            "S15": 0.7014681869787721,
+            "S13": 0.9460226576053752,
+            "S42": 0.701468195758032,
+            "S38": 0.8656197292255128,
+            "S37": 0.5261560899934328,
+            "S4": 0.7014682099950725,
+            "S46": 0.9460227034059918,
+            "S34": 0.865619229215921,
+            "S10": 0.8656195099799385,
+            "S24": 0.9460212687534527,
+            "S31": 0.7014682195378269,
+            "S7": 0.8656195866859795,
+            "S41": 0.8656201306090968,
+            "S33": 0.7279838360008795,
+            "S36": 0.9460220066797811,
+            "S32": 0.7014682182159959,
+            "S25": 0.06671550776577946,
+            "S28": 0.24996128844180204,
+            "S30": 0.9460220478070388
+          },
+          "local_start_s": {
+            "S11": 93.61990080372892,
+            "S5": 118.17663542930225,
+            "S1": 43.10955821471918,
+            "S20": 113.94200071777048,
+            "S50": 6.44757418461711,
+            "S18": 30.507959887507187,
+            "S27": 91.72344117550887,
+            "S17": 93.41541013402208,
+            "S29": 144.19900114807308,
+            "S16": 46.00527443312426,
+            "S8": 334.3825532587567,
+            "S23": 8.10020650261785,
+            "S21": 7.207911439469933,
+            "S35": 120.8845246743637,
+            "S48": 44.54597014765671,
+            "S22": 120.03498497571792,
+            "S47": 333.2399205025382,
+            "S19": 182.09354749733018,
+            "S43": 157.33441206422899,
+            "S3": 193.02892606835965,
+            "S2": 72.79739435340753,
+            "S6": 149.44632626525316,
+            "S45": 174.50421421701535,
+            "S39": 269.6657945757962,
+            "S9": 293.00630434242754,
+            "S26": 370.35546309718717,
+            "S14": 201.30150832310187,
+            "S15": 253.18343307497364,
+            "S13": 188.29780339653232,
+            "S42": 304.11944593114026,
+            "S38": 216.05717584690987,
+            "S37": 310.46062340738104,
+            "S4": 233.72892046752915,
+            "S46": 222.5688868857715,
+            "S34": 324.98428244098767,
+            "S10": 276.7783056694745,
+            "S24": 257.7746959531807,
+            "S31": 290.3711002153847,
+            "S7": 73.30991480193646,
+            "S41": 238.902706466349,
+            "S33": 381.2590627287122,
+            "S36": 165.9531561211467,
+            "S32": 30.021624800513614,
+            "S25": 124.9458875719437,
+            "S28": 160.05451958626773,
+            "S30": 70.39259641952619
+          },
+          "task_completion_s": {
+            "S1": 113.94200105458863,
+            "S2": 93.61991061134712,
+            "S3": 216.05680232936098,
+            "S4": 253.18344288277254,
+            "S5": 144.19901095573195,
+            "S6": 165.95236589744246,
+            "S7": 91.72306765781882,
+            "S8": 381.2590570934861,
+            "S9": 324.98390892362715,
+            "S10": 293.0059308250134,
+            "S11": 118.17664523694525,
+            "S12": 284.77845182595445,
+            "S13": 222.56809666213354,
+            "S14": 233.72893027528542,
+            "S15": 290.37111002323076,
+            "S16": 73.309541284232,
+            "S17": 120.03419475196306,
+            "S18": 70.39180619573872,
+            "S19": 193.02855255077517,
+            "S20": 160.05451992310967,
+            "S21": 124.94588763493648,
+            "S22": 149.44553604152154,
+            "S23": 46.004900915409785,
+            "S24": 269.66581567462623,
+            "S25": 408.86659042595284,
+            "S26": 425.6358295317878,
+            "S27": 120.88415115669206,
+            "S28": 272.6373736365291,
+            "S29": 174.50422402470153,
+            "S30": 93.41461991024872,
+            "S31": 304.1194557390386,
+            "S32": 44.54597995525103,
+            "S33": 420.8500374741817,
+            "S34": 334.38254762346867,
+            "S35": 157.33403854658187,
+            "S36": 188.297013172859,
+            "S37": 333.2399281460934,
+            "S38": 238.90233294883976,
+            "S39": 310.46063105087995,
+            "S40": 285.3374650567274,
+            "S41": 276.77793215201046,
+            "S42": 333.8459903468843,
+            "S43": 182.09317397971233,
+            "S44": 335.4282079873313,
+            "S45": 201.3015181308208,
+            "S46": 257.7739057295848,
+            "S47": 370.3554688887923,
+            "S48": 72.7974041610115,
+            "S49": 248.2954479454269,
+            "S50": 30.021634608101664
+          },
+          "batch_start_s": {
+            "G_U5_1": 330.3876483603898,
+            "G_U5_2": 280.86025899205674,
+            "G_U3_1": 244.97038782754262,
+            "G_U5_3": 277.37859290310274
+          },
+          "batch_finish_s": {
+            "G_U5_1": 386.60804509139126,
+            "G_U5_2": 330.3873989564637,
+            "G_U3_1": 265.11031881783157,
+            "G_U5_3": 280.8630983137223
+          }
+        },
+        "final_values": {
+          "tau_s": {
+            "G_U5_1": 7.185873256374665e-05,
+            "G_U5_2": 0.00010090633713163104,
+            "G_U3_1": 0.0003790388172835482,
+            "G_U5_3": 0.0
+          },
+          "bandwidth_mhz": {
+            "('U3', 'E2')": 5.0006179164517945,
+            "('U5', 'E1')": 4.000799241567261
+          },
+          "mec_cpu_ghz": {
+            "('U3', 'E2')": 3.821992846132503,
+            "('U5', 'E1')": 5.004339708252542
+          },
+          "local_cpu_ghz": {
+            "S11": 0.7014682026176728,
+            "S5": 0.7014682006253911,
+            "S1": 0.2499612938810905,
+            "S20": 0.24996129782588444,
+            "S50": 0.70146820399475,
+            "S18": 0.9460229241448618,
+            "S27": 0.8656199103770885,
+            "S17": 0.9460222563684245,
+            "S29": 0.7014681951131482,
+            "S16": 0.8656198593719251,
+            "S8": 0.7279838374013312,
+            "S23": 0.8656201313673016,
+            "S21": 0.06669592443153645,
+            "S35": 0.8656200964909889,
+            "S48": 0.7014681977228603,
+            "S22": 0.9460224087140665,
+            "S47": 0.5261560707150877,
+            "S19": 0.865619299590396,
+            "S43": 0.8656197865068338,
+            "S3": 0.8656197348026491,
+            "S2": 0.7014682079678765,
+            "S6": 0.9460216233164327,
+            "S45": 0.7014681995813943,
+            "S39": 0.5984077464014362,
+            "S9": 0.8656199847102499,
+            "S26": 0.4983588097420341,
+            "S14": 0.7014681925099061,
+            "S15": 0.7014681869787721,
+            "S13": 0.9460226576053752,
+            "S42": 0.701468195758032,
+            "S38": 0.8656197292255128,
+            "S37": 0.5261560899934328,
+            "S4": 0.7014682099950725,
+            "S46": 0.9460227034059918,
+            "S34": 0.865619229215921,
+            "S10": 0.8656195099799385,
+            "S24": 0.9460212687534527,
+            "S31": 0.7014682195378269,
+            "S7": 0.8656195866859795,
+            "S41": 0.8656201306090968,
+            "S33": 0.7279838360008795,
+            "S36": 0.9460220066797811,
+            "S32": 0.7014682182159959,
+            "S25": 0.06671550776577946,
+            "S28": 0.24996128844180204,
+            "S30": 0.9460220478070388
+          },
+          "local_start_s": {
+            "S11": 93.61990080372892,
+            "S5": 118.17663542930225,
+            "S1": 43.10955821471918,
+            "S20": 113.94200071777048,
+            "S50": 6.44757418461711,
+            "S18": 30.507959887507187,
+            "S27": 91.72344117550887,
+            "S17": 93.41541013402208,
+            "S29": 144.19900114807308,
+            "S16": 46.00527443312426,
+            "S8": 334.3825532587567,
+            "S23": 8.10020650261785,
+            "S21": 7.207911439469933,
+            "S35": 120.8845246743637,
+            "S48": 44.54597014765671,
+            "S22": 120.03498497571792,
+            "S47": 333.2399205025382,
+            "S19": 182.09354749733018,
+            "S43": 157.33441206422899,
+            "S3": 193.02892606835965,
+            "S2": 72.79739435340753,
+            "S6": 149.44632626525316,
+            "S45": 174.50421421701535,
+            "S39": 269.6657945757962,
+            "S9": 293.00630434242754,
+            "S26": 370.35546309718717,
+            "S14": 201.30150832310187,
+            "S15": 253.18343307497364,
+            "S13": 188.29780339653232,
+            "S42": 304.11944593114026,
+            "S38": 216.05717584690987,
+            "S37": 310.46062340738104,
+            "S4": 233.72892046752915,
+            "S46": 222.5688868857715,
+            "S34": 324.98428244098767,
+            "S10": 276.7783056694745,
+            "S24": 257.7746959531807,
+            "S31": 290.3711002153847,
+            "S7": 73.30991480193646,
+            "S41": 238.902706466349,
+            "S33": 381.2590627287122,
+            "S36": 165.9531561211467,
+            "S32": 30.021624800513614,
+            "S25": 124.9458875719437,
+            "S28": 160.05451958626773,
+            "S30": 70.39259641952619
+          },
+          "task_completion_s": {
+            "S1": 113.94200105458863,
+            "S2": 93.61991061134712,
+            "S3": 216.05680232936098,
+            "S4": 253.18344288277254,
+            "S5": 144.19901095573195,
+            "S6": 165.95236589744246,
+            "S7": 91.72306765781882,
+            "S8": 381.2590570934861,
+            "S9": 324.98390892362715,
+            "S10": 293.0059308250134,
+            "S11": 118.17664523694525,
+            "S12": 284.77845182595445,
+            "S13": 222.56809666213354,
+            "S14": 233.72893027528542,
+            "S15": 290.37111002323076,
+            "S16": 73.309541284232,
+            "S17": 120.03419475196306,
+            "S18": 70.39180619573872,
+            "S19": 193.02855255077517,
+            "S20": 160.05451992310967,
+            "S21": 124.94588763493648,
+            "S22": 149.44553604152154,
+            "S23": 46.004900915409785,
+            "S24": 269.66581567462623,
+            "S25": 408.86659042595284,
+            "S26": 425.6358295317878,
+            "S27": 120.88415115669206,
+            "S28": 272.6373736365291,
+            "S29": 174.50422402470153,
+            "S30": 93.41461991024872,
+            "S31": 304.1194557390386,
+            "S32": 44.54597995525103,
+            "S33": 420.8500374741817,
+            "S34": 334.38254762346867,
+            "S35": 157.33403854658187,
+            "S36": 188.297013172859,
+            "S37": 333.2399281460934,
+            "S38": 238.90233294883976,
+            "S39": 310.46063105087995,
+            "S40": 285.3374650567274,
+            "S41": 276.77793215201046,
+            "S42": 333.8459903468843,
+            "S43": 182.09317397971233,
+            "S44": 335.4282079873313,
+            "S45": 201.3015181308208,
+            "S46": 257.7739057295848,
+            "S47": 370.3554688887923,
+            "S48": 72.7974041610115,
+            "S49": 248.2954479454269,
+            "S50": 30.021634608101664
+          },
+          "batch_start_s": {
+            "G_U5_1": 330.3876483603898,
+            "G_U5_2": 280.86025899205674,
+            "G_U3_1": 244.97038782754262,
+            "G_U5_3": 277.37859290310274
+          },
+          "batch_finish_s": {
+            "G_U5_1": 386.60804509139126,
+            "G_U5_2": 330.3873989564637,
+            "G_U3_1": 265.11031881783157,
+            "G_U5_3": 280.8630983137223
+          }
+        },
+        "stage1_duals": {
+          "b_lower::U3::E2": 0.0,
+          "F_lower::U3::E2": -7.69761692783574e-24,
+          "b_lower::U5::E1": 0.0,
+          "F_lower::U5::E1": 0.0,
+          "upload_epi::G_U5_1": 0.08534116136830323,
+          "upload_epi::G_U5_2": 0.12586324726416098,
+          "upload_epi::G_U3_1": 0.4411264017082477,
+          "upload_epi::G_U5_3": 0.12413226694231755,
+          "bandwidth_cap::E1": 0.060993700688961615,
+          "mec_cpu_cap::E1": 0.2542117371682921,
+          "bandwidth_cap::E2": 0.035782546157322646,
+          "mec_cpu_cap::E2": 3.848602320027069e-24,
+          "local_release::S1": 0.031235841276543507,
+          "local_complete::S1": 0.03123584127648812,
+          "local_upper::S1": 0.0,
+          "local_lower::S1": 0.0,
+          "local_release::S20": 0.0,
+          "local_fifo::S20": 0.031235841276358325,
+          "local_complete::S20": 0.03123584127620473,
+          "local_upper::S20": 0.0,
+          "local_lower::S20": 0.0,
+          "local_release::S28": 0.0,
+          "local_fifo::S28": 0.031235841276019864,
+          "local_complete::S28": 0.031235841275809074,
+          "local_upper::S28": 0.0,
+          "local_lower::S28": 0.0,
+          "local_release::S23": 1.2968099044147214,
+          "local_complete::S23": 1.2968099044152166,
+          "local_upper::S23": 0.0,
+          "local_lower::S23": 0.0,
+          "local_release::S16": 0.0,
+          "local_fifo::S16": 1.2968099044145882,
+          "local_complete::S16": 1.296809904414538,
+          "local_upper::S16": 0.0,
+          "local_lower::S16": 0.0,
+          "local_release::S7": 0.0,
+          "local_fifo::S7": 1.296809904413751,
+          "local_complete::S7": 1.2968099044135262,
+          "local_upper::S7": 0.0,
+          "local_lower::S7": 0.0,
+          "local_release::S27": 0.0,
+          "local_fifo::S27": 1.296809904412915,
+          "local_complete::S27": 1.2968099044128867,
+          "local_upper::S27": 0.0,
+          "local_lower::S27": 0.0,
+          "local_release::S35": 0.0,
+          "local_fifo::S35": 1.2968099044120487,
+          "local_complete::S35": 1.2968099044117714,
+          "local_upper::S35": 0.0,
+          "local_lower::S35": 0.0,
+          "local_release::S43": 0.0,
+          "local_fifo::S43": 1.2968099044104415,
+          "local_complete::S43": 1.2968099044096197,
+          "local_upper::S43": 0.0,
+          "local_lower::S43": 0.0,
+          "local_release::S19": 0.0,
+          "local_fifo::S19": 1.2968099044082235,
+          "local_complete::S19": 1.2968099044073254,
+          "local_upper::S19": 0.0,
+          "local_lower::S19": 0.0,
+          "local_release::S3": 0.0,
+          "local_fifo::S3": 1.2968099044063914,
+          "local_complete::S3": 1.2968099044060157,
+          "local_upper::S3": 0.0,
+          "local_lower::S3": 0.0,
+          "local_release::S38": 0.0,
+          "local_fifo::S38": 1.296809904405091,
+          "local_complete::S38": 1.2968099044047179,
+          "local_upper::S38": 0.0,
+          "local_lower::S38": 0.0,
+          "local_release::S41": 0.0,
+          "local_fifo::S41": 1.2968099044037984,
+          "local_complete::S41": 1.2968099044034358,
+          "local_upper::S41": 0.0,
+          "local_lower::S41": 0.0,
+          "local_release::S10": 0.0,
+          "local_fifo::S10": 1.2968099044019767,
+          "local_complete::S10": 1.2968099044010104,
+          "local_upper::S10": 0.0,
+          "local_lower::S10": 0.0,
+          "local_release::S9": 0.0,
+          "local_fifo::S9": 1.296809904399805,
+          "local_complete::S9": 1.2968099043991326,
+          "local_upper::S9": 0.0,
+          "local_lower::S9": 0.0,
+          "local_release::S34": 0.0,
+          "local_fifo::S34": 1.2968099043976022,
+          "local_complete::S34": 1.296809904396554,
+          "local_upper::S34": 3.8800609589374376e-24,
+          "local_lower::S34": 3.1041127298659114e-23,
+          "local_release::S8": 0.0,
+          "local_fifo::S8": 0.7716022651066976,
+          "local_complete::S8": 0.771602265105638,
+          "local_upper::S8": 0.0,
+          "local_lower::S8": 0.0,
+          "local_release::S33": 0.0,
+          "local_fifo::S33": 0.7716022651048772,
+          "local_complete::S33": 0.771602265104078,
+          "local_upper::S33": 0.0,
+          "local_lower::S33": 0.0,
+          "local_release::S50": 0.6903373414465439,
+          "local_complete::S50": 0.690337341446525,
+          "local_upper::S50": 0.0,
+          "local_lower::S50": 0.0,
+          "local_release::S32": 0.0,
+          "local_fifo::S32": 0.690337341446498,
+          "local_complete::S32": 0.6903373414464458,
+          "local_upper::S32": 0.0,
+          "local_lower::S32": 0.0,
+          "local_release::S48": 0.0,
+          "local_fifo::S48": 0.6903373414463936,
+          "local_complete::S48": 0.6903373414463154,
+          "local_upper::S48": 0.0,
+          "local_lower::S48": 0.0,
+          "local_release::S2": 0.0,
+          "local_fifo::S2": 0.6903373414462308,
+          "local_complete::S2": 0.6903373414461182,
+          "local_upper::S2": 0.0,
+          "local_lower::S2": 0.0,
+          "local_release::S11": 0.0,
+          "local_fifo::S11": 0.6903373414460058,
+          "local_complete::S11": 0.6903373414458639,
+          "local_upper::S11": 0.0,
+          "local_lower::S11": 0.0,
+          "local_release::S5": 0.0,
+          "local_fifo::S5": 0.6903373414457228,
+          "local_complete::S5": 0.6903373414455495,
+          "local_upper::S5": 0.0,
+          "local_lower::S5": 0.0,
+          "local_release::S29": 0.0,
+          "local_fifo::S29": 0.6903373414453787,
+          "local_complete::S29": 0.690337341445171,
+          "local_upper::S29": 0.0,
+          "local_lower::S29": 0.0,
+          "local_release::S45": 0.0,
+          "local_fifo::S45": 0.6903373414449693,
+          "local_complete::S45": 0.6903373414447269,
+          "local_upper::S45": 2.35979405293028e-23,
+          "local_lower::S45": 0.0,
+          "local_release::S14": -1.2003869907721314e-22,
+          "local_fifo::S14": 0.6903373414444909,
+          "local_complete::S14": 0.6903373414442152,
+          "local_upper::S14": 0.0,
+          "local_lower::S14": 0.0,
+          "local_release::S4": 0.0,
+          "local_fifo::S4": 0.6903373414439461,
+          "local_complete::S4": 0.6903373414436321,
+          "local_upper::S4": 0.0,
+          "local_lower::S4": 0.0,
+          "local_release::S15": 0.0,
+          "local_fifo::S15": 0.6903373414433356,
+          "local_complete::S15": 0.6903373414429936,
+          "local_upper::S15": 0.0,
+          "local_lower::S15": 0.0,
+          "local_release::S31": 0.0,
+          "local_fifo::S31": 0.6903373414426619,
+          "local_complete::S31": 0.6903373414422764,
+          "local_upper::S31": 0.0,
+          "local_lower::S31": 0.0,
+          "local_release::S42": 0.0,
+          "local_fifo::S42": 0.6903373414419169,
+          "local_complete::S42": 0.690337341441509,
+          "local_upper::S42": 0.0,
+          "local_lower::S42": 0.0,
+          "local_release::S21": 0.0005937476530310844,
+          "local_complete::S21": 0.0005937476530219899,
+          "local_upper::S21": 0.0,
+          "local_lower::S21": 0.0,
+          "local_release::S25": 0.0,
+          "local_fifo::S25": 0.0005937477065786006,
+          "local_complete::S25": 0.0005937477645748338,
+          "local_upper::S25": 0.0,
+          "local_lower::S25": 0.0,
+          "local_release::S18": 1.6923649847486784,
+          "local_complete::S18": 1.6923649847494364,
+          "local_upper::S18": 0.0,
+          "local_lower::S18": 0.0,
+          "local_release::S30": -1.532723724503034e-23,
+          "local_fifo::S30": 1.6923649847484186,
+          "local_complete::S30": 1.6923649847483075,
+          "local_upper::S30": 0.0,
+          "local_lower::S30": 0.0,
+          "local_release::S17": 0.0,
+          "local_fifo::S17": 1.6923649847473516,
+          "local_complete::S17": 1.6923649847473103,
+          "local_upper::S17": 0.0,
+          "local_lower::S17": 0.0,
+          "local_release::S22": 0.0,
+          "local_fifo::S22": 1.6923649847462099,
+          "local_complete::S22": 1.692364984746014,
+          "local_upper::S22": 0.0,
+          "local_lower::S22": 0.0,
+          "local_release::S6": 0.0,
+          "local_fifo::S6": 1.6923649847446207,
+          "local_complete::S6": 1.6923649847440991,
+          "local_upper::S6": 0.0,
+          "local_lower::S6": 0.0,
+          "local_release::S36": 0.0,
+          "local_fifo::S36": 1.6923649847431406,
+          "local_complete::S36": 1.692364984743102,
+          "local_upper::S36": 0.0,
+          "local_lower::S36": 0.0,
+          "local_release::S13": 0.0,
+          "local_fifo::S13": 1.6923649847422486,
+          "local_complete::S13": 1.6923649847423217,
+          "local_upper::S13": 0.0,
+          "local_lower::S13": 0.0,
+          "local_release::S46": 0.0,
+          "local_fifo::S46": 1.6923649847409035,
+          "local_complete::S46": 1.6923649847403606,
+          "local_upper::S46": 0.0,
+          "local_lower::S46": 0.0,
+          "local_release::S24": 0.0,
+          "local_fifo::S24": 1.692364984738329,
+          "local_complete::S24": 1.6923649847371,
+          "local_upper::S24": 0.0,
+          "local_lower::S24": 0.0,
+          "local_release::S39": 0.0,
+          "local_fifo::S39": 0.42858916947809106,
+          "local_complete::S39": 0.42858916947656933,
+          "local_upper::S39": 0.0,
+          "local_lower::S39": 0.0,
+          "local_release::S37": 0.0,
+          "local_fifo::S37": 0.29132985289406177,
+          "local_complete::S37": 0.2913298528936368,
+          "local_upper::S37": 0.0,
+          "local_lower::S37": 0.0,
+          "local_release::S47": 0.0,
+          "local_fifo::S47": 0.2913298528932431,
+          "local_complete::S47": 0.29132985289277036,
+          "local_upper::S47": 0.0,
+          "local_lower::S47": 0.0,
+          "local_release::S26": 0.0,
+          "local_fifo::S26": 0.2475520331769765,
+          "local_complete::S26": 0.24755203317645993,
+          "local_upper::S26": -5.71348618889613e-23,
+          "local_lower::S26": 0.0,
+          "batch_arrival::G_U5_1": 0.0,
+          "batch_fifo::G_U5_1": 0.0,
+          "mec_task_complete::G_U5_1::1::S44": -1.6987182568214124e-21,
+          "batch_complete::G_U5_1": 0.0,
+          "batch_arrival::G_U5_2": 0.0,
+          "batch_fifo::G_U5_2": 0.1440416598514104,
+          "mec_task_complete::G_U5_2::1::S12": 0.14404165985070044,
+          "batch_complete::G_U5_2": 0.0,
+          "batch_arrival::G_U3_1": 0.0,
+          "mec_task_complete::G_U3_1::1::S49": 0.0,
+          "batch_complete::G_U3_1": 0.0,
+          "batch_arrival::G_U5_3": 0.14404165985311188,
+          "mec_task_complete::G_U5_3::1::S40": 0.0,
+          "batch_complete::G_U5_3": 0.1440416598521397,
+          "deadline::S1": 0.0,
+          "deadline::S2": 0.0,
+          "deadline::S3": 0.0,
+          "deadline::S4": 0.0,
+          "deadline::S5": 0.0,
+          "deadline::S6": 0.0,
+          "deadline::S7": 0.0,
+          "deadline::S8": -2.6546393728694836e-23,
+          "deadline::S9": 0.0,
+          "deadline::S10": 0.0,
+          "deadline::S11": 0.0,
+          "deadline::S12": 0.14404165985039102,
+          "deadline::S13": 0.0,
+          "deadline::S14": 0.0,
+          "deadline::S15": 0.0,
+          "deadline::S16": 0.0,
+          "deadline::S17": 0.0,
+          "deadline::S18": 0.0,
+          "deadline::S19": 0.0,
+          "deadline::S20": 0.0,
+          "deadline::S21": 0.0,
+          "deadline::S22": 0.0,
+          "deadline::S23": 0.0,
+          "deadline::S24": 1.263775815257687,
+          "deadline::S25": 0.0005937477641315422,
+          "deadline::S26": 0.2475520331760307,
+          "deadline::S27": 0.0,
+          "deadline::S28": 0.031235841275517467,
+          "deadline::S29": 0.0,
+          "deadline::S30": 0.0,
+          "deadline::S31": 0.0,
+          "deadline::S32": 0.0,
+          "deadline::S33": 0.771602265103584,
+          "deadline::S34": 0.5252076392888504,
+          "deadline::S35": 0.0,
+          "deadline::S36": 0.0,
+          "deadline::S37": 0.0,
+          "deadline::S38": 0.0,
+          "deadline::S39": 0.13725931658216067,
+          "deadline::S40": 0.0,
+          "deadline::S41": 0.0,
+          "deadline::S42": 0.6903373414411594,
+          "deadline::S43": 2.1206608750648555e-22,
+          "deadline::S44": 0.0,
+          "deadline::S45": 0.0,
+          "deadline::S46": 0.0,
+          "deadline::S47": 0.04377781971535327,
+          "deadline::S48": 0.0,
+          "deadline::S49": -2.8092471720981365e-26,
+          "deadline::S50": 0.0,
+          "avg_delay": 0.0,
+          "cycle::U1": 5.123962731459909e-22,
+          "cycle::U2": 0.0,
+          "cycle::U3": 0.0,
+          "cycle::U4": 0.0,
+          "cycle::U5": 0.0,
+          "battery::U1": 0.0,
+          "battery::U2": 0.0,
+          "battery::U3": 0.0,
+          "battery::U4": 0.0,
+          "battery::U5": 0.0
+        },
+        "diagnostics": {
+          "stage1_status": "optimal",
+          "stage1_solver": "SCS",
+          "energy_tolerance_j": 0.1686563294884225
+        }
+      }
+    },
+    {
+      "case": "K30_S46_A100_B-ALNS",
+      "source_file": "metrics_K30_S46.json",
+      "source_sha256": "d716fd5a5c4bf88c5ffa83bb82db0fb231d7f6ff908e16a1769de922f3722a1a",
+      "instance": {
+        "depot_xy": [
+          100.0,
+          100.0
+        ],
+        "tasks": {
+          "S1": {
+            "task_id": "S1",
+            "x": 872.7373533943885,
+            "y": 403.99462013217243,
+            "data_mb": 2.7658605483226966,
+            "cycles_per_bit": 1143.9146694171045,
+            "release_s": 0.0,
+            "deadline_s": 288.6370566056281,
+            "collect_s": 1.0
+          },
+          "S2": {
+            "task_id": "S2",
+            "x": 515.088592662579,
+            "y": 580.3812661506619,
+            "data_mb": 3.8415985659301874,
+            "cycles_per_bit": 812.8725559425071,
+            "release_s": 0.0,
+            "deadline_s": 259.9098606479773,
+            "collect_s": 1.0
+          },
+          "S3": {
+            "task_id": "S3",
+            "x": 327.2807929432004,
+            "y": 812.0883373340962,
+            "data_mb": 3.5294487632260236,
+            "cycles_per_bit": 854.1564719339192,
+            "release_s": 0.0,
+            "deadline_s": 413.0172036078418,
+            "collect_s": 1.0
+          },
+          "S4": {
+            "task_id": "S4",
+            "x": 526.658570740139,
+            "y": 949.1807297224935,
+            "data_mb": 3.803557979223696,
+            "cycles_per_bit": 837.1685784994579,
+            "release_s": 0.0,
+            "deadline_s": 422.8855003933587,
+            "collect_s": 1.0
+          },
+          "S5": {
+            "task_id": "S5",
+            "x": 479.59460754665247,
+            "y": 169.86669400255744,
+            "data_mb": 2.3968255407504278,
+            "cycles_per_bit": 829.7278954374347,
+            "release_s": 0.0,
+            "deadline_s": 382.2974136871336,
+            "collect_s": 1.0
+          },
+          "S6": {
+            "task_id": "S6",
+            "x": 542.6456471872212,
+            "y": 125.00657629487804,
+            "data_mb": 1.6790767908832684,
+            "cycles_per_bit": 1002.6288999436961,
+            "release_s": 0.0,
+            "deadline_s": 387.62918255435716,
+            "collect_s": 1.0
+          },
+          "S7": {
+            "task_id": "S7",
+            "x": 284.0668903826607,
+            "y": 122.40206666999387,
+            "data_mb": 2.06421530716111,
+            "cycles_per_bit": 827.6126015458597,
+            "release_s": 0.0,
+            "deadline_s": 307.90519567482335,
+            "collect_s": 1.0
+          },
+          "S8": {
+            "task_id": "S8",
+            "x": 856.9701796008277,
+            "y": 196.3947991170491,
+            "data_mb": 1.9052018751941409,
+            "cycles_per_bit": 1109.2760317808486,
+            "release_s": 0.0,
+            "deadline_s": 284.1573051305814,
+            "collect_s": 1.0
+          },
+          "S9": {
+            "task_id": "S9",
+            "x": 130.25206267800527,
+            "y": 258.23239560662853,
+            "data_mb": 2.830844708904189,
+            "cycles_per_bit": 1084.6925994908333,
+            "release_s": 0.0,
+            "deadline_s": 369.31198504974884,
+            "collect_s": 1.0
+          },
+          "S10": {
+            "task_id": "S10",
+            "x": 82.00575415770348,
+            "y": 292.577143753022,
+            "data_mb": 1.3473678909735805,
+            "cycles_per_bit": 1024.0404968946434,
+            "release_s": 0.0,
+            "deadline_s": 313.3532021594386,
+            "collect_s": 1.0
+          },
+          "S11": {
+            "task_id": "S11",
+            "x": 741.1748551992792,
+            "y": 565.8616397680321,
+            "data_mb": 2.7468590922412828,
+            "cycles_per_bit": 868.6247340441805,
+            "release_s": 0.0,
+            "deadline_s": 345.1696468450542,
+            "collect_s": 1.0
+          },
+          "S12": {
+            "task_id": "S12",
+            "x": 83.18522258498606,
+            "y": 116.65985876158547,
+            "data_mb": 3.5747743696839676,
+            "cycles_per_bit": 869.6910457964898,
+            "release_s": 0.0,
+            "deadline_s": 247.6816535081775,
+            "collect_s": 1.0
+          },
+          "S13": {
+            "task_id": "S13",
+            "x": 707.2319594911934,
+            "y": 198.0759110491489,
+            "data_mb": 1.9025283620692484,
+            "cycles_per_bit": 1029.8571457299238,
+            "release_s": 0.0,
+            "deadline_s": 416.6967741574648,
+            "collect_s": 1.0
+          },
+          "S14": {
+            "task_id": "S14",
+            "x": 42.242640378723024,
+            "y": 643.4515528350696,
+            "data_mb": 1.1051075279172953,
+            "cycles_per_bit": 1109.9584288437513,
+            "release_s": 0.0,
+            "deadline_s": 313.30518446052173,
+            "collect_s": 1.0
+          },
+          "S15": {
+            "task_id": "S15",
+            "x": 102.36039692708665,
+            "y": 396.28890114322587,
+            "data_mb": 2.9517248834199616,
+            "cycles_per_bit": 854.3043427476898,
+            "release_s": 0.0,
+            "deadline_s": 316.09315378659767,
+            "collect_s": 1.0
+          },
+          "S16": {
+            "task_id": "S16",
+            "x": 769.3428148177284,
+            "y": 807.0306225758728,
+            "data_mb": 3.1835656984527825,
+            "cycles_per_bit": 988.3929323473596,
+            "release_s": 0.0,
+            "deadline_s": 374.3909565954576,
+            "collect_s": 1.0
+          },
+          "S17": {
+            "task_id": "S17",
+            "x": 162.99317448175753,
+            "y": 388.0684470515788,
+            "data_mb": 1.9348729859248368,
+            "cycles_per_bit": 852.7921777384817,
+            "release_s": 0.0,
+            "deadline_s": 254.88050192302586,
+            "collect_s": 1.0
+          },
+          "S18": {
+            "task_id": "S18",
+            "x": 70.72917842283708,
+            "y": 956.7955812526427,
+            "data_mb": 2.1328858023777415,
+            "cycles_per_bit": 927.7362801940724,
+            "release_s": 0.0,
+            "deadline_s": 365.6154226549197,
+            "collect_s": 1.0
+          },
+          "S19": {
+            "task_id": "S19",
+            "x": 715.8955657546841,
+            "y": 881.7147243787992,
+            "data_mb": 3.735841713435216,
+            "cycles_per_bit": 822.8018951576486,
+            "release_s": 0.0,
+            "deadline_s": 292.01965830479503,
+            "collect_s": 1.0
+          },
+          "S20": {
+            "task_id": "S20",
+            "x": 393.63435861207535,
+            "y": 314.0832635913281,
+            "data_mb": 2.667950564178499,
+            "cycles_per_bit": 896.5069741103222,
+            "release_s": 0.0,
+            "deadline_s": 409.28701304698825,
+            "collect_s": 1.0
+          },
+          "S21": {
+            "task_id": "S21",
+            "x": 335.1518696244891,
+            "y": 878.1516599034475,
+            "data_mb": 3.776844699532171,
+            "cycles_per_bit": 1064.4010495862544,
+            "release_s": 0.0,
+            "deadline_s": 296.510402373524,
+            "collect_s": 1.0
+          },
+          "S22": {
+            "task_id": "S22",
+            "x": 74.44442707309321,
+            "y": 974.8948460773059,
+            "data_mb": 3.7685074476538984,
+            "cycles_per_bit": 995.9062246503299,
+            "release_s": 0.0,
+            "deadline_s": 258.5094430143822,
+            "collect_s": 1.0
+          },
+          "S23": {
+            "task_id": "S23",
+            "x": 751.2258338820567,
+            "y": 301.8981121030766,
+            "data_mb": 2.310367745483654,
+            "cycles_per_bit": 1191.9519631120063,
+            "release_s": 0.0,
+            "deadline_s": 412.7106790427473,
+            "collect_s": 1.0
+          },
+          "S24": {
+            "task_id": "S24",
+            "x": 834.2262803436447,
+            "y": 91.77080734760956,
+            "data_mb": 2.9577897521664682,
+            "cycles_per_bit": 1042.0094954923945,
+            "release_s": 0.0,
+            "deadline_s": 376.49490846141816,
+            "collect_s": 1.0
+          },
+          "S25": {
+            "task_id": "S25",
+            "x": 35.36460427772646,
+            "y": 896.1454937131996,
+            "data_mb": 1.5061569290318675,
+            "cycles_per_bit": 800.5627245260141,
+            "release_s": 0.0,
+            "deadline_s": 365.7999478236668,
+            "collect_s": 1.0
+          },
+          "S26": {
+            "task_id": "S26",
+            "x": 727.7741310289183,
+            "y": 708.9673952805246,
+            "data_mb": 1.264345972420784,
+            "cycles_per_bit": 892.0009844263493,
+            "release_s": 0.0,
+            "deadline_s": 345.6625576436584,
+            "collect_s": 1.0
+          },
+          "S27": {
+            "task_id": "S27",
+            "x": 601.2237885037493,
+            "y": 730.0541376318315,
+            "data_mb": 1.0433683561302738,
+            "cycles_per_bit": 1061.4079479790453,
+            "release_s": 0.0,
+            "deadline_s": 286.01078830878606,
+            "collect_s": 1.0
+          },
+          "S28": {
+            "task_id": "S28",
+            "x": 347.7528353820772,
+            "y": 169.14799243239656,
+            "data_mb": 2.488939665122192,
+            "cycles_per_bit": 902.0616960227244,
+            "release_s": 0.0,
+            "deadline_s": 360.22944575727547,
+            "collect_s": 1.0
+          },
+          "S29": {
+            "task_id": "S29",
+            "x": 294.1008538969318,
+            "y": 134.16632544989764,
+            "data_mb": 1.986959961786447,
+            "cycles_per_bit": 918.8459091363181,
+            "release_s": 0.0,
+            "deadline_s": 300.66350877054344,
+            "collect_s": 1.0
+          },
+          "S30": {
+            "task_id": "S30",
+            "x": 974.4582726326621,
+            "y": 587.5487810218684,
+            "data_mb": 3.5932766556781788,
+            "cycles_per_bit": 1056.8136741943122,
+            "release_s": 0.0,
+            "deadline_s": 424.3621816859712,
+            "collect_s": 1.0
+          }
+        },
+        "mecs": {
+          "E1": {
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0,
+            "bandwidth_mhz": 4.0,
+            "cpu_ghz": 5.0,
+            "radius_m": 200.0
+          },
+          "E2": {
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0,
+            "bandwidth_mhz": 5.0,
+            "cpu_ghz": 6.5,
+            "radius_m": 300.0
+          }
+        },
+        "uavs": {
+          "U1": {
+            "uav_id": "U1",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U2": {
+            "uav_id": "U2",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U3": {
+            "uav_id": "U3",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U4": {
+            "uav_id": "U4",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          },
+          "U5": {
+            "uav_id": "U5",
+            "speed_mps": 10.0,
+            "local_cpu_ghz": 1.0,
+            "tx_power_w": 0.1,
+            "flight_power_w": 180.0,
+            "hover_power_w": 200.0,
+            "energy_budget_j": 200000.0,
+            "altitude_m": 30.0,
+            "kappa": 1e-27
+          }
+        },
+        "contact_points": {
+          "E1_C": {
+            "point_id": "E1_C",
+            "mec_id": "E1",
+            "x": 100.0,
+            "y": 100.0
+          },
+          "E1_R1_A00": {
+            "point_id": "E1_R1_A00",
+            "mec_id": "E1",
+            "x": 192.3879532511287,
+            "y": 138.26834323650897
+          },
+          "E1_R1_A01": {
+            "point_id": "E1_R1_A01",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A02": {
+            "point_id": "E1_R1_A02",
+            "mec_id": "E1",
+            "x": 61.731656763491024,
+            "y": 192.3879532511287
+          },
+          "E1_R1_A03": {
+            "point_id": "E1_R1_A03",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 138.268343236509
+          },
+          "E1_R1_A04": {
+            "point_id": "E1_R1_A04",
+            "mec_id": "E1",
+            "x": 7.612046748871322,
+            "y": 61.73165676349103
+          },
+          "E1_R1_A05": {
+            "point_id": "E1_R1_A05",
+            "mec_id": "E1",
+            "x": 61.73165676349097,
+            "y": 7.61204674887135
+          },
+          "E1_R1_A06": {
+            "point_id": "E1_R1_A06",
+            "mec_id": "E1",
+            "x": 138.268343236509,
+            "y": 7.612046748871336
+          },
+          "E1_R1_A07": {
+            "point_id": "E1_R1_A07",
+            "mec_id": "E1",
+            "x": 192.38795325112864,
+            "y": 61.73165676349096
+          },
+          "E1_R2_A00": {
+            "point_id": "E1_R2_A00",
+            "mec_id": "E1",
+            "x": 270.0,
+            "y": 100.0
+          },
+          "E1_R2_A01": {
+            "point_id": "E1_R2_A01",
+            "mec_id": "E1",
+            "x": 220.20815280171308,
+            "y": 220.20815280171308
+          },
+          "E1_R2_A02": {
+            "point_id": "E1_R2_A02",
+            "mec_id": "E1",
+            "x": 100.00000000000001,
+            "y": 270.0
+          },
+          "E2_C": {
+            "point_id": "E2_C",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 250.0
+          },
+          "E2_R1_A00": {
+            "point_id": "E2_R1_A00",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A01": {
+            "point_id": "E2_R1_A01",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A02": {
+            "point_id": "E2_R1_A02",
+            "mec_id": "E2",
+            "x": 792.5974851452365,
+            "y": 388.58192987669304
+          },
+          "E2_R1_A03": {
+            "point_id": "E2_R1_A03",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 307.40251485476347
+          },
+          "E2_R1_A04": {
+            "point_id": "E2_R1_A04",
+            "mec_id": "E2",
+            "x": 711.418070123307,
+            "y": 192.59748514523653
+          },
+          "E2_R1_A05": {
+            "point_id": "E2_R1_A05",
+            "mec_id": "E2",
+            "x": 792.5974851452364,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A06": {
+            "point_id": "E2_R1_A06",
+            "mec_id": "E2",
+            "x": 907.4025148547635,
+            "y": 111.41807012330702
+          },
+          "E2_R1_A07": {
+            "point_id": "E2_R1_A07",
+            "mec_id": "E2",
+            "x": 988.581929876693,
+            "y": 192.59748514523645
+          },
+          "E2_R2_A02": {
+            "point_id": "E2_R2_A02",
+            "mec_id": "E2",
+            "x": 850.0,
+            "y": 505.0
+          },
+          "E2_R2_A03": {
+            "point_id": "E2_R2_A03",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 430.3122292025696
+          },
+          "E2_R2_A04": {
+            "point_id": "E2_R2_A04",
+            "mec_id": "E2",
+            "x": 595.0,
+            "y": 250.00000000000003
+          },
+          "E2_R2_A05": {
+            "point_id": "E2_R2_A05",
+            "mec_id": "E2",
+            "x": 669.6877707974304,
+            "y": 69.6877707974304
+          }
+        },
+        "cycle_s": 450.0,
+        "avg_delay_budget_s": 300.0,
+        "max_contacts_per_uav": 3,
+        "reference_gain_db": -50.0,
+        "pathloss_exp": 2.3,
+        "noise_psd_dbm_per_hz": -164.0
+      },
+      "solution": {
+        "routes": {
+          "U1": {
+            "uav_id": "U1",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U2": {
+            "uav_id": "U2",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S12"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S10"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S15"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S14"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S25"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S18"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S22"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S21"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S3"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S17"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S9"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U3": {
+            "uav_id": "U3",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U4": {
+            "uav_id": "U4",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S28"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S23"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S1"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S30"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S11"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S26"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S16"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S19"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S4"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S27"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S2"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S20"
+              },
+              {
+                "kind": "contact",
+                "ref_id": "G_U4_1"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          },
+          "U5": {
+            "uav_id": "U5",
+            "stops": [
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S29"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S5"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S13"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S8"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S24"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S6"
+              },
+              {
+                "kind": "task",
+                "ref_id": "S7"
+              },
+              {
+                "kind": "depot",
+                "ref_id": "DEPOT"
+              }
+            ]
+          }
+        },
+        "contact_visits": {
+          "G_U4_1": {
+            "visit_id": "G_U4_1",
+            "uav_id": "U4",
+            "point_id": "E1_C"
+          }
+        },
+        "task_decisions": {
+          "S15": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S18": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S8": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S21": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S24": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S6": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S17": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S10": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S25": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S12": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S28": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S14": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S20": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S2": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S23": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S22": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S27": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S30": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S5": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S19": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S4": {
+            "mode": "offload",
+            "contact_visit_id": "G_U4_1"
+          },
+          "S9": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S26": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S1": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S16": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S13": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S11": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S3": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S29": {
+            "mode": "local",
+            "contact_visit_id": null
+          },
+          "S7": {
+            "mode": "local",
+            "contact_visit_id": null
+          }
+        },
+        "metadata": {
+          "builder": "parallel_greedy_insertion_2opt_mec_repair",
+          "phase": "mec_assisted_initial_solution",
+          "mec_repair_steps": 0,
+          "mec_repair_moves": [],
+          "proxy_initial_score": [
+            0.0,
+            0.0,
+            0.0,
+            123568.65439141999,
+            6493.169461838232
+          ],
+          "proxy_final_score": [
+            0.0,
+            0.0,
+            0.0,
+            123568.65439141999,
+            6493.169461838232
+          ],
+          "proxy_feasible": true,
+          "offloaded_tasks": 1,
+          "contact_visits": 1
+        }
+      },
+      "result": {
+        "status": "optimal",
+        "solver": "SCS",
+        "is_dcp": true,
+        "energy_stage1_j": 123328.81890192388,
+        "energy_final_j": 123328.81890192388,
+        "stage1_values": {
+          "tau_s": {
+            "G_U4_1": 0.6476085416140531
+          },
+          "bandwidth_mhz": {
+            "('U4', 'E1')": 4.000896447138126
+          },
+          "mec_cpu_ghz": {
+            "('U4', 'E1')": 4.538887505792426
+          },
+          "local_cpu_ghz": {
+            "S15": 0.7589077229862896,
+            "S18": 0.7589077229364817,
+            "S8": 0.4000340508052558,
+            "S21": 0.7589077231017557,
+            "S24": 0.40003405083444804,
+            "S6": 0.40003405079143206,
+            "S17": 0.7589077229033239,
+            "S10": 0.7589077228722517,
+            "S25": 0.7589077228513028,
+            "S12": 0.7589077230345681,
+            "S28": 0.41313781774296726,
+            "S14": 0.7589077228538436,
+            "S20": 0.13212571913457702,
+            "S2": 0.9996209675446274,
+            "S23": 0.999763687774733,
+            "S22": 0.7589077230829483,
+            "S27": 1.0006251442954017,
+            "S30": 0.99938705546832,
+            "S5": 0.4000340508005257,
+            "S19": 0.9996390824312167,
+            "S9": 0.21466794457776647,
+            "S26": 1.0006104199251982,
+            "S1": 0.999605761733552,
+            "S16": 0.9996120594281951,
+            "S13": 0.4000340507997754,
+            "S11": 0.9999194645896335,
+            "S3": 0.7589077230277589,
+            "S29": 0.4000340507947587,
+            "S7": 0.4000340507930281
+          },
+          "local_start_s": {
+            "S15": 50.684614540132756,
+            "S18": 102.9077599770576,
+            "S8": 136.17378091035766,
+            "S21": 163.3297178322703,
+            "S24": 178.43808050246162,
+            "S6": 240.07373657272723,
+            "S17": 237.48661105137572,
+            "S10": 36.139926948552315,
+            "S25": 90.19714213141688,
+            "S12": 3.3670396279178707,
+            "S28": 26.722152387355194,
+            "S14": 77.26673130997577,
+            "S20": 264.4651642887583,
+            "S2": 234.88598983625488,
+            "S23": 70.19776092832049,
+            "S22": 123.76674706214749,
+            "S27": 226.03152769203595,
+            "S30": 117.61314612765939,
+            "S5": 57.21958967271604,
+            "S19": 201.40031560009527,
+            "S9": 254.8805018606849,
+            "S26": 167.16701545350244,
+            "S1": 92.25841252364467,
+            "S16": 176.18453996568067,
+            "S13": 96.99046612634794,
+            "S11": 148.05998446665,
+            "S3": 205.70723338312214,
+            "S29": 20.708495453249142,
+            "S7": 273.74069044249774
+          },
+          "task_completion_s": {
+            "S1": 117.61251803033402,
+            "S2": 259.9092315073931,
+            "S3": 237.48661098664078,
+            "S4": 381.9932007743427,
+            "S5": 96.99046611908842,
+            "S6": 273.74069043523815,
+            "S7": 307.9051956671904,
+            "S8": 178.43808049520203,
+            "S9": 369.31198504851875,
+            "S10": 50.684614475393346,
+            "S11": 167.1663873561739,
+            "S12": 36.139926883817616,
+            "S13": 136.17378090309816,
+            "S14": 90.19714206668209,
+            "S15": 77.266731245241,
+            "S16": 201.3996875027639,
+            "S17": 254.88050185958969,
+            "S18": 123.76674699741272,
+            "S19": 226.03089959470404,
+            "S20": 409.2870130466313,
+            "S21": 205.70723331838724,
+            "S22": 163.32971776753547,
+            "S23": 92.25778442631837,
+            "S24": 240.07373656546773,
+            "S25": 102.90775991232282,
+            "S26": 176.18391186835055,
+            "S27": 234.88536173892354,
+            "S28": 70.19776091789224,
+            "S29": 57.219589665456525,
+            "S30": 148.0593563693236
+          },
+          "batch_start_s": {
+            "G_U4_1": 376.1428297528412
+          },
+          "batch_finish_s": {
+            "G_U4_1": 490.7113730532529
+          }
+        },
+        "final_values": {
+          "tau_s": {
+            "G_U4_1": 0.6476085416140531
+          },
+          "bandwidth_mhz": {
+            "('U4', 'E1')": 4.000896447138126
+          },
+          "mec_cpu_ghz": {
+            "('U4', 'E1')": 4.538887505792426
+          },
+          "local_cpu_ghz": {
+            "S15": 0.7589077229862896,
+            "S18": 0.7589077229364817,
+            "S8": 0.4000340508052558,
+            "S21": 0.7589077231017557,
+            "S24": 0.40003405083444804,
+            "S6": 0.40003405079143206,
+            "S17": 0.7589077229033239,
+            "S10": 0.7589077228722517,
+            "S25": 0.7589077228513028,
+            "S12": 0.7589077230345681,
+            "S28": 0.41313781774296726,
+            "S14": 0.7589077228538436,
+            "S20": 0.13212571913457702,
+            "S2": 0.9996209675446274,
+            "S23": 0.999763687774733,
+            "S22": 0.7589077230829483,
+            "S27": 1.0006251442954017,
+            "S30": 0.99938705546832,
+            "S5": 0.4000340508005257,
+            "S19": 0.9996390824312167,
+            "S9": 0.21466794457776647,
+            "S26": 1.0006104199251982,
+            "S1": 0.999605761733552,
+            "S16": 0.9996120594281951,
+            "S13": 0.4000340507997754,
+            "S11": 0.9999194645896335,
+            "S3": 0.7589077230277589,
+            "S29": 0.4000340507947587,
+            "S7": 0.4000340507930281
+          },
+          "local_start_s": {
+            "S15": 50.684614540132756,
+            "S18": 102.9077599770576,
+            "S8": 136.17378091035766,
+            "S21": 163.3297178322703,
+            "S24": 178.43808050246162,
+            "S6": 240.07373657272723,
+            "S17": 237.48661105137572,
+            "S10": 36.139926948552315,
+            "S25": 90.19714213141688,
+            "S12": 3.3670396279178707,
+            "S28": 26.722152387355194,
+            "S14": 77.26673130997577,
+            "S20": 264.4651642887583,
+            "S2": 234.88598983625488,
+            "S23": 70.19776092832049,
+            "S22": 123.76674706214749,
+            "S27": 226.03152769203595,
+            "S30": 117.61314612765939,
+            "S5": 57.21958967271604,
+            "S19": 201.40031560009527,
+            "S9": 254.8805018606849,
+            "S26": 167.16701545350244,
+            "S1": 92.25841252364467,
+            "S16": 176.18453996568067,
+            "S13": 96.99046612634794,
+            "S11": 148.05998446665,
+            "S3": 205.70723338312214,
+            "S29": 20.708495453249142,
+            "S7": 273.74069044249774
+          },
+          "task_completion_s": {
+            "S1": 117.61251803033402,
+            "S2": 259.9092315073931,
+            "S3": 237.48661098664078,
+            "S4": 381.9932007743427,
+            "S5": 96.99046611908842,
+            "S6": 273.74069043523815,
+            "S7": 307.9051956671904,
+            "S8": 178.43808049520203,
+            "S9": 369.31198504851875,
+            "S10": 50.684614475393346,
+            "S11": 167.1663873561739,
+            "S12": 36.139926883817616,
+            "S13": 136.17378090309816,
+            "S14": 90.19714206668209,
+            "S15": 77.266731245241,
+            "S16": 201.3996875027639,
+            "S17": 254.88050185958969,
+            "S18": 123.76674699741272,
+            "S19": 226.03089959470404,
+            "S20": 409.2870130466313,
+            "S21": 205.70723331838724,
+            "S22": 163.32971776753547,
+            "S23": 92.25778442631837,
+            "S24": 240.07373656546773,
+            "S25": 102.90775991232282,
+            "S26": 176.18391186835055,
+            "S27": 234.88536173892354,
+            "S28": 70.19776091789224,
+            "S29": 57.219589665456525,
+            "S30": 148.0593563693236
+          },
+          "batch_start_s": {
+            "G_U4_1": 376.1428297528412
+          },
+          "batch_finish_s": {
+            "G_U4_1": 490.7113730532529
+          }
+        },
+        "stage1_duals": {
+          "b_lower::U4::E1": 0.0,
+          "F_lower::U4::E1": 1.9072492507372054e-23,
+          "upload_epi::G_U4_1": 200.09999999115752,
+          "bandwidth_cap::E1": 26.873617049347775,
+          "mec_cpu_cap::E1": 0.0,
+          "local_release::S12": 0.8741719401840821,
+          "local_complete::S12": 0.8741719401840855,
+          "local_upper::S12": 0.0,
+          "local_lower::S12": 0.0,
+          "local_release::S10": 0.0,
+          "local_fifo::S10": 0.8741719401841321,
+          "local_complete::S10": 0.8741719401841742,
+          "local_upper::S10": 0.0,
+          "local_lower::S10": 0.0,
+          "local_release::S15": -7.618314031403241e-23,
+          "local_fifo::S15": 0.8741719401842347,
+          "local_complete::S15": 0.8741719401842938,
+          "local_upper::S15": 0.0,
+          "local_lower::S15": 1.2114672148713038e-22,
+          "local_release::S14": 0.0,
+          "local_fifo::S14": 0.8741719401843818,
+          "local_complete::S14": 0.8741719401844712,
+          "local_upper::S14": 0.0,
+          "local_lower::S14": 0.0,
+          "local_release::S25": 0.0,
+          "local_fifo::S25": 0.874171940184575,
+          "local_complete::S25": 0.8741719401846791,
+          "local_upper::S25": -2.0942559381831454e-23,
+          "local_lower::S25": 0.0,
+          "local_release::S18": 0.0,
+          "local_fifo::S18": 0.8741719401847953,
+          "local_complete::S18": 0.8741719401849152,
+          "local_upper::S18": 0.0,
+          "local_lower::S18": 0.0,
+          "local_release::S22": 0.0,
+          "local_fifo::S22": 0.8741719401850527,
+          "local_complete::S22": 0.8741719401851956,
+          "local_upper::S22": 0.0,
+          "local_lower::S22": 0.0,
+          "local_release::S21": 0.0,
+          "local_fifo::S21": 0.8741719401853785,
+          "local_complete::S21": 0.8741719401855665,
+          "local_upper::S21": 0.0,
+          "local_lower::S21": 0.0,
+          "local_release::S3": -2.987098904382698e-22,
+          "local_fifo::S3": 0.8741719401857942,
+          "local_complete::S3": 0.8741719401860331,
+          "local_upper::S3": 0.0,
+          "local_lower::S3": 0.0,
+          "local_release::S17": 0.0,
+          "local_fifo::S17": 0.874171940186291,
+          "local_complete::S17": 0.8741719401865679,
+          "local_upper::S17": -2.4498581296338956e-23,
+          "local_lower::S17": 0.0,
+          "local_release::S9": 0.0,
+          "local_fifo::S9": 0.01978479593845868,
+          "local_complete::S9": 0.019784795938750932,
+          "local_upper::S9": 0.0,
+          "local_lower::S9": 0.0,
+          "local_release::S28": 0.14103107409781637,
+          "local_complete::S28": 0.14103107409784446,
+          "local_upper::S28": 0.0,
+          "local_lower::S28": 0.0,
+          "local_release::S23": 18.061861069756713,
+          "local_fifo::S23": 0.14103107409791887,
+          "local_complete::S23": 18.202892143854722,
+          "local_upper::S23": 357.4295226156218,
+          "local_lower::S23": 0.0,
+          "local_release::S1": 0.0,
+          "local_fifo::S1": 18.202892143853415,
+          "local_complete::S1": 18.202892143852,
+          "local_upper::S1": 410.9506901919132,
+          "local_lower::S1": 0.0,
+          "local_release::S30": 0.0,
+          "local_fifo::S30": 18.202892143855458,
+          "local_complete::S30": 18.202892143859245,
+          "local_upper::S30": 493.7328499290692,
+          "local_lower::S30": 0.0,
+          "local_release::S11": 0.0,
+          "local_fifo::S11": 18.202892143878884,
+          "local_complete::S11": 18.202892143900485,
+          "local_upper::S11": 309.4628266876269,
+          "local_lower::S11": 0.0,
+          "local_release::S26": 0.0,
+          "local_fifo::S26": 18.202892143914315,
+          "local_complete::S26": 18.202892143929546,
+          "local_upper::S26": 145.813220107482,
+          "local_lower::S26": 0.0,
+          "local_release::S16": 0.0,
+          "local_fifo::S16": 18.202892143930637,
+          "local_complete::S16": 18.202892143931813,
+          "local_upper::S16": 408.6925067376216,
+          "local_lower::S16": 0.0,
+          "local_release::S19": 0.0,
+          "local_fifo::S19": 18.20289214393737,
+          "local_complete::S19": 18.20289214394344,
+          "local_upper::S19": 399.19308812748733,
+          "local_lower::S19": 0.0,
+          "local_release::S27": 0.0,
+          "local_fifo::S27": 18.20289214395235,
+          "local_complete::S27": 18.20289214396216,
+          "local_upper::S27": 143.17144481680566,
+          "local_lower::S27": -8.028370822126532e-23,
+          "local_release::S2": 0.0,
+          "local_fifo::S2": 18.20289214395831,
+          "local_complete::S2": 18.202892143954138,
+          "local_upper::S2": 405.5737877728229,
+          "local_lower::S2": 0.0,
+          "local_release::S20": 0.00461309245203762,
+          "local_fifo::S20": 0.0,
+          "local_complete::S20": 0.004613092452339547,
+          "local_upper::S20": 0.0,
+          "local_lower::S20": 0.0,
+          "local_release::S29": 0.1280326823982899,
+          "local_complete::S29": 0.12803268239831192,
+          "local_upper::S29": 0.0,
+          "local_lower::S29": 0.0,
+          "local_release::S5": 0.0,
+          "local_fifo::S5": 0.12803268239837945,
+          "local_complete::S5": 0.1280326823984455,
+          "local_upper::S5": 0.0,
+          "local_lower::S5": -5.379271741579412e-23,
+          "local_release::S13": 0.0,
+          "local_fifo::S13": 0.128032682398554,
+          "local_complete::S13": 0.12803268239866705,
+          "local_upper::S13": 0.0,
+          "local_lower::S13": 0.0,
+          "local_release::S8": 0.0,
+          "local_fifo::S8": 0.12803268239881663,
+          "local_complete::S8": 0.12803268239897472,
+          "local_upper::S8": 0.0,
+          "local_lower::S8": 0.0,
+          "local_release::S24": 0.0,
+          "local_fifo::S24": 0.12803268239917487,
+          "local_complete::S24": 0.1280326823993833,
+          "local_upper::S24": 1.3392453289056962e-22,
+          "local_lower::S24": 0.0,
+          "local_release::S6": 0.0,
+          "local_fifo::S6": 0.12803268239964727,
+          "local_complete::S6": 0.12803268239992724,
+          "local_upper::S6": 0.0,
+          "local_lower::S6": -4.949289022285778e-23,
+          "local_release::S7": 0.0,
+          "local_fifo::S7": 0.12803268240022803,
+          "local_complete::S7": 0.1280326824005481,
+          "local_upper::S7": 0.0,
+          "local_lower::S7": 0.0,
+          "batch_arrival::G_U4_1": 0.0,
+          "mec_task_complete::G_U4_1::1::S4": 6.890206540215896e-26,
+          "batch_complete::G_U4_1": 0.0,
+          "deadline::S1": 0.0,
+          "deadline::S2": 18.202892143954422,
+          "deadline::S3": 0.0,
+          "deadline::S4": 0.0,
+          "deadline::S5": 0.0,
+          "deadline::S6": 0.0,
+          "deadline::S7": 0.12803268240085913,
+          "deadline::S8": 0.0,
+          "deadline::S9": 0.01978479593911905,
+          "deadline::S10": 0.0,
+          "deadline::S11": 5.430237903092197e-22,
+          "deadline::S12": 0.0,
+          "deadline::S13": 0.0,
+          "deadline::S14": 0.0,
+          "deadline::S15": 0.0,
+          "deadline::S16": 5.344306075601372e-22,
+          "deadline::S17": 0.854387144248396,
+          "deadline::S18": 0.0,
+          "deadline::S19": 0.0,
+          "deadline::S20": 0.004613092452745444,
+          "deadline::S21": 0.0,
+          "deadline::S22": 0.0,
+          "deadline::S23": -1.0463997183253338e-21,
+          "deadline::S24": 0.0,
+          "deadline::S25": 0.0,
+          "deadline::S26": 5.428790377273271e-22,
+          "deadline::S27": 0.0,
+          "deadline::S28": 0.0,
+          "deadline::S29": 0.0,
+          "deadline::S30": 0.0,
+          "avg_delay": 0.0,
+          "cycle::U1": 0.0,
+          "cycle::U2": 0.0,
+          "cycle::U3": 0.0,
+          "cycle::U4": 0.0,
+          "cycle::U5": 0.0,
+          "battery::U1": 0.0,
+          "battery::U2": 0.0,
+          "battery::U3": 0.0,
+          "battery::U4": 0.0,
+          "battery::U5": 9.089830934516022e-24
+        },
+        "diagnostics": {
+          "stage1_status": "optimal",
+          "stage1_solver": "SCS",
+          "energy_tolerance_j": 0.12332881890192388
+        }
+      }
+    }
+  ]
+}

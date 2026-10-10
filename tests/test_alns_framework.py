@@ -2,34 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from uav_mec.algorithms import (
-    CheckpointBudgetAwareTerminalFirstConfig,
-    run_uav_mec_budget_aware_terminal_first_esi_alns,
-    AdaptiveESIConfig,
-    BudgetAwareTerminalFirstConfig,
-    ContinuousESIConfig,
-    EnergyGuidedESIConfig,
-    TerminalFirstESIConfig,
-    TerminalRecoveryESIConfig,
-    GARouteConfig,
-    ProxyObjectiveEvaluator,
-    ProblemOperatorConfig,
-    ScreenedProxyObjectiveEvaluator,
-    Stage1CVXObjectiveOracle,
-    UavMecALNSConfig,
-    build_greedy_initial_solution,
-    build_mec_assisted_initial_solution,
-    run_route_ga,
-    run_uav_mec_adaptive_esi_alns,
-    run_uav_mec_budget_aware_terminal_first_alns,
-    run_uav_mec_continuous_esi_alns,
-    run_uav_mec_terminal_first_esi_alns,
-    run_uav_mec_terminal_recovery_esi_alns,
-    run_uav_mec_alns,
-    run_uav_mec_hybrid_alns,
-    energy_guided_intensification,
-    make_energy_guided_intensifier,
-)
+from uav_mec.algorithms import GARouteConfig, ProxyObjectiveEvaluator, ProblemOperatorConfig, ScreenedProxyObjectiveEvaluator, Stage1CVXObjectiveOracle, UavMecALNSConfig, build_greedy_initial_solution, build_mec_assisted_initial_solution, run_route_ga, run_uav_mec_alns, run_uav_mec_hybrid_alns
 import uav_mec.algorithms.alns.runner as runner_module
 from uav_mec.algorithms.alns import (
     DestroyConfig,
@@ -51,7 +24,6 @@ from uav_mec.algorithms.alns.problem_operators import (
     mec_batch_pressure_removal,
     mode_batch_repair,
     shared_mec_pressure_removal,
-    strict_neighbor_recovery,
 )
 from uav_mec.evaluation import build_event_info, validate_solution
 from uav_mec.optimization.resource import (
@@ -365,6 +337,7 @@ class _ConstantEliteOracle:
             final_values={"fake": {"x": 1.0}},
             diagnostics={
                 "stage1_status": self.stage1_status,
+                "stage1_qualified": self.stage1_status == "optimal",
             },
         )
 
@@ -692,35 +665,6 @@ def test_runtime_stagnation_stop_tracks_best_improvement(
     assert stop.last_improvement_elapsed_s == 1.0
 
 
-def test_adaptive_esi_returns_strict_incumbent_with_fake_oracle() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_adaptive_esi_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=43,
-        ),
-        adaptive=AdaptiveESIConfig(
-            total_runtime_s=0.05,
-            stagnation_runtime_s=0.005,
-            min_exploration_runtime_s=0.0,
-            elite_burst_runtime_s=0.01,
-            max_elite_triggers=1,
-            min_remaining_runtime_s=0.0,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.strict_incumbent_found is True
-    assert result.final_energy_j == 321.0
-    assert result.strict_incumbent_updates >= 1
-    assert result.phase_records
 
 
 
@@ -758,63 +702,9 @@ def test_alns_accepts_external_stopping_criterion() -> None:
     ) == 0
 
 
-def test_continuous_esi_returns_strict_final_with_fake_oracle() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_continuous_esi_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=53,
-        ),
-        continuous=ContinuousESIConfig(
-            total_runtime_s=0.08,
-            final_cert_reserve_fraction=0.20,
-            stagnation_fraction=0.20,
-            min_exploration_fraction=0.10,
-            elite_pool_fraction=0.15,
-            elite_burst_fraction=0.05,
-            max_elite_triggers=1,
-            final_cert_min_screened_gain_rel=0.0,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.strict_incumbent_found is True
-    assert result.final_energy_j == 321.0
-    assert result.oracle_calls >= 1
-    assert result.total_runtime_s >= 0.0
-    assert result.exploration.stop_reason == "search_deadline"
 
 
 
-def test_strict_neighbor_recovery_can_recover_from_nonstrict_base() -> None:
-    instance = _small_instance()
-    solution = _initial_solution(instance)
-    evaluator = ProxyObjectiveEvaluator()
-    state = UavMecState(instance, solution, evaluator)
-
-    recovered, stats = strict_neighbor_recovery(
-        state,
-        config=ProblemOperatorConfig(
-            contact_points_per_mec=1,
-            contact_target_pool=1,
-            critical_task_limit=3,
-            mode_candidate_limit=6,
-        ),
-        objective=lambda _instance, _solution: 123.0,
-        max_runtime_s=1.0,
-    )
-
-    validate_solution(instance, recovered.solution)
-    assert stats["candidates_available"] >= 1
-    assert stats["recovered"] is True
-    assert stats["objective"] == 123.0
 
 
 def test_recovery_cvx_profile_solves_small_instance() -> None:
@@ -834,231 +724,3 @@ def test_recovery_cvx_profile_solves_small_instance() -> None:
         "optimal",
         "optimal_inaccurate",
     }
-
-
-def test_terminal_recovery_prefers_already_strict_terminal() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_terminal_recovery_esi_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=59,
-        ),
-        terminal=TerminalRecoveryESIConfig(
-            total_runtime_s=0.10,
-            recovery_reserve_fraction=0.10,
-            inner_final_cert_reserve_fraction=0.05,
-            min_structural_recovery_runtime_s=0.0,
-        ),
-        continuous_config=ContinuousESIConfig(
-            total_runtime_s=0.09,
-            final_cert_reserve_fraction=0.05,
-            stagnation_fraction=0.20,
-            min_exploration_fraction=0.10,
-            elite_pool_fraction=0.10,
-            elite_burst_fraction=0.04,
-            max_elite_triggers=1,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        search_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.selection == "terminal_already_strict"
-    assert result.final_energy_j == 321.0
-    assert result.fallback_used is False
-    assert result.high_accuracy_attempted is False
-
-
-
-def test_terminal_first_returns_strict_terminal_with_fake_oracle() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_terminal_first_esi_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=61,
-        ),
-        terminal_first=TerminalFirstESIConfig(
-            total_runtime_s=0.08,
-            final_cert_reserve_fraction=0.20,
-            stagnation_fraction=0.20,
-            min_exploration_fraction=0.10,
-            elite_pool_fraction=0.15,
-            elite_burst_fraction=0.05,
-            max_elite_triggers=1,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.selection_source == "terminal_strict"
-    assert result.final_energy_j == 321.0
-    assert result.total_runtime_s >= 0.0
-    assert result.terminal_certification_runtime_s >= 0.0
-
-
-
-def test_budget_aware_terminal_first_uses_compact_initial_reserve() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_budget_aware_terminal_first_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=67,
-        ),
-        budget_aware=BudgetAwareTerminalFirstConfig(
-            total_runtime_s=0.10,
-            initial_reserve_fraction=0.03,
-            max_reserve_fraction=0.08,
-            observed_runtime_multiplier=2.0,
-            stagnation_fraction=0.20,
-            min_exploration_fraction=0.10,
-            elite_pool_fraction=0.10,
-            elite_burst_fraction=0.04,
-            max_elite_triggers=1,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.selection_source == "terminal_strict"
-    assert abs(result.initial_reserve_s - 0.003) <= 1e-12
-    assert result.final_reserve_s >= result.initial_reserve_s
-    assert result.final_reserve_s <= 0.008 + 1e-12
-    assert result.final_energy_j == 321.0
-
-
-
-def test_energy_guided_esi_limits_exact_candidate_evaluations() -> None:
-    instance = _small_instance()
-    solution = _initial_solution(instance)
-    state = UavMecState(
-        instance,
-        solution,
-        ProxyObjectiveEvaluator(),
-    )
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-    guide = EnergyGuidedESIConfig(
-        hotspot_task_limit=4,
-        route_options_per_task=4,
-        proxy_pool_limit=6,
-        cvx_shortlist_limit=2,
-        fallback_structural_limit=1,
-    )
-
-    _, stats = energy_guided_intensification(
-        state,
-        config=ProblemOperatorConfig(),
-        objective=oracle,
-        guidance=guide,
-        max_rounds=1,
-    )
-
-    assert int(stats["generated_candidates"]) > 0
-    assert int(stats["candidates_evaluated"]) <= 2
-    assert int(stats["exact_cvx_calls"]) <= 2
-    assert len(stats["hotspot_tasks"]) <= 4
-    assert all(
-        str(move["move"]).startswith(
-            (
-                "energy_",
-                "fallback::",
-            )
-        )
-        for move in stats["evaluated_moves"]
-    )
-
-
-def test_budget_aware_runner_accepts_energy_guided_intensifier() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_budget_aware_terminal_first_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=71,
-        ),
-        budget_aware=BudgetAwareTerminalFirstConfig(
-            total_runtime_s=0.10,
-            initial_reserve_fraction=0.03,
-            max_reserve_fraction=0.08,
-            observed_runtime_multiplier=2.0,
-            stagnation_fraction=0.15,
-            min_exploration_fraction=0.05,
-            elite_pool_fraction=0.15,
-            elite_burst_fraction=0.05,
-            max_elite_triggers=1,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-        elite_intensifier=make_energy_guided_intensifier(
-            EnergyGuidedESIConfig(
-                hotspot_task_limit=3,
-                route_options_per_task=3,
-                proxy_pool_limit=4,
-                cvx_shortlist_limit=2,
-            )
-        ),
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.final_energy_j == 321.0
-    assert all(
-        event.get("intensifier")
-        in {
-            None,
-            "energy_guided_intensification",
-        }
-        for event in result.events
-    )
-
-
-def test_budget_aware_terminal_first_returns_strict_terminal() -> None:
-    instance = _small_instance()
-    initial = _initial_solution(instance)
-    oracle = _ConstantEliteOracle(energy_j=321.0)
-
-    result = run_uav_mec_budget_aware_terminal_first_esi_alns(
-        instance,
-        initial_solution=initial,
-        config=UavMecALNSConfig(
-            iterations=100,
-            seed=67,
-        ),
-        budget_aware=CheckpointBudgetAwareTerminalFirstConfig(
-            total_runtime_s=0.08,
-            final_cert_reserve_fraction=0.10,
-            checkpoint_fraction=0.40,
-            stagnation_fraction=0.20,
-            min_exploration_fraction=0.10,
-            elite_pool_fraction=0.10,
-            elite_burst_fraction=0.04,
-            max_elite_triggers=1,
-        ),
-        evaluator=ProxyObjectiveEvaluator(),
-        elite_oracle=oracle,
-    )
-
-    validate_solution(instance, result.best_solution)
-    assert result.selection_source == "terminal_strict"
-    assert result.final_energy_j == 321.0
-    assert result.total_runtime_s >= 0.0
-    assert result.terminal_certification_runtime_s >= 0.0

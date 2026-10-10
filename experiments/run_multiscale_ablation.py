@@ -18,7 +18,7 @@ the paired-ablation semantics of experiments/run_elite_family_ablation.py.
 import argparse
 import json
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from statistics import mean, median
 from time import perf_counter
@@ -40,6 +40,10 @@ from uav_mec.instances import (
     build_paper_scale_instance,
     load_paper_scale_config,
 )
+from experiment_common import provenance, stage_snapshot
+from uav_mec.analysis.constraint_audit import AuditTolerance
+from uav_mec.analysis.experiment_snapshot import content_hash, write_json
+from uav_mec.analysis.stage1_acceptance import stage1_is_qualified
 
 
 PROFILES = (
@@ -92,11 +96,8 @@ def profile_problem_config(base, profile: str):
 
 
 def write_output(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    """原子写入完整快照，非有限能耗显式转为缺失值。"""
+    write_json(path, payload)
 
 
 def paired_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -165,6 +166,14 @@ def paired_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if row["comparable"]
             and row["full_advantage_pct"] is not None
         ]
+        # 失败会令各场景有效种子数不同，先场景内平均，不能用运行均值代替场景等权。
+        per_scenario = [
+            {"tasks": k, "scenario_seed": s,
+             "pairs": len(group), "mean_full_advantage_pct": mean(group)}
+            for k, s in sorted({(p["tasks"], p["scenario_seed"]) for p in pairs})
+            if (group := [p["full_advantage_pct"] for p in pairs
+                          if p["tasks"] == k and p["scenario_seed"] == s and p["comparable"]])
+        ]
         summaries.append(
             {
                 "profile": profile,
@@ -175,8 +184,10 @@ def paired_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "equal": sum(abs(v) <= 1e-9 for v in values),
                 "ablated_better": sum(v < -1e-9 for v in values),
                 "mean_full_advantage_pct": (
-                    mean(values) if values else None
+                    mean(s["mean_full_advantage_pct"] for s in per_scenario) if per_scenario else None
                 ),
+                "run_equal_mean_full_advantage_pct": mean(values) if values else None,
+                "per_scenario": per_scenario,
                 "median_full_advantage_pct": (
                     median(values) if values else None
                 ),
@@ -256,6 +267,8 @@ def main() -> None:
     scenario_seeds = parse_ints(args.scenario_seeds)
     algorithm_seeds = parse_ints(args.algorithm_seeds)
     output = Path(args.output)
+    if output.exists():
+        raise FileExistsError(f"拒绝覆盖已有实验：{output}")
 
     rows: list[dict[str, Any]] = []
     protocol = {
@@ -268,7 +281,9 @@ def main() -> None:
         "mecs": args.mecs,
         "uavs": args.uavs,
         "shared_exploration": True,
-        "strict_definition": "Stage-1 status == optimal",
+        "strict_definition": "optimal plus saved/reconstructed residuals and energy consistency",
+        "audit_tolerance": asdict(AuditTolerance()),
+        "provenance": provenance(),
         "no_batch_definition": (
             "disable explicit batch_merge and batch_split only; "
             "keep mode_batch_reassign enabled"
@@ -311,12 +326,15 @@ def main() -> None:
                 base_status = stage1_status(base_cvx)
                 base_energy = (
                     float(base_cvx.energy_stage1_j)
-                    if base_cvx.feasible and base_status == "optimal"
+                    if stage1_is_qualified(base_cvx)
                     else None
                 )
 
                 for profile in PROFILES:
                     oracle = Stage1CVXObjectiveOracle()
+                    # 各消融分支使用相同基线快照，不能重新求解成另一份连续解。
+                    oracle.prime(instance, exploration.best_solution, base_cvx)
+                    final_solution = deepcopy(exploration.best_solution)
                     stats: dict[str, Any] = {
                         "rounds": 0,
                         "candidates_evaluated": 0,
@@ -347,10 +365,11 @@ def main() -> None:
                             instance,
                             final_state.solution,
                         )
+                        final_solution = final_state.solution
                     else:
                         final_cvx = base_cvx
                         stats["skipped"] = (
-                            "exploration_stage1_not_strict_optimal"
+                            "exploration_stage1_unqualified"
                             if base_cvx.feasible
                             else "exploration_stage1_infeasible"
                         )
@@ -359,8 +378,7 @@ def main() -> None:
                     final_status = stage1_status(final_cvx)
                     final_energy = (
                         float(final_cvx.energy_stage1_j)
-                        if final_cvx.feasible
-                        and final_status == "optimal"
+                        if stage1_is_qualified(final_cvx)
                         else None
                     )
                     strict_pair = bool(
@@ -389,6 +407,14 @@ def main() -> None:
                             "elite_cvx_cache_hits": oracle.cache_hits,
                             "elite_runtime_s": elite_runtime_s,
                             "elite_stats": stats,
+                            "instance": instance,
+                            "base_solution": exploration.best_solution,
+                            "base_solution_sha256": content_hash(exploration.best_solution),
+                            "solution": final_solution,
+                            "solution_sha256": content_hash(final_solution),
+                            "base_stage1": stage_snapshot(instance, exploration.best_solution, base_cvx, stage=1),
+                            "final_stage1": stage_snapshot(instance, final_solution, final_cvx, stage=1),
+                            "oracle_records": oracle.solve_records,
                         }
                     )
 

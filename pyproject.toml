@@ -1,6 +1,6 @@
 [project]
 name = "uav-mec-patrol"
-version = "0.6.0"
+version = "0.7.0"
 description = "Research codebase for multi-UAV forest patrol, intermittent MEC contact, batch offloading, and resource allocation."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -16,6 +16,10 @@ dependencies = [
 dev = [
     "pytest",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+plot = ["matplotlib", "pillow"]
 
 [build-system]
 requires = ["hatchling"]

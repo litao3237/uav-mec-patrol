@@ -1327,82 +1327,6 @@ def _elite_move_family(label: str) -> str:
     return "other"
 
 
-def strict_neighbor_recovery(
-    state: UavMecState,
-    *,
-    config: ProblemOperatorConfig,
-    objective,
-    max_runtime_s: float | None = None,
-) -> tuple[UavMecState, dict[str, object]]:
-    """Find a nearby strict-certified structural solution.
-
-    Unlike elite intensification, this routine does not require the input state
-    itself to have a finite strict objective. It is intended for terminal
-    recovery when the screened-best discrete structure is only
-    OPTIMAL_INACCURATE. The existing proxy-ranked structural shortlist is
-    reused, and the lowest finite exact-oracle candidate is returned.
-    """
-
-    if max_runtime_s is not None and max_runtime_s < 0:
-        raise ValueError("max_runtime_s must be non-negative")
-
-    started = perf_counter()
-    deadline = (
-        None
-        if max_runtime_s is None
-        else started + max_runtime_s
-    )
-    current = state.copy()
-    shortlist = _structural_elite_candidates(
-        current,
-        config=config,
-    )
-
-    best_solution: DiscreteSolution | None = None
-    best_value = float("inf")
-    best_label: str | None = None
-    evaluated: list[dict[str, object]] = []
-    budget_exhausted = False
-
-    for label, candidate in shortlist:
-        if deadline is not None and perf_counter() >= deadline:
-            budget_exhausted = True
-            break
-
-        value = float(objective(current.instance, candidate))
-        finite = bool(np.isfinite(value))
-        evaluated.append(
-            {
-                "move": label,
-                "objective": value if finite else None,
-                "strict": finite,
-            }
-        )
-        if finite and value < best_value:
-            best_value = value
-            best_label = label
-            best_solution = candidate
-
-    if best_solution is not None:
-        current.solution = best_solution
-        current.invalidate()
-
-    validate_solution(current.instance, current.solution)
-    return current, {
-        "candidates_available": len(shortlist),
-        "candidates_evaluated": len(evaluated),
-        "evaluated_moves": evaluated,
-        "recovered": best_solution is not None,
-        "accepted_move": best_label,
-        "objective": (
-            best_value
-            if best_solution is not None
-            else None
-        ),
-        "budget_exhausted": budget_exhausted,
-        "runtime_s": perf_counter() - started,
-        "max_runtime_s": max_runtime_s,
-    }
 
 
 def contact_mode_intensification(
@@ -1461,6 +1385,11 @@ def contact_mode_intensification(
         return float(objective(current.instance, solution))
 
     current_value = value(current.solution)
+    if not np.isfinite(current_value):
+        # 不合格基线没有可比较的精英能耗，不允许以无穷值计算收益或继续扩展。
+        stats["skipped"] = "initial_objective_not_finite"
+        stats["runtime_s"] = perf_counter() - started
+        return current, stats
 
     for _ in range(max_rounds):
         if time_exhausted():
@@ -1520,6 +1449,10 @@ def contact_mode_intensification(
                 }
             )
             evaluated_labels.add(label)
+
+            if not finite_candidate:
+                # 拒绝数值不合格候选并保留本轮已合格精英，避免 inf-inf 生成 NaN。
+                return True
 
             scale = max(
                 1.0,

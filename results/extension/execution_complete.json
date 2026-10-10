@@ -1,0 +1,7 @@
+{
+  "new_blocks": 18,
+  "new_records": 306,
+  "complete": true,
+  "execution": "12 local Windows blocks + 6 GitHub Actions Windows blocks",
+  "cloud_run_id": 37911787155
+}

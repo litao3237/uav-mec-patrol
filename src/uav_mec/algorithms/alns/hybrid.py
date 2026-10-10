@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass, replace
+import logging
 from time import perf_counter
 from typing import Any
 
@@ -27,7 +28,7 @@ from .state import ObjectiveEvaluator, UavMecState
 
 
 class Stage1CVXObjectiveOracle:
-    """Cached Stage-1 CVX objective oracle for elite states only."""
+    """缓存精英结构的 Stage-1 求解和完整残差验收，仅合格值可参与接受比较。"""
 
     def __init__(
         self,
@@ -41,6 +42,37 @@ class Stage1CVXObjectiveOracle:
         self.cache_hits = 0
         self.solve_runtimes_s: list[float] = []
         self.solve_records: list[dict[str, Any]] = []
+        self.audit_runtime_s = 0.0
+        self.seeded_results = 0
+
+    def _qualify(self, instance, solution, result):
+        """独立核验先于缓存与比较；求解器的 optimal 不替代可行性检查。"""
+        # 延迟导入避免 analysis 与资源求解模块初始化时出现循环依赖。
+        from uav_mec.analysis.stage1_acceptance import qualify_stage1_result
+
+        started = perf_counter()
+        qualified = qualify_stage1_result(instance, solution, result)
+        self.audit_runtime_s += perf_counter() - started
+        if qualified.diagnostics["stage1_status"] == "invalid_residual":
+            logging.getLogger(__name__).warning(
+                "ESI拒绝Stage-1候选：原因=%s，求解器=%s，原状态=%s",
+                qualified.diagnostics["stage1_acceptance_reason"], result.solver,
+                qualified.diagnostics["stage1_solver_status"],
+            )
+        return qualified
+
+    def prime(self, instance, solution, result):
+        """从冻结检查点恢复基线，重新验收且拒绝覆盖已有缓存。
+
+        此操作不计为新的凸求解，核验时间单独累计，便于重放实验准确报告成本。
+        """
+        key = solution_signature(solution)
+        if key in self._cache:
+            raise ValueError("拒绝覆盖已缓存的Stage-1结果")
+        qualified = self._qualify(instance, solution, deepcopy(result))
+        self._cache[key] = qualified
+        self.seeded_results += 1
+        return qualified
 
     def solve(
         self,
@@ -62,6 +94,7 @@ class Stage1CVXObjectiveOracle:
         )
         runtime_s = perf_counter() - started
         self.solve_runtimes_s.append(runtime_s)
+        result = self._qualify(instance, solution, result)
         self.solve_records.append(
             {
                 "runtime_s": runtime_s,
@@ -77,6 +110,14 @@ class Stage1CVXObjectiveOracle:
                     else None
                 ),
                 "contacts": len(solution.contact_visits),
+                "qualified": result.diagnostics["stage1_qualified"],
+                "solver_status": result.diagnostics["stage1_solver_status"],
+                "rejection_reason": result.diagnostics["stage1_acceptance_reason"],
+                "residual_summary": {
+                    name: {field: audit.get(field) for field in
+                           ("passed", "complete", "worst_constraint", "max_normalized_violation", "reason")}
+                    for name, audit in (result.diagnostics["stage1_acceptance_audit"] or {}).items()
+                },
                 "offloaded_tasks": sum(
                     decision.mode.value == "offload"
                     for decision in solution.task_decisions.values()
@@ -101,6 +142,7 @@ class Stage1CVXObjectiveOracle:
         if (
             not result.feasible
             or stage1_status != "optimal"
+            or not result.diagnostics.get("stage1_qualified", False)
         ):
             return float("inf")
         return float(result.energy_stage1_j)
@@ -209,7 +251,13 @@ def run_uav_mec_hybrid_alns(
         # Elite acceptance is intended to be an exact monotone refinement.
         # Do not compare candidate energies against an approximate
         # OPTIMAL_INACCURATE baseline.
-        skip_reason = "exploration_stage1_not_strict_optimal"
+        skip_reason = (
+            "exploration_stage1_invalid_residual"
+            if stage1_status == "invalid_residual"
+            else "exploration_stage1_not_strict_optimal"
+        )
+    elif not exploration_cvx.diagnostics.get("stage1_qualified", False):
+        skip_reason = "exploration_stage1_unqualified"
 
     if skip_reason is not None:
         return HybridUavMecALNSResult(
@@ -267,6 +315,13 @@ def run_uav_mec_hybrid_alns(
         instance,
         intensified.solution,
     )
+
+    # 最后一道防线防止自定义评价器或未来改动把未验收结果作为精英返回。
+    if not final_cvx.diagnostics.get("stage1_qualified", False):
+        logging.getLogger(__name__).error("ESI最终结果未通过验收，保留已合格的探索基线")
+        intensified.solution = deepcopy(exploration.best_solution)
+        final_cvx = exploration_cvx
+        elite_stats["output_fallback"] = "unqualified_final_to_qualified_baseline"
 
     return HybridUavMecALNSResult(
         exploration=exploration,
