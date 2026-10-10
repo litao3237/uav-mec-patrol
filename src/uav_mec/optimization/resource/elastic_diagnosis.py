@@ -34,7 +34,7 @@ from uav_mec.evaluation.validator import validate_solution
 from uav_mec.optimization.resource.problem import build_resource_model
 
 
-PROTOCOLS = ("qos_only", "qos_plus_mec_capacity")
+PROTOCOLS = ("qos_only", "qos_plus_mec_capacity", "mec_capacity_only")
 QOS_GROUPS = frozenset(("deadline", "avg_delay", "cycle", "battery"))
 CAPACITY_GROUPS = frozenset(("bandwidth_cap", "mec_cpu_cap"))
 
@@ -154,7 +154,7 @@ def diagnose_elastic_resources(instance: Instance,
     model = build_resource_model(
         instance, solution, info, numerical_scaling=True,
     )
-    soft = set(QOS_GROUPS)
+    soft = set(CAPACITY_GROUPS) if mode == "mec_capacity_only" else set(QOS_GROUPS)
     if mode == "qos_plus_mec_capacity":
         soft |= set(CAPACITY_GROUPS)
 
@@ -172,7 +172,24 @@ def diagnose_elastic_resources(instance: Instance,
         else:
             hard.append(constraint)
 
-    assert slack_by_name
+    # No offloading/contact: there is no MEC capacity constraint to relax.
+    # Return a transparent "not applicable" result rather than interpreting
+    # a model with no elastic variables as zero resource pressure.
+    if not slack_by_name:
+        return {
+            "mode":mode,
+            "solver":None,
+            "status":"no_applicable_elastic_capacity_constraints",
+            "numerically_credible":False,
+            "normalized_total_elastic_slack":None,
+            "slack_sum_by_family":None,
+            "top_constraints":[],
+            "top_dependency_context":[],
+            "diagnostic_build_and_solve_s":perf_counter()-started,
+            "attempts":[],
+            "scope":"fixed_D_elastic_counterfactual_not_alns_repair",
+            "algorithm_acceptance_unchanged":True,
+        }
     obj = cp.sum(cp.hstack(list(slack_by_name.values())))
     # The diagnostic objective is normalized QoS/capacity violation, NOT UAV
     # energy and not the energy-optimal continuation of this fixed structure.
