@@ -54,7 +54,9 @@ def _best_split_locations(instance, source, owner, original_contact,
     )+1
     # Insert a new MEC visit AFTER both tasks are sampled but BEFORE their
     # existing MEC batch, so the EDF/FIFO upload queue changes atomically.
-    if earliest>=old_i:
+    # Inserting immediately before the old visit is a valid early
+    # upload of this pair (the old visit may remain for other tasks).
+    if earliest>old_i:
         return []
     opportunities=[]
     for pos in range(earliest,old_i+1):
