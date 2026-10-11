@@ -389,7 +389,12 @@ def frozen_queue_depth2(instance,source,*,exact_limit=3):
             if x.get("stage1_qualified")
         ]),
         "strict_stage1_oracle_calls":control.get("strict_cvx_calls",0),
-        "search_diagnostics":control.get("search_trace",{}),
+        "search_diagnostics":{
+            "precheck_passing":control.get("queue_precheck_passing",0),
+            "unique_candidates":control.get("generated_unique",0),
+            "actual_depth":len(control.get("search_trace",[])),
+            "trace":control.get("search_trace",[]),
+        },
         "total_wall_s":perf_counter()-start,
         "strict_candidate_limit":exact_limit,
     }
