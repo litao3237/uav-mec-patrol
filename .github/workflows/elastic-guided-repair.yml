@@ -1,0 +1,148 @@
+name: Elastic-slack-guided UAV-MEC repair ablations
+on:
+  push:
+    branches: ['experiment/elastic-guided-repair']
+    paths:
+      - 'experiments/_legacy_rescue_reference.py'
+      - 'experiments/_queue_repair_reference.py'
+      - 'experiments/elastic_repair_core.py'
+      - 'experiments/run_elastic_repair.py'
+      - 'experiments/summarize_elastic_repair.py'
+      - 'tests/test_elastic_repair.py'
+      - '.github/workflows/elastic-guided-repair.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 55
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate original and targeted algorithms
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_elastic_repair.py tests/test_elastic_diagnosis.py tests/test_queue_aware_precheck.py tests/test_resource_solver.py
+      - name: Download exact archived high-load K80 S61 failures
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S61-38043248604
+          path: input/source/
+      - name: Download exactly matched independent elastic diagnoses
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38050123790
+          github-token: ${{ github.token }}
+          name: elastic-K80-S61-38050123790
+          path: input/elastic/
+      - name: K80 S61 A111 one-step, two-strict-candidate smoke
+        run: |
+          uv run --no-sync python experiments/run_elastic_repair.py --source input/source/sensitivity-K80_S61.json --elastic input/elastic/elastic-K80_S61.json --seeds 111 --profiles compute_x1p5,deadline_x0p9 --depth 1 --beam-width 1 --exact-limit 2 --output outputs/elastic-repair-smoke.json
+      - name: Archive smoke even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-guided-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  paired:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['61','62','63','64']
+    runs-on: windows-latest
+    timeout-minutes: 125
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen P1-R resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download original B-ALNS failed solution structures
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38043248604
+          github-token: ${{ github.token }}
+          name: model-sensitivity-K80-S${{ matrix.scenario }}-38043248604
+          path: input/source/
+      - name: Download frozen QoS-only elastic results
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38050123790
+          github-token: ${{ github.token }}
+          name: elastic-K80-S${{ matrix.scenario }}-38050123790
+          path: input/elastic/
+      - name: Evaluate all five ablations from the exact same failed D
+        run: |
+          uv run --no-sync python experiments/run_elastic_repair.py --source "input/source/sensitivity-K80_S${{ matrix.scenario }}.json" --elastic "input/elastic/elastic-K80_S${{ matrix.scenario }}.json" --beam-width 2 --depth 2 --exact-limit 3 --output "outputs/elastic-repair-K80_S${{ matrix.scenario }}.json"
+      - name: Keep strict Stage-1/Stage-2 accepted and failed candidate results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-guided-K80-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  summarize:
+    needs: paired
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install analysis dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Gather each successful or partial archived-failure result
+        uses: actions/download-artifact@v4
+        with:
+          pattern: elastic-guided-K80-S*-${{ github.run_id }}
+          path: outputs/collected
+          merge-multiple: true
+      - name: Summarize recovered feasibility, CVX burden and elastic diagnosis costs
+        run: |
+          uv run --no-sync python experiments/summarize_elastic_repair.py --input-dir outputs/collected --output-dir outputs/repair-summary
+      - name: Preserve report and partial run failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-guided-summary-${{ github.run_id }}
+          path: outputs/repair-summary/
+          if-no-files-found: warn
+          retention-days: 90
