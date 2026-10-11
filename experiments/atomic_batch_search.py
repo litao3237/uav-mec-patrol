@@ -195,23 +195,23 @@ def run_atomic_arm(instance,source,*,arm,beam_width=2,depth=4,
     final_label=None
     failure_reason=None
     if good:
-        for _,candidate in sorted(good,key=lambda pair:pair[0]):
-            # A stage1-optimal low-energy solution could still fail the
-            # independent Stage2 audit. Continue through already-confirmed
-            # Stage1 options without additional candidate oracle calls.
-            full=finalize(
-                instance,candidate["sol"],method=arm,seed=None,
-                initialization_s=0.0,search_s=0.0,
-                diagnostics={"strict_candidate":candidate["label"]},
-            )
-            accepted=bool(
-                full["stage1"]["qualified"] and full["stage2"]["qualified"]
-            )
-            if accepted:
-                strict=True
-                strict_energy=float(full["resources"].energy_stage1_j)
-                final_label=candidate["label"]
-                break
+        _,candidate=min(good,key=lambda pair:pair[0])
+        # EXACTLY like the frozen depth4 comparator: verify only the
+        # least-energy Stage1-qualified candidate with final Stage1+Stage2.
+        # Additional finalization passes would give the atomic method an
+        # unfair advantage even under the same oracle cap.
+        full=finalize(
+            instance,candidate["sol"],method=arm,seed=None,
+            initialization_s=0.0,search_s=0.0,
+            diagnostics={"strict_candidate":candidate["label"]},
+        )
+        strict=bool(
+            full["stage1"]["qualified"] and full["stage2"]["qualified"]
+        )
+        if strict:
+            strict_energy=float(full["resources"].energy_stage1_j)
+        final_label=candidate["label"]
+        if not strict:
             failure_reason={
                 "stage1_qualified":bool(full["stage1"]["qualified"]),
                 "stage2_qualified":bool(full["stage2"]["qualified"]),
