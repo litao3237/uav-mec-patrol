@@ -1,0 +1,105 @@
+name: Elastic-guided rescue independent fresh-scene holdout
+on:
+  push:
+    branches: ['experiment/elastic-guided-repair']
+    paths:
+      - 'experiments/run_elastic_repair_holdout.py'
+      - 'experiments/summarize_elastic_repair_holdout.py'
+      - '.github/workflows/elastic-repair-holdout.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install fixed original dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm frozen repair operators and holdout CLI contract
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_elastic_repair.py tests/test_elastic_diagnosis.py
+          uv run --no-sync python experiments/run_elastic_repair_holdout.py --help
+  holdout:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['71','72','73','74']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unmodified original Stage1/Stage2 solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Fresh S71-S74 scenario, A117/A118 nested; original source then diagnosis then paired strict repairs
+        run: |
+          uv run --no-sync python experiments/run_elastic_repair_holdout.py --scenario ${{ matrix.scenario }} --output-dir "outputs/K80_S${{ matrix.scenario }}"
+      - name: Preserve all source, elastic and repaired/failed outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-repair-holdout-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  summarize:
+    needs: holdout
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install aggregator environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Download all heldout source, diagnosis and strict-repair snapshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: elastic-repair-holdout-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate holdout conditional feasibility, coverage and per-scenario uncertainty
+        run: |
+          uv run --no-sync python experiments/summarize_elastic_repair_holdout.py --input-dir outputs/collected --output-dir outputs/holdout-report
+      - name: Archive aggregate and incomplete-run diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-repair-holdout-summary-${{ github.run_id }}
+          path: outputs/holdout-report/
+          if-no-files-found: warn
+          retention-days: 90
