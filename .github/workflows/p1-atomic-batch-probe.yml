@@ -1,0 +1,137 @@
+name: P1 atomic MEC task-bundle feasibility probe
+on:
+  push:
+    branches: ['experiment/p1-atomic-batch-feasibility']
+    paths:
+      - 'experiments/atomic_batch_moves.py'
+      - 'experiments/atomic_batch_search.py'
+      - 'experiments/run_atomic_batch_study.py'
+      - 'experiments/summarize_atomic_batch.py'
+      - 'tests/test_atomic_batch_repair.py'
+      - '.github/workflows/p1-atomic-batch-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original frozen numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm atomic-batch/contact legality and exact same candidate scoring with atomic disabled
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_atomic_batch_repair.py tests/test_progressive_bridge.py tests/test_queue_guided_repair.py tests/test_queue_aware_precheck.py
+      - name: Download EXACT archived K80 S81 raw source from previous progressive holdout
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38115673621
+          github-token: ${{ github.token }}
+          name: bridge-holdout-S81-38115673621
+          path: input/
+      - name: K80 S81 A123 double-offload/paired-UAV feasibility smoke
+        run: |
+          uv run --no-sync python experiments/run_atomic_batch_study.py --input input/K80_S81/bridge-fresh-source-K80_S81.json --profiles "compute_x1p5,deadline_x0p9" --seeds 123 --beam-width 2 --depth 2 --exact-limit 2 --generation-cap-s 2.0 --output outputs/atomic-smoke.json
+      - name: Save all candidate statuses and smoke outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atomic-smoke-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  pilot:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['81','82','83','84']
+    runs-on: windows-latest
+    timeout-minutes: 95
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Frozen P1-R resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Retrieve unchanged original B-ALNS physical stress source
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38115673621
+          github-token: ${{ github.token }}
+          name: bridge-holdout-S${{ matrix.scenario }}-38115673621
+          path: input/
+      - name: Same-depth and strict-CVX quota atomic MEC/route candidate ablation
+        run: |
+          uv run --no-sync python experiments/run_atomic_batch_study.py --input "input/K80_S${{ matrix.scenario }}/bridge-fresh-source-K80_S${{ matrix.scenario }}.json" --beam-width 2 --depth 4 --exact-limit 3 --generation-cap-s 4.0 --output "outputs/atomic-K80_S${{ matrix.scenario }}.json"
+      - name: Retain repaired, rejected and interrupted candidate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atomic-K80-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: pilot
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Frozen aggregation environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Fetch all raw atomic pilot records
+        uses: actions/download-artifact@v4
+        with:
+          pattern: atomic-K80-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Summarize strict-validity and CPU time for all four arms
+        run: |
+          uv run --no-sync python experiments/summarize_atomic_batch.py --input-dir outputs/collected --output-dir outputs/atomic-summary --scenarios "81,82,83,84"
+      - name: Save complete and partial result tables and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atomic-summary-${{ github.run_id }}
+          path: outputs/atomic-summary/
+          if-no-files-found: warn
+          retention-days: 90
