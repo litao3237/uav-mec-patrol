@@ -1,15 +1,15 @@
-"""New independent scene/seed holdout for frozen progressive-bridge strategy.
+"""Fresh S85-S88 K80 paired validation of atomic UAV-MEC feasibility repairs.
 
-Predeclared before inspecting full pilot: K80 independent scenarios
-S85/S86/S87/S88 and nested original-algorithm seeds A123/A124.
-Run the original (unchanged) 100-iter B-ALNS exploration + original ESI
-checkpoint to create physical stress archives, then compare the frozen
-depth2, depth4 and bridge-depth4 conditional failure rescue arms.
+Independent scenarios S85-S88 and nested seeds A125-A126 are fixed before
+examining the S81-S84 atomic-repair pilot. Generate original B-ALNS/ESI
+checkpoints, then compare four frozen conditional rescue arms on the same
+failed structure: queue2, queue4, atomic double-offload/batch split and
+atomic version also allowing paired cross-UAV relocation.
 
-This is deliberately a CONDITIONAL feasibility-rescue study. Its source
-ALNS+ESI time is not charged to the three repair variants, so results do not
-prove equal end-to-end full metaheuristic superiority. All run/failure statuses
-and original final Stage1+Stage2 coverage are preserved.
+This is NOT yet an equal-end-to-end full ALNS comparison: the original
+ALNS exploration checkpoint is common and prepaid, then each repair arm
+is timed and audited separately. All original qualification failures
+remain in the source archive, including numerical uncertainty.
 """
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def main():
         "new_arms_depth4_width2":True,
         "strict_cvx_candidate_cap_per_arm":3,
         "soft_generation_time_cap_s":4.0,
-        "development_scenarios_S61_S64_not_counted_as_holdout":True,
+        "development_scenarios_S81_S84_not_counted_as_holdout":True,
         "end_to_end_global_ALNS_time_fairness_NOT_established":True,
         "source_hashes":current_source_hashes(Path(__file__)),
         "provenance":provenance(),
