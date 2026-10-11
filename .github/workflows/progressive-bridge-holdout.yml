@@ -1,0 +1,104 @@
+name: Progressive bridge independent fresh-scene validation
+on:
+  push:
+    branches: ['experiment/progressive-feasibility-bridge']
+    paths:
+      - 'experiments/run_progressive_bridge_holdout.py'
+      - '.github/workflows/progressive-bridge-holdout.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate the frozen depth-only and bridge strategies
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_progressive_bridge.py tests/test_queue_guided_repair.py
+          uv run --no-sync python experiments/run_progressive_bridge_holdout.py --help
+  holdout:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['81','82','83','84']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original Stage1/Stage2 resource solver and audit
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Unseen S81-S84 nested seeds 123/124 generate original B/ESI then paired rescue
+        run: |
+          uv run --no-sync python experiments/run_progressive_bridge_holdout.py --scenario ${{ matrix.scenario }} --output-dir "outputs/K80_S${{ matrix.scenario }}"
+      - name: Preserve all source, strict, invalid and interrupted evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-holdout-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+  summarize:
+    needs: holdout
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install aggregation environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Download complete and partial holdout physical source archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bridge-holdout-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Summarize strict restore rate by independent held-out scenario
+        run: |
+          uv run --no-sync python experiments/summarize_progressive_bridge.py --input-dir outputs/collected --output-dir outputs/holdout-summary --scenarios "81,82,83,84"
+      - name: Preserve whole and partial holdout summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-holdout-summary-${{ github.run_id }}
+          path: outputs/holdout-summary/
+          if-no-files-found: warn
+          retention-days: 90
