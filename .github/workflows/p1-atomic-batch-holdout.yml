@@ -1,0 +1,108 @@
+name: P1 atomic UAV-MEC paired fresh-scene holdout
+on:
+  push:
+    branches: ['experiment/p1-atomic-batch-feasibility']
+    paths:
+      - 'experiments/run_atomic_batch_holdout.py'
+      - '.github/workflows/p1-atomic-batch-holdout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original frozen resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate frozen algorithm and unseen-source holdout contract
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_atomic_batch_repair.py tests/test_progressive_bridge.py
+          uv run --no-sync python experiments/run_atomic_batch_holdout.py --help
+
+  fresh_scenarios:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original ALNS/CVXPY numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Generate unused S85-S88 with nested seeds125/126; save every original strict source, then all atomic repair arms
+        run: |
+          uv run --no-sync python experiments/run_atomic_batch_holdout.py --scenario ${{ matrix.scenario }} --output-dir "outputs/K80_S${{ matrix.scenario }}"
+      - name: Preserve complete and partial original source and pairwise repair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atomic-holdout-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: fresh_scenarios
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Install reporting environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e .
+      - name: Gather all heldout strict-validity and source snapshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: atomic-holdout-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate paired strict recovery, search time and scenario uncertainty
+        run: |
+          uv run --no-sync python experiments/summarize_atomic_batch.py --input-dir outputs/collected --output-dir outputs/holdout-summary --scenarios "85,86,87,88"
+      - name: Save final tables plus partial failure coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atomic-holdout-summary-${{ github.run_id }}
+          path: outputs/holdout-summary
+          if-no-files-found: warn
+          retention-days: 90
