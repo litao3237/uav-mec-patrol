@@ -1,0 +1,236 @@
+name: P5 rigorous rounded bandwidth and CPU necessary bound diagnostics
+on:
+  push:
+    branches: ['experiment/p5-joint-bandwidth-cpu-certificate']
+    paths:
+      - '.github/workflows/p5-joint-bw-cpu-audit.yml'
+      - 'src/uav_mec/optimization/resource/joint_station_bw_cpu_bound.py'
+      - 'experiments/run_p5_joint_bound_audit.py'
+      - 'tests/test_joint_station_bw_cpu_bound.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install strict frozen numerical model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify static pair share positive controls, monotonicity and immutable P1-R
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_joint_station_bw_cpu_bound.py tests/test_station_cpu_share_bound.py tests/test_queue_aware_precheck.py tests/test_elastic_diagnosis.py
+          uv run --no-sync python experiments/run_p5_joint_bound_audit.py --help
+
+  archived_frozen_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scenario: '85'
+            cohort: 'P1'
+            source_run: 38134649545
+            source_artifact: 'atomic-holdout-S85-38134649545'
+            prior_run: 38196891133
+            prior_artifact: 'p1-resource-S85-38196891133'
+            source_path: 'source/K80_S85/atomic-fresh-source-K80_S85.json'
+            prior_path: 'prior/p1-resource-S85.json'
+          - scenario: '86'
+            cohort: 'P1'
+            source_run: 38134649545
+            source_artifact: 'atomic-holdout-S86-38134649545'
+            prior_run: 38196891133
+            prior_artifact: 'p1-resource-S86-38196891133'
+            source_path: 'source/K80_S86/atomic-fresh-source-K80_S86.json'
+            prior_path: 'prior/p1-resource-S86.json'
+          - scenario: '87'
+            cohort: 'P1'
+            source_run: 38134649545
+            source_artifact: 'atomic-holdout-S87-38134649545'
+            prior_run: 38196891133
+            prior_artifact: 'p1-resource-S87-38196891133'
+            source_path: 'source/K80_S87/atomic-fresh-source-K80_S87.json'
+            prior_path: 'prior/p1-resource-S87.json'
+          - scenario: '88'
+            cohort: 'P1'
+            source_run: 38134649545
+            source_artifact: 'atomic-holdout-S88-38134649545'
+            prior_run: 38196891133
+            prior_artifact: 'p1-resource-S88-38196891133'
+            source_path: 'source/K80_S88/atomic-fresh-source-K80_S88.json'
+            prior_path: 'prior/p1-resource-S88.json'
+          - scenario: '89'
+            cohort: 'P4'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S89-38202029324'
+            prior_run: 38203976558
+            prior_artifact: 'p4-postbound-S89-38203976558'
+            source_path: 'source/K80_S89/p3-fresh-source-K80_S89.json'
+            prior_path: 'prior/p4-postbound-S89.json'
+          - scenario: '90'
+            cohort: 'P4'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S90-38202029324'
+            prior_run: 38203976558
+            prior_artifact: 'p4-postbound-S90-38203976558'
+            source_path: 'source/K80_S90/p3-fresh-source-K80_S90.json'
+            prior_path: 'prior/p4-postbound-S90.json'
+          - scenario: '91'
+            cohort: 'P4'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S91-38202029324'
+            prior_run: 38203976558
+            prior_artifact: 'p4-postbound-S91-38203976558'
+            source_path: 'source/K80_S91/p3-fresh-source-K80_S91.json'
+            prior_path: 'prior/p4-postbound-S91.json'
+          - scenario: '92'
+            cohort: 'P4'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S92-38202029324'
+            prior_run: 38203976558
+            prior_artifact: 'p4-postbound-S92-38203976558'
+            source_path: 'source/K80_S92/p3-fresh-source-K80_S92.json'
+            prior_path: 'prior/p4-postbound-S92.json'
+    runs-on: windows-latest
+    timeout-minutes: 115
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original CVX model dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download immutable original physical source with strict status metadata
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: source/
+      - name: Download previously Stage1 exactly solved candidate identity/hash archive
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.prior_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.prior_artifact }}
+          path: prior/
+      - name: Audit joint interval-rounded bandwidth and CPU necessary bound
+        run: |
+          uv run --no-sync python experiments/run_p5_joint_bound_audit.py --source "${{ matrix.source_path }}" --audit "${{ matrix.prior_path }}" --output "outputs/p5-joint-${{ matrix.cohort }}-S${{ matrix.scenario }}.json"
+      - name: Preserve complete, strict controls and any partial failed evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-joint-${{ matrix.cohort }}-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: archived_frozen_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p5-joint-?*-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Audit all 8 inspected scenarios, false rejections and bound refinement
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          all_files=sorted(Path('collected').rglob('p5-joint-*-S*.json'))
+          cohorts={'P1':[],'P4':[]};errors=[]
+          for f in all_files:
+              b=json.loads(f.read_text(encoding='utf-8'))
+              key=b['protocol']['cohort']
+              cohorts.setdefault(key,[]).append(b)
+              if not b.get('complete'):errors.append(f.name+':incomplete')
+              errors+=b.get('errors',[])
+          if len(cohorts['P1'])!=4 or len(cohorts['P4'])!=4:
+              errors.append('Missing archived 4+4 cohort files')
+          result={'cohorts':{},'errors':errors,
+                  'independent_test_claim':False,
+                  'scope':'previously inspected development P1 and P4 sources'}
+          for cohort,blocks in cohorts.items():
+              sources=[r for b in blocks for r in b['source_rows']
+                       if not r.get('missing_original_solution')]
+              candidates=[r for b in blocks for r in b['strict_candidate_rows']]
+              def tab(rows,strict_key):
+                  return {
+                      'records':len(rows),
+                      'original_Stage1_strict':sum(r[strict_key] for r in rows),
+                      'old_queue_necessary_reject':sum(not r['old_queue_pass'] for r in rows),
+                      'old_CPU_necessary_reject':sum(not r['old_CPU_share_pass'] for r in rows),
+                      'new_joint_reject':{str(k):sum(
+                          r['joint'][str(k)]['rejected'] for r in rows) for k in (12,24,48)},
+                      'extra_beyond_old_both':{str(k):sum(
+                          r['old_queue_pass'] and r['old_CPU_share_pass']
+                          and r['joint'][str(k)]['rejected'] for r in rows)
+                          for k in (12,24,48)},
+                      'false_rejected_strict_Stage1':{str(k):sum(
+                          r[strict_key] and r['joint'][str(k)]['rejected']
+                          for r in rows) for k in (12,24,48)},
+                      'mean_joint_ms':{str(k):(
+                          statistics.mean(r['joint'][str(k)]['joint_wall_s'] for r in rows)*1000
+                          if rows else None) for k in (12,24,48)},
+                  }
+              d={'original_sources':tab(sources,'strict_stage1_qualified'),
+                 'strict_CVX_checked_candidates':tab(candidates,'original_stage1_qualified'),
+                 'scenes':sorted(b['protocol']['scenario'] for b in blocks)}
+              if cohort=='P1' and len(candidates)!=42:errors.append('P1 expected 42 CVX structures')
+              if cohort=='P4' and len(candidates)!=6:errors.append('P4 expected 6 CVX structures')
+              result['cohorts'][cohort]=d
+              for part in ('original_sources','strict_CVX_checked_candidates'):
+                  if any(v>0 for v in d[part]['false_rejected_strict_Stage1'].values()):
+                      errors.append('UNSOUND joint test possible false rejection '+cohort+part)
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P5_JOINT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete or unsound preliminary P5: '+str(errors[:4]))
+          PY
+      - name: Archive exact denominators and scientific counterexample warnings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-joint-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
