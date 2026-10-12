@@ -1,0 +1,128 @@
+name: P1 frozen candidate selection counterfactual diagnostics
+on:
+  push:
+    branches: ['experiment/p1-candidate-selection-diagnostics']
+    paths:
+      - 'experiments/atomic_batch_search.py'
+      - 'experiments/run_p1_candidate_selection.py'
+      - 'tests/test_atomic_batch_repair.py'
+      - '.github/workflows/p1-candidate-selection-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original fixed resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate new policy and existing frozen default
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_atomic_batch_repair.py tests/test_progressive_bridge.py
+          uv run --no-sync python experiments/run_p1_candidate_selection.py --help
+
+  replay:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Retrieve immutable previously inspected P1 source and outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38134649545
+          github-token: ${{ github.token }}
+          name: atomic-holdout-S${{ matrix.scenario }}-38134649545
+          path: input/
+      - name: Counterfactual unchanged-oracle beam protection vs candidate replacement
+        run: |
+          uv run --no-sync python experiments/run_p1_candidate_selection.py --input "input/K80_S${{ matrix.scenario }}/atomic-fresh-source-K80_S${{ matrix.scenario }}.json" --archived-p1 "input/K80_S${{ matrix.scenario }}/atomic-K80_S${{ matrix.scenario }}.json" --output "outputs/p1-selection-S${{ matrix.scenario }}.json"
+      - name: Preserve complete and interrupted counterfactual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-selection-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: replay
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p1-selection-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Summarize method counts without treating nested seeds as IID
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          names=('plain4','atomic_global','atomic_pure_beam','atomic_protect_beam','atomic_protect_shortlist','atomic_protect_both')
+          rows=[]
+          files=sorted(Path('outputs/collected').rglob('p1-selection-S*.json'))
+          for p in files:
+              block=json.loads(p.read_text(encoding='utf-8'))
+              rows.extend(r for r in block['rows'] if r['eligible'])
+              print(p.name,block['summary'],'errors:',block.get('errors'))
+          result={'files':[p.name for p in files],
+                  'eligible':len(rows),
+                  'strict':{a:sum(bool(r['arms'].get(a,{}).get('strict_both_recovered')) for r in rows) for a in names},
+                  'errors':[e for p in files for e in json.loads(p.read_text(encoding='utf-8')).get('errors',[])]}
+          Path('outputs/aggregate').mkdir(parents=True,exist_ok=True)
+          Path('outputs/aggregate/summary.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+          print('P1_COUNTERFACTUAL_AGGREGATE='+json.dumps(result))
+          if len(files)!=4 or result['eligible']!=22 or result['errors']:
+              raise RuntimeError('Incomplete frozen development replay')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-selection-aggregate-${{ github.run_id }}
+          path: outputs/aggregate/
+          if-no-files-found: warn
+          retention-days: 90
