@@ -145,8 +145,10 @@ def run(source_file,previous_file,output):
                     q=queue_aware_feasibility_precheck(instance,c["sol"],info)
                     if not q.feasible:raise RuntimeError("Search emitted old-queue failing candidate")
                     gate=station_cpu_share_necessary_bound(instance,c["sol"],info=info,queue=q)
-                    pmax=max((x["min_cpu_pressure_ratio"] or float("inf"))
-                             for x in gate["stations"].values())
+                    ratios=[x["min_cpu_pressure_ratio"]
+                            for x in gate["stations"].values() if x["pairs"]]
+                    pmax=(max(ratios) if all(x is not None for x in ratios)
+                          else None)
                     row_info={
                         "candidate":c["label"],"candidate_sha256":content_hash(c["sol"]),
                         "cpu_guard_reject":gate["certified_cpu_share_failure"],
