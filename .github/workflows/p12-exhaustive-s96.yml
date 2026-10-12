@@ -1,0 +1,73 @@
+name: P12 exhaustive S96 original insertion rank 1 versus all 90 counterfactuals
+on:
+  push:
+    branches: ['experiment/p12-insertion-finish-repair-audit']
+    paths:
+      - '.github/workflows/p12-exhaustive-s96.yml'
+      - 'experiments/run_p12_s96_exhaustive.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  all_original_positions:
+    runs-on: windows-latest
+    timeout-minutes: 55
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore immutable original Stage1 Stage2 CVX numeric dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Guard exact original function behavior and full insertion-position CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p12_s96_exhaustive.py --help
+      - name: Download immutable original S96 B-ALNS source and physical scenario
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38207186664
+          github-token: ${{ github.token }}
+          name: p5-firstuse-S96-38207186664
+          path: source/
+      - name: Replay ALL legal original options through unmodified MEC finish and exact numerical checks
+        run: |
+          uv run --no-sync python experiments/run_p12_s96_exhaustive.py --source "source/K80_S96/p5-fresh-source-K80_S96.json" --output "outputs/p12-exhaustive-S96.json"
+      - name: Enforce original top rank and scientific strict qualification counterexample
+        shell: pwsh
+        run: |
+          @'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('outputs/p12-exhaustive-S96.json').read_text(encoding='utf-8'))
+          assert x['complete'] and not x['errors']
+          s=x['summary']
+          assert s['legal_original_options_exhaustively_checked']>=80
+          assert not s['top_rank_queue_necessary_pass_after_MEC']
+          assert s['first_queue_necessary_passing_original_rank']==3,s
+          assert s['first_strict_original_insertion_rank_within_first_six']==3,s
+          assert s['strict_candidates_in_first_six']>=1
+          print('P12_FULL_RANK_VERIFIED='+json.dumps(s,ensure_ascii=False))
+          '@ | uv run --no-sync python -
+      - name: Retain every task/route/MEC decision, real numerical result and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p12-exhaustive-S96-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
