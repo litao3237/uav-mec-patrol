@@ -34,9 +34,20 @@ from uav_mec.optimization.resource.queue_aware_precheck import (
     queue_aware_feasibility_precheck,
 )
 
-from .operators import DestroyConfig,_destroy_tasks
+from .operators import DestroyConfig,_destroy_tasks,critical_task_removal
 
-QUEUE_DESTROY_POLICIES=("queue_task","queue_chain","workload_control")
+QUEUE_DESTROY_POLICIES=(
+    "queue_task","queue_chain","workload_control",
+    "queue_guarded_task","queue_guarded_chain","workload_guarded",
+)
+# Gated controls fall back to the ORIGINAL critical task operator whenever
+# no individual FIFO/EDF necessary deadline is violated. The fallback is
+# part of the same operator slot and uses the original RNG unmodified.
+GATED_POLICIES={
+    "queue_guarded_task":"queue_task",
+    "queue_guarded_chain":"queue_chain",
+    "workload_guarded":"workload_control",
+}
 
 
 def _critical_queue_chains(instance,solution,info,queue):
@@ -87,7 +98,8 @@ def queue_guided_task_rank(instance,solution,*,policy):
         ratio=gap/max(1.0,task.deadline_s)
         direct[tid]=ratio
         pressure[tid]=ratio
-    if policy=="queue_chain":
+    base_policy=GATED_POLICIES.get(policy,policy)
+    if base_policy=="queue_chain":
         for late_task,predecessors in _critical_queue_chains(
             instance,solution,info,queue).items():
             related=direct[late_task]
@@ -101,7 +113,7 @@ def queue_guided_task_rank(instance,solution,*,policy):
                     pressure[pred],
                     related*(.55+.15*min(1.0,w)),
                 )
-    elif policy=="workload_control":
+    elif base_policy=="workload_control":
         pressure={
             tid:task.workload_gcycles/max(1.0,task.deadline_s)
             for tid,task in instance.tasks.items()
@@ -127,7 +139,13 @@ def queue_critical_task_removal(
     config:DestroyConfig,policy:str="queue_chain"):
     rank,why=queue_guided_task_rank(
         current.instance,current.solution,policy=policy)
-    del why
+    # The FIFO/EDF necessary certificate is not a sufficient feasibility
+    # test. It only decides WHETHER to use a queue-specific target pool.
+    # In the absence of an actual TASK deadline residual (even if an
+    # aggregate delay/cycle bound fails), do not replace the original
+    # proxy-based critical operator with arbitrary workload tie breaks.
+    if policy in GATED_POLICIES and why["deadline_violators"]==0:
+        return critical_task_removal(current,rng,config=config)
     q=config.count(len(rank))
     pool_size=min(len(rank),max(q,config.critical_pool_factor*q))
     pool=rank[:pool_size]
