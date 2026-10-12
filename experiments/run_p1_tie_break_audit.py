@@ -63,7 +63,8 @@ def rearrange(sorted_rows, policy):
                 if item["family"] not in used:
                     selected.append(item)
                     used.add(item["family"])
-            group=selected+[r for r in group if r not in selected]
+            selected_signatures={r["sig"] for r in selected}
+            group=selected+[r for r in group if r["sig"] not in selected_signatures]
         output.extend(group)
     assert len(output)==len(sorted_rows)
     assert [primary(x) for x in output]==[primary(x) for x in sorted_rows]
