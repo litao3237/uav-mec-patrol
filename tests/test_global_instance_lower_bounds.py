@@ -3,6 +3,10 @@ from copy import deepcopy
 from dataclasses import replace
 
 import pytest
+from pathlib import Path
+import sys
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"experiments"))
 
 from global_instance_lower_bounds import (
     global_physical_necessary_bounds,_euclidean_mst_length,
