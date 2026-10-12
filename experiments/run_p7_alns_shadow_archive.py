@@ -53,6 +53,7 @@ K80_CASES=(
     (89,"deadline_x0p9",128),
     (91,"compute_x1p5",128),
     (93,"compute_x1p5",130),
+    (93,"baseline",129),
     (94,"compute_x1p5",129),
     (95,"compute_x2p0",130),
     (96,"deadline_x0p9",130),
