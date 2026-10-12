@@ -1,0 +1,176 @@
+name: P6b first-use S97-S100 whole-contact MEC relocation holdout
+on:
+  push:
+    branches: ['experiment/p6b-station-batch-independent-holdout']
+    paths:
+      - '.github/workflows/p6b-station-batch-firstuse.yml'
+      - 'experiments/run_p6b_station_batch_fresh_holdout.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore original P1-R and independent Stage2 numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Revalidate unchanged MEC contact move, strict filters and unseen-only protocol
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p6b_station_batch_sweep.py tests/test_p6_postbound_conflict_moves.py tests/test_joint_station_bw_cpu_bound.py
+          uv run --no-sync python experiments/run_p6b_station_batch_fresh_holdout.py --help
+
+  independent_firstuse:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scene: ['97','98','99','100']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged B/ESI algorithms and original resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: First-use 4 physical stress profiles, 2 algorithm seeds, 5 frozen contact methods
+        run: |
+          uv run --no-sync python experiments/run_p6b_station_batch_fresh_holdout.py --scene ${{ matrix.scene }} --output-dir "outputs/K80_S${{ matrix.scene }}"
+      - name: Retain original source, method strict diagnostics, all errors, even partial
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p6b-firstuse-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: independent_firstuse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p6b-firstuse-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate original B strict states, paired repaired D and actual time costs
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p6b-fresh-repairs-K80_S*.json'))
+          blocks={};rows=[];errs=[]
+          for f in files:
+              obj=json.loads(f.read_text(encoding='utf-8'))
+              s=int(obj['protocol']['scene'])
+              if s in blocks:errs.append('duplicate scene '+str(s))
+              blocks[s]=obj
+              if not obj.get('complete'):errs.append('incomplete '+str(s))
+              errs+=obj.get('errors',[])
+              rows+=obj.get('rows',[])
+              origin=f.with_name(f'p6b-fresh-source-K80_S{s}.json')
+              if not origin.exists() or not json.loads(origin.read_text(encoding='utf-8')).get('complete'):
+                  errs.append('source missing or partial '+str(s))
+          arms=('P5_joint48_baseline','station_all_contacts',
+                'joint_binding_pairs_2','heaviest_batches_2','lexical_contacts_2')
+          elig=[r for r in rows if r['eligible']]
+          methods={}
+          for name in arms:
+              vals=[r['arms'].get(name,{}) for r in elig]
+              methods[name]={
+                  'strict_recovered':sum(bool(v.get('strict_both_recovered')) for v in vals),
+                  'eligible_sources':len(elig),
+                  'total_Stage1_CVX_calls':sum(v.get('oracle_calls',0) for v in vals),
+                  'mean_complete_repair_wall_s':(
+                      statistics.mean(v['complete_conditional_repair_wall_s'] for v in vals)
+                      if vals and all('complete_conditional_repair_wall_s' in v for v in vals) else None),
+                  'new_joint_passing_D_count':sum(v.get('postbound',{}).get('extra_joint_passing',0) for v in vals),
+                  'extra_phase_total_wall_s':sum(v.get('postbound',{}).get('postbound_wall_s',0) for v in vals),
+              }
+          control='P5_joint48_baseline'
+          difference={
+              name:{
+                  'gain':[{'scene':r['scene'],'profile':r['profile'],'seed':r['seed']}
+                          for r in elig if r['arms'].get(name,{}).get('strict_both_recovered')
+                          and not r['arms'].get(control,{}).get('strict_both_recovered')],
+                  'loss':[{'scene':r['scene'],'profile':r['profile'],'seed':r['seed']}
+                          for r in elig if not r['arms'].get(name,{}).get('strict_both_recovered')
+                          and r['arms'].get(control,{}).get('strict_both_recovered')],
+              } for name in arms[1:]
+          }
+          result={
+              'first_use_scenarios':sorted(blocks),
+              'original_B_pressure_source_attempts':len(rows),
+              'eligible_precheck_failed_D':len(elig),
+              'original_B_stage1_statuses':dict(Counter(r['original_stage1_status'] for r in rows)),
+              'paired_methods':methods,
+              'by_profile':{
+                  profile:{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                                 for r in elig if r['profile']==profile) for a in arms}
+                  for profile in sorted({r['profile'] for r in rows})},
+              'by_scene':{
+                  str(scene):{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                                    for r in elig if r['scene']==scene) for a in arms}
+                  for scene in sorted(blocks)},
+              'strict_gain_loss_relative_P5':difference,
+              'source_generation_B_ESI_prepaid':True,
+              'not_full_equal_wall_time_optimization_benchmark':True,
+              'algorithm_seeds_nested_not_independent_physical_scenarios':True,
+              'errors':errs,
+          }
+          if sorted(blocks)!=[97,98,99,100] or len(rows)!=32:
+              errs.append('Incomplete first-use physical scenario coverage')
+          if any(len([r for r in rows if r['scene']==s])!=8 for s in (97,98,99,100)):
+              errs.append('Missing one of eight nested pressure seeds')
+          if any(any(v.get('oracle_calls',0)>3 for v in r['arms'].values()) for r in elig):
+              errs.append('Original strict Stage1 oracle budget violated')
+          result['errors']=errs
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P6B_FIRSTUSE_HOLDOUT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if errs:raise RuntimeError('Incomplete/invalid independent P6b evidence '+str(errs[:3]))
+          PY
+      - name: Preserve all final results and negative tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p6b-firstuse-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
