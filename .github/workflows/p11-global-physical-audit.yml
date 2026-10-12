@@ -1,0 +1,194 @@
+name: P11 whole-instance global physical energetic and MST impossibility audit
+on:
+  push:
+    branches: ['experiment/p11-global-physical-feasibility-bounds']
+    paths:
+      - '.github/workflows/p11-global-physical-audit.yml'
+      - 'experiments/global_instance_lower_bounds.py'
+      - 'experiments/run_p11_global_physical_audit.py'
+      - 'tests/test_global_instance_lower_bounds.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore original strict numeric physical model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify globally necessary pooled CPU/MST time bound against Stage1 positive controls
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_global_instance_lower_bounds.py tests/test_queue_aware_precheck.py tests/test_joint_station_bw_cpu_bound.py
+          uv run --no-sync python experiments/run_p11_global_physical_audit.py --help
+
+  inspected_original_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '105'
+            archive_run: 38223612325
+            original_artifact: 'p9-firstuse-S105-38223612325'
+            original_file: 'source/K80_S105/p9-fresh-K80_S105.json'
+          - scene: '106'
+            archive_run: 38223612325
+            original_artifact: 'p9-firstuse-S106-38223612325'
+            original_file: 'source/K80_S106/p9-fresh-K80_S106.json'
+          - scene: '107'
+            archive_run: 38223612325
+            original_artifact: 'p9-firstuse-S107-38223612325'
+            original_file: 'source/K80_S107/p9-fresh-K80_S107.json'
+          - scene: '108'
+            archive_run: 38223612325
+            original_artifact: 'p9-firstuse-S108-38223612325'
+            original_file: 'source/K80_S108/p9-fresh-K80_S108.json'
+          - scene: '109'
+            archive_run: 38246716690
+            original_artifact: 'p10-firstuse-S109-38246716690'
+            original_file: 'source/K80_S109/p10-fresh-K80_S109.json'
+          - scene: '110'
+            archive_run: 38246716690
+            original_artifact: 'p10-firstuse-S110-38246716690'
+            original_file: 'source/K80_S110/p10-fresh-K80_S110.json'
+          - scene: '111'
+            archive_run: 38246716690
+            original_artifact: 'p10-firstuse-S111-38246716690'
+            original_file: 'source/K80_S111/p10-fresh-K80_S111.json'
+          - scene: '112'
+            archive_run: 38246716690
+            original_artifact: 'p10-firstuse-S112-38246716690'
+            original_file: 'source/K80_S112/p10-fresh-K80_S112.json'
+    runs-on: windows-latest
+    timeout-minutes: 55
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original paper-scale scenario generator
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download original strict physical profile SHA archives
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.archive_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.original_artifact }}
+          path: source/
+      - name: Check true entire-INSTANCE optimistic task/CPU/geometry capacity impossibility
+        run: |
+          uv run --no-sync python experiments/run_p11_global_physical_audit.py --source "${{ matrix.original_file }}" --output "outputs/p11-global-S${{ matrix.scene }}.json"
+      - name: Archive global physical results including all non-refuted cases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p11-global-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: inspected_original_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p11-global-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Summarize only mathematically certified entire-instance impossibilities
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p11-global-S*.json'))
+          rows=[];errors=[];blocks={}
+          for file in files:
+              d=json.loads(file.read_text(encoding='utf-8'))
+              scene=int(d['protocol']['scene'])
+              if scene in blocks:errors.append('duplicate '+str(scene))
+              blocks[scene]=d
+              if not d.get('complete'):errors.append('incomplete '+str(scene))
+              errors+=d.get('errors',[])
+              rows+=d.get('rows',[])
+          c=lambda r:r['global_certificate']
+          by_profile={}
+          for p in sorted({r['profile'] for r in rows}):
+              sample=[r for r in rows if r['profile']==p]
+              by_profile[p]={
+                  'physical_scenes':len(sample),
+                  'globally_proven_impossible':sum(c(r)['globally_infeasible_certified'] for r in sample),
+                  'one_task_certificates':sum(c(r)['single_task_necessary']['impossible_count']>0 for r in sample),
+                  'pooled_CPU_energetic_certificates':sum(c(r)['pooled_CPU_energetic_interval']['violates'] for r in sample),
+                  'UAV_MST_deadline_certificates':sum(c(r)['UAV_collection_MST_deadline_prefix']['violates'] for r in sample),
+                  'UAV_MST_patrol_cycle_certificates':sum(c(r)['UAV_collection_MST_patrol_cycle']['violates'] for r in sample),
+                  'max_pooled_CPU_ratio':max(c(r)['pooled_CPU_energetic_interval']['demand_ratio'] for r in sample),
+                  'max_MST_deadline_ratio':max(c(r)['UAV_collection_MST_deadline_prefix']['demand_ratio'] for r in sample),
+                  'any_old_algorithm_strict_physical_cases':sum(r['nested_old_original_strict_ESI']>0 for r in sample),
+              }
+          result={
+              'scenes':sorted(blocks),
+              'physical_stress_profiles':len(rows),
+              'globally_certified_impossible_profiles':sum(c(r)['globally_infeasible_certified'] for r in rows),
+              'previously_Strict_Physical_Positive_Controls_Falsely_Rejected':sum(
+                  c(r)['globally_infeasible_certified'] and r['nested_any_experimental_strict_ESI']>0
+                  for r in rows),
+              'by_profile':by_profile,
+              'all_other_cases_are_NOT_proven_feasible':True,
+              'already_inspected_original_physical_scenes_not_new_holdout':True,
+              'not_whole_route_MILP_optimality_proof':True,
+              'errors':errors,
+          }
+          if sorted(blocks)!=list(range(105,113)) or len(rows)!=40:
+              errors.append('missing one of 8 original physical scenes with 5 profiles each')
+          if result['previously_Strict_Physical_Positive_Controls_Falsely_Rejected']:
+              errors.append('UNSOUND full-instance necessary bound vs original strict solution')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P11_GLOBAL_PHYSICAL_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete/unsafe global proof audit: '+str(errors[:2]))
+          PY
+      - name: Retain every physical case and complete global-necessary proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p11-global-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
