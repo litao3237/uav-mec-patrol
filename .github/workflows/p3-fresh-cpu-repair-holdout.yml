@@ -1,0 +1,161 @@
+name: P3 frozen CPU certificate repair independent S89-S92 holdout
+
+on:
+  push:
+    branches: ['experiment/p3-cpu-repair-fresh-holdout']
+    paths:
+      - '.github/workflows/p3-fresh-cpu-repair-holdout.yml'
+      - 'experiments/run_p3_cpu_certificate_holdout.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore frozen original numerical models and tests
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm untouched old evaluator and pre-registered new scenario contract
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p3_cpu_certificate_moves.py tests/test_station_cpu_share_bound.py tests/test_atomic_batch_repair.py
+          uv run --no-sync python experiments/run_p3_cpu_certificate_holdout.py --help
+
+  fresh_scenarios:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['89','90','91','92']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen ESI ALNS and Stage1 Stage2 environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Produce independent physical S89-S92 checkpoints and compare frozen repair arms
+        run: |
+          uv run --no-sync python experiments/run_p3_cpu_certificate_holdout.py --scenario ${{ matrix.scenario }} --output-dir "outputs/K80_S${{ matrix.scenario }}"
+      - name: Preserve full original source snapshots and partial rescue outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-fresh-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: fresh_scenarios
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p3-fresh-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate by independent scenario preserving all failure and numeric uncertainty
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('outputs/collected').rglob('p3-fresh-rescue-K80_S*.json'))
+          blocks={};rows=[];errors=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              s=d['protocol']['scenario']
+              if s in blocks:errors.append('duplicate scene '+str(s))
+              blocks[s]=d
+              if not d.get('complete'):errors.append('incomplete '+str(s))
+              errors.extend(d.get('errors',[]))
+              rows.extend(d.get('rows',[]))
+          arms=('old_atomic_cpu_guard','cert_plain','cert_bridge','heavy_bridge')
+          elig=[r for r in rows if r['eligible_for_fixed_D_repair']]
+          def per_arm(a):
+              v=[r['arms'].get(a,{}) for r in elig]
+              return {'strict_recovered':sum(bool(x.get('strict_both_recovered',False)) for x in v),
+                      'attempted_sources':len(v),
+                      'stage1_oracle_calls':sum(x.get('oracle_calls',0) for x in v),
+                      'mean_complete_repair_wall_s':(
+                          statistics.mean(x['total_wall_s'] for x in v)
+                          if v and all('total_wall_s' in x for x in v) else None),
+                      'mean_queue_admitted':(
+                          statistics.mean(x['search']['unique_queue_admitted'] for x in v)
+                          if v and all('search' in x for x in v) else None)}
+          base='old_atomic_cpu_guard'
+          result={
+              'source_scenes':sorted(blocks),
+              'original_B_ALNS_pressure_attempts':len(rows),
+              'conditional_repair_eligible':len(elig),
+              'source_original_stage1_statuses':dict(Counter(r['source_stage1_status'] for r in rows)),
+              'method_results':{a:per_arm(a) for a in arms},
+              'by_profile':{p:{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                                     for r in elig if r['profile']==p)
+                               for a in arms}
+                            for p in sorted({r['profile'] for r in rows})},
+              'by_scene':{str(s):{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                                          for r in elig if r['scenario']==s)
+                                   for a in arms}
+                          for s in sorted(blocks)},
+              'paired_strict_changes':{a:{
+                  'new_recoveries':[{'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                                    for r in elig if r['arms'][a]['strict_both_recovered']
+                                    and not r['arms'][base]['strict_both_recovered']],
+                  'lost_recoveries':[{'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                                     for r in elig if not r['arms'][a]['strict_both_recovered']
+                                     and r['arms'][base]['strict_both_recovered']]}
+                  for a in arms[1:]},
+              'errors':errors,
+              'nested_algorithm_seeds_not_iid':True,
+              'not_full_equal_time_end_to_end_ALNS':True,
+          }
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P3_FRESH_HOLDOUT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if sorted(blocks)!=[89,90,91,92] or len(rows)!=32 or errors:
+              raise RuntimeError('Incomplete pre-registered independent holdout')
+          PY
+      - name: Save strict paired results and all failure coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-fresh-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
