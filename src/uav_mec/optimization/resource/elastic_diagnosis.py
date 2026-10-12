@@ -35,6 +35,8 @@ from uav_mec.optimization.resource.problem import build_resource_model
 
 
 PROTOCOLS = ("qos_only", "qos_plus_mec_capacity", "mec_capacity_only")
+# Opt-in post-holdout attribution only; do not broaden frozen legacy PROTOCOLS.
+SINGLE_CAPACITY_DIAGNOSTIC_MODES = ("cpu_capacity_only", "bandwidth_capacity_only")
 QOS_GROUPS = frozenset(("deadline", "avg_delay", "cycle", "battery"))
 CAPACITY_GROUPS = frozenset(("bandwidth_cap", "mec_cpu_cap"))
 
@@ -144,7 +146,7 @@ def diagnose_elastic_resources(instance: Instance,
     under the original physical constraints. Never read a non-credible
     solver status as a valid conflict certificate.
     """
-    if mode not in PROTOCOLS:
+    if mode not in (*PROTOCOLS, *SINGLE_CAPACITY_DIAGNOSTIC_MODES):
         raise ValueError(mode)
     if numerical_violation_tol <= 0 or solve_tol <= 0 or max_scs_iters <= 0:
         raise ValueError("Positive numerical tolerances required")
@@ -157,6 +159,10 @@ def diagnose_elastic_resources(instance: Instance,
     soft = set(CAPACITY_GROUPS) if mode == "mec_capacity_only" else set(QOS_GROUPS)
     if mode == "qos_plus_mec_capacity":
         soft |= set(CAPACITY_GROUPS)
+    if mode == "cpu_capacity_only":
+        soft = {"mec_cpu_cap"}
+    if mode == "bandwidth_capacity_only":
+        soft = {"bandwidth_cap"}
 
     if len(model.constraints) != len(model.named_constraints):
         raise RuntimeError("Unexpected unnamed constraints in resource model")
