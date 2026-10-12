@@ -1,0 +1,202 @@
+name: P6b station-scale MEC contact-batch repair controlled pilot
+on:
+  push:
+    branches: ['experiment/p6b-station-batch-sweep']
+    paths:
+      - '.github/workflows/p6b-station-batch-pilot.yml'
+      - 'experiments/station_batch_sweep_moves.py'
+      - 'experiments/run_p6b_station_batch_probe.py'
+      - 'tests/test_p6b_station_batch_sweep.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original UAV-MEC numerical resources
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm batch-level operator identity and original solver tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p6b_station_batch_sweep.py tests/test_p6_postbound_conflict_moves.py tests/test_joint_station_bw_cpu_bound.py
+          uv run --no-sync python experiments/run_p6b_station_batch_probe.py --help
+
+  inspected_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '89'
+            source_run: 38202029324
+            artifact: 'p3-fresh-S89-38202029324'
+            source_file: 'source/K80_S89/p3-fresh-source-K80_S89.json'
+          - scene: '90'
+            source_run: 38202029324
+            artifact: 'p3-fresh-S90-38202029324'
+            source_file: 'source/K80_S90/p3-fresh-source-K80_S90.json'
+          - scene: '91'
+            source_run: 38202029324
+            artifact: 'p3-fresh-S91-38202029324'
+            source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json'
+          - scene: '92'
+            source_run: 38202029324
+            artifact: 'p3-fresh-S92-38202029324'
+            source_file: 'source/K80_S92/p3-fresh-source-K80_S92.json'
+          - scene: '93'
+            source_run: 38207186664
+            artifact: 'p5-firstuse-S93-38207186664'
+            source_file: 'source/K80_S93/p5-fresh-source-K80_S93.json'
+          - scene: '94'
+            source_run: 38207186664
+            artifact: 'p5-firstuse-S94-38207186664'
+            source_file: 'source/K80_S94/p5-fresh-source-K80_S94.json'
+          - scene: '95'
+            source_run: 38207186664
+            artifact: 'p5-firstuse-S95-38207186664'
+            source_file: 'source/K80_S95/p5-fresh-source-K80_S95.json'
+    runs-on: windows-latest
+    timeout-minutes: 110
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R numerical environment and residual checks
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download original already-seen physical scenario sources
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Same-category contact-batch policies with full Stage1 and Stage2
+        run: |
+          uv run --no-sync python experiments/run_p6b_station_batch_probe.py --source "${{ matrix.source_file }}" --output "outputs/p6b-station-S${{ matrix.scene }}.json"
+      - name: Preserve all frozen successes, negative controls and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p6b-station-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: inspected_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p6b-station-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Compare all-batches to same-family constrained batch choice
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p6b-station-S*.json'))
+          blocks={};errors=[]
+          for f in files:
+              x=json.loads(f.read_text(encoding='utf-8'))
+              s=int(x['protocol']['scene'])
+              if s in blocks:errors.append('duplicate '+str(s))
+              blocks[s]=x
+              if not x.get('complete'):errors.append('incomplete '+f.name)
+              errors+=x.get('errors',[])
+          arms=('P5_joint48_baseline','station_all_contacts',
+                'joint_binding_pairs_2','heaviest_batches_2','lexical_contacts_2')
+          def get_stats(scenes):
+              rows=[r for s in scenes for r in blocks.get(s,{}).get('rows',[])]
+              elig=[r for r in rows if r['eligible']]
+              def method(a):
+                  vals=[r['arms'].get(a,{}) for r in elig]
+                  return {
+                      'strict_recovered':sum(bool(v.get('strict_both_recovered')) for v in vals),
+                      'stage1_exact_calls':sum(v.get('oracle_calls',0) for v in vals),
+                      'additional_joint_pass':sum(v.get('postbound',{}).get('extra_joint_passing',0) for v in vals),
+                      'mean_whole_repair_wall_s':statistics.mean(
+                          v['complete_conditional_repair_wall_s'] for v in vals
+                      ) if vals and all('complete_conditional_repair_wall_s' in v for v in vals) else None,
+                      'additional_work_wall_s':sum(v.get('postbound',{}).get('postbound_wall_s',0) for v in vals),
+                      'attempted_source_D':len(vals),
+                  }
+              base='P5_joint48_baseline'
+              delta={
+                  a:{'gain':[
+                         {'s':r['scene'],'profile':r['profile'],'seed':r['seed']}
+                         for r in elig if r['arms'].get(a,{}).get('strict_both_recovered')
+                         and not r['arms'].get(base,{}).get('strict_both_recovered')],
+                     'loss':[
+                         {'s':r['scene'],'profile':r['profile'],'seed':r['seed']}
+                         for r in elig if not r['arms'].get(a,{}).get('strict_both_recovered')
+                         and r['arms'].get(base,{}).get('strict_both_recovered')]
+                    } for a in arms[1:]
+              }
+              return {'source_attempts':len(rows),'eligible_failed_D':len(elig),
+                      'arms':{a:method(a) for a in arms},'paired_gain_loss':delta}
+          result={
+              'scenes':sorted(blocks),
+              'cohorts':{
+                  'former_P3_S89_S92':get_stats((89,90,91,92)),
+                  'former_P5_S93_S95':get_stats((93,94,95)),
+                  'all_inspected_development':get_stats(tuple(range(89,96)))
+              },
+              'all_corpus_is_dev_not_unseen':True,
+              'whole_original_B_ALNS_search_time_prepaid':True,
+              'errors':errors,
+          }
+          if sorted(blocks)!=list(range(89,96)):
+              errors.append('Missing inspected scene S89-S95')
+          if any(len(d['rows'])!=8 for d in blocks.values()):
+              errors.append('Incomplete nested physical source states')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P6B_STATION_BATCH_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete P6b experiment: '+str(errors[:3]))
+          PY
+      - name: Retain all strict-success and negative-case paired findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p6b-station-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
