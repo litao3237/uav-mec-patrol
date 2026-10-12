@@ -1,0 +1,143 @@
+name: P2 shared-MEC CPU safe screening matched exact-quota pilot
+on:
+  push:
+    branches: ['experiment/p2-station-cpu-share-diagnostics']
+    paths:
+      - '.github/workflows/p2-cpu-screening-pilot.yml'
+      - 'experiments/run_p2_cpu_share_screening.py'
+      - 'src/uav_mec/optimization/resource/station_cpu_share_bound.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm syntax and frozen CPU necessary condition guards
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_station_cpu_share_bound.py tests/test_atomic_batch_repair.py
+          uv run --no-sync python experiments/run_p2_cpu_share_screening.py --help
+
+  scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 115
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original P1-R/Stage2 solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download immutable original source and strict previous outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38134649545
+          github-token: ${{ github.token }}
+          name: atomic-holdout-S${{ matrix.scenario }}-38134649545
+          path: input/
+      - name: Run three-call controlled repair and report total source-fixed CPU time
+        run: |
+          uv run --no-sync python experiments/run_p2_cpu_share_screening.py --source "input/K80_S${{ matrix.scenario }}/atomic-fresh-source-K80_S${{ matrix.scenario }}.json" --previous "input/K80_S${{ matrix.scenario }}/atomic-K80_S${{ matrix.scenario }}.json" --output "outputs/p2-screen-S${{ matrix.scenario }}.json"
+      - name: Preserve all source hashes, rejected candidates and audit failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-screen-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p2-screen-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Aggregate strict success and full CPU budget, keeping failure denominators
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('outputs/collected').glob('p2-screen-S*.json'))
+          rows=[];errors=[]
+          for p in files:
+              j=json.loads(p.read_text(encoding='utf-8'))
+              if not j.get('complete'):errors.append(p.name+':incomplete')
+              rows+=j.get('rows',[])
+              errors+=j.get('errors',[])
+          arms=['legacy_top3','necessary_cpu_guard_top3']
+          stat={
+              arm:{
+                  'strict':sum(bool(r['arms'].get(arm,{}).get('strict_both_recovered')) for r in rows),
+                  'total_CVX_calls':sum(r['arms'].get(arm,{}).get('stage1_oracle_calls',0) for r in rows),
+                  'mean_complete_repair_wall_s':statistics.mean(
+                      r['arms'][arm]['whole_repair_wall_s'] for r in rows) if rows and
+                      all(arm in r['arms'] for r in rows) else None,
+              } for arm in arms}
+          result={'source_count':len(rows),'cases_from_scenes':len(files),
+                  'strict_comparators':stat,'errors':errors,
+                  'prior_strict_reproduced':sum(r.get('legacy_strict_reproduced',False) for r in rows),
+                  'screening_rejects_before_3_CVX':sum(r.get('cpu_screen_rejected',0) for r in rows),
+                  'improved_sources':[{'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                      for r in rows if r['arms'].get('necessary_cpu_guard_top3',{}).get('strict_both_recovered')
+                      and not r['arms'].get('legacy_top3',{}).get('strict_both_recovered')],
+                  'lost_sources':[{'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                      for r in rows if not r['arms'].get('necessary_cpu_guard_top3',{}).get('strict_both_recovered')
+                      and r['arms'].get('legacy_top3',{}).get('strict_both_recovered')]}
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P2_CPU_SCREEN_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if len(files)!=4 or len(rows)!=22 or errors or result['prior_strict_reproduced']!=22:
+              raise RuntimeError('Incomplete frozen comparison; no scientific claims allowed')
+          PY
+      - name: Preserve final paired table and all failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-screen-summary-${{ github.run_id }}
+          path: outputs/summary/
+          if-no-files-found: warn
+          retention-days: 90
