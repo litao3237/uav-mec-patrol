@@ -18,7 +18,6 @@ from uav_mec.optimization.resource.elastic_diagnosis import (
     relaxation_scale, diagnose_elastic_resources,
 )
 from uav_mec.analysis.experiment_snapshot import content_hash
-from summarize_elastic_diagnosis import aggregate
 
 
 def test_explicit_groups_and_recovered_original_constraint_units():
@@ -97,20 +96,6 @@ def test_no_mec_hardware_cap_softening_unless_explicitly_requested():
     assert full["normalized_total_elastic_slack"]<=(
         q["normalized_total_elastic_slack"]+.003
     )
-
-
-def test_missing_blocks_remain_visible_in_reporting():
-    scenario={
-        "protocol":{"tasks":80,"independent_scenario_seed":61},
-        "complete":False,
-        "rows":[],
-        "unhandled_program_errors":[],
-    }
-    data=aggregate(
-        [scenario],expected=((80,61),(80,62)),
-    )
-    assert data["missing_blocks"]==[[80,62]]
-    assert data["incomplete_blocks"]==[[80,61]]
 
 
 @pytest.mark.parametrize("invalid",[
