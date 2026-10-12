@@ -40,9 +40,14 @@ ARMS=(
 
 def atomic_search(instance, source, *, include_atomic,
                   include_cross_uav=False, beam_width=2, depth=4,
-                  exact_limit=3, generation_cap_s=4.0):
+                  exact_limit=3, generation_cap_s=4.0,
+                  beam_policy="global", shortlist_policy="global"):
     if include_cross_uav and not include_atomic:
         raise ValueError("Cross-UAV atomic moves require atomic candidate arm")
+    if beam_policy not in ("global", "one_pure_legacy", "pure_legacy_only"):
+        raise ValueError("Invalid frozen counterfactual beam policy")
+    if shortlist_policy not in ("global", "one_pure_legacy"):
+        raise ValueError("Invalid frozen counterfactual shortlist policy")
     if min(beam_width,depth,exact_limit)<=0 or generation_cap_s<=0:
         raise ValueError("Positive limits are required")
     t0=perf_counter()
@@ -62,7 +67,8 @@ def atomic_search(instance, source, *, include_atomic,
             reverse=True,
         )[:3]
     original_metric=_metric(instance,source,root_task_ids=root_ids)
-    beam=[{"label":"root","sol":deepcopy(source),"metric":original_metric}]
+    beam=[{"label":"root","sol":deepcopy(source),"metric":original_metric,
+           "pure_legacy":True}]
     unique_seen={solution_signature(source)}
     viable={}
     counters=Counter()
@@ -109,6 +115,8 @@ def atomic_search(instance, source, *, include_atomic,
                     "metric":metric,"depth":turn,
                     "parent":item["label"],
                     "family":label.split("::")[0],
+                    "pure_legacy":(item["pure_legacy"]
+                        and not label.startswith("bundle_")),
                 }
                 layer.append(row)
                 if metric["passed"]:
@@ -121,14 +129,30 @@ def atomic_search(instance, source, *, include_atomic,
             key=lambda row:_legacy_global_key(row["metric"],row["label"]),
         )
         chosen=layer[:beam_width]
+        if beam_policy=="pure_legacy_only":
+            chosen=[r for r in layer if r["pure_legacy"]][:beam_width]
+        elif beam_policy=="one_pure_legacy":
+            # A read-only diagnostic counterfactual: keep the globally
+            # strongest next state and one entirely non-atomic path.
+            head=layer[0]
+            protected=next((r for r in layer
+                            if r["pure_legacy"] and r["sig"]!=head["sig"]),
+                           None)
+            if protected is not None and beam_width>=2:
+                chosen=[head,protected]
         beam=[{
             "label":r["label"],"sol":r["sol"],"metric":r["metric"],
+            "pure_legacy":r["pure_legacy"],
         } for r in chosen]
         trace.append({
             "depth":turn,
             "new_unique":len(layer),
             "queue_pass":sum(r["metric"]["passed"] for r in layer),
             "beam_labels":[r["label"] for r in chosen],
+            "beam_pure_legacy":[r["pure_legacy"] for r in chosen],
+            "passing_by_family":dict(Counter(
+                r["family"] for r in layer if r["metric"]["passed"])),
+            "generated_by_family":dict(Counter(r["family"] for r in layer)),
             "best_queue_gap_s":layer[0]["metric"]["total_excess_s"],
         })
         counters["depth_steps"]+=1
@@ -138,9 +162,17 @@ def atomic_search(instance, source, *, include_atomic,
         key=lambda row:_legacy_global_key(row["metric"],row["label"]),
     )
     shortlist=ordered[:exact_limit]
+    if shortlist_policy=="one_pure_legacy" and exact_limit>=1:
+        # Isolate end-of-search shortlist competition from beam eviction.
+        best_pure=next((r for r in ordered if r["pure_legacy"]),None)
+        if (best_pure is not None and shortlist
+                and not any(r["pure_legacy"] for r in shortlist)):
+            shortlist=shortlist[:-1]+[best_pure]
     return shortlist,{
         "include_atomic":include_atomic,
         "include_cross_uav":include_cross_uav,
+        "beam_policy":beam_policy,
+        "shortlist_policy":shortlist_policy,
         "source_queue_excess_s":original_metric["total_excess_s"],
         "unique_generated":counters["unique_generated"],
         "legacy_raw":counters["legacy_raw"],
@@ -158,12 +190,14 @@ def atomic_search(instance, source, *, include_atomic,
         "generation_wall_s":perf_counter()-t0,
         "strict_shortlist_labels":[r["label"] for r in shortlist],
         "strict_shortlist_depth":[r["depth"] for r in shortlist],
+        "strict_shortlist_pure_legacy":[r["pure_legacy"] for r in shortlist],
         "trace":trace,
     }
 
 
 def run_atomic_arm(instance,source,*,arm,beam_width=2,depth=4,
-                   exact_limit=3,generation_cap_s=4.0):
+                   exact_limit=3,generation_cap_s=4.0,
+                   beam_policy="global",shortlist_policy="global"):
     if arm not in ARMS[2:]:
         raise ValueError(arm)
     started=perf_counter()
@@ -172,6 +206,7 @@ def run_atomic_arm(instance,source,*,arm,beam_width=2,depth=4,
         include_cross_uav=arm=="atomic_offload_and_cross_uav_depth4",
         beam_width=beam_width,depth=depth,
         exact_limit=exact_limit,generation_cap_s=generation_cap_s,
+        beam_policy=beam_policy,shortlist_policy=shortlist_policy,
     )
     oracle=Stage1CVXObjectiveOracle()
     good=[]
