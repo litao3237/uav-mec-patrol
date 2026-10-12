@@ -1,0 +1,197 @@
+name: P7 original ALNS shadow intermediate feasibility archive diagnosis
+on:
+  push:
+    branches: ['experiment/p7-alns-exploration-feasibility-audit']
+    paths:
+      - '.github/workflows/p7-alns-shadow-replay.yml'
+      - 'experiments/run_p7_alns_shadow_archive.py'
+      - 'tests/test_p7_alns_shadow_archive.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore frozen original ALNS/P1-R environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate no source mutation, exact-score shadow identity and archive CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p7_alns_shadow_archive.py tests/test_joint_station_bw_cpu_bound.py
+          uv run --no-sync python experiments/run_p7_alns_shadow_archive.py --help
+
+  shadow_development_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '89'
+            original_run: 38202029324
+            original_artifact: 'p3-fresh-S89-38202029324'
+            original_source_path: 'sources/K80_S89/p3-fresh-source-K80_S89.json'
+            cases: 'deadline_x0p9:128'
+          - scene: '91'
+            original_run: 38202029324
+            original_artifact: 'p3-fresh-S91-38202029324'
+            original_source_path: 'sources/K80_S91/p3-fresh-source-K80_S91.json'
+            cases: 'compute_x1p5:128'
+          - scene: '93'
+            original_run: 38207186664
+            original_artifact: 'p5-firstuse-S93-38207186664'
+            original_source_path: 'sources/K80_S93/p5-fresh-source-K80_S93.json'
+            cases: 'compute_x1p5:130,baseline:129'
+          - scene: '94'
+            original_run: 38207186664
+            original_artifact: 'p5-firstuse-S94-38207186664'
+            original_source_path: 'sources/K80_S94/p5-fresh-source-K80_S94.json'
+            cases: 'compute_x1p5:129'
+          - scene: '95'
+            original_run: 38207186664
+            original_artifact: 'p5-firstuse-S95-38207186664'
+            original_source_path: 'sources/K80_S95/p5-fresh-source-K80_S95.json'
+            cases: 'compute_x2p0:130'
+          - scene: '96'
+            original_run: 38207186664
+            original_artifact: 'p5-firstuse-S96-38207186664'
+            original_source_path: 'sources/K80_S96/p5-fresh-source-K80_S96.json'
+            cases: 'deadline_x0p9:130'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged published ALNS and Stage1 CVX solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download previously inspected B-ALNS physical source from exact original Actions
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.original_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.original_artifact }}
+          path: sources/
+      - name: Rerun identical original random-search trajectory with read-only feasibility recorder
+        run: |
+          uv run --no-sync python experiments/run_p7_alns_shadow_archive.py --source "${{ matrix.original_source_path }}" --profiles-seeds "${{ matrix.cases }}" --output "outputs/p7-shadow-S${{ matrix.scene }}.json"
+      - name: Preserve exact B state replay, original feasibility and shadow Stage1/2 diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p7-shadow-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: shadow_development_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p7-shadow-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Compare original B trajectory and observed feasibility archive without overclaiming
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p7-shadow-S*.json'))
+          rows=[];errors=[]
+          for f in files:
+              x=json.loads(f.read_text(encoding='utf-8'))
+              if not x.get('complete'):errors.append(f.name+':incomplete')
+              errors+=x.get('errors',[])
+              rows+=x.get('rows',[])
+          def scope(r):
+              counts=r.get('shadow',{}).get('counters',{})
+              return {
+                  'scene':r['scene'],'profile':r['profile'],'seed':r['seed'],
+                  'original_B_status':r['original_B_status'],
+                  'original_endpoint_replayed':r.get('original_best_reproduced',False),
+                  'unique_created_D':counts.get('unique_generated',0),
+                  'old_fast_precheck_pass':counts.get('old_fast_precheck_passed',0),
+                  'queue_necessary_pass':counts.get('queue_necessary_pass',0),
+                  'static_CPU_necessary_pass':counts.get('static_cpu_necessary_pass',0),
+                  'joint_necessary_pass':counts.get('joint_bw_cpu_necessary_pass',0),
+                  'extra_shadow_observation_s':r.get('shadow',{}).get('shadow_observation_wall_s',0),
+                  'additional_stage1_strict':sum(x['stage1_strict']
+                      for name,rr in r['archive_exact_rechecks'].items()
+                      if name!='reuse_metadata' for x in rr),
+                  'additional_strict_stage1_stage2':sum(x['strict_both']
+                      for name,rr in r['archive_exact_rechecks'].items()
+                      if name!='reuse_metadata' for x in rr),
+              }
+          records=[scope(r) for r in rows]
+          summary={
+              'source_archives':len(files),'original_B_attempts':len(rows),
+              'all_B_trajectory_hashes_match':all(x['original_endpoint_replayed'] for x in records),
+              'source_B_precheck_failed':sum(x['original_B_status']=='infeasible_precheck' for x in records),
+              'failed_sources_ever_created_joint_passed_D':sum(
+                  x['original_B_status']=='infeasible_precheck' and x['joint_necessary_pass']>0
+                  for x in records),
+              'failed_sources_with_postpaid_strict_archive_success':sum(
+                  x['original_B_status']=='infeasible_precheck'
+                  and x['additional_strict_stage1_stage2']>0
+                  for x in records),
+              'each_case':records,
+              'errors':errors,
+              'P7_shadows_are_not_accepted_by_original_ALNS':True,
+              'postpaid_extra_Stage1_CVX_checks_not_equal_budget':True,
+              'only_already_seen_stress_scenarios':True,
+          }
+          if len(files)!=6 or len(rows)!=7:
+              errors.append('Missing one of seven preregistered B source cases')
+          if not summary['all_B_trajectory_hashes_match']:
+              errors.append('Shadow altered original ALNS best or physical source')
+          summary['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P7_ALNS_SHADOW_AGGREGATE='+json.dumps(summary,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete or non-reproducible shadow audit '+str(errors[:3]))
+          PY
+      - name: Save all observed candidate classes and negative cases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p7-shadow-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
