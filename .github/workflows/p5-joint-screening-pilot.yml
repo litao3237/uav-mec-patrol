@@ -1,0 +1,202 @@
+name: P5 matched exact Stage1 quota joint certificate screen pilot
+on:
+  push:
+    branches: ['experiment/p5-joint-bandwidth-cpu-certificate']
+    paths:
+      - '.github/workflows/p5-joint-screening-pilot.yml'
+      - 'experiments/run_p5_joint_screening_probe.py'
+      - 'tests/test_p5_joint_screening.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore original frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Check exact three-call screening, strict qualification, and old source behavior
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p5_joint_screening.py tests/test_joint_station_bw_cpu_bound.py tests/test_station_cpu_share_bound.py
+          uv run --no-sync python experiments/run_p5_joint_screening_probe.py --help
+
+  paired_archived:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '85'
+            archive_run: 38134649545
+            archive_name: 'atomic-holdout-S85-38134649545'
+            source_file: 'source/K80_S85/atomic-fresh-source-K80_S85.json'
+          - scene: '86'
+            archive_run: 38134649545
+            archive_name: 'atomic-holdout-S86-38134649545'
+            source_file: 'source/K80_S86/atomic-fresh-source-K80_S86.json'
+          - scene: '87'
+            archive_run: 38134649545
+            archive_name: 'atomic-holdout-S87-38134649545'
+            source_file: 'source/K80_S87/atomic-fresh-source-K80_S87.json'
+          - scene: '88'
+            archive_run: 38134649545
+            archive_name: 'atomic-holdout-S88-38134649545'
+            source_file: 'source/K80_S88/atomic-fresh-source-K80_S88.json'
+          - scene: '89'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S89-38202029324'
+            source_file: 'source/K80_S89/p3-fresh-source-K80_S89.json'
+          - scene: '90'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S90-38202029324'
+            source_file: 'source/K80_S90/p3-fresh-source-K80_S90.json'
+          - scene: '91'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S91-38202029324'
+            source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json'
+          - scene: '92'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S92-38202029324'
+            source_file: 'source/K80_S92/p3-fresh-source-K80_S92.json'
+    runs-on: windows-latest
+    timeout-minutes: 95
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore unchanged published physics and exact numerical solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download original archived unmodified B and ESI sources
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.archive_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.archive_name }}
+          path: source/
+      - name: Paired queue/static CPU/joint 12-bin/48-bin strict screening
+        run: |
+          uv run --no-sync python experiments/run_p5_joint_screening_probe.py --source "${{ matrix.source_file }}" --output "outputs/p5-screen-S${{ matrix.scene }}.json"
+      - name: Preserve all outcomes, source hashes and partial errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-screen-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: paired_archived
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p5-screen-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Strict paired recovery, total wall time and original control reproduction
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          from collections import Counter
+          files=sorted(Path('collected').rglob('p5-screen-S*.json'))
+          byscene={};errors=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              s=d['protocol']['scenario']
+              if s in byscene:errors.append('duplicate scene '+str(s))
+              byscene[s]=d
+              if not d.get('complete'):errors.append(f.name+':incomplete')
+              errors+=d.get('errors',[])
+          arms=('queue_top3','static_cpu_top3','joint_bw_cpu_12','joint_bw_cpu_48')
+          def summarize(rows):
+              eligible=[r for r in rows if r['eligible']]
+              def arm(a):
+                  vals=[r['arms'].get(a,{}) for r in eligible]
+                  return {
+                      'recovered':sum(bool(x.get('strict_both_recovered')) for x in vals),
+                      'stage1_calls':sum(x.get('oracle_calls',0) for x in vals),
+                      'mean_full_repair_wall_s':statistics.mean(
+                          x['full_repair_wall_s'] for x in vals
+                      ) if vals and all('full_repair_wall_s' in x for x in vals) else None,
+                      'static_rejections':sum(
+                          x.get('cpu_and_joint_gate',{}).get('static_rejected',0) for x in vals),
+                      'additional_joint_rejections':sum(
+                          x.get('cpu_and_joint_gate',{}).get('joint_extra_rejected',0) for x in vals),
+                      'strict_Stage1_candidates':sum(x.get('stage1_pass_candidates',0) for x in vals),
+                  }
+              return {'source_attempts':len(rows),'eligible_failed_D':len(eligible),
+                      'arms':{a:arm(a) for a in arms},
+                      'by_profile':{p:{a:sum(bool(r['arms'].get(a,{}).get('strict_both_recovered'))
+                                                  for r in eligible if r['profile']==p)
+                                            for a in arms}
+                                    for p in sorted({r['profile'] for r in rows})}}
+          result={'scenes':sorted(byscene),'cohorts':{},'errors':errors,
+                  'development_samples_only':True,
+                  'full_equal_time_ALNS_proof':False}
+          for key,subset in {
+              'P1_S85_S88':[85,86,87,88],
+              'P4_S89_S92':[89,90,91,92],
+              'combined_S85_S92':list(range(85,93)),
+          }.items():
+              rows=[r for s in subset for r in byscene.get(s,{}).get('rows',[])]
+              result['cohorts'][key]=summarize(rows)
+          p1=result['cohorts']['P1_S85_S88']
+          p4=result['cohorts']['P4_S89_S92']
+          if (p1['eligible_failed_D']!=22
+              or p1['arms']['queue_top3']['recovered']!=4
+              or p1['arms']['static_cpu_top3']['recovered']!=5
+              or p4['eligible_failed_D']!=17
+              or p4['arms']['queue_top3']['recovered']!=0
+              or p4['arms']['static_cpu_top3']['recovered']!=0):
+              errors.append('Frozen original queue/CPU strict replay changed')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P5_SCREEN_PILOT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if len(byscene)!=8 or errors:
+              raise RuntimeError('Incomplete archived paired P5 screen, no performance claim')
+          PY
+      - name: Save complete negative and positive paired experimental evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-screen-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
