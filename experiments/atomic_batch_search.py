@@ -41,7 +41,8 @@ ARMS=(
 def atomic_search(instance, source, *, include_atomic,
                   include_cross_uav=False, beam_width=2, depth=4,
                   exact_limit=3, generation_cap_s=4.0,
-                  beam_policy="global", shortlist_policy="global"):
+                  beam_policy="global", shortlist_policy="global",
+                  diagnostic_trace=False):
     if include_cross_uav and not include_atomic:
         raise ValueError("Cross-UAV atomic moves require atomic candidate arm")
     if beam_policy not in ("global", "one_pure_legacy", "pure_legacy_only"):
@@ -67,8 +68,9 @@ def atomic_search(instance, source, *, include_atomic,
             reverse=True,
         )[:3]
     original_metric=_metric(instance,source,root_task_ids=root_ids)
+    root_hash=content_hash(source) if diagnostic_trace else None
     beam=[{"label":"root","sol":deepcopy(source),"metric":original_metric,
-           "pure_legacy":True}]
+           "pure_legacy":True, "path":(), "node_hash":root_hash}]
     unique_seen={solution_signature(source)}
     viable={}
     counters=Counter()
@@ -117,6 +119,8 @@ def atomic_search(instance, source, *, include_atomic,
                     "family":label.split("::")[0],
                     "pure_legacy":(item["pure_legacy"]
                         and not label.startswith("bundle_")),
+                    "path":item["path"]+(label,) if diagnostic_trace else (),
+                    "parent_hash":item["node_hash"] if diagnostic_trace else None,
                 }
                 layer.append(row)
                 if metric["passed"]:
@@ -140,9 +144,13 @@ def atomic_search(instance, source, *, include_atomic,
                            None)
             if protected is not None and beam_width>=2:
                 chosen=[head,protected]
+        if diagnostic_trace:
+            for r in chosen:
+                r["node_hash"]=content_hash(r["sol"])
         beam=[{
             "label":r["label"],"sol":r["sol"],"metric":r["metric"],
             "pure_legacy":r["pure_legacy"],
+            "path":r["path"],"node_hash":r.get("node_hash"),
         } for r in chosen]
         trace.append({
             "depth":turn,
@@ -150,6 +158,8 @@ def atomic_search(instance, source, *, include_atomic,
             "queue_pass":sum(r["metric"]["passed"] for r in layer),
             "beam_labels":[r["label"] for r in chosen],
             "beam_pure_legacy":[r["pure_legacy"] for r in chosen],
+            "beam_hashes":[r.get("node_hash") for r in chosen] if diagnostic_trace else [],
+            "beam_paths":[list(r["path"]) for r in chosen] if diagnostic_trace else [],
             "passing_by_family":dict(Counter(
                 r["family"] for r in layer if r["metric"]["passed"])),
             "generated_by_family":dict(Counter(r["family"] for r in layer)),
@@ -169,6 +179,16 @@ def atomic_search(instance, source, *, include_atomic,
                 and not any(r["pure_legacy"] for r in shortlist)):
             shortlist=shortlist[:-1]+[best_pure]
     return shortlist,{
+        "diagnostic_shortlist":[
+            {
+                "rank":rank,"node_hash":content_hash(r["sol"]),
+                "parent_hash":r.get("parent_hash"),
+                "path":list(r["path"]),"family":r["family"],
+                "label":r["label"],"depth":r["depth"],
+                "queue_metric":r["metric"],
+            }
+            for rank,r in enumerate(shortlist,1)
+        ] if diagnostic_trace else [],
         "include_atomic":include_atomic,
         "include_cross_uav":include_cross_uav,
         "beam_policy":beam_policy,
