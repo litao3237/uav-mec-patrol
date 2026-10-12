@@ -1,0 +1,181 @@
+name: P5 first-use S93-S96 joint BW CPU certificate independent holdout
+on:
+  push:
+    branches: ['experiment/p5-joint-bw-cpu-independent-holdout']
+    paths:
+      - '.github/workflows/p5-joint-bw-cpu-fresh-holdout.yml'
+      - 'experiments/run_p5_joint_fresh_holdout.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged ESI ALNS, P1-R and Stage2 environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify static vs coupled interval bound safety and holdout CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_joint_station_bw_cpu_bound.py tests/test_station_cpu_share_bound.py tests/test_p5_joint_screening.py
+          uv run --no-sync python experiments/run_p5_joint_fresh_holdout.py --help
+
+  independent_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['93','94','95','96']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install ORIGINAL published P1-R and P2 physical resource environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: First-use independent original B and ESI scenarios and frozen four-arm screening
+        run: |
+          uv run --no-sync python experiments/run_p5_joint_fresh_holdout.py --scenario ${{ matrix.scenario }} --output-dir "outputs/K80_S${{ matrix.scenario }}"
+      - name: Archive all original ESI/B source snapshots and strict paired outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-firstuse-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: independent_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p5-firstuse-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Confirm complete independent sources and strict CVX/Stage2 pairwise outcomes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p5-fresh-repair-K80_S*.json'))
+          blocks={};rows=[];errors=[];source_stats={}
+          for file in files:
+              x=json.loads(file.read_text(encoding='utf-8'))
+              scene=int(x['protocol']['scenario'])
+              if scene in blocks:errors.append('duplicate scene '+str(scene))
+              blocks[scene]=x
+              if not x.get('complete'):errors.append('incomplete '+str(scene))
+              errors+=x.get('errors',[])
+              rows+=x.get('rows',[])
+              source_file=file.with_name(f'p5-fresh-source-K80_S{scene}.json')
+              if not source_file.exists():
+                  errors.append('no source JSON '+str(scene))
+              else:
+                  src=json.loads(source_file.read_text(encoding='utf-8'))
+                  if not src.get('complete'):errors.append('unfinished original source '+str(scene))
+                  source_stats[str(scene)]={
+                      'records':len(src.get('rows',[])),
+                      'strict_Stage1':sum(bool(r.get('stage1_qualified')) for r in src.get('rows',[])),
+                      'source_method_counts':dict(Counter(r['method'] for r in src.get('rows',[])))}
+          arms=('queue_top3','static_cpu_top3','joint_bw_cpu_12','joint_bw_cpu_48')
+          eligible=[r for r in rows if r['eligible']]
+          def arm(a):
+              vals=[r['arms'].get(a,{}) for r in eligible]
+              return {
+                  'strict':sum(bool(x.get('strict_both_recovered')) for x in vals),
+                  'source_attempts':len(vals),
+                  'stage1_CVX_calls':sum(x.get('oracle_calls',0) for x in vals),
+                  'stage1_qualified_candidates':sum(x.get('stage1_pass_candidates',0) for x in vals),
+                  'mean_total_repair_wall_s':(
+                      statistics.mean(x['full_repair_wall_s'] for x in vals)
+                      if vals and all('full_repair_wall_s' in x for x in vals) else None),
+                  'joint_extra_rejections':sum(
+                      x.get('cpu_and_joint_gate',{}).get('joint_extra_rejected',0)
+                      for x in vals)}
+          control=arms[1]
+          result={
+              'first_use_independent_scenes':sorted(blocks),
+              'total_B_pressure_source_states':len(rows),
+              'conditional_precheck_failed_source_states':len(eligible),
+              'original_B_stage1_statuses':dict(Counter(r['source_status'] for r in rows)),
+              'original_complete_source_archives':source_stats,
+              'methods':{a:arm(a) for a in arms},
+              'by_profile':{
+                  p:{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                           for r in eligible if r['profile']==p) for a in arms}
+                  for p in sorted({r['profile'] for r in rows})},
+              'by_scene':{
+                  str(s):{a:sum(r['arms'].get(a,{}).get('strict_both_recovered',False)
+                                 for r in eligible if r['scenario']==s) for a in arms}
+                  for s in sorted(blocks)},
+              'paired_gain_loss_relative_to_static_CPU':{
+                  a:{
+                      'new':[{'s':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                             for r in eligible if r['arms'].get(a,{}).get('strict_both_recovered')
+                             and not r['arms'].get(control,{}).get('strict_both_recovered')],
+                      'lost':[{'s':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                              for r in eligible if not r['arms'].get(a,{}).get('strict_both_recovered')
+                              and r['arms'].get(control,{}).get('strict_both_recovered')],
+                  } for a in ('joint_bw_cpu_12','joint_bw_cpu_48')},
+              'errors':errors,
+              'pre_registered_new_stress_scenes':True,
+              'nested_algorithm_seeds_are_not_independent_physical_scenarios':True,
+              'source_B_ALNS_time_prepaid_not_full_equal_time_ALNS_comparison':True,
+          }
+          if sorted(blocks)!=[93,94,95,96] or len(rows)!=32:
+              errors.append('Missing physical scene or seed coverage')
+          if any(len([r for r in rows if r['scenario']==s])!=8 for s in (93,94,95,96)):
+              errors.append('Missing nested source seeds/pressure profiles')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P5_FIRST_USE_HOLDOUT_AGGREGATE='+json.dumps({
+              k:v for k,v in result.items() if k not in ('original_complete_source_archives','paired_gain_loss_relative_to_static_CPU')
+          },ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete frozen original heldout P5 data: '+str(errors[:3]))
+          PY
+      - name: Retain complete strict and negative evidence for independent scenes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p5-firstuse-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
