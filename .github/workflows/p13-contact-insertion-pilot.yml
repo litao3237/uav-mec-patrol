@@ -1,0 +1,125 @@
+name: P13 original top3 MEC-contact-aware insertion attribution pilot
+on:
+  push:
+    branches: ['experiment/p13-contact-aware-insertion-pilot']
+    paths:
+      - '.github/workflows/p13-contact-insertion-pilot.yml'
+      - 'experiments/run_p13_contact_insertion_probe.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate frozen original operator and pilot CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p13_contact_insertion_probe.py --help
+  frozen_sources:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, artifact: 'p3-fresh-S89-38202029324', file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, artifact: 'p3-fresh-S91-38202029324', file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, artifact: 'p5-firstuse-S93-38207186664', file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, artifact: 'p5-firstuse-S95-38207186664', file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, artifact: 'p5-firstuse-S96-38207186664', file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Compare same original top3 physical candidates under contact and queue criteria
+        run: |
+          uv run --no-sync python experiments/run_p13_contact_insertion_probe.py --source "${{ matrix.file }}" --cases "${{ matrix.cases }}" --output "outputs/p13-contact-S${{ matrix.scene }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p13-contact-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+  summarize:
+    needs: frozen_sources
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p13-contact-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p13-contact-S*.json'))
+          rows=[];errors=[]
+          for f in files:
+              x=json.loads(f.read_text(encoding='utf-8'))
+              rows.extend(x.get('rows',[]))
+              errors+=x.get('errors',[])
+              if not x.get('complete'):errors.append('incomplete '+f.name)
+          arms=('original_top1','same_budget_original_rank','contact_opportunity','post_mec_queue')
+          trials=[t for r in rows for t in r['tasks']]
+          summary={
+              'scenes':len(files),'source_cases':len(rows),'task_trials':len(trials),
+              'strict':{a:sum(t['extra_stage1_posthoc'][a]['Stage1_and_Stage2_strict'] for t in trials) for a in arms},
+              'queue_pass':{a:sum(t['winners'][a]['queue_necessary_pass'] for t in trials) for a in arms},
+              'nonoriginal_rank':{a:sum(t['winners'][a]['rank']!=1 for t in trials) for a in arms},
+              'same_original_candidates':True,'posthoc_not_equal_ALNS_wall':True,
+              'errors':errors,
+          }
+          if len(files)!=5 or len(rows)!=6 or len(trials)!=12:errors.append('missing frozen source cases')
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('P13_AGGREGATE='+json.dumps(summary,ensure_ascii=False))
+          if errors:raise RuntimeError(str(errors[:3]))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p13-contact-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
