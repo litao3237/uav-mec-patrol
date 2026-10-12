@@ -2,7 +2,7 @@
 
 S105-S108 were not used for P0-P9 algorithm development. Freeze
 physical profiles and two nested stochastic seeds before observing
-any S101-S104 experimental result.
+any S105-S108 experimental result.
 
 Four arms use the EXACT same original ScreenedProxy objective,
 original repair operators, RRT acceptance, CVX Stage1, Stage2 and
