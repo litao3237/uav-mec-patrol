@@ -327,7 +327,7 @@ def diagnose_elastic_resources(instance: Instance,
             "capacity_relaxation_interpretation":(
                 "soft capacity is a counterfactual hardware expansion, "
                 "not a feasible resource allocation on the real station"
-                if mode=="qos_plus_mec_capacity" else
+                if bool(soft.intersection(CAPACITY_GROUPS)) else
                 "actual MEC station capacities remain hard"
             ),
         }
