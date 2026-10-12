@@ -143,7 +143,7 @@ def run(source:Path,output:Path,selected):
                     "stage1_status")),
             "top_original_queue_task_targets":{
                 pol:queue_guided_task_rank(inst,initial,policy=pol)[0][:12]
-                for pol in QUEUE_DESTROY_POLICIES
+                for pol in ARMS[1:]
             },
             "arms":{},
         }
