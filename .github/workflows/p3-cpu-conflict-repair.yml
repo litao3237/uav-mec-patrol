@@ -1,0 +1,155 @@
+name: P3 CPU certificate targeted structural repair pilot
+
+on:
+  push:
+    branches: ['experiment/p3-cpu-conflict-guided-repair']
+    paths:
+      - '.github/workflows/p3-cpu-conflict-repair.yml'
+      - 'experiments/cpu_certificate_repair_moves.py'
+      - 'experiments/run_p3_cpu_certificate_probe.py'
+      - 'tests/test_p3_cpu_certificate_moves.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen published-model environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate deterministic CPU-certificate targets and all original tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p3_cpu_certificate_moves.py tests/test_station_cpu_share_bound.py tests/test_atomic_batch_repair.py
+          uv run --no-sync python experiments/run_p3_cpu_certificate_probe.py --help
+
+  development_scenarios:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 110
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R and Stage2 environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore unchanged P1 source scenarios; do not regenerate or modify D
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38134649545
+          github-token: ${{ github.token }}
+          name: atomic-holdout-S${{ matrix.scenario }}-38134649545
+          path: source/
+      - name: Run four paired repairs with full CPU time and strict validation
+        run: |
+          uv run --no-sync python experiments/run_p3_cpu_certificate_probe.py --source "source/K80_S${{ matrix.scenario }}/atomic-fresh-source-K80_S${{ matrix.scenario }}.json" --previous "source/K80_S${{ matrix.scenario }}/atomic-K80_S${{ matrix.scenario }}.json" --output "outputs/p3-cpu-K80_S${{ matrix.scenario }}.json"
+      - name: Preserve every success, failure and exception
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-cpu-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: development_scenarios
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p3-cpu-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Audit full original source denominators and report paired outcomes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          all_files=sorted(Path('outputs/collected').glob('p3-cpu-K80_S*.json'))
+          rows=[];err=[]
+          for f in all_files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              if not d.get('complete'):err.append(f.name+':incomplete')
+              rows+=d.get('rows',[])
+              err+=d.get('errors',[])
+          arms=('old_atomic_cpu_guard','cert_plain','cert_bridge','heavy_bridge')
+          def stats(arm):
+              vals=[r['arms'].get(arm,{}) for r in rows]
+              valid=[v for v in vals if 'oracle_calls' in v]
+              return {
+                  'attempts':len(vals),
+                  'strict':sum(bool(v.get('strict_both_recovered')) for v in vals),
+                  'CVX_stage1_calls':sum(v.get('oracle_calls',0) for v in vals),
+                  'mean_full_wall_seconds':statistics.mean(v['total_wall_s'] for v in valid) if valid else None,
+                  'mean_queue_passing_states':statistics.mean(v['search']['unique_queue_admitted'] for v in valid) if valid else None,
+                  'mean_cpu_target_raw':statistics.mean(v['search'].get('cpu_target_raw',0) for v in valid) if valid else None,
+                  'generation_cap_hit':sum(bool(v['search'].get('soft_generation_timeout',False)) for v in valid),
+              }
+          old={a:stats(a) for a in arms}
+          base=[r['arms'].get('old_atomic_cpu_guard',{}).get('strict_both_recovered',False) for r in rows]
+          deltas={}
+          for arm in arms[1:]:
+              deltas[arm]={
+                  'wins':[{'s':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                          for i,r in enumerate(rows) if not base[i] and r['arms'].get(arm,{}).get('strict_both_recovered')],
+                  'lost':[{'s':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                          for i,r in enumerate(rows) if base[i] and not r['arms'].get(arm,{}).get('strict_both_recovered')],
+              }
+          result={'source_count':len(rows),'scenario_count':len(all_files),
+                  'methods':old,'paired_deltas':deltas,
+                  'by_profile':{p:{arm:sum(r['arms'][arm].get('strict_both_recovered',False) for r in rows if r['profile']==p)
+                                   for arm in arms} for p in sorted({r['profile'] for r in rows})},
+                  'errors':err,
+                  'development_sample_only':True}
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P3_CPU_CERT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if len(all_files)!=4 or len(rows)!=22 or err:
+              raise RuntimeError('Incomplete paired development evidence; no performance conclusion')
+          PY
+      - name: Archive aggregate and partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-cpu-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
