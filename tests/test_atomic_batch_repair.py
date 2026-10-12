@@ -117,3 +117,28 @@ def test_locked_ablation_arms_are_not_called_original_paper_algorithms():
         "atomic_offload_depth4",
         "atomic_offload_and_cross_uav_depth4",
     )
+
+
+@pytest.mark.parametrize("policy",(
+    "global","one_pure_legacy","pure_legacy_only",
+))
+def test_counterfactual_beam_policy_never_changes_strict_acceptance_rules(policy):
+    instance,sol=fifo_stress_with_three_locals()
+    before=content_hash(sol)
+    shortlisted,diag=atomic_search(
+        instance,sol,include_atomic=True,include_cross_uav=True,
+        beam_policy=policy,shortlist_policy="one_pure_legacy",
+        depth=2,beam_width=2,exact_limit=2,generation_cap_s=15.,
+    )
+    assert len(shortlisted)<=2
+    assert all(x["metric"]["passed"] for x in shortlisted)
+    assert all("pure_legacy" in x for x in shortlisted)
+    assert all(len(step["beam_labels"])<=2 for step in diag["trace"])
+    assert content_hash(sol)==before
+
+
+def test_counterfactual_invalid_policy_fails_closed():
+    instance,sol=fifo_stress_with_three_locals()
+    with pytest.raises(ValueError):
+        atomic_search(instance,sol,include_atomic=True,
+                      beam_policy="made_up")
