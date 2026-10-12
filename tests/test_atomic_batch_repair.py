@@ -142,3 +142,33 @@ def test_counterfactual_invalid_policy_fails_closed():
     with pytest.raises(ValueError):
         atomic_search(instance,sol,include_atomic=True,
                       beam_policy="made_up")
+
+
+def test_optin_atomic_diagnostic_ancestry_is_structurally_sound():
+    instance,sol=fifo_stress_with_three_locals()
+    original=content_hash(sol)
+    shortlist,stats=atomic_search(
+        instance,sol,include_atomic=True,include_cross_uav=True,
+        beam_width=2,depth=3,exact_limit=8,
+        generation_cap_s=15.,diagnostic_trace=True,
+    )
+    assert len(shortlist)==len(stats["diagnostic_shortlist"])
+    for row,snapshot in zip(shortlist,stats["diagnostic_shortlist"]):
+        assert snapshot["node_hash"]==content_hash(row["sol"])
+        assert snapshot["parent_hash"] is not None
+        assert snapshot["path"][-1]==row["label"]
+        assert snapshot["depth"]==len(snapshot["path"])
+    for layer in stats["trace"]:
+        assert len(layer["beam_paths"])==len(layer["beam_labels"])
+        assert len(layer["beam_hashes"])==len(layer["beam_labels"])
+        assert all(x is not None for x in layer["beam_hashes"])
+    assert content_hash(sol)==original
+
+
+def test_source_queue_conflict_certificate_remains_necessary_only():
+    from run_p1_resource_conflict_audit import certificate
+    instance,sol=fifo_stress_with_three_locals()
+    result=certificate(instance,sol)
+    assert not result["passed"]
+    assert result["deadline_count"]>=1
+    assert result["deadline_by_mode"]["local"]>=1
