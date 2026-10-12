@@ -1,0 +1,207 @@
+name: P12 original insertion-option versus full MEC repair timing audit
+on:
+  push:
+    branches: ['experiment/p12-insertion-finish-repair-audit']
+    paths:
+      - '.github/workflows/p12-original-insertion-vs-mec.yml'
+      - 'experiments/run_p12_insertion_finish_audit.py'
+      - 'tests/test_p12_insertion_finish.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original physical solver and experiment dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify exact original cheapest and regret2 MEC repair before/after probes
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p12_insertion_finish.py tests/test_queue_aware_precheck.py
+          uv run --no-sync python experiments/run_p12_insertion_finish_audit.py --help
+
+  original_frozen_D:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '89'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S89-38202029324'
+            original_source: 'source/K80_S89/p3-fresh-source-K80_S89.json'
+            original_cases: 'deadline_x0p9:128'
+          - scene: '91'
+            archive_run: 38202029324
+            archive_name: 'p3-fresh-S91-38202029324'
+            original_source: 'source/K80_S91/p3-fresh-source-K80_S91.json'
+            original_cases: 'compute_x1p5:128'
+          - scene: '93'
+            archive_run: 38207186664
+            archive_name: 'p5-firstuse-S93-38207186664'
+            original_source: 'source/K80_S93/p5-fresh-source-K80_S93.json'
+            original_cases: 'compute_x1p5:130,baseline:129'
+          - scene: '95'
+            archive_run: 38207186664
+            archive_name: 'p5-firstuse-S95-38207186664'
+            original_source: 'source/K80_S95/p5-fresh-source-K80_S95.json'
+            original_cases: 'compute_x2p0:130'
+          - scene: '96'
+            archive_run: 38207186664
+            archive_name: 'p5-firstuse-S96-38207186664'
+            original_source: 'source/K80_S96/p5-fresh-source-K80_S96.json'
+            original_cases: 'deadline_x0p9:130'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore original P1-R and unchanged B-ALNS insertion solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download immutable original B-ALNS physical D and input hashes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.archive_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.archive_name }}
+          path: source/
+      - name: Test identical removed task against ranked insertion positions before AND after unchanged MEC builder
+        run: |
+          uv run --no-sync python experiments/run_p12_insertion_finish_audit.py --source "${{ matrix.original_source }}" --cases "${{ matrix.original_cases }}" --output "outputs/p12-insertion-S${{ matrix.scene }}.json"
+      - name: Archive exact SHA matched trace, before/after queue states and partial errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p12-insertion-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: original_frozen_D
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p12-insertion-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Report actual top1-vs-later rank reversals and full original MEC reconstruction effects
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p12-insertion-S*.json'))
+          blocks={};rows=[];errors=[]
+          for p in files:
+              d=json.loads(p.read_text(encoding='utf-8'))
+              s=int(d['protocol']['scene'])
+              if s in blocks: errors.append('duplicate '+str(s))
+              blocks[s]=d
+              if not d.get('complete'):errors.append('incomplete '+str(s))
+              errors+=d.get('errors',[])
+              rows+=d.get('rows',[])
+          one=[r for row in rows for r in row.get('single_task_counterfactuals',[])]
+          sampled=[v for t in one for v in t['sampled_positions']]
+          full=[(label,v) for row in rows for label,v in row.get('real_multi_task_repair',{}).items()]
+          def compact_case(row):
+              return {
+                  'scene':row['scene'],'profile':row['profile'],'seed':row['seed'],
+                  'original_B_strict':row['source_B_Stage1_strict'],
+                  'original_B_queue_reasons':row['original_B_queue_necessary']['queue_reason_count'],
+                  'single_tasks':[{
+                      'task_id':t['task_id'],'mode':t['original_offloading_mode'],
+                      'tested':len(t['sampled_positions']),
+                      'available_positions':t['all_original_legal_positions'],
+                      'best_sampled_old_rank':t['queue_best_sampled_original_rank'],
+                      'old_top1_post_queue_pass':t['original_first_rank_after_MEC']['queue_necessary_pass'],
+                      'best_post_queue_pass':t['queue_best_sampled_after_MEC']['queue_necessary_pass'],
+                      'better_later_positions':t['sampled_strictly_better_queue_alternatives'],
+                      'strict_posthoc':t['strict_posthoc'],
+                  } for t in row.get('single_task_counterfactuals',[])],
+                  'real_repair':{
+                      k:{
+                          'before_reason_count':v['before_MEC_rebuild']['queue_reason_count'],
+                          'after_reason_count':v['after_MEC_rebuild']['queue_reason_count'],
+                          'MEC_changed_decisions':v['structural_effect']['real_discrete_decisions_changed'],
+                      } for k,v in row.get('real_multi_task_repair',{}).items()},
+              }
+          result={
+              'source_scenes':sorted(blocks),
+              'frozen_B_source_cases':len(rows),
+              'one_task_option_rank_sets':len(one),
+              'sampled_legal_positions':len(sampled),
+              'old_first_rank_outperformed_by_later_sampled_position':sum(
+                  t['sampled_strictly_better_queue_alternatives']>0 for t in one),
+              'old_first_rank_queue_failed_but_later_sampled_rank_queue_passed':sum(
+                  t['any_alternative_becomes_queue_necessary_passing'] for t in one),
+              'total_finished_samples_with_MEC_decision_changes':sum(
+                  v['structural_effect']['physical_signature_changed'] for v in sampled),
+              'original_15percent_removed_task_repairs':len(full),
+              'full_real_repairs_where_MEC_finish_worsened_reason_count':sum(
+                  v['after_MEC_rebuild']['queue_reason_count']>
+                  v['before_MEC_rebuild']['queue_reason_count'] for _,v in full),
+              'full_real_repairs_where_MEC_finish_improved_reason_count':sum(
+                  v['after_MEC_rebuild']['queue_reason_count']<
+                  v['before_MEC_rebuild']['queue_reason_count'] for _,v in full),
+              'full_original_cheapest_vs_regret2_methods':dict(Counter(name for name,_ in full)),
+              'by_case':[compact_case(row) for row in rows],
+              'errors':errors,
+              'previously_inspected_sources_NOT_independent_holdout':True,
+              'sampled_option_ranks_not_exhaustive':True,
+              'extra_CVX_diagnostic_only_NOT_equal_runtime_ALNS':True,
+              'unchanged_original_insertion_and_finish_repair':True,
+          }
+          if sorted(blocks)!=[89,91,93,95,96] or len(rows)!=6 or len(one)!=12 or len(full)!=12:
+              errors.append('One of 6 frozen source cases or 12 task/repair probes missing')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P12_INSERTION_FINISH_AGGREGATE='+json.dumps({k:v for k,v in result.items() if k!='by_case'},ensure_ascii=False))
+          if errors:raise RuntimeError('P12 incomplete or error-bearing original-function attribution: '+str(errors[:3]))
+          PY
+      - name: Save both negative and positive source-matched timing mismatch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p12-insertion-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
