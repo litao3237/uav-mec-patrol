@@ -1,0 +1,147 @@
+name: P1 exact tie-break operator-family ablations
+
+on:
+  push:
+    branches: ['experiment/p1-resource-conflict-attribution']
+    paths:
+      - '.github/workflows/p1-tie-break-audit.yml'
+      - 'experiments/run_p1_tie_break_audit.py'
+      - 'tests/test_p1_tie_break_audit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate exact numeric tie invariants and source safety
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p1_tie_break_audit.py tests/test_atomic_batch_repair.py
+          uv run --no-sync python experiments/run_p1_tie_break_audit.py --help
+
+  scenarios:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen Stage1 and Stage2 solvers
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Re-fetch strictly immutable 2026-10-11 original physical structures
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38134649545
+          github-token: ${{ github.token }}
+          name: atomic-holdout-S${{ matrix.scenario }}-38134649545
+          path: input/
+      - name: Same candidate pool and same three exact Stage1 calls, only tie-break changes
+        run: |
+          uv run --no-sync python experiments/run_p1_tie_break_audit.py --source "input/K80_S${{ matrix.scenario }}/atomic-fresh-source-K80_S${{ matrix.scenario }}.json" --previous "input/K80_S${{ matrix.scenario }}/atomic-K80_S${{ matrix.scenario }}.json" --output "outputs/p1-tie-S${{ matrix.scenario }}.json"
+      - name: Archive complete and partial strict numerical results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1-tie-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: scenarios
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p1-tie-S*-${{ github.run_id }}
+          path: outputs/collected/
+          merge-multiple: true
+      - name: Compare completed preserved three-slot arms by independent scenario
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('outputs/collected')
+          files=sorted(p.glob('p1-tie-S*.json'))
+          keys=('lexical_original','reuse_on_exact_ties','diverse_on_exact_ties')
+          rows=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              if not d.get('complete') or d.get('errors'):
+                  raise RuntimeError('Invalid/incomplete '+f.name)
+              rows.extend(d['rows'])
+          n=len(rows)
+          if len(files)!=4 or n!=22:
+              raise RuntimeError(f'Incomplete source set: {len(files)} / {n}')
+          if any(not r.get('original_rank_reproduced') or not r.get('original_strict_reproduced') for r in rows):
+              raise RuntimeError('Original P1 shortlist/strict result changed')
+          summary={
+              'scenario_files':[f.name for f in files], 'eligible':n,
+              'original_strict_reproduced':n,
+              'strict':{k:sum(bool(r['arms'][k]['strict_both_recovered']) for r in rows) for k in keys},
+              'by_profile':{p:{k:sum(bool(r['arms'][k]['strict_both_recovered']) for r in rows if r['profile']==p) for k in keys}
+                  for p in sorted({r['profile'] for r in rows})},
+              'source_strict_gain_loss':{k:[
+                  {q:r[q] for q in ('scenario','profile','seed')}
+                  for r in rows if bool(r['arms'][k]['strict_both_recovered'])!=
+                      bool(r['arms']['lexical_original']['strict_both_recovered'])
+              ] for k in keys[1:]},
+              'changed_top3_names':{k:sum(
+                  [x['label'] for x in r['arms'][k]['tested_candidates']] !=
+                  [x['label'] for x in r['arms']['lexical_original']['tested_candidates']]
+                  for r in rows) for k in keys[1:]},
+              'top_numeric_tie_sources':sum(r['primary_tie_at_top']>1 for r in rows),
+              'oracle_call_totals':{k:sum(r['arms'][k]['oracle_calls'] for r in rows) for k in keys},
+          }
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P1_TIE_AGGREGATE='+json.dumps(summary,ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-tie-summary-${{ github.run_id }}
+          path: outputs/summary/
+          if-no-files-found: warn
+          retention-days: 90
