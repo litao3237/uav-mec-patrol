@@ -1,0 +1,157 @@
+name: P2 static shared-MEC CPU necessary bound audit
+on:
+  push:
+    branches: ['experiment/p2-station-cpu-share-diagnostics']
+    paths:
+      - '.github/workflows/p2-station-cpu-share-audit.yml'
+      - 'src/uav_mec/optimization/resource/station_cpu_share_bound.py'
+      - 'experiments/run_p2_station_cpu_share_audit.py'
+      - 'tests/test_station_cpu_share_bound.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original model and numerical libraries
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify lower bound invariants and unchanged earlier algorithm
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_station_cpu_share_bound.py tests/test_queue_aware_precheck.py tests/test_atomic_batch_repair.py
+          uv run --no-sync python experiments/run_p2_station_cpu_share_audit.py --help
+
+  diagnostic:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['85','86','87','88']
+    runs-on: windows-latest
+    timeout-minutes: 65
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download original K80 strict physical source results
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38134649545
+          github-token: ${{ github.token }}
+          name: atomic-holdout-S${{ matrix.scenario }}-38134649545
+          path: input/
+      - name: Download previously strictly evaluated top8 candidates
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38196891133
+          github-token: ${{ github.token }}
+          name: p1-resource-S${{ matrix.scenario }}-38196891133
+          path: archived/
+      - name: Prove-case necessary station bound against original strict controls
+        run: |
+          uv run --no-sync python experiments/run_p2_station_cpu_share_audit.py --source "input/K80_S${{ matrix.scenario }}/atomic-fresh-source-K80_S${{ matrix.scenario }}.json" --previous "input/K80_S${{ matrix.scenario }}/atomic-K80_S${{ matrix.scenario }}.json" --resource-audit "archived/p1-resource-S${{ matrix.scenario }}.json" --output "outputs/p2-station-S${{ matrix.scenario }}.json"
+      - name: Preserve all complete or partial counterexample results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p2-station-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          if-no-files-found: warn
+          retention-days: 90
+
+  summarize:
+    needs: diagnostic
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p2-station-S*-${{ github.run_id }}
+          path: inputs/
+          merge-multiple: true
+      - name: Strictly audit aggregate and de-duplicate frozen physical structures
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+          paths=sorted(Path('inputs').rglob('p2-station-S*.json'))
+          rows=[];candidates=[];errors=[]
+          for p in paths:
+              x=json.loads(p.read_text(encoding='utf-8'))
+              if not x.get('complete'):errors.append(p.name+':incomplete')
+              errors.extend(x.get('errors',[]))
+              rows+=x.get('source_results',[])
+              candidates+=x.get('candidate_results',[])
+          def tab(z):
+              return {'records':len(z),
+                      'strict_qualified':sum(r['strict_stage1_qualified'] for r in z),
+                      'old_queue_rejected':sum(not r['queue_necessary_pass'] for r in z),
+                      'new_cpu_rejected':sum(r['station_cpu_reject'] for r in z),
+                      'new_only':sum(r['queue_necessary_pass'] and r['station_cpu_reject'] for r in z),
+                      'wrongly_rejected_strict_qualified':sum(
+                          r['strict_stage1_qualified'] and r['station_cpu_reject'] for r in z)}
+          raw=tab(rows); cand=tab(candidates)
+          unique={}
+          for r in rows:
+              unique[r['scenario'],r['profile'],r['solution_sha256']]=r
+          dedup=tab(list(unique.values()))
+          summary={'scene_files':[p.name for p in paths],
+                   'source':raw,'unique_source_structures':dedup,
+                   'prior_strictly_evaluated_top8_candidates':cand,
+                   'by_profile':{p:tab([r for r in rows if r['profile']==p])
+                                 for p in sorted({r['profile'] for r in rows})},
+                   'errors':errors}
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(summary,ensure_ascii=False,indent=2)+'\n',
+              encoding='utf-8')
+          print('P2_CPU_PAIR_AGGREGATE='+json.dumps(summary,ensure_ascii=False))
+          if len(paths)!=4 or len(rows)!=80 or len(candidates)!=42 or len(unique)!=48 or errors:
+              raise RuntimeError('Incomplete or mismatched frozen P2 source archive')
+          if raw['wrongly_rejected_strict_qualified'] or cand['wrongly_rejected_strict_qualified']:
+              raise RuntimeError('Possible invalid necessary CPU bound; STOP integration')
+          PY
+      - name: Save audit counts and all missing/error warnings
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p2-station-summary-${{ github.run_id }}
+          path: outputs/summary/
+          if-no-files-found: warn
+          retention-days: 90
