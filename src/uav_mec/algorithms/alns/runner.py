@@ -313,6 +313,8 @@ class UavMecALNSConfig:
     )
     enable_problem_operators: bool = False
     problem_operator_profile: str = "core"
+    # Experiment-only P9 hook; None preserves original ALNS EXACTLY.
+    queue_destroy_policy: str | None = None
     operator_scores: tuple[float, float, float, float] = (
         25.0,
         5.0,
@@ -387,6 +389,10 @@ def run_uav_mec_alns(
         )
     if cfg.min_runtime_s < 0.0:
         raise ValueError("min_runtime_s must be non-negative")
+    if cfg.queue_destroy_policy is not None:
+        from .queue_operators import QUEUE_DESTROY_POLICIES
+        if cfg.queue_destroy_policy not in QUEUE_DESTROY_POLICIES:
+            raise ValueError("Unknown experiment-only queue destroy policy")
 
     if initial_solution is None:
         route_seed = build_greedy_initial_solution(instance)
@@ -409,6 +415,16 @@ def run_uav_mec_alns(
     engine = ALNS(np.random.default_rng(cfg.seed))
 
     destroy_operators = make_destroy_operators(cfg.destroy)
+    if cfg.queue_destroy_policy is not None:
+        # Replace exactly ONE existing critical destroy operator. No
+        # additional ALNS operator/roulette weight or repair is introduced.
+        from .queue_operators import create_queue_destroy_operator
+        destroy_operators = [
+            ("critical_task_removal", create_queue_destroy_operator(
+                cfg.destroy,cfg.queue_destroy_policy))
+            if name=="critical_task_removal" else (name,fn)
+            for name,fn in destroy_operators
+        ]
     repair_operators = make_repair_operators()
     if cfg.enable_problem_operators:
         destroy_operators += make_problem_destroy_operators(
