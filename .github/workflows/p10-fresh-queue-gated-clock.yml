@@ -1,0 +1,193 @@
+name: P10 FIRST-USE original ESI-ALNS queue-gated destroy S109-S112
+
+on:
+  push:
+    branches: ['experiment/p10-gated-destroy-firstuse-clock']
+    paths:
+      - '.github/workflows/p10-fresh-queue-gated-clock.yml'
+      - 'experiments/run_p10_queue_gated_fresh.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ESI ALNS physical resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate original fixed Stage1/Stage2 and nonmutating queue evaluator
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p10_queue_guarded_destroy.py tests/test_queue_aware_precheck.py tests/test_joint_station_bw_cpu_bound.py
+          uv run --no-sync python experiments/run_p10_queue_gated_fresh.py --help
+
+  new_independent_scenes:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scene: ['109','110','111','112']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ALNS, ESI, P1-R and Stage2 dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: First-use five-arm paired exploration in identical 6s plus 2s ESI budgets
+        run: |
+          uv run --no-sync python experiments/run_p10_queue_gated_fresh.py --scenario ${{ matrix.scene }} --output-dir "outputs/K80_S${{ matrix.scene }}"
+      - name: Preserve complete and partial original/graded Stage1 and Stage2 audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-firstuse-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: new_independent_scenes
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p10-firstuse-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Summarize original B/ESI strict qualification after replacing only critical destroy
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from collections import Counter
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p10-fresh-K80_S*.json'))
+          byscene={};rows=[];errors=[]
+          for file in files:
+              block=json.loads(file.read_text(encoding='utf-8'))
+              scene=int(block['protocol']['scenario'])
+              if scene in byscene:errors.append('duplicate scene '+str(scene))
+              byscene[scene]=block
+              if not block.get('complete'):errors.append('partial scene '+str(scene))
+              errors+=block.get('errors',[])
+              rows+=block.get('rows',[])
+          arms=('original','queue_chain','queue_guarded_task','queue_guarded_chain','workload_guarded')
+          def stats(items,arm):
+              methods=[r['arms'].get(arm,{}) for r in items]
+              good=[r for r in methods if 'feasibility_funnel' in r]
+              def avg(k):
+                  return statistics.mean(r[k] for r in good) if good else None
+              return {
+                  'physical_source_seed_attempts':len(methods),
+                  'B_stage1_strict':sum(bool(r.get('B',{}).get('strict_Stage1')) for r in methods),
+                  'ESI_stage1_and_stage2_strict':sum(bool(r.get('ESI',{}).get('strict_both')) for r in methods),
+                  'ESI_strict_energy_j_mean_conditional':(
+                      statistics.mean(r['ESI']['energy_j'] for r in good if r['ESI']['strict_both'])
+                      if any(r['ESI']['strict_both'] for r in good) else None),
+                  'ALNS_unique_visited':sum(r['feasibility_funnel']['counters'].get('unique_generated',0) for r in good),
+                  'ALNS_queue_necessary_pass':sum(r['feasibility_funnel']['counters'].get('queue_necessary_pass',0) for r in good),
+                  'ALNS_joint_BW_CPU_necessary_pass':sum(r['feasibility_funnel']['counters'].get('joint_bw_cpu_necessary_pass',0) for r in good),
+                  'mean_original_B_exploration_wall_s':avg('original_B_exploration_wall_s'),
+                  'mean_full_end_to_end_wall_s':avg('actual_end_to_end_wall_s'),
+                  'mean_stage1_and_stage2_audit_wall_s':avg('original_BESI_independent_audits_wall_s'),
+              }
+          by_profile={
+              prof:{a:stats([r for r in rows if r['profile']==prof],a)
+                    for a in arms}
+              for prof in sorted({r['profile'] for r in rows})
+          }
+          paired={}
+          for alt in arms[1:]:
+              paired[alt]={
+                  'ESI_strict_gained':[
+                      {'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                      for r in rows
+                      if r['arms'].get(alt,{}).get('ESI',{}).get('strict_both')
+                      and not r['arms'].get('original',{}).get('ESI',{}).get('strict_both')],
+                  'ESI_strict_lost':[
+                      {'scene':r['scenario'],'profile':r['profile'],'seed':r['seed']}
+                      for r in rows
+                      if not r['arms'].get(alt,{}).get('ESI',{}).get('strict_both')
+                      and r['arms'].get('original',{}).get('ESI',{}).get('strict_both')],
+                  'paired_strict_energy_savings_j':[
+                      {'scene':r['scenario'],'profile':r['profile'],'seed':r['seed'],
+                       'saving_j':r['arms']['original']['ESI']['energy_j']-
+                                  r['arms'][alt]['ESI']['energy_j']}
+                      for r in rows
+                      if r['arms'].get('original',{}).get('ESI',{}).get('strict_both')
+                      and r['arms'].get(alt,{}).get('ESI',{}).get('strict_both')],
+              }
+          result={
+              'new_scene_ids':sorted(byscene),
+              'matched_physical_profile_seed_rows':len(rows),
+              'nested_algorithm_seeds_are_not_independent_scenarios':True,
+              'methods':{a:stats(rows,a) for a in arms},
+              'by_profile':by_profile,
+              'by_scene':{
+                  str(s):{a:stats(byscene[s]['rows'],a) for a in arms}
+                  for s in sorted(byscene)},
+              'paired_relative_original':paired,
+              'matching_only_exploration_and_elite_budgets_not_hard_full_wall':True,
+              'errors':errors,
+          }
+          if sorted(byscene)!=[109,110,111,112] or len(rows)!=40:
+              errors.append('Missing four first-use scenes or 40 profile/seed cases')
+          if any(len(byscene[s]['rows'])!=10 for s in byscene):
+              errors.append('Missing one of ten per-scene physical experiments')
+          for row in rows:
+              if not all(a in row['arms'] and 'ESI' in row['arms'][a] for a in arms):
+                  errors.append('Missing original or graded ESI strict row '+str(row['scenario']))
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P10_WALL_BUDGET_FIRSTUSE_AGGREGATE='+json.dumps({
+              'new_scene_ids':result['new_scene_ids'],
+              'rows':result['matched_physical_profile_seed_rows'],
+              'methods':result['methods'],
+              'paired':result['paired_relative_original'],
+              'errors':errors
+          },ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete first-use original ALNS critical-destroy comparison '+str(errors[:2]))
+          PY
+      - name: Retain independent matched-wall exploratory comparison and caveats
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-firstuse-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
