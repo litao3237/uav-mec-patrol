@@ -1,0 +1,195 @@
+name: P8 original ALNS queue-guided evaluation 100-iteration paired pilot
+
+on:
+  push:
+    branches: ['experiment/p8-queue-guided-original-alns']
+    paths:
+      - '.github/workflows/p8-queue-guided-pilot.yml'
+      - 'experiments/queue_guided_alns_evaluator.py'
+      - 'experiments/run_p8_queue_alns_pilot.py'
+      - 'tests/test_p8_queue_guided_alns.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged published P1-R resource model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify queue gradient physical meaning and old scalar behavior
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p8_queue_guided_alns.py tests/test_queue_aware_precheck.py tests/test_station_cpu_share_bound.py
+          uv run --no-sync python experiments/run_p8_queue_alns_pilot.py --help
+
+  inspected_scenarios:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scene: '89'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S89-38202029324'
+            file: 'input/K80_S89/p3-fresh-source-K80_S89.json'
+            cases: 'deadline_x0p9:128'
+          - scene: '91'
+            source_run: 38202029324
+            source_artifact: 'p3-fresh-S91-38202029324'
+            file: 'input/K80_S91/p3-fresh-source-K80_S91.json'
+            cases: 'compute_x1p5:128'
+          - scene: '93'
+            source_run: 38207186664
+            source_artifact: 'p5-firstuse-S93-38207186664'
+            file: 'input/K80_S93/p5-fresh-source-K80_S93.json'
+            cases: 'compute_x1p5:130,baseline:129'
+          - scene: '94'
+            source_run: 38207186664
+            source_artifact: 'p5-firstuse-S94-38207186664'
+            file: 'input/K80_S94/p5-fresh-source-K80_S94.json'
+            cases: 'compute_x1p5:129'
+          - scene: '95'
+            source_run: 38207186664
+            source_artifact: 'p5-firstuse-S95-38207186664'
+            file: 'input/K80_S95/p5-fresh-source-K80_S95.json'
+            cases: 'compute_x2p0:130'
+          - scene: '96'
+            source_run: 38207186664
+            source_artifact: 'p5-firstuse-S96-38207186664'
+            file: 'input/K80_S96/p5-fresh-source-K80_S96.json'
+            cases: 'deadline_x0p9:130'
+    runs-on: windows-latest
+    timeout-minutes: 130
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ESI-ALNS and strict Stage1/Stage2 solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore immutable previously inspected physical sources
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: input/
+      - name: Reproduce original B hash and replay fixed 100-iteration guided ALNS
+        run: |
+          uv run --no-sync python experiments/run_p8_queue_alns_pilot.py --source "${{ matrix.file }}" --cases "${{ matrix.cases }}" --output "outputs/p8-queue-S${{ matrix.scene }}.json"
+      - name: Archive original and guided B/ESI strict results and partial exceptions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p8-queue-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: inspected_scenarios
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p8-queue-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Report matched iteration feasibility funnel and true original endpoint replay
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p8-queue-S*.json'))
+          rows=[];errors=[]
+          for f in files:
+              b=json.loads(f.read_text(encoding='utf-8'))
+              if not b.get('complete'):errors.append(f.name+':incomplete')
+              errors+=b.get('errors',[])
+              rows+=b.get('rows',[])
+          arms=('original','queue_sum','queue_max')
+          def count(arm):
+              runs=[r['arms'].get(arm,{}) for r in rows]
+              valid=[r for r in runs if 'funnel' in r]
+              return {
+                  'cases':len(runs),
+                  'B_Stage1_strict':sum(bool(r.get('B',{}).get('stage1_strict')) for r in runs),
+                  'ESI_Stage1_and_Stage2_strict':sum(bool(r.get('ESI',{}).get('both_strict')) for r in runs),
+                  'total_unique_D':sum(r['funnel']['counters'].get('unique_visited',0) for r in valid),
+                  'queue_necessary_passing_D':sum(r['funnel']['counters'].get('queue_necessary_pass',0) for r in valid),
+                  'CPU_necessary_passing_D':sum(r['funnel']['counters'].get('CPU_share_necessary_pass',0) for r in valid),
+                  'joint_BW_CPU_necessary_passing_D':sum(r['funnel']['counters'].get('joint_bw_cpu_necessary_pass',0) for r in valid),
+                  'mean_search_wall_s':statistics.mean(r['search_wall_s'] for r in valid) if valid else None,
+                  'mean_full_end_to_end_wall_s':statistics.mean(r['full_end_to_end_wall_s'] for r in valid) if valid else None,
+                  'total_observer_wall_s':sum(r['funnel']['observer_wall_s'] for r in valid),
+              }
+          result={
+              'scenarios':len(files),'paired_individual_cases':len(rows),
+              'original_B_SHAs_identical_to_original_source':sum(
+                  r['arms'].get('original',{}).get('B',{}).get('solution_sha256')==r['original_B_sha256']
+                  for r in rows),
+              'arms':{a:count(a) for a in arms},
+              'by_case':[
+                  {'scene':r['scene'],'profile':r['profile'],'seed':r['seed'],
+                   'original_B_status':r['original_B_status'],
+                   'arms':{a:{
+                      'queue_pass':r['arms'][a]['funnel']['counters'].get('queue_necessary_pass',0),
+                      'joint_pass':r['arms'][a]['funnel']['counters'].get('joint_bw_cpu_necessary_pass',0),
+                      'B_strict':r['arms'][a]['B']['stage1_strict'],
+                      'ESI_strict':r['arms'][a]['ESI']['both_strict'],
+                      'wall_s':r['arms'][a]['full_end_to_end_wall_s'],
+                      } for a in arms}}
+                  for r in rows if all(a in r['arms'] and 'funnel' in r['arms'][a] for a in arms)],
+              'errors':errors,'same_iterations_NOT_equal_walltime':True,
+              'all_scenes_already_used_in_P7_development':True,
+          }
+          if len(files)!=6 or len(rows)!=7 or result['original_B_SHAs_identical_to_original_source']!=7:
+              errors.append('Missing expected seven paired cases or original B hash mismatch')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P8_QUEUE_PILOT_AGGREGATE='+json.dumps(result,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete original P8 pilot: '+str(errors[:3]))
+          PY
+      - name: Preserve strict paired success and negative results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p8-queue-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
