@@ -117,7 +117,9 @@ def _run_arm(instance,initial,seed,arm,initialization_s):
     return {
         "arm":arm,
         "B":audits["B"],"ESI":audits["ESI"],
-        "B_search_iterations":max(0,len(getattr(\n            hybrid.exploration.raw_result.statistics,\n            "objectives",[]))-1),
+        "B_search_iterations":max(0,len(getattr(
+            hybrid.exploration.raw_result.statistics,
+            "objectives",[]))-1),
         "B_best_scalar":float(hybrid.exploration.best_objective),
         "ESI_elite_skipped":hybrid.elite_stats.get("skipped"),
         "ESI_elite_stats":hybrid.elite_stats,
