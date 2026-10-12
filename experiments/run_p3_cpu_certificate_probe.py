@@ -195,6 +195,13 @@ def _new_search(instance,source,*,policy,protect,
             if improving:
                 chosen=[top,improving[0]]
                 protected=True
+        if protect:
+            # Avoid treating an unscored parent as infinite pressure:
+            # its actual shared-MEC lower bound must be evaluated first.
+            for r in chosen:
+                if "cpu_gap" not in r:
+                    r["cpu_gap"]=_cpu_gap(
+                        station_cpu_share_necessary_bound(instance,r["sol"]))
         beam=[{
             "label":r["label"],"sol":r["sol"],"metric":r["metric"],
             "cpu_gap":r.get("cpu_gap",math.inf),
@@ -216,7 +223,8 @@ def _new_search(instance,source,*,policy,protect,
     return ordered,{
         "policy":policy,"protect_cpu_progress":protect,
         "old_source_queue_gap_s":root_metric["total_excess_s"],
-        "old_source_cpu_gap":root_cpu,
+        "old_source_cpu_gap":root_cpu if math.isfinite(root_cpu) else None,
+        "old_source_cpu_gap_unbounded":not math.isfinite(root_cpu),
         "unique_queue_admitted":len(ordered),
         "generated_unique":stats["generated_unique"],
         "old_raw":stats["old_proposals"],
