@@ -1,0 +1,176 @@
+name: P4 post-bound Stage1 resource conflict attribution
+on:
+  push:
+    branches: ['experiment/p4-postbound-resource-attribution']
+    paths:
+      - '.github/workflows/p4-postbound-resource-attribution.yml'
+      - 'experiments/run_p4_postbound_attribution.py'
+      - 'src/uav_mec/optimization/resource/elastic_diagnosis.py'
+      - 'tests/test_p4_postbound_attribution.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original resource dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Test separate hard-QoS CPU and bandwidth counterfactual semantics
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p4_postbound_attribution.py tests/test_elastic_diagnosis.py tests/test_station_cpu_share_bound.py
+          uv run --no-sync python experiments/run_p4_postbound_attribution.py --help
+
+  resource_analysis:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: ['89','90','91','92']
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore identical original Stage1 and Stage2 numerical dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Download immutable P3 independent scenario input and repaired candidates
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38202029324
+          github-token: ${{ github.token }}
+          name: p3-fresh-S${{ matrix.scenario }}-38202029324
+          path: input/
+      - name: Replay selected exact candidates and diagnose isolated CPU/bandwidth effects
+        run: |
+          uv run --no-sync python experiments/run_p4_postbound_attribution.py --source "input/K80_S${{ matrix.scenario }}/p3-fresh-source-K80_S${{ matrix.scenario }}.json" --prior "input/K80_S${{ matrix.scenario }}/p3-fresh-rescue-K80_S${{ matrix.scenario }}.json" --output "outputs/p4-postbound-S${{ matrix.scenario }}.json"
+      - name: Preserve all failed/valid structures, solver states and incomplete results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-postbound-S${{ matrix.scenario }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: resource_analysis
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p4-postbound-S*-${{ github.run_id }}
+          path: input/
+          merge-multiple: true
+      - name: Preserve four-scenario source failure funnel and numeric uncertainty
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from collections import Counter
+          files=sorted(Path('input').rglob('p4-postbound-S*.json'))
+          blocks={}
+          modes=('qos_only','mec_capacity_only','cpu_capacity_only','bandwidth_capacity_only')
+          errors=[]
+          for f in files:
+              b=json.loads(f.read_text(encoding='utf-8'))
+              s=int(b['protocol']['scenario'])
+              if s in blocks: errors.append('duplicate scenario '+str(s))
+              blocks[s]=b
+              if not b.get('complete'):errors.append('incomplete '+str(s))
+              errors+=b.get('errors',[])
+          if sorted(blocks)!=[89,90,91,92] or errors:
+              raise RuntimeError('Incomplete or erroneous post-holdout diagnosis: '+str(errors[:3]))
+          rows=[r for b in blocks.values() for r in b['source_funnel']]
+          candidates=[r for b in blocks.values() for r in b['candidate_dossiers']]
+          def status(x):
+              if not x.get('numerically_credible'):return 'uncertain:'+str(x.get('status'))
+              v=x.get('normalized_total_elastic_slack')
+              return 'positive' if v is not None and v>0.002 else 'near_zero'
+          result={
+              'scenes':sorted(blocks),
+              'original_B_pressure_attempts':len(rows),
+              'original_B_precheck_failed':sum(r['original_source_eligible'] for r in rows),
+              'sources_with_any_strict_eval':sum(
+                  r['original_source_eligible'] and any(a.get('stage1_calls',0)>0 for a in r['methods'].values())
+                  for r in rows),
+              'distinct_CVX_candidate_structures':len(candidates),
+              'candidate_replays_changed':sum(bool(c.get('solver_replay_mismatch')) for c in candidates),
+              'per_mode':{
+                  m:dict(Counter(status(c['elastic_modes'][m]) for c in candidates))
+                  for m in modes},
+              'per_scene':{
+                  str(s):{
+                      'source_precheck_failure':sum(r['original_source_eligible'] for r in blocks[s]['source_funnel']),
+                      'candidate_structures':len(blocks[s]['candidate_dossiers']),
+                      'modes':{m:dict(Counter(status(c['elastic_modes'][m])
+                                      for c in blocks[s]['candidate_dossiers'])) for m in modes}
+                  } for s in sorted(blocks)},
+              'positive_controls':{
+                  str(s):{m:{'credible':v.get('numerically_credible'),
+                              'slack':v.get('normalized_total_elastic_slack')}
+                          for m,v in blocks[s]['positive_control']['modes'].items()}
+                  for s in sorted(blocks)},
+              'candidate_reasons':[
+                  {'s':c['scenario'],'profile':c['profile'],'seed':c['source_seed'],
+                   'hash':c['candidate_sha256'],'label':c['candidate_label'],
+                   'old_status':c['original_stage1_status'],
+                   'new_status':c['verified_exact_stage1']['status'],
+                   'CPU_ratio':c['old_model']['station_required_cpu_ratio'],
+                   'modes':{m:status(c['elastic_modes'][m]) for m in modes},
+                   'top_QoS_constraints':c['elastic_modes']['qos_only'].get('top_constraints',[])[:3],
+                   'cap_both':c['elastic_modes']['mec_capacity_only'].get('top_constraints',[])[:4],
+                   'cap_CPU_only':c['elastic_modes']['cpu_capacity_only'].get('top_constraints',[])[:4],
+                   'cap_bandwidth_only':c['elastic_modes']['bandwidth_capacity_only'].get('top_constraints',[])[:4]}
+                  for c in candidates],
+              'study_scope':'post-holdout diagnosis on previously inspected P3 S89-S92, not independent new holdout',
+          }
+          if len(rows)!=32:
+              raise RuntimeError('Source coverage missing: '+str(len(rows)))
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P4_POSTBOUND_AGGREGATE='+json.dumps({k:v for k,v in result.items() if k not in ('candidate_reasons','positive_controls')},ensure_ascii=False))
+          PY
+      - name: Save numerical counterfactual table and all source states
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-postbound-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
