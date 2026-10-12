@@ -22,3 +22,12 @@ P9 不再修改评价函数；保持原 `ScreenedProxyObjectiveEvaluator`、所�
 4. **停止门槛：** 若四个独立新场景 `queue_task`/ `queue_chain` 没有提高严格合格率、反而破坏正常工况原成功或增加运行时间，拒绝合并P9；下一步需重新研究原ALNS修复算子本身是否只按距离/逐任务乐观时限重插入，或从初始任务划分/卸载批次构造处理可行域难度。
 
 结果统计单位必须是**独立物理场景**，两个算法seed只嵌套重复；`Stage1=infeasible` 本身不是整实例严格不可行证明，任何必要界通过也不是严格可行证明。不改 `develop` 或原论文结果；相关学术创新性需另对比 resource-constrained LNS、route/scheduling with time windows 和多UAV-MEC资源耦合文献。
+
+## 相关文献精确界定（2026-10-12 调研补录，不涉及修改冻结实验）
+
+- Stefan Voigt, **A review and ranking of operators in adaptive large neighborhood search for vehicle routing problems**, *European Journal of Operational Research* 322(2):357–375, 2025, DOI: https://doi.org/10.1016/j.ejor.2024.05.033。综述分析211项 ALNS 运算子研究，说明“删除高违约任务/单算子权重选择”思路并非学术首创，应强调模型差异而非新算子名字。
+- Yiming Liu, Roberto Baldacci et al., **Efficient feasibility checks and an adaptive large neighborhood search algorithm for the time-dependent green vehicle routing problem with time windows**, *European Journal of Operational Research* 310(1):133–155, 2023, DOI: https://doi.org/10.1016/j.ejor.2023.02.028。已有高效时间窗可行性检查与ALNS结合；P9简单加入乐观时限链也不能宣称通用时间窗创新。
+- CIE 2024, **An adaptive large neighborhood search for the multi-depot dynamic vehicle routing problem with time windows**, DOI: https://doi.org/10.1016/j.cie.2024.110122。提供删除/插入与时间窗兼容性设计的相关先例。
+- Sarasola et al., **Adaptive large neighborhood search for the vehicle routing problem with synchronization constraints at the delivery location**, *Networks*, 2020, DOI: https://doi.org/10.1002/net.21905。同步资源和时间窗可行性与邻域配合亦有先例。
+
+因而本论文潜在贡献只有在严格证明/消融具体 **UAV采集—本地FIFO—MEC EDF/跨接触FIFO—固定带宽CPU耦合** 后，才可讨论特化必要证书与动作选择的系统价值；单纯"queue-guided"或"deadline-aware ALNS"不能当成新理论。此段文献补录不参与任何 P9 方法选优。
