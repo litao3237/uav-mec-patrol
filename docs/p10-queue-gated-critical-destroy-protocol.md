@@ -32,3 +32,12 @@ P10 由此提出**无自适应经验系数**的“必要冲突触发/原行为�
 5. **停止门槛：** 如果P10依然损失原严格成功，或在未见场景相比P9没有改善/能耗更差，不要堆叠“更强的前驱权重”，转而做反事实诊断旧 `_options_for_task` 逐任务时间乐观及 `_finish_repair` 的任务重卸载MEC修复与 FIFO/EDF强制序之间的不一致。
 
 **安全性边界：** 队列预检是固定离散D的必要条件，若通过绝不表示原Stage1真实资源可行，回退也不是数学上保证保持整个ALNS最终成功；真正严格判定完全由原 Stage1+Stage2 双阶段资格决定。所有代码与结果均留在实验分支，不修改 `develop`。
+
+## 新增：已核实的直接相关先例（方法定位，非性能宣称）
+
+- Chen et al. (2020), *An Adaptive Large Neighborhood Search Algorithm for the Satellite Data Transmission Scheduling Problem*, DOI [10.1155/2020/5243749](https://doi.org/10.1155/2020/5243749)：已有时间窗比率删除、处理时长删除、地面站剩余资源删除，说明**对时限紧任务实行destroy并非新思想**。
+- *An adaptive large neighborhood search for the multi-depot dynamic vehicle routing problem with time windows*, *Computers & Industrial Engineering* 191 (2024), 110122, DOI [10.1016/j.cie.2024.110122](https://doi.org/10.1016/j.cie.2024.110122)：已有专用删除和时间窗兼容插入方法，说明简单的“队列可行时优先时间窗”等规则很难单独构成论文创新。
+- Xiao et al. (2024), *Adaptive large neighborhood search algorithm with reinforcement search strategy for solving extended cooperative multi task assignment problem of UAVs*, *Information Sciences* 679, 121068, DOI [10.1016/j.ins.2024.121068](https://doi.org/10.1016/j.ins.2024.121068)：多UAV执行带任务先后约束时，已有针对前后任务的 destroy/repair，P10“关键前驱链”的新颖性必须落在**MEC接触/上传批次+本地FIFO/远端EDF+共享CPU/BW**的特定数学模型，而不能仅靠前驱关系三个字。
+- *Research on Scheduling Return Communication Tasks for UAV Swarms in Disaster Relief Scenarios*, *Drones* 9(8),567 (2025), DOI [10.3390/drones9080567](https://doi.org/10.3390/drones9080567)：无人机群通信任务已研究多类任务/基站破坏策略，尤其接触与通信资源约束是本项目必须进一步做有差异性的方向。
+
+这些文献支持“P9/P10具有合理研究背景”，**不证明其学术首创**。投稿前应对决策变量、资源是否静态、时限的 FIFO/EDF 证书安全性、不同负载的严谨独立实验进行逐项对比。
