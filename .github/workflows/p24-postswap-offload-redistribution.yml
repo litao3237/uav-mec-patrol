@@ -1,0 +1,120 @@
+name: P24 strict original-MEC CPU post-swap single-task offload redistribution
+on:
+  push:
+    branches: ['experiment/p24-postswap-cpu-offload-repair']
+    paths:
+      - '.github/workflows/p24-postswap-offload-redistribution.yml'
+      - 'experiments/run_p24_postswap_offload_redistribution.py'
+      - 'experiments/summarize_p24_offload_redistribution.py'
+      - 'tests/test_p24_postswap_offload_redistribution.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged P1-R original solver and original ALNS
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate equal pool task redirection, orphan contact cleanup and original model
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p24_postswap_offload_redistribution.py tests/test_p22_deadline_cross_uav_exchange.py
+          uv run --no-sync python experiments/run_p24_postswap_offload_redistribution.py --help
+
+  seen_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, source_artifact: 'p3-fresh-S89-38202029324', source_file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, source_artifact: 'p3-fresh-S91-38202029324', source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, source_artifact: 'p5-firstuse-S93-38207186664', source_file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, source_artifact: 'p5-firstuse-S95-38207186664', source_file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, source_artifact: 'p5-firstuse-S96-38207186664', source_file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original numerical resource physics
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore exact source B endpoint from original P3/P5
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: source/
+      - name: Restore exact P22 frozen selected cross-UAV D
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38370212481
+          github-token: ${{ github.token }}
+          name: p22-exchange-S${{ matrix.scene }}-38370212481
+          path: p22/
+      - name: Identical one-step candidate D pool CPU vs queue vs workload rankings, 3 strict each
+        run: |
+          uv run --no-sync python experiments/run_p24_postswap_offload_redistribution.py --source "${{ matrix.source_file }}" --p22 "p22/p22-exchange-S${{ matrix.scene }}.json" --cases "${{ matrix.cases }}" --output "outputs/p24-offload-S${{ matrix.scene }}.json"
+      - name: Preserve entire explored pool all strict failures and source SHAs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p24-offload-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: seen_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p24-offload-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate complete unchanged-hardware strict success and losses
+        run: |
+          python experiments/summarize_p24_offload_redistribution.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p24-offload-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
