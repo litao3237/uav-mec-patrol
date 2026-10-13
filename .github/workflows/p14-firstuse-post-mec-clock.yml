@@ -1,0 +1,187 @@
+name: P14 first-use true ESI ALNS Top3 MEC preview matched search clock S113-S116
+on:
+  push:
+    branches: ['experiment/p14-post-mec-preview-firstuse']
+    paths:
+      - '.github/workflows/p14-firstuse-post-mec-clock.yml'
+      - 'experiments/run_p14_preview_firstuse.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original strict P1-R/Stage2 physics
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify old cheapest/regret2 identities and frozen experiment command
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p14_post_mec_preview_repair.py tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p14_preview_firstuse.py --help
+
+  independent_firstuse:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        scene: ['113','114','115','116']
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Restore original paper physical generator and CVX solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: First-use S113-S116 with original, preview sham, contact, queue and guarded controls
+        run: |
+          uv run --no-sync python experiments/run_p14_preview_firstuse.py --scenario ${{ matrix.scene }} --output-dir "outputs/K80_S${{ matrix.scene }}"
+      - name: Preserve every physical profile, complete/partial Stage1/2, and preview timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p14-firstuse-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: independent_firstuse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p14-firstuse-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: First-use paired strict outcomes, energy only jointly strict and observed real clock costs
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p14-firstuse-K80_S*.json'))
+          blocks={};rows=[];errors=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              scene=int(d['protocol']['scenario'])
+              if scene in blocks:errors.append('duplicate physical scene '+str(scene))
+              blocks[scene]=d
+              if not d.get('complete'):errors.append('partial '+f.name)
+              errors+=d.get('errors',[])
+              rows+=d.get('rows',[])
+          arms=('original','preview_sham','preview_contact','preview_queue','preview_guarded')
+          def stats(sample,arm):
+              trials=[r['arms'].get(arm,{}) for r in sample]
+              valid=[x for x in trials if 'ESI' in x]
+              def avg(key):
+                  return statistics.mean(x[key] for x in valid) if valid else None
+              return {
+                  'paired_attempts':len(trials),
+                  'B_Stage1_qualified':sum(x['B']['strict_stage1'] for x in valid),
+                  'ESI_Stage1_and_Stage2_qualified':sum(x['ESI']['strict_both'] for x in valid),
+                  'strict_ESI_energy_mean_j_descriptive_only':(
+                      statistics.mean(x['ESI']['energy_j'] for x in valid if x['ESI']['strict_both'])
+                      if any(x['ESI']['strict_both'] for x in valid) else None),
+                  'ALNS_total_visited_unique_D':sum(x['read_only_funnel']['counters'].get('unique_generated',0) for x in valid),
+                  'ALNS_queue_necessary_passing_D':sum(x['read_only_funnel']['counters'].get('queue_necessary_pass',0) for x in valid),
+                  'ALNS_joint_BW_CPU_passing_D':sum(x['read_only_funnel']['counters'].get('joint_bw_cpu_necessary_pass',0) for x in valid),
+                  'ALNS_iterations':sum(x['B_search_iterations'] for x in valid),
+                  'repaired_final_task_previewed':sum((x['preview'] or {}).get('candidates_previewed',0) for x in valid),
+                  'repaired_final_task_selected_nonoriginal_rank':sum((x['preview'] or {}).get('chosen_rank_above_one',0) for x in valid),
+                  'mean_original_B_exploration_wall_s':avg('hybrid_B_exploration_wall_s'),
+                  'mean_true_complete_end_to_end_wall_s':avg('true_end_to_end_wall_s'),
+                  'mean_preview_algorithm_wall_s':statistics.mean((x['preview'] or {}).get('preview_and_ranking_wall_s',0) for x in valid) if valid else None,
+              }
+          changes={}
+          for alternative in arms[1:]:
+              gains=[];losses=[];energy=[]
+              for r in rows:
+                  old=r['arms'].get('original',{}).get('ESI',{})
+                  new=r['arms'].get(alternative,{}).get('ESI',{})
+                  record={'s':r['scene'],'profile':r['profile'],'seed':r['seed']}
+                  if new.get('strict_both') and not old.get('strict_both'):
+                      gains.append(record)
+                  if old.get('strict_both') and not new.get('strict_both'):
+                      losses.append(record)
+                  if old.get('strict_both') and new.get('strict_both'):
+                      energy.append({**record,'saving_j':old['energy_j']-new['energy_j']})
+              changes[alternative]={
+                  'new_strict_solutions':gains,
+                  'lost_original_strict_solutions':losses,
+                  'strict_jointly_feasible_energy_pairs':energy,
+              }
+          result={
+              'new_independent_physical_scene_ids':sorted(blocks),
+              'nested_seed_profile_pair_rows':len(rows),
+              'methods':{a:stats(rows,a) for a in arms},
+              'by_profile':{profile:{a:stats([r for r in rows if r['profile']==profile],a)
+                                      for a in arms}
+                            for profile in sorted({r['profile'] for r in rows})},
+              'by_scene':{str(s):{a:stats(blocks[s]['rows'],a) for a in arms}
+                          for s in sorted(blocks)},
+              'paired_vs_original':changes,
+              'all_methods_have_same_search_clock_but_not_hard_full_end_to_end_cutoff':True,
+              'algorithm_seeds_nested_within_four_physical_scenes':True,
+              'original_develop_ESI_model_untouched':True,
+              'errors':errors,
+          }
+          if sorted(blocks)!=[113,114,115,116] or len(rows)!=40:
+              errors.append('Expected four first-use scenes and 40 paired profile/seed inputs')
+          if any(len(blocks[s]['rows'])!=10 for s in blocks):
+              errors.append('One first-use physical scene lacks a required profile/seed')
+          if any(not all('ESI' in r['arms'].get(a,{}) for a in arms) for r in rows):
+              errors.append('Missing original or preview method strict numerical outcome')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P14_FIRSTUSE_AGGREGATE='+json.dumps({
+              'scenes':result['new_independent_physical_scene_ids'],
+              'rows':len(rows),
+              'methods':result['methods'],
+              'paired':result['paired_vs_original'],
+              'errors':errors,
+          },ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete strict P14 source/effect results '+str(errors[:3]))
+          PY
+      - name: Preserve complete sample-level strict negative and positive evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p14-firstuse-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
