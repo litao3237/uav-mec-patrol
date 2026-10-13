@@ -29,3 +29,9 @@ P15 测试**先不做任何额外完整MEC重构**，能否在插入时凭借旧
 **第二阶段：** 如第一阶段有可信候选，就**冻结所有选择规则、Top3、全时序与回退逻辑**，首次在从未使用的 S117–S120、算法seed161/162、K80五压力配置上进行真正配对，原B探索6秒＋ESI最多2秒，统计全部真实运行墙钟与差异。若没有改善或改变更多原严格成功，应报告负面并停止叠加昂贵重构；后续只研究真实多任务插入候选顺序/初始分配而非同样玩法调权重。S113–S116已经用于P14，不得重复当作独立holdout。
 
 **注意：** P15不是证明 `_insertion_option`存在代码bug；生产原评价指标本来是低成本近似。新方法也非数理上的全可行充分条件。只有相同物理场景层级可靠统计、真正原严格两阶段合格率/配对能耗与单位时间开销改善，才可能讨论为新 ESI-ALNS 方法贡献。原`develop`和论文数据均不改。
+
+## 同类文献基线（投稿新颖性必须谨慎）
+
+Y. Liu, R. Baldacci, J. Zhou, Y. Yu, Y. Zhang, W. Sun, “Efficient feasibility checks and an adaptive large neighborhood search algorithm for the time-dependent green vehicle routing problem with time windows,” *European Journal of Operational Research*, 310(1), 133–155, 2023, DOI [10.1016/j.ejor.2023.02.028](https://doi.org/10.1016/j.ejor.2023.02.028)。该工作已清楚将 **高效时窗可行性检查**与 ALNS 的修复过程结合，并强调邻域评价成本对大规模效率的作用；P15不可声称首次在ALNS中进行低成本时限判断或接触机会启发式。真正需说明的是本项目 **UAV采集→本地FIFO和MEC远端EDF→接触上传共享带宽与固定CPU分配** 导致的离散候选预测结构是否具有数学/实证差异。文献支持研究动机，不代替证明P15数值优势。
+
+这篇文献以车辆路径时间依赖为主要问题，并非含本项目 UAV–MEC静态份额联合卸载，不能直接把其算法性能作为本项目同模型公平对照。
