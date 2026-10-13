@@ -1,0 +1,160 @@
+name: P16 original MEC critical-pool candidate actionability 36-position broad audit
+on:
+  push:
+    branches: ['experiment/p16-mec-greedy-actionability-diagnosis']
+    paths:
+      - '.github/workflows/p16-original-greedy-broad.yml'
+      - 'experiments/run_p16_greedy_generalization.py'
+      - 'experiments/run_p16_greedy_generalization.py'
+      - 'tests/test_p12_insertion_finish.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R resource model and scientific dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Exact sham source SHA, 3-preview quota, original residual tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p12_insertion_finish.py tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p16_greedy_generalization.py --help
+
+  development_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, artifact: 'p3-fresh-S89-38202029324', file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, artifact: 'p3-fresh-S91-38202029324', file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, artifact: 'p5-firstuse-S93-38207186664', file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, artifact: 'p5-firstuse-S95-38207186664', file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, artifact: 'p5-firstuse-S96-38207186664', file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ALNS/ESI resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore original previously-seen physical K80 B/ESI D and strict outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Original static MEC greedy acceptance vs 36 real full builder steps
+        run: |
+          uv run --no-sync python experiments/run_p16_greedy_generalization.py --source "${{ matrix.file }}" --cases "${{ matrix.cases }}" --output "outputs/p16-general-S${{ matrix.scene }}.json"
+      - name: Save complete source identities, repairs, strict qualification and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p16-general-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: development_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p16-general-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate all original MEC acceptance and queue outcomes without claiming strict CVX
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p16-general-S*.json'))
+          rows=[];errors=[]
+          for p in files:
+              data=json.loads(p.read_text(encoding='utf-8'))
+              rows+=data.get('rows',[])
+              errors+=data.get('errors',[])
+              if not data.get('complete'):errors.append('incomplete '+p.name)
+          all_tasks=[x for r in rows for x in r.get('tested_task_cases',[])]
+          scenarios=sorted(set(r['scene'] for r in rows))
+          changes=[x for x in all_tasks if x['reconstructed_heuristic_policy']['changed_original_rank']]
+          scored=[e for case in all_tasks for e in case['top3_original_positions']]
+          report={
+              'scenes':scenarios,'source_cases':len(rows),
+              'fixed_one_task_remove_trials':len(all_tasks),
+              'original_top3_complete_rebuilt_counters':len(scored),
+              'actionability_rule_selected_non_top1':len(changes),
+              'actionability_rule_improved_queue_necessary_pass':sum(
+                  not x['reconstructed_heuristic_policy']['old_rank1_queue_pass']
+                  and x['reconstructed_heuristic_policy']['chosen_queue_pass']
+                  for x in changes),
+              'actionability_rule_lost_queue_necessary_pass':sum(
+                  x['reconstructed_heuristic_policy']['old_rank1_queue_pass']
+                  and not x['reconstructed_heuristic_policy']['chosen_queue_pass']
+                  for x in changes),
+              'mean_cheap_proxy_wall_ms':statistics.mean(
+                  e['prediction_wall_s'] for e in scored)*1000 if scored else None,
+              'mean_original_full_MEC_repair_wall_ms':statistics.mean(
+                  e['actual_original_MEC_builder_wall_s'] for e in scored)*1000 if scored else None,
+              'case_differences':[{'s':r['scene'],'profile':r['profile'],'seed':r['seed'],
+                  'task':x['removed_task'],
+                  **x['reconstructed_heuristic_policy']}
+                  for r in rows for x in r.get('tested_task_cases',[])
+                  if x['reconstructed_heuristic_policy']['changed_original_rank']],
+              'no_extra_CVX_and_development_data_only':True,
+              'errors':errors,
+          }
+          if scenarios!=[89,91,93,95,96] or len(rows)!=6 or len(all_tasks)!=12 or len(scored)!=36:
+              errors.append('Missing original source or top3 test coverage')
+          report['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(
+              json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P16_ORIGINAL_GREEDY_GENERAL_AGGREGATE='+json.dumps(report,ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete original greedy broad audit '+str(errors[:3]))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p16-general-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
