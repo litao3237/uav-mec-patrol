@@ -1,0 +1,40 @@
+name: P28 read only E1 MEC EDF virtual queue bottleneck chain
+on:
+  push:
+    branches: ['experiment/p28-archived-e1-bottleneck-chain']
+    paths:
+      - '.github/workflows/p28-archived-e1-chain.yml'
+      - 'experiments/audit_p28_archived_cpu_chain.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  forensic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore exact P27 S91/S93 original-model elastic archive
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38434439247
+          github-token: ${{ github.token }}
+          pattern: p27-elastic-S*-38434439247
+          path: collected/
+          merge-multiple: true
+      - name: Check original source protocol and Python standard-library only
+        run: |
+          python -m py_compile experiments/audit_p28_archived_cpu_chain.py
+          python experiments/audit_p28_archived_cpu_chain.py --help
+      - name: Identify binding E1 UAV-MEC pair, deadlines, and predecessor tasks
+        run: |
+          python experiments/audit_p28_archived_cpu_chain.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p28-e1-cpu-chain-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
