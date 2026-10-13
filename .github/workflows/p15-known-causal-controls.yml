@@ -1,0 +1,59 @@
+name: P15 source-immutable S96 S23 and S93 S68 virtual-contact causal checks
+on:
+  push:
+    branches: ['experiment/p15-cheap-contact-insertion']
+    paths:
+      - 'experiments/run_p15_cheap_causal.py'
+      - '.github/workflows/p15-known-causal-controls.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  causal:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {scene: '93', source_run: 38207186664, artifact: 'p5-firstuse-S93-38207186664', original_file: 'source/K80_S93/p5-fresh-source-K80_S93.json'}
+          - {scene: '96', source_run: 38207186664, artifact: 'p5-firstuse-S96-38207186664', original_file: 'source/K80_S96/p5-fresh-source-K80_S96.json'}
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged P1-R and final-stage qualifications
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Confirm cheap causal evaluator CLI and original strict tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p15_cheap_virtual_contact_repair.py
+          uv run --no-sync python experiments/run_p15_cheap_causal.py --help
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Replay identical task and original Top3 with just cheap scoring
+        run: |
+          uv run --no-sync python experiments/run_p15_cheap_causal.py --source "${{ matrix.original_file }}" --output "outputs/p15-causal-S${{ matrix.scene }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p15-causal-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
