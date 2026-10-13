@@ -1,0 +1,41 @@
+name: P21 exact P20 K80 route and queue constraint attribution
+on:
+  push:
+    branches: ['experiment/p21-postcapacity-constraint-attribution']
+    paths:
+      - '.github/workflows/p21-postcapacity-constraint-audit.yml'
+      - 'experiments/run_p21_postcapacity_constraint_audit.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  attribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download immutable complete P20 physical scenario archives
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38368976798
+          github-token: ${{ github.token }}
+          pattern: p20-capacity-S*-38368976798
+          path: collected/
+          merge-multiple: true
+      - name: Check experiment only uses archived evidence and stdlib
+        run: |
+          python -m py_compile experiments/run_p21_postcapacity_constraint_audit.py
+          python experiments/run_p21_postcapacity_constraint_audit.py --help
+      - name: Analyze residual task deadlines, mean delay, patrol-cycle bounds
+        run: |
+          python experiments/run_p21_postcapacity_constraint_audit.py --collected collected --output outputs/summary/summary.json
+      - name: Archive per-source diagnostic accounting and fixed-D SHA proofs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p21-constraint-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
