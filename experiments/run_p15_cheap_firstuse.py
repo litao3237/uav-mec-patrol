@@ -2,7 +2,7 @@
 
 Frozen arms: original, cheap_sham, cheap_contact, cheap_virtual,
 cheap_guarded. One original MEC builder per repair, without extra CVX for scoring. Freeze ALL policies, physical profiles and seeds BEFORE
-seeing any S113–S116 result. Previous S89–S112 already inspected.
+seeing any S117–S120 result. Previous S89–S116 already inspected.
 
 Every arm receives an identical initial discrete source, original
 destroy/repair operator COUNT, original ScreenedProxy objective,
@@ -52,7 +52,7 @@ def run(scene,output_dir:Path):
     if scene not in NEW_SCENES:
         raise ValueError("Only frozen first-use S117-S120 physical scenes")
     if output_dir.exists() and list(output_dir.iterdir()):
-        raise FileExistsError("Never overwrite first-use P14 source outcomes")
+        raise FileExistsError("Never overwrite first-use P15 source outcomes")
     output_dir.mkdir(parents=True,exist_ok=True)
     output=output_dir/f"p15-firstuse-K80_S{scene}.json"
 
@@ -145,7 +145,7 @@ def run(scene,output_dir:Path):
                         "Joint_Passing_D":evaluation["read_only_funnel"]["counters"].get(
                             "joint_bw_cpu_necessary_pass",0),
                         "Preview_Count":(
-                            evaluation["preview"]["candidates_previewed"]
+                            evaluation["preview"]["evaluated_positions"]
                             if evaluation["preview"] else 0),
                         "Preview_Changed_Rank1":(
                             evaluation["preview"]["selected_non_top1"]
@@ -176,7 +176,7 @@ def run(scene,output_dir:Path):
     print("P15_FIRSTUSE_SUMMARY="+json.dumps({
         "scene":scene,**results["summary"]},ensure_ascii=False),flush=True)
     if results["errors"]:
-        raise RuntimeError(f"Incomplete P14 independent test: {results['errors'][:2]}")
+        raise RuntimeError(f"Incomplete P15 independent test: {results['errors'][:2]}")
     return results
 
 
