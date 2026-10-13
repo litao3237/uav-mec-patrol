@@ -1,0 +1,166 @@
+name: P15 original ALNS cheap virtual contact FIFO EDF preview development pilot
+on:
+  push:
+    branches: ['experiment/p15-cheap-contact-insertion']
+    paths:
+      - '.github/workflows/p15-cheap-contact-pilot.yml'
+      - 'experiments/p15_cheap_virtual_contact_repair.py'
+      - 'experiments/run_p15_actual_alns_pilot.py'
+      - 'tests/test_p15_cheap_virtual_contact_repair.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R resource model and scientific dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Exact sham source SHA, 3-preview quota, original residual tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p15_cheap_virtual_contact_repair.py tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p15_actual_alns_pilot.py --help
+
+  development_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, artifact: 'p3-fresh-S89-38202029324', file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, artifact: 'p3-fresh-S91-38202029324', file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, artifact: 'p5-firstuse-S93-38207186664', file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, artifact: 'p5-firstuse-S95-38207186664', file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, artifact: 'p5-firstuse-S96-38207186664', file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ALNS/ESI resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore original previously-seen physical K80 B/ESI D and strict outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Original vs shim vs contact vs post-MEC queue real 100-step ALNS
+        run: |
+          uv run --no-sync python experiments/run_p15_actual_alns_pilot.py --source "${{ matrix.file }}" --cases "${{ matrix.cases }}" --output "outputs/p15-cheap-S${{ matrix.scene }}.json"
+      - name: Save complete source identities, repairs, strict qualification and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p15-cheap-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: development_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p15-cheap-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Archive exact original/sham identity and all actual runtime/candidate effects
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p15-cheap-S*.json'))
+          blocks={};rows=[];errors=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              s=int(d['protocol']['scene'])
+              if s in blocks: errors.append('duplicate '+str(s))
+              blocks[s]=d
+              if not d.get('complete'):errors.append('partial '+str(s))
+              errors+=d.get('errors',[])
+              rows+=d.get('rows',[])
+          arms=('original','cheap_sham','cheap_contact','cheap_virtual','cheap_guarded')
+          def stats(arm):
+              valid=[r['arms'].get(arm,{}) for r in rows if 'B' in r['arms'].get(arm,{})]
+              return {
+                  'attempts':len(rows),
+                  'B_Stage1_strict':sum(v['B']['strict_stage1'] for v in valid),
+                  'ESI_both_strict':sum(v['ESI']['strict_both'] for v in valid),
+                  'unique_generated_D':sum(v['read_only_funnel']['counters'].get('unique_generated',0) for v in valid),
+                  'queue_pass_D':sum(v['read_only_funnel']['counters'].get('queue_necessary_pass',0) for v in valid),
+                  'joint_pass_D':sum(v['read_only_funnel']['counters'].get('joint_bw_cpu_necessary_pass',0) for v in valid),
+                  'preview_candidates':sum((v['preview'] or {}).get('evaluated_positions',0) for v in valid),
+                  'selected_non_top1':sum((v['preview'] or {}).get('selected_non_top1',0) for v in valid),
+                  'mean_complete_wall_s':statistics.mean(v['complete_run_wall_s'] for v in valid) if valid else None,
+                  'mean_100step_search_s':statistics.mean(v['hybrid_total_wall_s'] for v in valid) if valid else None,
+                  'mean_preview_wall_s':statistics.mean((v['preview'] or {}).get('all_cheap_prediction_wall_s',0) for v in valid) if valid else None,
+              }
+          summary={
+              'source_scenes':sorted(blocks),'source_cases':len(rows),
+              'arms':{a:stats(a) for a in arms},
+              'original_replayed_SHA':sum(r['arms']['original']['B']['sha256']==r['frozen_B_endpoint_sha256'] for r in rows if 'B' in r['arms'].get('original',{})),
+              'sham_replayed_SHA':sum(r['arms']['cheap_sham']['B']['sha256']==r['frozen_B_endpoint_sha256'] for r in rows if 'B' in r['arms'].get('cheap_sham',{})),
+              'paired_changes':{a:{
+                  'wins':[{'s':r['scene'],'profile':r['profile'],'seed':r['seed']} for r in rows if r['arms'].get(a,{}).get('ESI',{}).get('strict_both') and not r['arms'].get('original',{}).get('ESI',{}).get('strict_both')],
+                  'losses':[{'s':r['scene'],'profile':r['profile'],'seed':r['seed']} for r in rows if not r['arms'].get(a,{}).get('ESI',{}).get('strict_both') and r['arms'].get('original',{}).get('ESI',{}).get('strict_both')],
+              } for a in arms[1:]},
+              'errors':errors,
+              'development_scenarios_previously_seen':True,
+              'same_100_iterations_not_matched_full_time':True,
+          }
+          if sorted(blocks)!=[89,91,93,95,96] or len(rows)!=6:
+              errors.append('Incomplete original six case corpus')
+          if summary['original_replayed_SHA']!=6 or summary['sham_replayed_SHA']!=6:
+              errors.append('Original or sham 100-iteration search altered baseline SHA')
+          summary['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P15_ALNS_CHEAP_AGGREGATE='+json.dumps(summary,ensure_ascii=False))
+          if errors:raise RuntimeError('Invalid original/sham identity or incomplete P15 pilot: '+str(errors[:3]))
+          PY
+      - name: Keep all result artifacts, negative controls and original SHA
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p15-cheap-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
