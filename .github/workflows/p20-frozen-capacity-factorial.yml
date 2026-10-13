@@ -1,0 +1,121 @@
+name: P20 frozen K80 original D MEC CPU and BW capacity factorial
+on:
+  push:
+    branches: ['experiment/p20-frozen-capacity-factorial']
+    paths:
+      - '.github/workflows/p20-frozen-capacity-factorial.yml'
+      - 'experiments/run_p20_frozen_capacity_factorial.py'
+      - 'experiments/summarize_p20_frozen_capacity.py'
+      - 'tests/test_p20_frozen_capacity_factorial.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R solver and original frozen ALNS
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate immutable capacity-only perturbation and original P19 identity
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p20_frozen_capacity_factorial.py tests/test_p19_repair_order_factorial.py
+          uv run --no-sync python experiments/run_p20_frozen_capacity_factorial.py --help
+          uv run --no-sync python experiments/summarize_p20_frozen_capacity.py --help
+
+  frozen_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, source_artifact: 'p3-fresh-S89-38202029324', source_file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, source_artifact: 'p3-fresh-S91-38202029324', source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, source_artifact: 'p5-firstuse-S93-38207186664', source_file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, source_artifact: 'p5-firstuse-S95-38207186664', source_file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, source_artifact: 'p5-firstuse-S96-38207186664', source_file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 140
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged resource solver and numerical physics
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore original frozen B solution from existing P3/P5 archive
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: source/
+      - name: Restore exact original P19 repair outcome identity
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38357446482
+          github-token: ${{ github.token }}
+          name: p19-order-S${{ matrix.scene }}-38357446482
+          path: p19/
+      - name: Full two-stage numerical audit of fixed-D MEC CPU/BW factorial
+        run: |
+          uv run --no-sync python experiments/run_p20_frozen_capacity_factorial.py --source "${{ matrix.source_file }}" --p19 "p19/p19-order-S${{ matrix.scene }}.json" --cases "${{ matrix.cases }}" --output "outputs/p20-capacity-S${{ matrix.scene }}.json"
+      - name: Preserve all capacity arm outcomes and negative cases
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p20-capacity-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: frozen_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p20-capacity-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Report paired CPU only, bandwidth only, joint, fourfold effects
+        run: |
+          python experiments/summarize_p20_frozen_capacity.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p20-capacity-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
