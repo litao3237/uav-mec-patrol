@@ -1,0 +1,102 @@
+name: P30 independent Windows Linux exact S91 original physical Stage1 Stage2 strict witness
+on:
+  push:
+    branches: ['experiment/p30-independent-first-strict-rescue-audit']
+    paths:
+      - '.github/workflows/p30-independent-s91-strict.yml'
+      - 'experiments/run_p30_crossrunner_witness_verification.py'
+      - 'experiments/summarize_p30_crossrunner_witness.py'
+      - 'tests/test_p30_crossrunner_witness_verification.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  independent_original_physics:
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {runner: windows, system: windows-latest}
+          - {runner: ubuntu, system: ubuntu-latest}
+    runs-on: ${{ matrix.system }}
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen unchanged P1-R Stage1 Stage2 and physical audit deps
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify exact immutable frozen source and 2-model residual audit CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p30_crossrunner_witness_verification.py tests/test_p29_e1_binding_cross_uav.py
+          uv run --no-sync python experiments/run_p30_crossrunner_witness_verification.py --help
+      - name: Restore original P3 K80 S91 archived B and physical scenario
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38202029324
+          github-token: ${{ github.token }}
+          name: p3-fresh-S91-38202029324
+          path: source/
+      - name: Restore original P22 SHA matched critical swap negative control
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38370212481
+          github-token: ${{ github.token }}
+          name: p22-exchange-S91-38370212481
+          path: p22/
+      - name: Restore exact fixed S36 to U1 E2 strict witness identity and positive
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38435970018
+          github-token: ${{ github.token }}
+          name: p29-transfer-S91-38435970018
+          path: p29/
+      - name: Rerun independent original solver and Stage2 saved reconstructed residual witness
+        run: |
+          uv run --no-sync python experiments/run_p30_crossrunner_witness_verification.py --source "source/K80_S91/p3-fresh-source-K80_S91.json" --p22 "p22/p22-exchange-S91.json" --p29 "p29/p29-transfer-S91.json" --runner "${{ matrix.runner }}" --output "outputs/p30-witness-${{ matrix.runner }}.json"
+      - name: Archive successful and failed original physical model verification
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p30-witness-${{ matrix.runner }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: independent_original_physics
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p30-witness-*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Demand BOTH OS independent successful original Stage2 residual rechecks
+        run: |
+          python experiments/summarize_p30_crossrunner_witness.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p30-witness-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
