@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 import json
 from pathlib import Path
 
-from run_p20_frozen_capacity_factorial import CANDIDATES, FACTORS
+CANDIDATES = ("B_frozen", "cheapest_P19", "regret2_P19")
+FACTORS = ("unchanged", "CPU_x2", "BW_x2", "CPU_BW_x2", "CPU_BW_x4")
 
 EXPECTED_SCENES = (89, 91, 93, 95, 96)
 
