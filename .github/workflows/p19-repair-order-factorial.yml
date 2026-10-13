@@ -1,0 +1,162 @@
+name: P19 original repair order versus final position factorial diagnosis
+on:
+  push:
+    branches: ['experiment/p19-repair-order-causal-diagnostic']
+    paths:
+      - '.github/workflows/p19-repair-order-factorial.yml'
+      - 'experiments/run_p19_repair_order_factorial.py'
+      - 'experiments/run_p19_repair_order_factorial.py'
+      - 'tests/test_p19_repair_order_factorial.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R resource model and scientific dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Exact sham source SHA, 3-preview quota, original residual tests
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p19_repair_order_factorial.py tests/test_p19_repair_order_factorial.py
+          uv run --no-sync python experiments/run_p19_repair_order_factorial.py --help
+
+  development_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, artifact: 'p3-fresh-S89-38202029324', file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, artifact: 'p3-fresh-S91-38202029324', file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, artifact: 'p5-firstuse-S93-38207186664', file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, artifact: 'p5-firstuse-S95-38207186664', file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, artifact: 'p5-firstuse-S96-38207186664', file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ALNS/ESI resource solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore original previously-seen physical K80 B/ESI D and strict outcomes
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.artifact }}
+          path: source/
+      - name: Original static MEC greedy acceptance vs 36 real full builder steps
+        run: |
+          uv run --no-sync python experiments/run_p19_repair_order_factorial.py --source "${{ matrix.file }}" --cases "${{ matrix.cases }}" --output "outputs/p19-order-S${{ matrix.scene }}.json"
+      - name: Save complete source identities, repairs, strict qualification and errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p19-order-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: development_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p19-order-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate fixed destroyed D original vs reversed task order and last rank3
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          files=sorted(Path('collected').rglob('p19-order-S*.json'))
+          rows=[];errors=[]
+          for f in files:
+              d=json.loads(f.read_text(encoding='utf-8'))
+              rows.extend(d.get('rows',[]))
+              errors+=d.get('errors',[])
+              if not d.get('complete'):errors.append('incomplete '+f.name)
+          cases=[(r,k,v['policies']) for r in rows for k,v in r['repairs'].items()]
+          def count(p):
+              return sum(x[p]['after']['queue_necessary_pass'] for _,_,x in cases)
+          result={
+              'source_scenes':sorted({r['scene'] for r in rows}),
+              'original_frozen_B_sources':len(rows),
+              'original_cheapest_regret_repair_pairs':len(cases),
+              'actual_complete_D':sum(len(x) for _,_,x in cases),
+              'queue_necessary_pass':{p:count(p) for p in (
+                  'original_order','reverse_order','deadline_pressure_order',
+                  'original_order_last_rank2','original_order_last_rank3')},
+              'strict_original':sum(x['original_order']['strict_posthoc']['Stage1_and_Stage2_strict'] for _,_,x in cases),
+              'strict_reverse':sum(x['reverse_order']['strict_posthoc']['Stage1_and_Stage2_strict'] for _,_,x in cases),
+              'paired_strict_gains_reverse':[
+                  {'scene':r['scene'],'profile':r['profile'],'seed':r['seed'],'kind':k}
+                  for r,k,x in cases if x['reverse_order']['strict_posthoc']['Stage1_and_Stage2_strict']
+                  and not x['original_order']['strict_posthoc']['Stage1_and_Stage2_strict']],
+              'paired_strict_losses_reverse':[
+                  {'scene':r['scene'],'profile':r['profile'],'seed':r['seed'],'kind':k}
+                  for r,k,x in cases if x['original_order']['strict_posthoc']['Stage1_and_Stage2_strict']
+                  and not x['reverse_order']['strict_posthoc']['Stage1_and_Stage2_strict']],
+              'case_details':[{
+                  'scene':r['scene'],'profile':r['profile'],'seed':r['seed'],'kind':k,
+                  'removed':len(r['same_destroyed_task_set']),
+                  'original_order':x['original_order']['order'],
+                  'queue_reasons':{p:x[p]['after']['queue_reason_count'] for p in x},
+                  'strict_original':x['original_order']['strict_posthoc']['Stage1_and_Stage2_strict'],
+                  'strict_reverse':x['reverse_order']['strict_posthoc']['Stage1_and_Stage2_strict'],
+              } for r,k,x in cases],
+              'not_a_new_holdout':True,
+              'only_original_and_reverse_posthoc_strict_CVX':True,
+              'errors':errors,
+          }
+          if result['source_scenes']!=[89,91,93,95,96] or len(rows)!=6 or len(cases)!=12 or result['actual_complete_D']!=60:
+              errors.append('Missing 6 frozen B sources, 12 real repair pairs, or 60 factorial full-D results')
+          result['errors']=errors
+          Path('outputs/summary').mkdir(parents=True,exist_ok=True)
+          Path('outputs/summary/summary.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('P19_REPAIR_ORDER_AGGREGATE='+json.dumps({k:v for k,v in result.items() if k!='case_details'},ensure_ascii=False))
+          if errors:raise RuntimeError('Incomplete P19 causal audit '+str(errors[:3]))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p19-order-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
