@@ -1,0 +1,103 @@
+name: P18 independent multiscale K30 K50 K80 MEC actionability S125-S128
+on:
+  push:
+    branches: ['experiment/p18-actionability-multiscale-holdout']
+    paths:
+      - '.github/workflows/p18-multiscale-firstuse.yml'
+      - 'experiments/run_p18_multiscale_firstuse.py'
+      - 'experiments/summarize_p18_multiscale.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen original ESI physics
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify unchanged sham and preregistered experiment CLI
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p17_actionable_insertion_repair.py tests/test_p12_insertion_finish.py
+          uv run --no-sync python experiments/run_p18_multiscale_firstuse.py --help
+          uv run --no-sync python experiments/summarize_p18_multiscale.py --help
+
+  firstuse:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        scene: ['125','126','127','128']
+        scale: ['30','50','80']
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R Stage1 Stage2 numerical model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Frozen new spatial layout and scale; three fixed arms and 6s plus 2s clocks
+        run: |
+          uv run --no-sync python experiments/run_p18_multiscale_firstuse.py --scenario ${{ matrix.scene }} --scale ${{ matrix.scale }} --output-dir "outputs/K${{ matrix.scale }}_S${{ matrix.scene }}"
+      - name: Preserve all strict successes, failures, source SHA and full runtime
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p18-K${{ matrix.scale }}-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: firstuse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p18-K*-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate by scene and K with paired strict energy and no false independent seed count
+        run: |
+          python experiments/summarize_p18_multiscale.py --collected collected --output outputs/summary/summary.json
+      - name: Retain complete scale-level, paired and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p18-multiscale-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
+          if-no-files-found: warn
