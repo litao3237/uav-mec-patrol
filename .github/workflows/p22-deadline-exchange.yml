@@ -1,0 +1,113 @@
+name: P22 frozen K80 deadline-critical cross-UAV pair exchanges vs random
+on:
+  push:
+    branches: ['experiment/p22-deadline-critical-cross-uav-exchange']
+    paths:
+      - '.github/workflows/p22-deadline-exchange.yml'
+      - 'experiments/run_p22_deadline_cross_uav_exchange.py'
+      - 'experiments/summarize_p22_exchange.py'
+      - 'tests/test_p22_deadline_cross_uav_exchange.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original physics
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Original exact-MEC rebuilding, cross-UAV ownership and SHA controls
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p22_deadline_cross_uav_exchange.py tests/test_p19_repair_order_factorial.py
+          uv run --no-sync python experiments/run_p22_deadline_cross_uav_exchange.py --help
+
+  inspected_sources:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - {scene: '89', run: 38202029324, source_artifact: 'p3-fresh-S89-38202029324', source_file: 'source/K80_S89/p3-fresh-source-K80_S89.json', cases: 'deadline_x0p9:128'}
+          - {scene: '91', run: 38202029324, source_artifact: 'p3-fresh-S91-38202029324', source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json', cases: 'compute_x1p5:128'}
+          - {scene: '93', run: 38207186664, source_artifact: 'p5-firstuse-S93-38207186664', source_file: 'source/K80_S93/p5-fresh-source-K80_S93.json', cases: 'compute_x1p5:130,baseline:129'}
+          - {scene: '95', run: 38207186664, source_artifact: 'p5-firstuse-S95-38207186664', source_file: 'source/K80_S95/p5-fresh-source-K80_S95.json', cases: 'compute_x2p0:130'}
+          - {scene: '96', run: 38207186664, source_artifact: 'p5-firstuse-S96-38207186664', source_file: 'source/K80_S96/p5-fresh-source-K80_S96.json', cases: 'deadline_x0p9:130'}
+    runs-on: windows-latest
+    timeout-minutes: 110
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original P1-R CVX physics and source operators
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Recover exact SHA-immutable original B endpoint D
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: source/
+      - name: Same 12 full MEC builds for deadline-critical vs random swaps
+        run: |
+          uv run --no-sync python experiments/run_p22_deadline_cross_uav_exchange.py --source "${{ matrix.source_file }}" --cases "${{ matrix.cases }}" --output "outputs/p22-exchange-S${{ matrix.scene }}.json"
+      - name: Archive all unsuccessful exchanges and posthoc strict checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p22-exchange-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: inspected_sources
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p22-exchange-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Independent Stage1 and Stage2 success vs matched same-MEC-calls random control
+        run: |
+          python experiments/summarize_p22_exchange.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p22-exchange-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
