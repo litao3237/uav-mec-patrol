@@ -1,0 +1,117 @@
+name: P29 original MEC E1 binding-task cross UAV relocation and E2 contact reuse
+on:
+  push:
+    branches: ['experiment/p29-e1-binding-cross-uav-relocation']
+    paths:
+      - '.github/workflows/p29-e1-cross-uav.yml'
+      - 'experiments/run_p29_e1_binding_cross_uav.py'
+      - 'experiments/summarize_p29_e1_transfer.py'
+      - 'tests/test_p29_e1_binding_cross_uav.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install exactly original P1-R ALNS numerical model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Test physical/legal E1 binding targets UAV migration original P1R
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p29_e1_binding_cross_uav.py tests/test_p22_deadline_cross_uav_exchange.py
+          uv run --no-sync python experiments/run_p29_e1_binding_cross_uav.py --help
+
+  known_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {scene: '91', profile: 'compute_x1p5', seed: '128', source_run: 38202029324, source_artifact: 'p3-fresh-S91-38202029324', source_file: 'source/K80_S91/p3-fresh-source-K80_S91.json'}
+          - {scene: '93', profile: 'baseline', seed: '129', source_run: 38207186664, source_artifact: 'p5-firstuse-S93-38207186664', source_file: 'source/K80_S93/p5-fresh-source-K80_S93.json'}
+    runs-on: windows-latest
+    timeout-minutes: 145
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged physical oracle and solver dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Recover original physical B-ALNS frozen endpoint
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.source_run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.source_artifact }}
+          path: source/
+      - name: Recover preregistered exact frozen P22 critical D
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38370212481
+          github-token: ${{ github.token }}
+          name: p22-exchange-S${{ matrix.scene }}-38370212481
+          path: p22/
+      - name: Cross UAV E1 binding-critical task versus heavy and random equal selected strict quota
+        run: |
+          uv run --no-sync python experiments/run_p29_e1_binding_cross_uav.py --source "${{ matrix.source_file }}" --p22 "p22/p22-exchange-S${{ matrix.scene }}.json" --profile "${{ matrix.profile }}" --seed ${{ matrix.seed }} --output "outputs/p29-transfer-S${{ matrix.scene }}.json"
+      - name: Archive all generated legal D SHA and original solver outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p29-transfer-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: known_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p29-transfer-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate three rankers identical pools with all strict successes and losses
+        run: |
+          python experiments/summarize_p29_e1_transfer.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p29-e1-transfer-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
