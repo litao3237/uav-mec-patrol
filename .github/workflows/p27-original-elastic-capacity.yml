@@ -1,0 +1,131 @@
+name: P27 frozen S91 S93 original MEC CPU/BW elastic bottleneck attribution
+on:
+  push:
+    branches: ['experiment/p27-postswap-elastic-cpu-bottleneck']
+    paths:
+      - '.github/workflows/p27-original-elastic-capacity.yml'
+      - 'experiments/run_p27_exact_elastic_cpu_attribution.py'
+      - 'experiments/summarize_p27_elastic_cpu.py'
+      - 'tests/test_p27_exact_elastic_cpu_attribution.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install unchanged original conic P1-R and scientific dependencies
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Validate diagnostic-only elastic method preregistration and frozen source keys
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p27_exact_elastic_cpu_attribution.py tests/test_p26_postswap_mec_batch_transfer.py
+          uv run --no-sync python experiments/run_p27_exact_elastic_cpu_attribution.py --help
+
+  inspected_fixed_cases:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {scene: '91', profile: 'compute_x1p5', seed: '128', run: 38202029324, original_artifact: 'p3-fresh-S91-38202029324', original_file: 'source/K80_S91/p3-fresh-source-K80_S91.json'}
+          - {scene: '93', profile: 'baseline', seed: '129', run: 38207186664, original_artifact: 'p5-firstuse-S93-38207186664', original_file: 'source/K80_S93/p5-fresh-source-K80_S93.json'}
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install original resource solver with unmodified Stage1 Stage2 acceptance
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Restore original physical frozen K80 B source
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          name: ${{ matrix.original_artifact }}
+          path: source/
+      - name: Restore exact P22 selected cross-UAV D
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38370212481
+          github-token: ${{ github.token }}
+          name: p22-exchange-S${{ matrix.scene }}-38370212481
+          path: p22/
+      - name: Verify previously archived P24 one-task offload D SHA
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38432057245
+          github-token: ${{ github.token }}
+          name: p24-offload-S${{ matrix.scene }}-38432057245
+          path: p24/
+      - name: Verify previously archived P26 whole-batch offload D SHA
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 38433669608
+          github-token: ${{ github.token }}
+          name: p26-batch-S${{ matrix.scene }}-38433669608
+          path: p26/
+      - name: Diagnose exact D original CPU-only BW-only combined capacity and QoS elastic slack
+        run: |
+          uv run --no-sync python experiments/run_p27_exact_elastic_cpu_attribution.py --source "${{ matrix.original_file }}" --p22 "p22/p22-exchange-S${{ matrix.scene }}.json" --p24 "p24/p24-offload-S${{ matrix.scene }}.json" --p26 "p26/p26-batch-S${{ matrix.scene }}.json" --cases "${{ matrix.profile }}:${{ matrix.seed }}" --output "outputs/p27-elastic-S${{ matrix.scene }}.json"
+      - name: Archive all credible and non-credible numerical relaxation outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p27-elastic-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: inspected_fixed_cases
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p27-elastic-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Aggregate credible CPU GHz slack by station without false original feasibility
+        run: |
+          python experiments/summarize_p27_elastic_cpu.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p27-elastic-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
