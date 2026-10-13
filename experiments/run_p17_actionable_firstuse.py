@@ -1,7 +1,7 @@
 """P17 FIRST-USE S121–S124 original MEC-greedy actionability scoring under same ALNS 6s+2s clocks.
 
-Frozen arms: original, cheap_sham, cheap_contact, cheap_virtual,
-cheap_guarded. One original MEC builder per repair, without extra CVX for scoring. Freeze ALL policies, physical profiles and seeds BEFORE
+Frozen arms: original, proxy_sham, proxy_contact, proxy_critical,
+proxy_actionable. One original MEC builder per repair, without extra CVX for scoring. Freeze ALL policies, physical profiles and seeds BEFORE
 seeing any S121–S124 result. Previous S89–S120 already inspected.
 
 Every arm receives an identical initial discrete source, original
@@ -50,7 +50,7 @@ ELITE_BUDGET_S=2.0
 
 def run(scene,output_dir:Path):
     if scene not in NEW_SCENES:
-        raise ValueError("Only frozen first-use S117-S120 physical scenes")
+        raise ValueError("Only frozen first-use S121-S124 physical scenes")
     if output_dir.exists() and list(output_dir.iterdir()):
         raise FileExistsError("Never overwrite first-use P17 source outcomes")
     output_dir.mkdir(parents=True,exist_ok=True)
