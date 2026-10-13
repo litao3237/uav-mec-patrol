@@ -63,7 +63,7 @@ class ActionabilityCounters:
     original_builder_count:int=0
     cheap_local_proxy_calls:int=0
     cheap_reuse_proxy_calls:int=0
-    actual_reuse_actions_accepted:int=0
+    old_proxy_eligible_reuse_candidates:int=0
     selected_non_top1:int=0
     rank1_was_proxy_feasible:int=0
     fallback_no_eligible_reuse:int=0
@@ -79,7 +79,7 @@ class ActionabilityCounters:
             "original_builder_count":self.original_builder_count,
             "cheap_local_proxy_calls":self.cheap_local_proxy_calls,
             "cheap_reuse_proxy_calls":self.cheap_reuse_proxy_calls,
-            "actual_reuse_actions_accepted":self.actual_reuse_actions_accepted,
+            "old_proxy_eligible_reuse_candidates":self.old_proxy_eligible_reuse_candidates,
             "selected_non_top1":self.selected_non_top1,
             "rank1_was_proxy_feasible":self.rank1_was_proxy_feasible,
             "fallback_no_eligible_reuse":self.fallback_no_eligible_reuse,
@@ -113,7 +113,7 @@ def preview_actionable_reuse(state,tid,option,rank,counters:ActionabilityCounter
             alt.score,before.score,
             tolerance=builder.improvement_tolerance):
             actionable.append((tuple(alt.score.key),vid))
-            counters.actual_reuse_actions_accepted+=1
+            counters.old_proxy_eligible_reuse_candidates+=1
     best=min(actionable,default=None)
     counters.cheap_previews+=1
     counters.cheap_scoring_wall_s+=perf_counter()-t0
