@@ -13,8 +13,8 @@ clock budget and ESI elite phase at most 2s. These are NOT hard
 end-to-end 8s deadlines: conic solves and final independent Stage1+2
 validation can overrun, so record real total wall time and quality.
 
-Samples: four independent physical spatial scenarios; five single
-factor pressure settings each; algorithm seeds are NESTED repeats.
+Samples: four independent physical spatial scenarios per scale; three
+frozen pressure settings at each scale; algorithm seeds are NESTED repeats.
 Do not call 40 paired rows independent physical cases.
 """
 from __future__ import annotations
@@ -49,9 +49,9 @@ ELITE_BUDGET_S=2.0
 
 def run(scene,scale:int,output_dir:Path):
     if scene not in NEW_SCENES or scale not in SCALES:
-        raise ValueError("Only frozen first-use S125-S128 and K30/K50/K80 physical scenarios")
+        raise ValueError("Only frozen first-use S125-S128 and K30/K50/K30/K50/K80 physical scenarios")
     if output_dir.exists() and list(output_dir.iterdir()):
-        raise FileExistsError("Never overwrite first-use P17 source outcomes")
+        raise FileExistsError("Never overwrite first-use P18 source outcomes")
     output_dir.mkdir(parents=True,exist_ok=True)
     output=output_dir/f"p18-firstuse-K{scale}_S{scene}.json"
 
