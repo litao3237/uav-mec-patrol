@@ -1,0 +1,105 @@
+name: P32 staged queue shield strict ALNS firstuse unseen S139 S142
+on:
+  push:
+    branches: ['experiment/p32-staged-queue-shield-firstuse']
+    paths:
+      - '.github/workflows/p32-staged-queue-shield-firstuse.yml'
+      - 'experiments/p32_staged_queue_repair.py'
+      - 'experiments/run_p32_staged_firstuse.py'
+      - 'experiments/summarize_p32_staged_firstuse.py'
+      - 'tests/test_p32_staged_queue_repair.py'
+      - 'docs/p32-staged-queue-shield-preregistered-protocol.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install exactly original stage1 stage2 model and ALNS runtime
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify original source SHA sham D identical one MEC builder and predeclared firstuse code
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p32_staged_queue_repair.py tests/test_p31_binding_aware_repair.py
+          uv run --no-sync python experiments/run_p32_staged_firstuse.py --help
+          uv run --no-sync python experiments/summarize_p32_staged_firstuse.py --help
+
+  firstuse:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        scene: ['139','140','141','142']
+        scale: ['30','50','80']
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen paper physics and Stage1 Stage2 numerical model
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Test all six preregistered actual original ALNS arms
+        run: |
+          uv run --no-sync python experiments/run_p32_staged_firstuse.py --scene ${{ matrix.scene }} --scale ${{ matrix.scale }} --output "outputs/p32-firstuse-K${{ matrix.scale }}_S${{ matrix.scene }}.json"
+      - name: Retain every strict original loss and gain per frozen scene task scale and seed
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p32-K${{ matrix.scale }}-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: firstuse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p32-K*-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Pair all original strict gains losses wall time and exact nested scene controls
+        run: |
+          python experiments/summarize_p32_staged_firstuse.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p32-staged-firstuse-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
