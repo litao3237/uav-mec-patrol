@@ -1,0 +1,105 @@
+name: P33 frozen exact P32 CPU guard replication 216 full ALNS S143 S146 two seeds
+on:
+  push:
+    branches: ['experiment/p33-cpu-guard-exact-replication']
+    paths:
+      - '.github/workflows/p33-cpu-guard-replication.yml'
+      - 'experiments/p33_cpu_sham_replication.py'
+      - 'experiments/run_p33_cpu_replication.py'
+      - 'experiments/summarize_p33_cpu_replication.py'
+      - 'tests/test_p33_cpu_sham_replication.py'
+      - 'docs/p33-exact-cpu-guard-replication-preregistered.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen unchanged original P1R Stage1 Stage2 and ESI ALNS
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Verify exact original D preservation identical CPU sham versus unaltered P32 and preregistered protocol
+        run: |
+          uv run --no-sync python -m ruff check --select E9,F821 src experiments tests
+          uv run --no-sync python -m pytest tests/test_p33_cpu_sham_replication.py tests/test_p32_staged_queue_repair.py
+          uv run --no-sync python experiments/run_p33_cpu_replication.py --help
+          uv run --no-sync python experiments/summarize_p33_cpu_replication.py --help
+
+  new_spatial_firstuse:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        scene: ['143','144','145','146']
+        scale: ['30','50','80']
+    runs-on: windows-latest
+    timeout-minutes: 160
+    env:
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install exact frozen paper physical Stage1 and Stage2 solver
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Evaluate original versus identical-work CPU sham and P32 unmodified CPU guard on new layouts and two seeds
+        run: |
+          uv run --no-sync python experiments/run_p33_cpu_replication.py --scene ${{ matrix.scene }} --scale ${{ matrix.scale }} --output "outputs/p33-replication-K${{ matrix.scale }}_S${{ matrix.scene }}.json"
+      - name: Archive every strict positive and negative result nested seed original model SHA and true total wall time
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p33-replication-K${{ matrix.scale }}-S${{ matrix.scene }}-${{ github.run_id }}
+          path: outputs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  summarize:
+    needs: new_spatial_firstuse
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p33-replication-K*-S*-${{ github.run_id }}
+          path: collected/
+          merge-multiple: true
+      - name: Verify all 72 paired cases 216 strict original models and original-vs-sham-vs-CPU gates
+        run: |
+          python experiments/summarize_p33_cpu_replication.py --collected collected --output outputs/summary/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p33-cpu-replication-summary-${{ github.run_id }}
+          path: outputs/summary/
+          retention-days: 90
