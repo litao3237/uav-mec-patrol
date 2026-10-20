@@ -231,7 +231,10 @@ class KKTObjectiveEvaluator:
             self.stats.resource_status_counts.get(result.status, 0) + 1
         )
 
-        if score.qos_soft:
+        # Only the soft protocol needs a proxy key for every KKT outcome.
+        # Keep strict-mode allocation and acceptance unchanged.
+        score = evaluate_initial_proxy(instance, solution).score if not instance.qos_hard else None
+        if score is not None and score.qos_soft:
             value = task_scalar(total_tasks=len(instance.tasks),
                                 physical_violations=int(not result.feasible),
                                 on_time=score.on_time_tasks,
