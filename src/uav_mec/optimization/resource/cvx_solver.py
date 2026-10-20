@@ -10,6 +10,9 @@ import numpy as np
 
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation import EventInfo, build_event_info
+from uav_mec.evaluation.task_objective import (
+    ON_TIME_TOL_S, LATENESS_TOL, better_task_key, measured_task_key,
+)
 
 from .precheck import fast_feasibility_precheck
 from .reduced import evaluate_reduced_resources
@@ -298,16 +301,16 @@ def solve_stage2_realization(
             # Stage-2 cannot sacrifice tasks already on time in Stage-1.
             for task_id, task in instance.tasks.items():
                 baseline = stage1_completion_s[task_id]
-                if baseline <= task.release_s + task.deadline_s:
+                if baseline <= task.release_s + task.deadline_s + ON_TIME_TOL_S:
                     quality_constraints.append(
-                        model.variables["task_completion_s"][task_id] <= task.release_s + task.deadline_s
+                        model.variables["task_completion_s"][task_id] <= task.release_s + task.deadline_s + ON_TIME_TOL_S
                     )
             # Nor can it increase aggregate normalized lateness beyond solver tolerance.
-            old_lateness = sum(max(0., stage1_completion_s[t] - task.release_s - task.deadline_s)
+            old_lateness = sum(max(0., stage1_completion_s[t] - task.release_s - task.deadline_s - ON_TIME_TOL_S)
                                / max(1., task.deadline_s) for t, task in instance.tasks.items())
-            new_lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s)
+            new_lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s - ON_TIME_TOL_S)
                                 / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
-            quality_constraints.append(new_lateness <= old_lateness + 1e-5)
+            quality_constraints.append(new_lateness <= old_lateness + LATENESS_TOL)
         problem = cp.Problem(cp.Minimize(objective_scale * model.normalized_mec_cpu),
                              model.constraints + [energy_guard, *quality_constraints])
         kwargs = _solver_kwargs(solver, verbose, solver_profile)
@@ -390,7 +393,7 @@ def solve_resource_problem(
         # Convex surrogate for soft QoS: optimize lateness and completion before
         # energy. Exact success-count priority is enforced in discrete candidate
         # ranking and measured independently, rather than claimed as a CVX optimum.
-        lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s)
+        lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s - ON_TIME_TOL_S)
                         / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
         normalized_delay = sum(((model.variables["task_completion_s"][t] - task.release_s)
                                 / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
@@ -474,23 +477,105 @@ def solve_resource_problem(
                 },
             )
 
-    # With soft QoS, problem1.value is a composite objective, not Joules.
+    # Stage-1A uses the convex lateness surrogate (NOT exact success-count
+    # optimization). Stage-1B minimizes real Joules while preserving the
+    # reconstructed on-time tasks and near-minimal total normalized lateness.
     energy_star = _value(model.total_energy.value)
     stage1_values = _snapshot_vars(model.variables)
     stage1_duals = _snapshot_duals(model.named_constraints)
     stage1_avg_delay = _value(model.avg_delay_expr.value)
     stage1_reduced = evaluate_reduced_resources(
-        instance,
-        solution,
-        info,
+        instance, solution, info,
         bandwidth_mhz=bandwidth_values,
         mec_cpu_ghz=mec_cpu_values,
         local_cpu_ghz=local_cpu_values,
     )
-    stage1_return_times = {
-        u: _value(expr.value if hasattr(expr, "value") else expr)
-        for u, expr in model.return_time.items()
+    stage1_solver_status = str(problem1.status)
+    m0_diagnostics = {
+        "stage1_resource_policy": "strict_minimum_energy" if instance.qos_hard
+        else "m0_quality_guarded_energy_refinement",
+        "m0_energy_refinement_status": "not_applicable" if instance.qos_hard else "not_attempted",
+        "m0_energy_refinement_used": False,
     }
+    if not instance.qos_hard and stage1_solver_status == cp.OPTIMAL:
+        from uav_mec.analysis.constraint_audit import audit_both_timelines
+
+        baseline_delays = {
+            t: stage1_reduced.task_completion_s[t] - instance.tasks[t].release_s
+            for t in instance.tasks
+        }
+        original_key = measured_task_key(
+            instance, baseline_delays, energy_j=stage1_reduced.total_energy_j,
+            distance_m=sum(info.route_distance_m.values()),
+        )
+        protected = [
+            t for t, delay in baseline_delays.items()
+            if delay <= instance.tasks[t].deadline_s + ON_TIME_TOL_S
+        ]
+        extra = build_resource_model(instance, solution, info, numerical_scaling=True)
+        tardiness = sum((
+            cp.pos(extra.variables["task_completion_s"][t] - task.release_s
+                   - task.deadline_s - ON_TIME_TOL_S)
+            / max(1.0, task.deadline_s)
+            for t, task in instance.tasks.items()
+        ), cp.Constant(0.0))
+        constraints = list(extra.constraints) + [
+            extra.variables["task_completion_s"][t]
+            <= instance.tasks[t].release_s + instance.tasks[t].deadline_s + ON_TIME_TOL_S
+            for t in protected
+        ] + [tardiness <= original_key[2] + LATENESS_TOL]
+        subproblem = cp.Problem(cp.Minimize(extra.total_energy), constraints)
+        if not subproblem.is_dcp():
+            raise RuntimeError("M0 guarded energy subproblem must be DCP")
+        refined_solver, errors = _solve_with_fallback(
+            subproblem, verbose=verbose, solver_profile=solver_profile,
+        )
+        m0_diagnostics.update(
+            m0_energy_refinement_status=str(subproblem.status),
+            m0_energy_solver=refined_solver,
+            m0_energy_solver_errors=errors,
+            m0_protected_success_count=len(protected),
+            m0_baseline_lateness=original_key[2],
+        )
+        if refined_solver is not None and subproblem.status == cp.OPTIMAL:
+            bw2, cpu2, local2, primal_errors = _stage1_resource_values(extra)
+            if not primal_errors:
+                candidate_values = _snapshot_vars(extra.variables)
+                audited = audit_both_timelines(instance, solution, candidate_values)
+                if all(v["complete"] and v["passed"] for v in audited.values()):
+                    measured = audited["reconstructed"]
+                    improved_key = measured_task_key(
+                        instance, measured["timeline"]["task_delay_s"],
+                        energy_j=measured["metrics"]["energy_j"],
+                        distance_m=measured["metrics"]["total_distance_m"],
+                    )
+                    no_worse = better_task_key(improved_key, original_key) or (
+                        improved_key[1] == original_key[1]
+                        and improved_key[2] <= original_key[2] + LATENESS_TOL
+                        and improved_key[3] <= original_key[3] + 1e-3
+                    )
+                    if no_worse:
+                        energy_star = _value(extra.total_energy.value)
+                        stage1_values = candidate_values
+                        stage1_duals = _snapshot_duals(extra.named_constraints)
+                        stage1_avg_delay = _value(extra.avg_delay_expr.value)
+                        bandwidth_values, mec_cpu_values, local_cpu_values = bw2, cpu2, local2
+                        stage1_reduced = evaluate_reduced_resources(
+                            instance, solution, info,
+                            bandwidth_mhz=bandwidth_values,
+                            mec_cpu_ghz=mec_cpu_values,
+                            local_cpu_ghz=local_cpu_values,
+                        )
+                        solver1 = refined_solver
+                        m0_diagnostics["m0_energy_refinement_used"] = True
+                        m0_diagnostics["m0_refined_lateness"] = improved_key[2]
+                    else:
+                        m0_diagnostics["m0_rejection_reason"] = "lexicographic_regression"
+                else:
+                    m0_diagnostics["m0_rejection_reason"] = "physical_residual_failed"
+            else:
+                m0_diagnostics["m0_rejection_reason"] = "invalid_primal"
+    stage1_return_times = dict(stage1_reduced.return_time_s)
 
     # Lexicographic stage 2: among energy-optimal solutions, minimize MEC CPU
     # occupation. Diagnostic experiments that only need the Stage-1 energy
@@ -509,7 +594,7 @@ def solve_resource_problem(
         stage2 = solve_stage2_realization(
             instance, solution, info, energy_star_j=energy_star,
             energy_tolerance_j=tol_j, verbose=verbose, solver_profile=solver_profile,
-            stage1_completion_s=stage1_values["task_completion_s"],
+            stage1_completion_s=stage1_reduced.task_completion_s,
         )
         solver2 = stage2["solver"]
         stage2_status = stage2["status"]
@@ -536,7 +621,7 @@ def solve_resource_problem(
         solver_final = solver1
 
     diagnostics = {
-        "stage1_status": str(problem1.status),
+        "stage1_status": stage1_solver_status,
         "stage2_status": stage2_status,
         "stage1_solver": solver1,
         "stage2_solver": solver2,
@@ -567,12 +652,13 @@ def solve_resource_problem(
         "problem1_is_dcp": problem1.is_dcp(),
         "problem1_is_dpp": problem1.is_dpp(),
         "solver_profile": solver_profile,
+        **m0_diagnostics,
     }
     if capture_stage2_raw_values:
         diagnostics["stage2_raw_values"] = stage2_raw_values
 
     return ResourceSolveResult(
-        status=stage2_status if final_values is not stage1_values else str(problem1.status),
+        status=stage2_status if final_values is not stage1_values else stage1_solver_status,
         solver=solver_final,
         is_dcp=problem1.is_dcp(),
         energy_stage1_j=energy_star,
