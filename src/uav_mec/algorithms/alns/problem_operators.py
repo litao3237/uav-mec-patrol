@@ -19,6 +19,7 @@ from uav_mec.domain import (
 )
 from uav_mec.evaluation import build_event_info
 from uav_mec.evaluation.geometry import distance, stop_xy
+from uav_mec.evaluation.task_objective import better_task_key
 from uav_mec.evaluation.validator import validate_solution
 from uav_mec.optimization.resource import fast_feasibility_precheck
 
@@ -1389,6 +1390,18 @@ def contact_mode_intensification(
     def value(solution: DiscreteSolution) -> float:
         return float(objective(current.instance, solution))
 
+    # Strict legacy oracle retains scalar-Joules acceptance verbatim. For M0,
+    # the CVX oracle supplies a measured tuple and *only* this tuple determines
+    # acceptance. The finite scalar remains diagnostic, never a Joule amount.
+    task_qos_mode = (
+        not current.instance.qos_hard
+        and callable(getattr(objective, "quality_key", None))
+    )
+
+    def quality(solution: DiscreteSolution):
+        return objective.quality_key(current.instance, solution) if task_qos_mode else None
+
+    current_quality = quality(current.solution)
     current_value = value(current.solution)
     if not np.isfinite(current_value):
         # 不合格基线没有可比较的精英能耗，不允许以无穷值计算收益或继续扩展。
@@ -1408,10 +1421,12 @@ def contact_mode_intensification(
             break
 
         best_value = current_value
+        best_quality = current_quality
         best_label: str | None = None
         best_solution: DiscreteSolution | None = None
 
         round_base_value = current_value
+        round_base_quality = current_quality
         evaluated_moves = list(stats["evaluated_moves"])
         evaluated_labels: set[str] = set()
 
@@ -1421,9 +1436,10 @@ def contact_mode_intensification(
             *,
             widened: bool = False,
         ) -> bool:
-            nonlocal best_value, best_label, best_solution
+            nonlocal best_value, best_quality, best_label, best_solution
             if time_exhausted():
                 return False
+            candidate_quality = quality(candidate)
             candidate_value = value(candidate)
             stats["candidates_evaluated"] = (
                 int(stats["candidates_evaluated"]) + 1
@@ -1433,13 +1449,24 @@ def contact_mode_intensification(
                     int(stats["widened_candidates_evaluated"]) + 1
                 )
             finite_candidate = np.isfinite(candidate_value)
-            improvement_pct = (
-                100.0
-                * (round_base_value - candidate_value)
-                / max(1.0, abs(round_base_value))
-                if finite_candidate
-                else None
-            )
+            if task_qos_mode:
+                finite_candidate = finite_candidate and candidate_quality is not None
+                # Physical energy saving (not the scaled surrogate) controls
+                # the near-miss widening trigger in energy-tie neighborhoods.
+                improvement_pct = (
+                    100.0 * (round_base_quality[3] - candidate_quality[3])
+                    / max(1.0, abs(round_base_quality[3]))
+                    if finite_candidate and candidate_quality[1:3] == round_base_quality[1:3]
+                    else None
+                )
+            else:
+                improvement_pct = (
+                    100.0
+                    * (round_base_value - candidate_value)
+                    / max(1.0, abs(round_base_value))
+                    if finite_candidate
+                    else None
+                )
             evaluated_moves.append(
                 {
                     "round": int(stats["rounds"]),
@@ -1451,6 +1478,7 @@ def contact_mode_intensification(
                     ),
                     "improvement_pct": improvement_pct,
                     "widened": widened,
+                    "task_quality": list(candidate_quality) if task_qos_mode and candidate_quality is not None else None,
                 }
             )
             evaluated_labels.add(label)
@@ -1459,25 +1487,23 @@ def contact_mode_intensification(
                 # 拒绝数值不合格候选并保留本轮已合格精英，避免 inf-inf 生成 NaN。
                 return True
 
-            scale = max(
-                1.0,
-                abs(best_value),
-                abs(candidate_value),
-            )
-            numerical_tol = tolerance * scale
-            meaningful_tol = max(
-                config.elite_min_improvement_j,
-                config.elite_min_improvement_rel * scale,
-            )
-            acceptance_tol = max(
-                numerical_tol,
-                meaningful_tol,
-            )
-            if (
-                candidate_value
-                < best_value - acceptance_tol
-            ):
+            if task_qos_mode:
+                accepted = better_task_key(
+                    candidate_quality, best_quality,
+                    min_energy_improvement_j=config.elite_min_improvement_j,
+                    min_energy_improvement_rel=config.elite_min_improvement_rel,
+                )
+            else:
+                scale = max(1.0, abs(best_value), abs(candidate_value))
+                numerical_tol = tolerance * scale
+                meaningful_tol = max(
+                    config.elite_min_improvement_j,
+                    config.elite_min_improvement_rel * scale,
+                )
+                accepted = candidate_value < best_value - max(numerical_tol, meaningful_tol)
+            if accepted:
                 best_value = candidate_value
+                best_quality = candidate_quality
                 best_label = label
                 best_solution = candidate
             return True
@@ -1581,9 +1607,11 @@ def contact_mode_intensification(
             break
 
         previous_value = current_value
+        previous_quality = current_quality
         current.solution = best_solution
         current.invalidate()
         current_value = best_value
+        current_quality = best_quality
         stats["improvements"] = int(
             stats["improvements"]
         ) + 1
@@ -1593,12 +1621,21 @@ def contact_mode_intensification(
                 "move": best_label,
                 "objective": best_value,
                 "improvement_j": (
-                    previous_value - best_value
+                    previous_quality[3] - best_quality[3]
+                    if task_qos_mode else previous_value - best_value
                 ),
                 "improvement_pct": (
-                    100.0
-                    * (previous_value - best_value)
+                    100.0 * (previous_quality[3] - best_quality[3])
+                    / max(1.0, abs(previous_quality[3]))
+                    if task_qos_mode else
+                    100.0 * (previous_value - best_value)
                     / max(1.0, abs(previous_value))
+                ),
+                "success_count_gain": (
+                    int(previous_quality[1] - best_quality[1]) if task_qos_mode else None
+                ),
+                "normalized_lateness_reduction": (
+                    previous_quality[2] - best_quality[2] if task_qos_mode else None
                 ),
             }
         )
