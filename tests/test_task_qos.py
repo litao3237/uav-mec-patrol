@@ -99,3 +99,14 @@ def test_undefined_success_conditional_metrics_are_null_not_zero():
     assert values["energy_per_successful_task"] is None
     assert values["mean_delay_all"] == original.cycle_s
     assert values["success_rate"] == 0
+
+
+def test_strict_instance_json_is_backward_compatible_and_soft_is_explicit():
+    from uav_mec.analysis.experiment_snapshot import json_ready, restore_instance
+    inst, _ = build_small_instance()
+    legacy = json_ready(inst)
+    assert "qos_hard" not in legacy
+    assert restore_instance(legacy).qos_hard is True
+    v26 = json_ready(replace(inst, qos_hard=False))
+    assert v26["qos_hard"] is False
+    assert restore_instance(v26).qos_hard is False

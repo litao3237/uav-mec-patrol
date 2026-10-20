@@ -18,7 +18,12 @@ from uav_mec.domain import (
 def json_ready(value: Any) -> Any:
     """递归保留原始字段；NaN/Inf用null表示，状态与失败原因由调用方另存。"""
     if is_dataclass(value):
-        return json_ready(asdict(value))
+        data = asdict(value)
+        if isinstance(value, Instance) and value.qos_hard:
+            # Preserve the exact v25/archived JSON identity and SHA-256.
+            # Only the explicitly opted-in v26 instances serialize qos_hard=false.
+            data.pop("qos_hard", None)
+        return json_ready(data)
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, dict):
