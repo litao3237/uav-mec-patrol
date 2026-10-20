@@ -12,7 +12,7 @@ from uav_mec.optimization.resource import (
 )
 
 from uav_mec.algorithms.initial import evaluate_initial_proxy
-from uav_mec.evaluation.task_objective import task_scalar
+from uav_mec.evaluation.task_objective import scalar_for_instance, measured_task_key
 
 
 def solution_signature(solution: DiscreteSolution) -> tuple:
@@ -71,7 +71,7 @@ class ProxyObjectiveEvaluator:
         proxy = evaluate_initial_proxy(instance, solution)
         score = proxy.score
         if score.qos_soft:
-            value = task_scalar(total_tasks=len(instance.tasks),
+            value = scalar_for_instance(instance,
                                 physical_violations=score.violated_constraints,
                                 on_time=score.on_time_tasks,
                                 normalized_lateness=score.normalized_lateness,
@@ -151,7 +151,7 @@ class ScreenedProxyObjectiveEvaluator:
             self.stats.precheck_rejects += int(not precheck.feasible)
             self.stats.feasible_calls += int(not is_physical)
             self.stats.infeasible_calls += int(is_physical)
-            value = task_scalar(total_tasks=len(instance.tasks),
+            value = scalar_for_instance(instance,
                                 physical_violations=int(is_physical),
                                 on_time=score.on_time_tasks,
                                 normalized_lateness=score.normalized_lateness,
@@ -235,7 +235,7 @@ class KKTObjectiveEvaluator:
         # Keep strict-mode allocation and acceptance unchanged.
         score = evaluate_initial_proxy(instance, solution).score if not instance.qos_hard else None
         if score is not None and score.qos_soft:
-            value = task_scalar(total_tasks=len(instance.tasks),
+            value = scalar_for_instance(instance,
                                 physical_violations=int(not result.feasible),
                                 on_time=score.on_time_tasks,
                                 normalized_lateness=score.normalized_lateness,

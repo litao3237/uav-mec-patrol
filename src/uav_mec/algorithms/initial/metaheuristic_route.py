@@ -11,7 +11,7 @@ import logging
 import math
 from time import perf_counter
 
-from uav_mec.evaluation.task_objective import task_scalar
+from uav_mec.evaluation.task_objective import scalar_for_instance
 from typing import Any
 
 import numpy as np
@@ -62,11 +62,11 @@ def _validate(config: RouteMetaheuristicConfig) -> None:
         raise ValueError('时间上限必须有限且非负')
 
 
-def _score(evaluated) -> float:
+def _score(evaluated, instance: Instance) -> float:
     """沿用构造代理的标量惩罚；最终能耗必须由独立连续求解给出。"""
     score = evaluated.proxy.score
     if score.qos_soft:
-        return task_scalar(total_tasks=len(evaluated.proxy.reduced.task_completion_s),
+        return scalar_for_instance(instance,
                            physical_violations=score.violated_constraints,
                            on_time=score.on_time_tasks,
                            normalized_lateness=score.normalized_lateness,
@@ -108,7 +108,7 @@ def run_route_metaheuristic(instance: Instance, *, method: str, seed: int,
         nonlocal evaluations, hits
         value, hit = _evaluate(instance, chromosome, task_ids=task_ids, uav_ids=uav_ids, cache=cache)
         evaluations += 1; hits += int(hit)
-        return value, _score(value)
+        return value, _score(value, instance)
 
     def record(best_score):
         history.append({'elapsed_s': perf_counter()-started, 'evaluations': evaluations,

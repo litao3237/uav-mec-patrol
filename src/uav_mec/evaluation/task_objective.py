@@ -78,6 +78,20 @@ def better_task_key(candidate: tuple[float, ...],
     return False
 
 
+def scalar_for_instance(instance, *, physical_violations: int, on_time: int,
+                        normalized_lateness: float, energy_j: float,
+                        distance_m: float) -> float:
+    """Normalize using explicit capacity/cycle scales shared by all seven methods."""
+    return task_scalar(
+        total_tasks=len(instance.tasks), physical_violations=physical_violations,
+        on_time=on_time, normalized_lateness=normalized_lateness,
+        energy_j=energy_j, distance_m=distance_m,
+        energy_reference_j=max(1.0, sum(u.energy_budget_j for u in instance.uavs.values())),
+        distance_reference_m=max(1.0, sum(u.speed_mps * instance.cycle_s
+                                          for u in instance.uavs.values())),
+    )
+
+
 def task_scalar(*, total_tasks: int, physical_violations: int,
                 on_time: int, normalized_lateness: float,
                 energy_j: float, distance_m: float,

@@ -90,6 +90,11 @@ def _proxy_precheck_key(
     )
     proxy = evaluate_initial_proxy(state.instance, solution)
     score = proxy.score
+    if not state.instance.qos_hard:
+        # Never shortlist an energy-cheap but task-failing move ahead of an
+        # equally physical move that finishes more tasks.
+        return (0.0 if precheck.feasible else 1.0,
+                *score.key[1:])
     return (
         0.0 if precheck.feasible else 1.0,
         float(len(precheck.reasons)),
