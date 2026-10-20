@@ -298,12 +298,12 @@ def solve_stage2_realization(
         energy_guard = (model.total_energy - energy_star_j - energy_tolerance_j) / 1000.0 <= 0
         quality_constraints = []
         if not instance.qos_hard and stage1_completion_s is not None:
-            # Stage-2 cannot sacrifice tasks already on time in Stage-1.
+            # Guard at the actual deadline, leaving ON_TIME_TOL_S as numerical\n            # classification margin; do not optimize exactly up to the tolerant\n            # threshold, since sub-nanosecond solver residuals can cross it.
             for task_id, task in instance.tasks.items():
                 baseline = stage1_completion_s[task_id]
                 if baseline <= task.release_s + task.deadline_s + ON_TIME_TOL_S:
                     quality_constraints.append(
-                        model.variables["task_completion_s"][task_id] <= task.release_s + task.deadline_s + ON_TIME_TOL_S
+                        model.variables["task_completion_s"][task_id] <= task.release_s + task.deadline_s
                     )
             # Nor can it increase aggregate normalized lateness beyond solver tolerance.
             old_lateness = sum(max(0., stage1_completion_s[t] - task.release_s - task.deadline_s - ON_TIME_TOL_S)
@@ -521,7 +521,7 @@ def solve_resource_problem(
         ), cp.Constant(0.0))
         constraints = list(extra.constraints) + [
             extra.variables["task_completion_s"][t]
-            <= instance.tasks[t].release_s + instance.tasks[t].deadline_s + ON_TIME_TOL_S
+            <= instance.tasks[t].release_s + instance.tasks[t].deadline_s
             for t in protected
         ] + [tardiness <= original_key[2] + LATENESS_TOL]
         subproblem = cp.Problem(cp.Minimize(extra.total_energy), constraints)

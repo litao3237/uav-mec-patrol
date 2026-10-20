@@ -57,3 +57,12 @@ maximum-success solution. Labels in experiments must keep that distinction.
   any additional Stage-1B runtime rather than hiding it.
 - Do **not** launch a new 816-run matrix until M0 pilot is accepted and the
   optimization benefit/cost trade-off is independently assessed.
+
+### Numerical boundary adjustment
+
+M0 Stage-1B and Stage-2 preserve the Stage-1A successful task set using a
+**deadline guard at D itself**, rather than D+1e-6. This makes the solver's
+constraint strictly inside the frozen classification tolerance and avoids
+roundoff-induced changes to on-time task counts at the tolerant boundary.
+A numerically infeasible guarded solve falls back to its previously verified
+physical allocation and is **not** treated as an improvement.
