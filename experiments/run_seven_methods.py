@@ -29,6 +29,9 @@ from uav_mec.optimization.resource.cvx_solver import solve_stage2_realization
 from uav_mec.evaluation import build_event_info
 from uav_mec.analysis.task_admission import admit_tasks
 from uav_mec.analysis.task_metrics import summarize_task_qos
+from uav_mec.evaluation.task_objective import (
+    ON_TIME_TOL_S, LATENESS_TOL, measured_task_key,
+)
 from statistics import mean
 
 METHODS = ("GR-MR", "FTR-NM", "RGA-MR", "SA-MR", "DPSO-MR", "B-ALNS", "ESI-ALNS")
@@ -107,7 +110,8 @@ def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
                 subset, admitted.solution, build_event_info(subset, admitted.solution),
                 energy_star_j=stage1_energy,
                 energy_tolerance_j=res.diagnostics["energy_tolerance_j"],
-                stage1_completion_s=res.stage1_values["task_completion_s"],
+                stage1_completion_s={t: d + subset.tasks[t].release_s for t, d in
+                                     physical["reconstructed"]["timeline"]["task_delay_s"].items()},
             )
             stage2 = {"status": outcome["status"], "qualified": False,
                       "available": outcome["raw_values"] is not None,
@@ -122,15 +126,23 @@ def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
                 )
                 stage2 = stage2_audit | {"attempts": outcome["attempts"]}
                 if stage2["qualified"]:
-                    old_delays = physical["reconstructed"]["timeline"]["task_delay_s"]
-                    new_delays = stage2["audit"]["reconstructed"]["timeline"]["task_delay_s"]
-                    def completed(delays):
-                        return sum(delays[t] <= subset.tasks[t].deadline_s + 1e-9 for t in subset.tasks)
-                    def overdue(delays):
-                        return sum(max(0., delays[t] - subset.tasks[t].deadline_s) /
-                                   max(1., subset.tasks[t].deadline_s) for t in subset.tasks)
-                    if (completed(new_delays) < completed(old_delays) or
-                            overdue(new_delays) > overdue(old_delays) + 1e-5):
+                    old_audit = physical["reconstructed"]
+                    new_audit = stage2["audit"]["reconstructed"]
+                    old_key = measured_task_key(
+                        subset, old_audit["timeline"]["task_delay_s"],
+                        energy_j=old_audit["metrics"]["energy_j"],
+                        distance_m=old_audit["metrics"]["total_distance_m"],
+                    )
+                    new_key = measured_task_key(
+                        subset, new_audit["timeline"]["task_delay_s"],
+                        energy_j=new_audit["metrics"]["energy_j"],
+                        distance_m=new_audit["metrics"]["total_distance_m"],
+                    )
+                    if (
+                        new_key[1] > old_key[1]
+                        or new_key[2] > old_key[2] + LATENESS_TOL
+                        or new_key[3] > old_key[3] + res.diagnostics["energy_tolerance_j"]
+                    ):
                         stage2["qualified"] = False
                         stage2["status"] = "rejected_task_qos_regression"
                     else:
@@ -237,8 +249,11 @@ def run_block(tasks: int, scenario: int, phase: str, config: Path, output: Path,
         raise FileExistsError(f"拒绝覆盖已有实验：{output}")
     if qos_mode not in ("strict", "task-level"):
         raise ValueError("Unknown QoS protocol")
-    run_protocol = (dict(PROTOCOL, id=PROTOCOL["id"] + "__v26_task_qos",
+    run_protocol = (dict(PROTOCOL, id=PROTOCOL["id"] + "__m0_task_qos_v1",
                          qos_mode="task_level_soft_deadline",
+                         quality_rule="M0_common_measured_lex_success_lateness_energy_distance",
+                         on_time_tolerance_s=ON_TIME_TOL_S,
+                         resource_policy="lateness_surrogate_then_audited_guarded_energy",
                          priority=["physical_gate", "-on_time_tasks", "normalized_lateness",
                                    "energy_j", "distance_m"],
                          all_task_delay="cycle_end_right_censoring_for_unserved")

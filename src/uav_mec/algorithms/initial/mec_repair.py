@@ -17,7 +17,7 @@ from uav_mec.domain import (
 from uav_mec.evaluation import build_event_info
 from uav_mec.evaluation.geometry import distance, stop_xy
 from uav_mec.evaluation.validator import validate_solution
-from uav_mec.evaluation.task_objective import task_key
+from uav_mec.evaluation.task_objective import task_key, ON_TIME_TOL_S
 from uav_mec.optimization.resource.reduced import (
     ReducedResourceEvaluation,
     evaluate_reduced_resources,
@@ -162,8 +162,8 @@ def evaluate_initial_proxy(
         sum_normalized_violation=sum(normalized),
         total_energy_j=reduced.total_energy_j,
         total_distance_m=sum(info.route_distance_m.values()),
-        on_time_tasks=sum(value <= 1e-9 for value in reduced.deadline_violation_s.values()),
-        normalized_lateness=sum(max(0.0, value) / max(1.0, instance.tasks[t].deadline_s)
+        on_time_tasks=sum(value <= ON_TIME_TOL_S for value in reduced.deadline_violation_s.values()),
+        normalized_lateness=sum(max(0.0, value - ON_TIME_TOL_S) / max(1.0, instance.tasks[t].deadline_s)
                                 for t, value in reduced.deadline_violation_s.items()),
         qos_soft=not instance.qos_hard,
     )

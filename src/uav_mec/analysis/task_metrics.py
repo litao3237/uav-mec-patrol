@@ -6,6 +6,7 @@ import math
 import numpy as np
 
 from uav_mec.domain import Instance
+from uav_mec.evaluation.task_objective import ON_TIME_TOL_S
 
 
 REQUIRED_TASK_QOS_FIELDS = (
@@ -40,7 +41,7 @@ def summarize_task_qos(original: Instance, *,
         raise ValueError("Stage-2 energy must be finite when available")
 
     on_time = {t for t, delay in delays_s.items()
-               if delay <= original.tasks[t].deadline_s + 1e-9}
+               if delay <= original.tasks[t].deadline_s + ON_TIME_TOL_S}
     late = served_ids - on_time
     successes = len(on_time)
     # Unserved tasks have no completion time. Cycle-end is an explicit

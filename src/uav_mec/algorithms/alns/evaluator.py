@@ -12,7 +12,7 @@ from uav_mec.optimization.resource import (
 )
 
 from uav_mec.algorithms.initial import evaluate_initial_proxy
-from uav_mec.evaluation.task_objective import task_scalar
+from uav_mec.evaluation.task_objective import scalar_for_instance, measured_task_key
 
 
 def solution_signature(solution: DiscreteSolution) -> tuple:
@@ -71,7 +71,7 @@ class ProxyObjectiveEvaluator:
         proxy = evaluate_initial_proxy(instance, solution)
         score = proxy.score
         if score.qos_soft:
-            value = task_scalar(total_tasks=len(instance.tasks),
+            value = scalar_for_instance(instance,
                                 physical_violations=score.violated_constraints,
                                 on_time=score.on_time_tasks,
                                 normalized_lateness=score.normalized_lateness,
@@ -137,25 +137,48 @@ class ScreenedProxyObjectiveEvaluator:
         score = proxy.score
 
         if score.qos_soft:
-            # Optimistic physical rejection remains a hard gate, but missed task
-            # deadlines cannot trigger the hard penalty in soft-QoS mode.
-            is_physical = not precheck.feasible
-            if score.violated_constraints and not is_physical:
+            # CVX can rescue a conservative equal-share proxy, but only with
+            # the same independently audited physical certificate as the
+            # finalizer. Do not label solver "feasible" without a residual check.
+            physical_failure = not precheck.feasible
+            evaluated_key = None
+            if score.violated_constraints and not physical_failure:
+                from uav_mec.analysis.stage1_acceptance import qualify_stage1_result
+
                 self.stats.cvx_refinements += 1
                 self.stats.ambiguous_proxy_calls += 1
-                result = self.cvx_solver.solve(instance, solution, info)
+                result = qualify_stage1_result(
+                    instance, solution, self.cvx_solver.solve(instance, solution, info)
+                )
                 self.stats.resource_status_counts[result.status] = (
                     self.stats.resource_status_counts.get(result.status, 0) + 1
                 )
-                is_physical = not result.feasible
+                physical_failure = not result.diagnostics.get("stage1_qualified", False)
+                if not physical_failure:
+                    audit = result.diagnostics["stage1_acceptance_audit"]["reconstructed"]
+                    evaluated_key = measured_task_key(
+                        instance, audit["timeline"]["task_delay_s"],
+                        energy_j=audit["metrics"]["energy_j"],
+                        distance_m=audit["metrics"]["total_distance_m"],
+                    )
             self.stats.precheck_rejects += int(not precheck.feasible)
-            self.stats.feasible_calls += int(not is_physical)
-            self.stats.infeasible_calls += int(is_physical)
-            value = task_scalar(total_tasks=len(instance.tasks),
-                                physical_violations=int(is_physical),
-                                on_time=score.on_time_tasks,
-                                normalized_lateness=score.normalized_lateness,
-                                energy_j=score.total_energy_j, distance_m=score.total_distance_m)
+            self.stats.feasible_calls += int(not physical_failure)
+            self.stats.infeasible_calls += int(physical_failure)
+            if evaluated_key is None:
+                on_time, late, energy, distance = (
+                    score.on_time_tasks, score.normalized_lateness,
+                    score.total_energy_j, score.total_distance_m,
+                )
+            else:
+                on_time, late, energy, distance = (
+                    int(-evaluated_key[1]), evaluated_key[2],
+                    evaluated_key[3], evaluated_key[4],
+                )
+            value = scalar_for_instance(
+                instance, physical_violations=int(physical_failure),
+                on_time=on_time, normalized_lateness=late,
+                energy_j=energy, distance_m=distance,
+            )
         elif not precheck.feasible:
             self.stats.precheck_rejects += 1
             self.stats.infeasible_calls += 1
@@ -235,7 +258,7 @@ class KKTObjectiveEvaluator:
         # Keep strict-mode allocation and acceptance unchanged.
         score = evaluate_initial_proxy(instance, solution).score if not instance.qos_hard else None
         if score is not None and score.qos_soft:
-            value = task_scalar(total_tasks=len(instance.tasks),
+            value = scalar_for_instance(instance,
                                 physical_violations=int(not result.feasible),
                                 on_time=score.on_time_tasks,
                                 normalized_lateness=score.normalized_lateness,

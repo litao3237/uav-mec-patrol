@@ -25,7 +25,7 @@ from .runner import (
     run_uav_mec_alns,
 )
 from .state import ObjectiveEvaluator, UavMecState
-from uav_mec.evaluation.task_objective import task_scalar
+from uav_mec.evaluation.task_objective import scalar_for_instance, measured_task_key
 
 
 class Stage1CVXObjectiveOracle:
@@ -147,16 +147,27 @@ class Stage1CVXObjectiveOracle:
         ):
             return float("inf")
         if not instance.qos_hard:
-            metrics = result.diagnostics["stage1_acceptance_audit"]["reconstructed"]
-            delays = metrics["timeline"]["task_delay_s"]
-            success = sum(delays[t] <= instance.tasks[t].deadline_s + 1e-9 for t in instance.tasks)
-            lateness = sum(max(0., delays[t] - instance.tasks[t].deadline_s)
-                           / max(1., instance.tasks[t].deadline_s) for t in instance.tasks)
-            return task_scalar(total_tasks=len(instance.tasks), physical_violations=0,
-                               on_time=success, normalized_lateness=lateness,
-                               energy_j=float(result.energy_stage1_j),
-                               distance_m=metrics["metrics"]["total_distance_m"])
+            key = self.quality_key(instance, solution)
+            if key is None:
+                return float("inf")
+            return scalar_for_instance(
+                instance, physical_violations=0, on_time=int(-key[1]),
+                normalized_lateness=key[2], energy_j=key[3], distance_m=key[4],
+            )
         return float(result.energy_stage1_j)
+
+    def quality_key(self, instance: Instance, solution: DiscreteSolution):
+        """Independent physical audit -> exact lex tuple; never a scaled scalar."""
+        result = self.solve(instance, solution)
+        if not result.diagnostics.get("stage1_qualified", False):
+            return None
+        audited = result.diagnostics["stage1_acceptance_audit"]["reconstructed"]
+        physical = audited["metrics"]
+        return measured_task_key(
+            instance, audited["timeline"]["task_delay_s"],
+            energy_j=physical["energy_j"],
+            distance_m=physical["total_distance_m"],
+        )
 
 
 @dataclass
