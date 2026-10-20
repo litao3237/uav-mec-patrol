@@ -19,6 +19,7 @@ FIGURES = {
     "energy_per_successful_task": "Energy per successful task (J)",
     "mec_cpu_utilization": "Mean MEC CPU allocation fraction",
     "runtime": "End-to-end runtime (s)",
+    "strict_all_tasks_success": "All-tasks-on-time strict success rate",
 }
 METHODS = ("GR-MR", "FTR-NM", "RGA-MR", "SA-MR", "DPSO-MR", "B-ALNS", "ESI-ALNS")
 
