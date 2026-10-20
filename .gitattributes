@@ -1,9 +1,0 @@
-# 源码使用一致换行；结果和图件固定字节，保证跨平台 SHA-256 一致。
-* text=auto eol=lf
-results/** -text
-figures/** -text
-data/** -text
-*.zip -text
-*.pdf -text
-*.png -text
-*.tiff -text

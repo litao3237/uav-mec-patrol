@@ -10,6 +10,8 @@ from dataclasses import dataclass
 import logging
 import math
 from time import perf_counter
+
+from uav_mec.evaluation.task_objective import task_scalar
 from typing import Any
 
 import numpy as np
@@ -63,6 +65,12 @@ def _validate(config: RouteMetaheuristicConfig) -> None:
 def _score(evaluated) -> float:
     """沿用构造代理的标量惩罚；最终能耗必须由独立连续求解给出。"""
     score = evaluated.proxy.score
+    if score.qos_soft:
+        return task_scalar(total_tasks=len(evaluated.proxy.reduced.task_completion_s),
+                           physical_violations=score.violated_constraints,
+                           on_time=score.on_time_tasks,
+                           normalized_lateness=score.normalized_lateness,
+                           energy_j=score.total_energy_j, distance_m=score.total_distance_m)
     penalty = 0.0 if score.violated_constraints == 0 else 1e9 * (
         1 + score.violated_constraints + score.max_normalized_violation + score.sum_normalized_violation
     )
@@ -174,5 +182,5 @@ def run_route_metaheuristic(instance: Instance, *, method: str, seed: int,
     logging.getLogger(__name__).info('%s A%s完成：评价%s次，缓存命中%s，耗时%.3fs',
                                      method,seed,evaluations,hits,perf_counter()-started)
     return RouteMetaheuristicResult(deepcopy(best.solution),evaluations,hits,history,
-                                    {'method':method,'seed':seed,'objective':'constructive_proxy_penalty_1e9',
+                                    {'method':method,'seed':seed,'objective':'task_success_lex_scalar_v26' if not instance.qos_hard else 'constructive_proxy_penalty_1e9',
                                      'velocity':'assignment_operations' if method=='DPSO-MR' else None})

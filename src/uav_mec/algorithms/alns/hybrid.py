@@ -25,6 +25,7 @@ from .runner import (
     run_uav_mec_alns,
 )
 from .state import ObjectiveEvaluator, UavMecState
+from uav_mec.evaluation.task_objective import task_scalar
 
 
 class Stage1CVXObjectiveOracle:
@@ -145,6 +146,16 @@ class Stage1CVXObjectiveOracle:
             or not result.diagnostics.get("stage1_qualified", False)
         ):
             return float("inf")
+        if not instance.qos_hard:
+            metrics = result.diagnostics["stage1_acceptance_audit"]["reconstructed"]
+            delays = metrics["timeline"]["task_delay_s"]
+            success = sum(delays[t] <= instance.tasks[t].deadline_s + 1e-9 for t in instance.tasks)
+            lateness = sum(max(0., delays[t] - instance.tasks[t].deadline_s)
+                           / max(1., instance.tasks[t].deadline_s) for t in instance.tasks)
+            return task_scalar(total_tasks=len(instance.tasks), physical_violations=0,
+                               on_time=success, normalized_lateness=lateness,
+                               energy_j=float(result.energy_stage1_j),
+                               distance_m=metrics["metrics"]["total_distance_m"])
         return float(result.energy_stage1_j)
 
 
