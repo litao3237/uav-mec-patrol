@@ -251,14 +251,16 @@ def build_resource_model(
             S_batch[visit_id] + total_work * cp.inv_pos(F[pair]) - C_batch[visit_id] <= 0,
         )
 
-    # QoS.
-    for task_id, task in instance.tasks.items():
-        add(f"deadline::{task_id}", c_task[task_id] - task.release_s - task.deadline_s <= 0)
+    # QoS is an optional hard restriction; v26 optimizes it as task-level performance.
+    if instance.qos_hard:
+        for task_id, task in instance.tasks.items():
+            add(f"deadline::{task_id}", c_task[task_id] - task.release_s - task.deadline_s <= 0)
 
     avg_delay_expr = cvx_sum(
         [c_task[t] - instance.tasks[t].release_s for t in instance.tasks]
     ) / len(instance.tasks)
-    add("avg_delay", avg_delay_expr - instance.avg_delay_budget_s <= 0)
+    if instance.qos_hard:
+        add("avg_delay", avg_delay_expr - instance.avg_delay_budget_s <= 0)
 
     for uav_id in instance.uavs:
         add(f"cycle::{uav_id}", return_time[uav_id] - instance.cycle_s <= 0)

@@ -43,6 +43,7 @@ def main():
     parser.add_argument('--level',type=float,required=True)
     parser.add_argument('--scenario',type=int,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--qos-mode',choices=['strict','task-level'],default='strict')
     args=parser.parse_args()
     logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
     runner.PROTOCOL=protocol(args.study,args.level)
@@ -70,7 +71,7 @@ def main():
     runner.build_paper_scale_instance=build
     runner.write_json=write
     runner.run_block(runner.PROTOCOL['tasks'][0],args.scenario,'formal',
-                     ROOT/'configs/baseline.yaml',args.output)
+                     ROOT/'configs/baseline.yaml',args.output,qos_mode=args.qos_mode)
 
 
 if __name__=='__main__':main()

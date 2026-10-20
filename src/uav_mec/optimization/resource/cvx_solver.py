@@ -266,6 +266,7 @@ def solve_stage2_realization(
     energy_tolerance_j: float,
     verbose: bool = False,
     solver_profile: str = "default",
+    stage1_completion_s: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """固定Stage-1能耗锚点，在等价缩放模型上求Stage-2并核验全部物理约束。
 
@@ -292,8 +293,23 @@ def solve_stage2_realization(
         model = build_resource_model(instance, solution, info, numerical_scaling=True)
         # 1 kJ=1000 J：改变数值表示，不改变能耗保护上限。
         energy_guard = (model.total_energy - energy_star_j - energy_tolerance_j) / 1000.0 <= 0
+        quality_constraints = []
+        if not instance.qos_hard and stage1_completion_s is not None:
+            # Stage-2 cannot sacrifice tasks already on time in Stage-1.
+            for task_id, task in instance.tasks.items():
+                baseline = stage1_completion_s[task_id]
+                if baseline <= task.release_s + task.deadline_s:
+                    quality_constraints.append(
+                        model.variables["task_completion_s"][task_id] <= task.release_s + task.deadline_s
+                    )
+            # Nor can it increase aggregate normalized lateness beyond solver tolerance.
+            old_lateness = sum(max(0., stage1_completion_s[t] - task.release_s - task.deadline_s)
+                               / max(1., task.deadline_s) for t, task in instance.tasks.items())
+            new_lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s)
+                                / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
+            quality_constraints.append(new_lateness <= old_lateness + 1e-5)
         problem = cp.Problem(cp.Minimize(objective_scale * model.normalized_mec_cpu),
-                             model.constraints + [energy_guard])
+                             model.constraints + [energy_guard, *quality_constraints])
         kwargs = _solver_kwargs(solver, verbose, solver_profile)
         if solver == "CLARABEL":
             kwargs.update(max_iter=300, tol_gap_abs=1e-9, tol_gap_rel=1e-9, tol_feas=1e-9,
@@ -368,7 +384,18 @@ def solve_resource_problem(
         )
 
     model = build_resource_model(instance, solution, info)
-    problem1 = cp.Problem(cp.Minimize(model.total_energy), model.constraints)
+    if instance.qos_hard:
+        stage1_objective = model.total_energy
+    else:
+        # Convex surrogate for soft QoS: optimize lateness and completion before
+        # energy. Exact success-count priority is enforced in discrete candidate
+        # ranking and measured independently, rather than claimed as a CVX optimum.
+        lateness = sum((cp.pos(model.variables["task_completion_s"][t] - task.release_s - task.deadline_s)
+                        / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
+        normalized_delay = sum(((model.variables["task_completion_s"][t] - task.release_s)
+                                / max(1., task.deadline_s) for t, task in instance.tasks.items()), cp.Constant(0.0))
+        stage1_objective = 1e6 * lateness + 10.0 * normalized_delay + model.total_energy / 1000.0
+    problem1 = cp.Problem(cp.Minimize(stage1_objective), model.constraints)
     if not problem1.is_dcp():
         raise RuntimeError("P1-R was expected to be DCP, but CVXPY reports is_dcp=False")
 
@@ -447,7 +474,8 @@ def solve_resource_problem(
                 },
             )
 
-    energy_star = float(problem1.value)
+    # With soft QoS, problem1.value is a composite objective, not Joules.
+    energy_star = _value(model.total_energy.value)
     stage1_values = _snapshot_vars(model.variables)
     stage1_duals = _snapshot_duals(model.named_constraints)
     stage1_avg_delay = _value(model.avg_delay_expr.value)
@@ -481,6 +509,7 @@ def solve_resource_problem(
         stage2 = solve_stage2_realization(
             instance, solution, info, energy_star_j=energy_star,
             energy_tolerance_j=tol_j, verbose=verbose, solver_profile=solver_profile,
+            stage1_completion_s=stage1_values["task_completion_s"],
         )
         solver2 = stage2["solver"]
         stage2_status = stage2["status"]

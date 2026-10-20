@@ -17,6 +17,7 @@ from uav_mec.domain import (
 from uav_mec.evaluation import build_event_info
 from uav_mec.evaluation.geometry import distance, stop_xy
 from uav_mec.evaluation.validator import validate_solution
+from uav_mec.evaluation.task_objective import task_key
 from uav_mec.optimization.resource.reduced import (
     ReducedResourceEvaluation,
     evaluate_reduced_resources,
@@ -43,9 +44,17 @@ class ProxyScore:
     sum_normalized_violation: float
     total_energy_j: float
     total_distance_m: float
+    on_time_tasks: int = 0
+    normalized_lateness: float = 0.0
+    qos_soft: bool = False
 
     @property
-    def key(self) -> tuple[float, float, float, float, float]:
+    def key(self) -> tuple[float, ...]:
+        if self.qos_soft:
+            return task_key(physical_violations=self.violated_constraints,
+                            on_time=self.on_time_tasks,
+                            normalized_lateness=self.normalized_lateness,
+                            energy_j=self.total_energy_j, distance_m=self.total_distance_m)
         return (
             float(self.violated_constraints),
             self.max_normalized_violation,
@@ -108,17 +117,16 @@ def _normalized_violations(
 ) -> list[float]:
     values: list[float] = []
 
-    for task_id, task in instance.tasks.items():
-        violation = max(0.0, reduced.deadline_violation_s[task_id])
-        values.append(violation / max(1.0, task.deadline_s))
+    if instance.qos_hard:
+        for task_id, task in instance.tasks.items():
+            violation = max(0.0, reduced.deadline_violation_s[task_id])
+            values.append(violation / max(1.0, task.deadline_s))
 
-    avg_violation = max(
-        0.0,
-        reduced.avg_delay_s - instance.avg_delay_budget_s,
-    )
-    values.append(
-        avg_violation / max(1.0, instance.avg_delay_budget_s)
-    )
+        avg_violation = max(
+            0.0,
+            reduced.avg_delay_s - instance.avg_delay_budget_s,
+        )
+        values.append(avg_violation / max(1.0, instance.avg_delay_budget_s))
 
     for uav_id, uav in instance.uavs.items():
         cycle_violation = max(
@@ -154,6 +162,10 @@ def evaluate_initial_proxy(
         sum_normalized_violation=sum(normalized),
         total_energy_j=reduced.total_energy_j,
         total_distance_m=sum(info.route_distance_m.values()),
+        on_time_tasks=sum(value <= 1e-9 for value in reduced.deadline_violation_s.values()),
+        normalized_lateness=sum(max(0.0, value) / max(1.0, instance.tasks[t].deadline_s)
+                                for t, value in reduced.deadline_violation_s.items()),
+        qos_soft=not instance.qos_hard,
     )
     return ProxyEvaluation(reduced=reduced, score=score)
 
@@ -383,7 +395,8 @@ def build_mec_assisted_initial_solution(
     accepted_moves: list[dict[str, object]] = []
 
     for step in range(1, cfg.max_steps + 1):
-        if current_proxy.score.violated_constraints == 0:
+        if (current_proxy.score.violated_constraints == 0 and
+                (instance.qos_hard or current_proxy.score.on_time_tasks == len(instance.tasks))):
             break
 
         critical = _critical_local_tasks(

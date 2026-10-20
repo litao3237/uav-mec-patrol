@@ -72,3 +72,10 @@ python experiments/plot_figures.py --output-dir outputs/figures
 固定探索配置下的能耗改善不能替代等时间优势的证据。预算对照尚未建立稳定优势；80 任务的七算法共同有效集合较小。经验参考只用于描述观察到的差距，不是全局最优值。详见 [结果说明](docs/results.md)。
 
 本次整理保留当前方法与有效证据，移除了旧强化变体、旧五算法运行入口、重复图包、过时工作流与一次性写稿脚本。历史提交仍可通过 Git 追溯。
+
+## Experimental v26 task-level QoS (separate from archived v25)
+
+The opt-in task-success, delay and energy protocol and its physical-admission
+certificates are documented in [docs/task_qos_protocol_v26.md](docs/task_qos_protocol_v26.md).
+It uses `--qos-mode task-level`, and the independent pilot workflow runs
+30/50/80-task checks. Archived `results/` and strict v25 defaults are untouched.

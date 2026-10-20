@@ -246,9 +246,86 @@ def aggregate_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+
+TASK_LEVEL_ABLATION_METRICS = (
+    "success_rate", "mean_delay_all", "mean_delay_success", "p95_delay_all",
+    "total_energy", "energy_per_successful_task", "mec_cpu_utilization",
+    "runtime", "strict_all_tasks_success", "deadline_violation_rate",
+)
+
+
+def aggregate_task_qos_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Include every physical run, averaging seeds within scenario first."""
+    out = []
+    for tasks in sorted({int(r["tasks"]) for r in rows}):
+        for profile in PROFILES:
+            selected = [r for r in rows if int(r["tasks"]) == tasks and r["profile"] == profile]
+            if not selected:
+                continue
+            for metric in TASK_LEVEL_ABLATION_METRICS:
+                per_scenario = []
+                observed = 0
+                for scenario in sorted({r["scenario_seed"] for r in selected}):
+                    vals = [float(r["metrics"][metric]) for r in selected
+                            if r["scenario_seed"] == scenario and
+                            r.get("metrics") and r["metrics"][metric] is not None]
+                    observed += len(vals)
+                    if vals:
+                        per_scenario.append({"scenario_seed": scenario, "mean": mean(vals)})
+                out.append({
+                    "tasks": tasks, "profile": profile, "metric": metric,
+                    "planned_runs": len(selected),
+                    "physical_feasible_runs": sum(r["metrics"]["physical_feasible"] for r in selected),
+                    "observed_runs": observed, "scenarios": len(per_scenario),
+                    "scenario_equal_mean": (
+                        mean(x["mean"] for x in per_scenario) if per_scenario else None),
+                    "per_scenario": per_scenario,
+                })
+    return out
+
+
+def paired_task_qos_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Directly paired, task success prioritized; never discard late runs."""
+    groups = {}
+    for r in rows:
+        groups.setdefault((r["tasks"], r["scenario_seed"], r["algorithm_seed"]), {})[
+            r["profile"]] = r
+    result = []
+    for key, by_profile in sorted(groups.items()):
+        if "full" not in by_profile:
+            raise ValueError(f"Missing paired full profile: {key}")
+        full = by_profile["full"]["metrics"]
+        for profile in PROFILES:
+            if profile == "full":
+                continue
+            if profile not in by_profile:
+                raise ValueError(f"Missing paired ablation {profile}: {key}")
+            ablated = by_profile[profile]["metrics"]
+            if not full["physical_feasible"] or not ablated["physical_feasible"]:
+                raise ValueError(f"Uncertified paired physical run: {key}")
+            result.append({
+                "tasks": key[0], "scenario_seed": key[1], "algorithm_seed": key[2],
+                "profile": profile,
+                "full_minus_ablation_success_rate": (
+                    full["success_rate"] - ablated["success_rate"]),
+                "full_minus_ablation_mean_delay_all_s": (
+                    full["mean_delay_all"] - ablated["mean_delay_all"]),
+                "full_minus_ablation_energy_j": (
+                    full["total_energy"] - ablated["total_energy"]),
+                "full_minus_ablation_energy_per_successful_task": (
+                    full["energy_per_successful_task"] - ablated["energy_per_successful_task"]
+                    if full["energy_per_successful_task"] is not None and
+                       ablated["energy_per_successful_task"] is not None else None),
+                "full_strict_success": full["strict_all_tasks_success"],
+                "ablation_strict_success": ablated["strict_all_tasks_success"],
+            })
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/baseline.yaml")
+    parser.add_argument('--qos-mode',choices=['strict','task-level'],default='strict')
     parser.add_argument("--tasks", default="30,50,70,80")
     parser.add_argument("--scenario-seeds", default="45,46,47")
     parser.add_argument("--algorithm-seeds", default="100,101,102")
@@ -263,6 +340,8 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_paper_scale_config(args.config)
+    if args.qos_mode == 'task-level':
+        from run_seven_methods import finalize
     task_counts = parse_ints(args.tasks)
     scenario_seeds = parse_ints(args.scenario_seeds)
     algorithm_seeds = parse_ints(args.algorithm_seeds)
@@ -273,6 +352,8 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     protocol = {
         "tasks": task_counts,
+        "qos_mode": args.qos_mode,
+        "protocol_version": "v26_task_qos" if args.qos_mode == "task-level" else "v25_strict",
         "scenario_seeds": scenario_seeds,
         "algorithm_seeds": algorithm_seeds,
         "profiles": list(PROFILES),
@@ -299,6 +380,7 @@ def main() -> None:
                 num_mecs=args.mecs,
                 scenario_seed=scenario_seed,
             )
+            instance = replace(instance, qos_hard=(args.qos_mode == 'strict'))
             route_seed = build_greedy_initial_solution(instance)
             initial = build_mec_assisted_initial_solution(
                 instance,
@@ -388,8 +470,16 @@ def main() -> None:
                     gain_vs_base_pct = (
                         100.0 * (base_energy - final_energy)
                         / max(1.0, abs(base_energy))
-                        if strict_pair else None
+                        if strict_pair and instance.qos_hard else None
                     )
+                    soft_metrics = None
+                    soft_admission = None
+                    if not instance.qos_hard:
+                        recovered = finalize(instance, final_solution, method="ESI-"+profile,
+                                             seed=algorithm_seed, initialization_s=0.0,
+                                             search_s=elite_runtime_s,
+                                             diagnostics={"profile": profile})
+                        soft_metrics, soft_admission = recovered["metrics"], recovered["admission"]
                     rows.append(
                         {
                             "tasks": tasks,
@@ -400,7 +490,9 @@ def main() -> None:
                             "base_energy_j": base_energy,
                             "final_stage1_status": final_status,
                             "final_energy_j": final_energy,
-                            "strict_pair": strict_pair,
+                            "strict_pair": strict_pair if instance.qos_hard else False,
+                            "metrics": soft_metrics,
+                            "admission": soft_admission,
                             "gain_vs_base_pct": gain_vs_base_pct,
                             "accepted": int(stats.get("improvements", 0)),
                             "elite_cvx_calls": oracle.calls,
@@ -428,8 +520,10 @@ def main() -> None:
                     },
                 )
 
-    aggregate = aggregate_profiles(rows)
-    paired = paired_summaries(rows)
+    aggregate = (aggregate_profiles(rows) if instance.qos_hard else
+                 aggregate_task_qos_profiles(rows))
+    paired = (paired_summaries(rows) if instance.qos_hard else
+              paired_task_qos_profiles(rows))
     payload = {
         "complete": True,
         "experiment": "multiscale_elite_family_ablation",

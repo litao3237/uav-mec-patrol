@@ -12,6 +12,7 @@ from uav_mec.optimization.resource import (
 )
 
 from uav_mec.algorithms.initial import evaluate_initial_proxy
+from uav_mec.evaluation.task_objective import task_scalar
 
 
 def solution_signature(solution: DiscreteSolution) -> tuple:
@@ -69,7 +70,15 @@ class ProxyObjectiveEvaluator:
 
         proxy = evaluate_initial_proxy(instance, solution)
         score = proxy.score
-        if score.violated_constraints == 0:
+        if score.qos_soft:
+            value = task_scalar(total_tasks=len(instance.tasks),
+                                physical_violations=score.violated_constraints,
+                                on_time=score.on_time_tasks,
+                                normalized_lateness=score.normalized_lateness,
+                                energy_j=score.total_energy_j, distance_m=score.total_distance_m)
+            self.stats.feasible_calls += int(score.violated_constraints == 0)
+            self.stats.infeasible_calls += int(score.violated_constraints != 0)
+        elif score.violated_constraints == 0:
             value = score.total_energy_j
             self.stats.feasible_calls += 1
         else:
@@ -127,7 +136,27 @@ class ScreenedProxyObjectiveEvaluator:
         proxy = evaluate_initial_proxy(instance, solution)
         score = proxy.score
 
-        if not precheck.feasible:
+        if score.qos_soft:
+            # Optimistic physical rejection remains a hard gate, but missed task
+            # deadlines cannot trigger the hard penalty in soft-QoS mode.
+            is_physical = not precheck.feasible
+            if score.violated_constraints and not is_physical:
+                self.stats.cvx_refinements += 1
+                self.stats.ambiguous_proxy_calls += 1
+                result = self.cvx_solver.solve(instance, solution, info)
+                self.stats.resource_status_counts[result.status] = (
+                    self.stats.resource_status_counts.get(result.status, 0) + 1
+                )
+                is_physical = not result.feasible
+            self.stats.precheck_rejects += int(not precheck.feasible)
+            self.stats.feasible_calls += int(not is_physical)
+            self.stats.infeasible_calls += int(is_physical)
+            value = task_scalar(total_tasks=len(instance.tasks),
+                                physical_violations=int(is_physical),
+                                on_time=score.on_time_tasks,
+                                normalized_lateness=score.normalized_lateness,
+                                energy_j=score.total_energy_j, distance_m=score.total_distance_m)
+        elif not precheck.feasible:
             self.stats.precheck_rejects += 1
             self.stats.infeasible_calls += 1
             value = (
@@ -202,7 +231,18 @@ class KKTObjectiveEvaluator:
             self.stats.resource_status_counts.get(result.status, 0) + 1
         )
 
-        if result.feasible:
+        # Only the soft protocol needs a proxy key for every KKT outcome.
+        # Keep strict-mode allocation and acceptance unchanged.
+        score = evaluate_initial_proxy(instance, solution).score if not instance.qos_hard else None
+        if score is not None and score.qos_soft:
+            value = task_scalar(total_tasks=len(instance.tasks),
+                                physical_violations=int(not result.feasible),
+                                on_time=score.on_time_tasks,
+                                normalized_lateness=score.normalized_lateness,
+                                energy_j=score.total_energy_j, distance_m=score.total_distance_m)
+            self.stats.feasible_calls += int(result.feasible)
+            self.stats.infeasible_calls += int(not result.feasible)
+        elif result.feasible:
             value = float(result.energy_stage1_j)
             self.stats.feasible_calls += 1
         else:

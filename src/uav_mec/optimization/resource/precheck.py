@@ -82,7 +82,7 @@ def fast_feasibility_precheck(
 
         completion_lb[task_id] = lb
         deadline_abs = task.release_s + task.deadline_s
-        if lb > deadline_abs + tol_s:
+        if instance.qos_hard and lb > deadline_abs + tol_s:
             reasons.append(
                 f"task {task_id}: optimistic completion LB {lb:.6f}s exceeds "
                 f"deadline {deadline_abs:.6f}s"
@@ -93,7 +93,7 @@ def fast_feasibility_precheck(
         avg_lb = sum(
             completion_lb[t] - instance.tasks[t].release_s for t in instance.tasks
         ) / len(instance.tasks)
-        if avg_lb > instance.avg_delay_budget_s + tol_s:
+        if instance.qos_hard and avg_lb > instance.avg_delay_budget_s + tol_s:
             reasons.append(
                 f"average delay: optimistic LB {avg_lb:.6f}s exceeds "
                 f"budget {instance.avg_delay_budget_s:.6f}s"

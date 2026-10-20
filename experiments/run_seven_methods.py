@@ -27,6 +27,9 @@ from uav_mec.algorithms.initial.metaheuristic_route import RouteMetaheuristicCon
 from uav_mec.analysis.stage1_acceptance import qualify_stage1_result
 from uav_mec.optimization.resource.cvx_solver import solve_stage2_realization
 from uav_mec.evaluation import build_event_info
+from uav_mec.analysis.task_admission import admit_tasks
+from uav_mec.analysis.task_metrics import summarize_task_qos
+from statistics import mean
 
 METHODS = ("GR-MR", "FTR-NM", "RGA-MR", "SA-MR", "DPSO-MR", "B-ALNS", "ESI-ALNS")
 DETERMINISTIC = METHODS[:2]
@@ -69,9 +72,129 @@ def execution_schedule(tasks: int, scenario: int, seeds: list[int]) -> list[tupl
     return [groups[int(i)] for i in rng.permutation(len(groups))]
 
 
+
+def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
+                      initialization_s: float, search_s: float, diagnostics: dict) -> dict:
+    """Report verified physical runs and task-level QoS, without stage imputation."""
+    started = perf_counter()
+    admitted = admit_tasks(instance, solution)
+    subset = admitted.instance
+    physical = admitted.audit
+    chosen_audit = physical
+    stage1_energy = 0.0
+    stage2_energy = None
+    source = admitted.source
+    stage2 = {"status": "not_run", "qualified": False, "available": False,
+              "audit": None, "reason": "no accepted stage2 resource snapshot"}
+    if admitted.resources is None:
+        stage1 = {"status": "verified_idle", "qualified": False, "physical_verified": True,
+                  "available": False, "audit": None}
+        stage2["reason"] = "no admitted tasks; zero-flight physical certificate"
+    else:
+        res = admitted.resources
+        # Report the independently rebuilt physical Joules, not an unverified
+        # raw solver-expression value (they can differ under cone scaling).
+        stage1_energy = float(physical['reconstructed']['metrics']['energy_j'])
+        stage1 = {
+            "status": str(res.diagnostics.get("stage1_status", res.status)),
+            "qualified": admitted.source == "cvx_verified",
+            "physical_verified": True,
+            "available": True,
+            "audit": physical, "values": res.stage1_values,
+        }
+        if admitted.source == "cvx_verified":
+            outcome = solve_stage2_realization(
+                subset, admitted.solution, build_event_info(subset, admitted.solution),
+                energy_star_j=stage1_energy,
+                energy_tolerance_j=res.diagnostics["energy_tolerance_j"],
+                stage1_completion_s=res.stage1_values["task_completion_s"],
+            )
+            stage2 = {"status": outcome["status"], "qualified": False,
+                      "available": outcome["raw_values"] is not None,
+                      "values": outcome["raw_values"], "audit": None,
+                      "attempts": outcome["attempts"]}
+            if outcome["accepted"]:
+                stage2_audit = stage_snapshot(
+                    subset, admitted.solution,
+                    replace(res, diagnostics=dict(res.diagnostics, stage2_status="optimal",
+                                                   stage2_raw_values=outcome["raw_values"])),
+                    stage=2,
+                )
+                stage2 = stage2_audit | {"attempts": outcome["attempts"]}
+                if stage2["qualified"]:
+                    old_delays = physical["reconstructed"]["timeline"]["task_delay_s"]
+                    new_delays = stage2["audit"]["reconstructed"]["timeline"]["task_delay_s"]
+                    def completed(delays):
+                        return sum(delays[t] <= subset.tasks[t].deadline_s + 1e-9 for t in subset.tasks)
+                    def overdue(delays):
+                        return sum(max(0., delays[t] - subset.tasks[t].deadline_s) /
+                                   max(1., subset.tasks[t].deadline_s) for t in subset.tasks)
+                    if (completed(new_delays) < completed(old_delays) or
+                            overdue(new_delays) > overdue(old_delays) + 1e-5):
+                        stage2["qualified"] = False
+                        stage2["status"] = "rejected_task_qos_regression"
+                    else:
+                        stage2_energy = float(stage2["audit"]["reconstructed"]["metrics"]["energy_j"])
+                        source = "stage2_cvx_verified"
+                        chosen_audit = stage2["audit"]
+
+    if chosen_audit is not None:
+        if not all(a["complete"] and a["passed"] for a in chosen_audit.values()):
+            raise RuntimeError("Cannot report a physically unverified solution")
+        measured = chosen_audit["reconstructed"]
+        delays = measured["timeline"]["task_delay_s"]
+        metrics = measured["metrics"]
+        distance = metrics["total_distance_m"]
+        cpu = mean(metrics["cpu_occupation_by_mec"].values())
+        energy = metrics["energy_j"]
+    else:
+        # Idle mission: directly verified depot -> depot, so energy and occupation
+        # are actual zeroes, not missing values backfilled with zero.
+        delays, distance, cpu, energy = {}, 0.0, 0.0, 0.0
+
+    if stage2_energy is not None and abs(stage2_energy - energy) > 1e-6 * max(1., energy):
+        raise RuntimeError('Accepted Stage-2 energy must match independent physical audit')
+    resource_s = perf_counter() - started
+    measured_metrics = summarize_task_qos(
+        instance, served_ids=set(subset.tasks), delays_s=delays,
+        unserved_reasons=admitted.removed_reasons,
+        energy_stage1=stage1_energy, energy_stage2=stage2_energy,
+        total_energy=energy, route_distance_m=distance, cpu_utilization=cpu,
+        runtime_s=initialization_s + search_s + resource_s, energy_source=source,
+    )
+    return {
+        "method": method, "algorithm_seed": seed,
+        "candidate_solution_sha256": content_hash(solution),
+        "solution": admitted.solution,
+        "solution_sha256": content_hash(admitted.solution),
+        "stage1": stage1, "stage2": stage2,
+        "metrics": measured_metrics,
+        **{field: measured_metrics[field] for field in (
+            "physical_feasible", "served_tasks", "success_rate",
+            "mean_delay_all", "mean_delay_success", "p95_delay_all",
+            "deadline_violation_rate", "stage1_energy", "stage2_energy",
+            "route_distance", "mec_cpu_utilization", "runtime",
+            "strict_all_tasks_success",
+        )},
+        "admission": {"source": admitted.source, "removed_reasons": admitted.removed_reasons,
+                      "attempts": admitted.attempts, "runtime_s": admitted.runtime_s},
+        "diagnostics": diagnostics,
+        "timing": {
+            "initialization_s": initialization_s, "search_s": search_s,
+            "resource_recompute_s": resource_s, "independent_audit_s": 0.0,
+            "total_to_resources_s": initialization_s + search_s + resource_s,
+            "total_with_audit_s": initialization_s + search_s + resource_s,
+        },
+    }
+
+
 def finalize(instance, solution, *, method: str, seed: int | None,
              initialization_s: float, search_s: float, diagnostics: dict) -> dict:
     """统一在最终结构重算两阶段资源；独立核验失败保留原始值但不进入指标均值。"""
+    if not instance.qos_hard:
+        return finalize_task_qos(instance, solution, method=method, seed=seed,
+                                 initialization_s=initialization_s, search_s=search_s,
+                                 diagnostics=diagnostics)
     started = perf_counter()
     # 两阶段串联使用同一合格能耗锚点，防止失败第一阶段进入资源二次优化。
     resources = qualify_stage1_result(instance,solution,
@@ -104,18 +227,28 @@ def finalize(instance, solution, *, method: str, seed: int | None,
     }
 
 
-def run_block(tasks: int, scenario: int, phase: str, config: Path, output: Path) -> None:
+def run_block(tasks: int, scenario: int, phase: str, config: Path, output: Path,
+              qos_mode: str = "strict") -> None:
     """每个场景块在同一runner顺序完成各方法，逐组原子落盘以保留中断上下文。"""
     task_values, scenarios, seeds = phase_matrix(phase)
     if tasks not in task_values or scenario not in scenarios:
         raise ValueError("请求不属于冻结实验矩阵")
     if output.exists():
         raise FileExistsError(f"拒绝覆盖已有实验：{output}")
+    if qos_mode not in ("strict", "task-level"):
+        raise ValueError("Unknown QoS protocol")
+    run_protocol = (dict(PROTOCOL, id=PROTOCOL["id"] + "__v26_task_qos",
+                         qos_mode="task_level_soft_deadline",
+                         priority=["physical_gate", "-on_time_tasks", "normalized_lateness",
+                                   "energy_j", "distance_m"],
+                         all_task_delay="cycle_end_right_censoring_for_unserved")
+                    if qos_mode == "task-level" else PROTOCOL)
     cfg = load_paper_scale_config(config)
     instance = build_paper_scale_instance(
         cfg, num_tasks=tasks, num_uavs=PROTOCOL["uavs"], num_mecs=PROTOCOL["mecs"],
         scenario_seed=scenario,
     )
+    instance = replace(instance, qos_hard=(qos_mode == "strict"))
     started = perf_counter()
     route = build_greedy_initial_solution(instance)
     route_s = perf_counter() - started
@@ -125,7 +258,7 @@ def run_block(tasks: int, scenario: int, phase: str, config: Path, output: Path)
     initial_hash = content_hash(initial)
     schedule = execution_schedule(tasks, scenario, seeds)
     payload = {
-        "protocol": PROTOCOL, "protocol_sha256": content_hash(PROTOCOL), "phase": phase,
+        "protocol": run_protocol, "protocol_sha256": content_hash(run_protocol), "phase": phase,
         "provenance": provenance(), "config": cfg,
         "source_hashes": current_source_hashes(),
         "config_file_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
@@ -221,11 +354,13 @@ def main() -> None:
     parser.add_argument("--tasks", type=int, required=True)
     parser.add_argument("--scenario", type=int, required=True)
     parser.add_argument("--phase", choices=["pilot", "formal"], required=True)
+    parser.add_argument("--qos-mode", choices=["strict", "task-level"], default="strict")
     parser.add_argument("--config", type=Path, default=Path("configs/baseline.yaml"))
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    run_block(args.tasks, args.scenario, args.phase, args.config, args.output)
+    run_block(args.tasks, args.scenario, args.phase, args.config, args.output,
+              qos_mode=args.qos_mode)
 
 
 if __name__ == "__main__":
