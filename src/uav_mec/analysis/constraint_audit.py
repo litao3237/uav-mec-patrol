@@ -135,10 +135,14 @@ def audit_resources(instance: Instance, solution: DiscreteSolution, values: dict
             add(f"local_lower::{t}", 1e-4 - f[t], "GHz", 1e-4)
             add(f"local_upper::{t}", f[t] - instance.uavs[u].local_cpu_ghz,
                 "GHz", instance.uavs[u].local_cpu_ghz)
-    for t, task in instance.tasks.items():
-        add(f"deadline::{t}", completion[t] - task.release_s - task.deadline_s, "s", task.deadline_s)
+    # Only physical constraints participate in v26 independent acceptance.
+    # Deadline and average delay remain visible in metrics/timeline below.
+    if instance.qos_hard:
+        for t, task in instance.tasks.items():
+            add(f"deadline::{t}", completion[t] - task.release_s - task.deadline_s, "s", task.deadline_s)
     delays = {t: completion[t] - instance.tasks[t].release_s for t in instance.tasks}
-    add("avg_delay", mean(delays.values()) - instance.avg_delay_budget_s, "s", instance.avg_delay_budget_s)
+    if instance.qos_hard:
+        add("avg_delay", mean(delays.values()) - instance.avg_delay_budget_s, "s", instance.avg_delay_budget_s)
     energy_by_uav = {}
     components = {"flight_j": sum(info.fixed_flight_energy_j.values()),
                   "collection_j": sum(info.fixed_collection_energy_j.values()),

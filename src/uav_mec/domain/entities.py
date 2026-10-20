@@ -74,3 +74,6 @@ class Instance:
     reference_gain_db: float = -50.0
     pathloss_exp: float = 2.3
     noise_psd_dbm_per_hz: float = -164.0
+    # Opt-in protocol: deadline/mean-delay are reported as task-level QoS, not constraints.
+    # Default preserves the archived strict experimental formulation.
+    qos_hard: bool = True
