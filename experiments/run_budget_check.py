@@ -6,7 +6,7 @@
 from __future__ import annotations
 import argparse
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 import json
 import logging
@@ -34,11 +34,13 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir',type=Path,required=True)
     parser.add_argument('--pilot',action='store_true')
+    parser.add_argument('--qos-mode',choices=['strict','task-level'],default='strict')
     args=parser.parse_args()
     logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
     args.output_dir.mkdir(parents=True,exist_ok=True)
     # 正式计时使用串行进程；调用方必须先结束占用CPU的正式七方法作业。
     hashes=current_source_hashes(Path(__file__))
+    protocol = dict(PROTOCOL, id=PROTOCOL['id']+'__v26_task_qos',qos_mode='task-level') if args.qos_mode=='task-level' else PROTOCOL
     for tasks in PROTOCOL['tasks']:
         for scenario in ([45] if args.pilot else PROTOCOL['scenarios']):
             out=args.output_dir/f'K{tasks}_S{scenario}.json'
@@ -48,7 +50,8 @@ def main():
                 raise RuntimeError(f'已有中断或不同源码结果，保留原文件：{out}')
             instance=build_paper_scale_instance(load_paper_scale_config(),num_tasks=tasks,
                 num_uavs=5,num_mecs=2,scenario_seed=scenario)
-            payload={'protocol':PROTOCOL,'source_hashes':hashes,'provenance':provenance(),
+            instance=replace(instance,qos_hard=(args.qos_mode=='strict'))
+            payload={'protocol':protocol,'source_hashes':hashes,'provenance':provenance(),
                      'instance':instance,'instance_sha256':content_hash(instance),'tasks':tasks,
                      'scenario_seed':scenario,'complete':False,'pilot':args.pilot,'rows':[]}
             write_json(out,payload)

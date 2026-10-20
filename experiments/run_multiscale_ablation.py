@@ -249,6 +249,7 @@ def aggregate_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/baseline.yaml")
+    parser.add_argument('--qos-mode',choices=['strict','task-level'],default='strict')
     parser.add_argument("--tasks", default="30,50,70,80")
     parser.add_argument("--scenario-seeds", default="45,46,47")
     parser.add_argument("--algorithm-seeds", default="100,101,102")
@@ -263,6 +264,8 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_paper_scale_config(args.config)
+    if args.qos_mode == 'task-level':
+        from run_seven_methods import finalize
     task_counts = parse_ints(args.tasks)
     scenario_seeds = parse_ints(args.scenario_seeds)
     algorithm_seeds = parse_ints(args.algorithm_seeds)
@@ -273,6 +276,8 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     protocol = {
         "tasks": task_counts,
+        "qos_mode": args.qos_mode,
+        "protocol_version": "v26_task_qos" if args.qos_mode == "task-level" else "v25_strict",
         "scenario_seeds": scenario_seeds,
         "algorithm_seeds": algorithm_seeds,
         "profiles": list(PROFILES),
@@ -299,6 +304,7 @@ def main() -> None:
                 num_mecs=args.mecs,
                 scenario_seed=scenario_seed,
             )
+            instance = replace(instance, qos_hard=(args.qos_mode == 'strict'))
             route_seed = build_greedy_initial_solution(instance)
             initial = build_mec_assisted_initial_solution(
                 instance,
@@ -388,8 +394,16 @@ def main() -> None:
                     gain_vs_base_pct = (
                         100.0 * (base_energy - final_energy)
                         / max(1.0, abs(base_energy))
-                        if strict_pair else None
+                        if strict_pair and instance.qos_hard else None
                     )
+                    soft_metrics = None
+                    soft_admission = None
+                    if not instance.qos_hard:
+                        recovered = finalize(instance, final_solution, method="ESI-"+profile,
+                                             seed=algorithm_seed, initialization_s=0.0,
+                                             search_s=elite_runtime_s,
+                                             diagnostics={"profile": profile})
+                        soft_metrics, soft_admission = recovered["metrics"], recovered["admission"]
                     rows.append(
                         {
                             "tasks": tasks,
@@ -400,7 +414,9 @@ def main() -> None:
                             "base_energy_j": base_energy,
                             "final_stage1_status": final_status,
                             "final_energy_j": final_energy,
-                            "strict_pair": strict_pair,
+                            "strict_pair": strict_pair if instance.qos_hard else False,
+                            "metrics": soft_metrics,
+                            "admission": soft_admission,
                             "gain_vs_base_pct": gain_vs_base_pct,
                             "accepted": int(stats.get("improvements", 0)),
                             "elite_cvx_calls": oracle.calls,
