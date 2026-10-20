@@ -1,0 +1,34 @@
+[project]
+name = "uav-mec-patrol"
+version = "0.7.0"
+description = "Research codebase for multi-UAV forest patrol, intermittent MEC contact, batch offloading, and resource allocation."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "cvxpy",
+    "clarabel",
+    "alns>=7.0,<8.0",
+    "pyyaml",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+plot = ["matplotlib", "pillow"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uav_mec"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

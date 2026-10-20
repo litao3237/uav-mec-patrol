@@ -1,0 +1,17 @@
+﻿tasks,profile,mean,ci_low,ci_high,independent_scenarios,metric,unit,source_metric,transform
+30,no-route,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+50,no-route,1.2672061491161768,0.0,2.951210705780749,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+70,no-route,0.7667512116872096,0.0918998163584991,1.8701178567071366,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+80,no-route,0.7085746664200271,0.4233008060246144,0.9533934893777767,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+30,no-contact,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+50,no-contact,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+70,no-contact,0.008454150760095739,0.0,0.025362452280287214,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+80,no-contact,0.30200948476239126,0.09594414210987866,0.7073409282697426,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+30,no-batch,0.003988655131412802,0.0,0.011965965394238406,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+50,no-batch,0.40780337122955385,0.0,1.2234101136886615,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+70,no-batch,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+80,no-batch,0.008964530688646902,0.0,0.026893592065940705,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+30,no-widening,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+50,no-widening,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+70,no-widening,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity
+80,no-widening,0.0,0.0,0.0,3,full_ESI_advantage_over_ablation_percent,%,100 * (E_ablation - E_full) / E_ablation,identity

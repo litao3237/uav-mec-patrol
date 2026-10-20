@@ -1,0 +1,17 @@
+{
+  "archives": 16,
+  "raw_files": 109,
+  "uncompressed_bytes": 1424588165,
+  "sha256_verified": true,
+  "figure_files": 116,
+  "summary_files": 14,
+  "main_records": 816,
+  "main_both_qualified": 667,
+  "extension_new_records": 306,
+  "extension_reused_panel_records": 102,
+  "budget_records": 96,
+  "ablation_records": 180,
+  "all_recorded_summaries_match": true,
+  "figure_data_rows_verified": 555,
+  "reference_scope": "strong.json 为历史经验参考，缺完整资源快照，不作残差复验或最优性证书"
+}

@@ -1,0 +1,7 @@
+﻿tasks,mean,ci_low,ci_high,independent_scenarios,observations,metric,unit,source_metric,transform
+30,0.4166815157003106,0.01367180696483471,1.1854771600905587,8,23,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered
+40,0.29077021775043127,0.0157552575626396,0.7661674171256113,8,24,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered
+50,2.737500637432052,1.1286789705924831,4.4195009502870874,8,24,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered
+60,1.3793632048261102,0.14723995975659754,3.070348441568371,8,23,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered
+70,2.350266564467437,1.2804371578752678,3.386284022674889,8,23,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered
+80,1.4064715792000764,0.4012943684626456,2.674809740894314,8,22,paired_energy_saving_kj,kJ,paired_stage1_energy_ESI_minus_B_j,-x / 1000; interval endpoints reordered

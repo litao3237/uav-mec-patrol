@@ -1,0 +1,23 @@
+{
+  "provider": "USGS The National Map / USGSTopo",
+  "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/export?bbox=751201.673%2C4185886.033%2C759523.861%2C4194174.700&bboxSR=32610&imageSR=32610&size=2400%2C2400&format=png&transparent=false&f=image",
+  "crs": "EPSG:32610",
+  "bbox_utm": [
+    751201.6726668144,
+    4185886.033021654,
+    759523.8612718289,
+    4194174.699928864
+  ],
+  "pixels": [
+    2400,
+    2400
+  ],
+  "sha256": "7fb326847bb7871bb2fc91cfe51076c397ba7f9292c831564a7f984acae33749",
+  "attribution": "USGS The National Map; USFS road data; other contributing national datasets.",
+  "image_extent_utm": [
+    751201.673,
+    4185869.2724999995,
+    759523.861,
+    4194191.4604999996
+  ]
+}
