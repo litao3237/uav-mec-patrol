@@ -92,7 +92,9 @@ def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
         stage2["reason"] = "no admitted tasks; zero-flight physical certificate"
     else:
         res = admitted.resources
-        stage1_energy = float(res.energy_stage1_j)
+        # Report the independently rebuilt physical Joules, not an unverified
+        # raw solver-expression value (they can differ under cone scaling).
+        stage1_energy = float(physical['reconstructed']['metrics']['energy_j'])
         stage1 = {
             "status": str(res.diagnostics.get("stage1_status", res.status)),
             "qualified": admitted.source == "cvx_verified",
@@ -132,7 +134,7 @@ def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
                         stage2["qualified"] = False
                         stage2["status"] = "rejected_task_qos_regression"
                     else:
-                        stage2_energy = float(outcome["energy_j"])
+                        stage2_energy = float(stage2["audit"]["reconstructed"]["metrics"]["energy_j"])
                         source = "stage2_cvx_verified"
                         chosen_audit = stage2["audit"]
 
@@ -150,6 +152,8 @@ def finalize_task_qos(instance, solution, *, method: str, seed: int | None,
         # are actual zeroes, not missing values backfilled with zero.
         delays, distance, cpu, energy = {}, 0.0, 0.0, 0.0
 
+    if stage2_energy is not None and abs(stage2_energy - energy) > 1e-6 * max(1., energy):
+        raise RuntimeError('Accepted Stage-2 energy must match independent physical audit')
     resource_s = perf_counter() - started
     measured_metrics = summarize_task_qos(
         instance, served_ids=set(subset.tasks), delays_s=delays,

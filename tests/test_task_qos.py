@@ -110,3 +110,20 @@ def test_strict_instance_json_is_backward_compatible_and_soft_is_explicit():
     v26 = json_ready(replace(inst, qos_hard=False))
     assert v26["qos_hard"] is False
     assert restore_instance(v26).qos_hard is False
+
+
+
+def test_energy_metrics_are_independent_physical_measurements():
+    from pathlib import Path
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from run_seven_methods import finalize
+    inst, solution = build_small_instance()
+    soft = replace(inst, qos_hard=False)
+    row = finalize(soft, solution, method="TEST", seed=None,
+                   initialization_s=0., search_s=0., diagnostics={})
+    m = row["metrics"]
+    assert m["physical_feasible"] is True
+    assert m["stage1_energy"] >= 0.
+    if m["stage2_energy"] is not None:
+        assert m["stage2_energy"] == pytest.approx(m["total_energy"], rel=1e-8)
