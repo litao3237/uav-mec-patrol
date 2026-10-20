@@ -246,6 +246,82 @@ def aggregate_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+
+TASK_LEVEL_ABLATION_METRICS = (
+    "success_rate", "mean_delay_all", "mean_delay_success", "p95_delay_all",
+    "total_energy", "energy_per_successful_task", "mec_cpu_utilization",
+    "runtime", "strict_all_tasks_success", "deadline_violation_rate",
+)
+
+
+def aggregate_task_qos_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Include every physical run, averaging seeds within scenario first."""
+    out = []
+    for tasks in sorted({int(r["tasks"]) for r in rows}):
+        for profile in PROFILES:
+            selected = [r for r in rows if int(r["tasks"]) == tasks and r["profile"] == profile]
+            if not selected:
+                continue
+            for metric in TASK_LEVEL_ABLATION_METRICS:
+                per_scenario = []
+                observed = 0
+                for scenario in sorted({r["scenario_seed"] for r in selected}):
+                    vals = [float(r["metrics"][metric]) for r in selected
+                            if r["scenario_seed"] == scenario and
+                            r.get("metrics") and r["metrics"][metric] is not None]
+                    observed += len(vals)
+                    if vals:
+                        per_scenario.append({"scenario_seed": scenario, "mean": mean(vals)})
+                out.append({
+                    "tasks": tasks, "profile": profile, "metric": metric,
+                    "planned_runs": len(selected),
+                    "physical_feasible_runs": sum(r["metrics"]["physical_feasible"] for r in selected),
+                    "observed_runs": observed, "scenarios": len(per_scenario),
+                    "scenario_equal_mean": (
+                        mean(x["mean"] for x in per_scenario) if per_scenario else None),
+                    "per_scenario": per_scenario,
+                })
+    return out
+
+
+def paired_task_qos_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Directly paired, task success prioritized; never discard late runs."""
+    groups = {}
+    for r in rows:
+        groups.setdefault((r["tasks"], r["scenario_seed"], r["algorithm_seed"]), {})[
+            r["profile"]] = r
+    result = []
+    for key, by_profile in sorted(groups.items()):
+        if "full" not in by_profile:
+            raise ValueError(f"Missing paired full profile: {key}")
+        full = by_profile["full"]["metrics"]
+        for profile in PROFILES:
+            if profile == "full":
+                continue
+            if profile not in by_profile:
+                raise ValueError(f"Missing paired ablation {profile}: {key}")
+            ablated = by_profile[profile]["metrics"]
+            if not full["physical_feasible"] or not ablated["physical_feasible"]:
+                raise ValueError(f"Uncertified paired physical run: {key}")
+            result.append({
+                "tasks": key[0], "scenario_seed": key[1], "algorithm_seed": key[2],
+                "profile": profile,
+                "full_minus_ablation_success_rate": (
+                    full["success_rate"] - ablated["success_rate"]),
+                "full_minus_ablation_mean_delay_all_s": (
+                    full["mean_delay_all"] - ablated["mean_delay_all"]),
+                "full_minus_ablation_energy_j": (
+                    full["total_energy"] - ablated["total_energy"]),
+                "full_minus_ablation_energy_per_successful_task": (
+                    full["energy_per_successful_task"] - ablated["energy_per_successful_task"]
+                    if full["energy_per_successful_task"] is not None and
+                       ablated["energy_per_successful_task"] is not None else None),
+                "full_strict_success": full["strict_all_tasks_success"],
+                "ablation_strict_success": ablated["strict_all_tasks_success"],
+            })
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/baseline.yaml")
@@ -444,8 +520,10 @@ def main() -> None:
                     },
                 )
 
-    aggregate = aggregate_profiles(rows)
-    paired = paired_summaries(rows)
+    aggregate = (aggregate_profiles(rows) if instance.qos_hard else
+                 aggregate_task_qos_profiles(rows))
+    paired = (paired_summaries(rows) if instance.qos_hard else
+              paired_task_qos_profiles(rows))
     payload = {
         "complete": True,
         "experiment": "multiscale_elite_family_ablation",
