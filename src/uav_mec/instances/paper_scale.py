@@ -69,6 +69,8 @@ class PaperScaleConfig:
 
     scenario_seed: int
     algorithm_seed: int
+    uav_propulsion_model: str = "constant"
+    uav_rotor_params: dict[str, float] | None = None
 
     def with_scale(
         self,
@@ -161,6 +163,8 @@ def paper_scale_config_from_mapping(data: Mapping[str, Any]) -> PaperScaleConfig
         noise_psd_dbm_per_hz=float(channel["noise_psd_dbm_per_hz"]),
         scenario_seed=int(experiment["scenario_seed"]),
         algorithm_seed=int(experiment["algorithm_seed"]),
+        uav_propulsion_model=str(uav.get("propulsion_model", "constant")),
+        uav_rotor_params=(dict(uav["rotor_params"]) if "rotor_params" in uav else None),
     )
 
 
@@ -169,6 +173,13 @@ def load_paper_scale_config(path: str | Path = "configs/baseline.yaml") -> Paper
 
 
 def _validate_config(cfg: PaperScaleConfig) -> None:
+    from uav_mec.evaluation.propulsion import RotorParameters
+    if cfg.uav_propulsion_model not in ("constant", "rotor"):
+        raise ValueError("Unsupported propulsion model")
+    if cfg.uav_propulsion_model == "rotor":
+        RotorParameters(**(cfg.uav_rotor_params or {}))
+    elif cfg.uav_rotor_params is not None:
+        raise ValueError("Rotor parameters require propulsion_model=rotor")
     if cfg.width_m <= 0 or cfg.height_m <= 0:
         raise ValueError("Forest dimensions must be positive")
     if cfg.num_tasks <= 0 or cfg.num_uavs <= 0 or cfg.num_mecs <= 0:
@@ -271,6 +282,8 @@ def _build_uavs(cfg: PaperScaleConfig) -> dict[str, UAV]:
             energy_budget_j=cfg.uav_energy_budget_j,
             altitude_m=cfg.uav_altitude_m,
             kappa=cfg.uav_kappa,
+            propulsion_model=cfg.uav_propulsion_model,
+            rotor_params=cfg.uav_rotor_params,
         )
         for idx in range(1, cfg.num_uavs + 1)
     }

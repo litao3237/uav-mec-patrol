@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from uav_mec.domain import DiscreteSolution, ExecutionMode, Instance, StopType
 
 from .geometry import distance, stop_xy
+from .propulsion import flight_power_w, hover_power_w
 from .validator import validate_solution
 
 
@@ -70,9 +71,9 @@ def build_event_info(instance: Instance, solution: DiscreteSolution) -> EventInf
 
         info.base_return_s[uav_id] = base_t
         info.route_distance_m[uav_id] = total_dist
-        info.fixed_flight_energy_j[uav_id] = uav.flight_power_w * (total_dist / uav.speed_mps)
+        info.fixed_flight_energy_j[uav_id] = flight_power_w(uav) * (total_dist / uav.speed_mps)
         collection_time = sum(instance.tasks[t].collect_s for t in route.task_ids())
-        info.fixed_collection_energy_j[uav_id] = uav.hover_power_w * collection_time
+        info.fixed_collection_energy_j[uav_id] = hover_power_w(uav) * collection_time
         info.contact_order[uav_id] = contact_order
         info.local_order[uav_id] = local_tasks
 

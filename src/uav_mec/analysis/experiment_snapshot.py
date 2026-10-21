@@ -19,6 +19,9 @@ def json_ready(value: Any) -> Any:
     """递归保留原始字段；NaN/Inf用null表示，状态与失败原因由调用方另存。"""
     if is_dataclass(value):
         data = asdict(value)
+        if isinstance(value, UAV) and value.propulsion_model == "constant" and value.rotor_params is None:
+            data.pop("propulsion_model", None)
+            data.pop("rotor_params", None)
         if isinstance(value, Instance) and value.qos_hard:
             # Preserve the exact v25/archived JSON identity and SHA-256.
             # Only the explicitly opted-in v26 instances serialize qos_hard=false.
