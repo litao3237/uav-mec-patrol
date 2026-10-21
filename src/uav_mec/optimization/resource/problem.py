@@ -7,6 +7,7 @@ from typing import Any
 import cvxpy as cp
 
 from uav_mec.domain import DiscreteSolution, ExecutionMode, Instance
+from uav_mec.evaluation.propulsion import hover_power_w
 from uav_mec.evaluation import EventInfo, gamma_mhz, visit_mec_id
 
 
@@ -275,7 +276,7 @@ def build_resource_model(
             kappa_scaled = uav.kappa * 1e27
             local_energy_terms.append(kappa_scaled * task.workload_gcycles * cp.square(f_local[task_id]))
         offload_terms = [
-            (uav.hover_power_w + uav.tx_power_w) * tau[visit_id]
+            (hover_power_w(uav) + uav.tx_power_w) * tau[visit_id]
             for visit_id in info.contact_order[uav_id]
         ]
         energy_expr: Any = cp.Constant(float(fixed))

@@ -1,0 +1,61 @@
+name: E1 rotor physical consistency and isolated pilot
+on:
+  push:
+    branches: ['experiment/e1-rotor-physics']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONUTF8: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - run: uv run --no-sync python -m pytest -q tests/test_e1_rotor_physics.py tests/test_task_qos.py tests/test_resource_solver.py tests/test_m0_evaluation.py
+      - name: Validate legacy archive hashes
+        run: uv run --no-sync python experiments/manage_results.py verify
+  pilot:
+    needs: quality
+    runs-on: windows-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        tasks: [30,50]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - shell: pwsh
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Seven methods, frozen scene with new rotor model
+        shell: pwsh
+        run: |
+          uv run --no-sync python experiments/run_seven_methods.py --qos-mode task-level --phase pilot --tasks ${{ matrix.tasks }} --scenario 45 --config configs/rotor_e1.yaml --output "outputs/e1/K${{ matrix.tasks }}_S45.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-rotor-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/e1/
+          if-no-files-found: warn
+          retention-days: 90

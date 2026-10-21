@@ -45,6 +45,8 @@ class UAV:
     energy_budget_j: float
     altitude_m: float = 30.0
     kappa: float = 1e-27
+    propulsion_model: str = "constant"
+    rotor_params: dict[str, float] | None = None
 
 
 @dataclass(frozen=True)
