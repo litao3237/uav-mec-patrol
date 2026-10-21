@@ -33,6 +33,7 @@ from .problem_operators import (
 )
 from .state import ObjectiveEvaluator, UavMecState
 from .quality_control import TaskQoSRecordToRecord, UnitCreditBandit
+from .domain_credit import DomainAwareCreditBandit
 
 
 class _TimeScaledRecordToRecordTravel:
@@ -357,6 +358,10 @@ class UavMecALNSConfig:
     qos_rrt_lateness_end: float = 0.0
     credit_exploration: float = 0.28
     credit_novelty_bonus: float = 0.05
+    domain_credit_components: tuple[str, ...] = ("flight", "mec", "deadline")
+    domain_flight_weight: float = 0.18
+    domain_mec_weight: float = 0.14
+    domain_deadline_weight: float = 0.12
 
 
 @dataclass
@@ -371,6 +376,7 @@ class UavMecALNSResult:
     search_trace: list[dict[str, object]] = field(default_factory=list)
     acceptance_trace: list[dict[str, object]] = field(default_factory=list)
     credit_history: list[dict[str, object]] = field(default_factory=list)
+    domain_history: list[dict[str, object]] = field(default_factory=list)
     stop_reason: str = "iterations"
     stop_elapsed_s: float | None = None
     last_improvement_elapsed_s: float | None = None
@@ -401,17 +407,17 @@ def run_uav_mec_alns(
         raise ValueError("ALNS iterations must be positive")
     if cfg.acceptance_mode not in ("scalar_rrt", "qos_physical_rrt"):
         raise ValueError("Unknown ALNS acceptance_mode")
-    if cfg.selection_mode not in ("roulette", "unit_credit_ucb"):
+    if cfg.selection_mode not in ("roulette", "unit_credit_ucb", "domain_credit_ucb"):
         raise ValueError("Unknown ALNS selection_mode")
     if (
         cfg.acceptance_mode == "qos_physical_rrt"
-        or cfg.selection_mode == "unit_credit_ucb"
+        or cfg.selection_mode in ("unit_credit_ucb", "domain_credit_ucb")
     ) and instance.qos_hard:
         raise ValueError("M0.3 quality-control algorithms require soft task QoS")
     if cfg.acceptance_mode == "qos_physical_rrt" and cfg.time_scaled_rrt:
         raise ValueError("M0.3 iteration-cooled task QoS RRT is not time-scaled")
     if (cfg.acceptance_mode == "qos_physical_rrt" or
-        cfg.selection_mode == "unit_credit_ucb"):
+        cfg.selection_mode in ("unit_credit_ucb", "domain_credit_ucb")):
         if evaluator is not None and not callable(getattr(evaluator, "quality_key", None)):
             raise ValueError("M0.3 quality control requires quality_key evaluator")
     if cfg.max_runtime_s is not None and cfg.max_runtime_s < 0:
@@ -448,6 +454,11 @@ def run_uav_mec_alns(
 
     validate_solution(instance, initial_solution)
     objective_evaluator = evaluator or ScreenedProxyObjectiveEvaluator()
+    if cfg.selection_mode == "domain_credit_ucb":
+        # Capture proxy features during normal ALNS objective evaluation.
+        if not hasattr(objective_evaluator, "capture_domain_snapshots"):
+            raise ValueError("Domain credit requires screened proxy diagnostics")
+        objective_evaluator.capture_domain_snapshots = True
     initial_state = UavMecState(
         instance,
         initial_solution,
@@ -484,8 +495,21 @@ def run_uav_mec_alns(
     for name, operator in repair_operators:
         engine.add_repair_operator(operator, name=name)
 
-    if cfg.selection_mode == "unit_credit_ucb":
-        select = UnitCreditBandit(
+    if cfg.selection_mode in ("unit_credit_ucb", "domain_credit_ucb"):
+        selector_type = (
+            DomainAwareCreditBandit
+            if cfg.selection_mode == "domain_credit_ucb"
+            else UnitCreditBandit
+        )
+        extras = (
+            dict(
+                components=cfg.domain_credit_components,
+                flight_weight=cfg.domain_flight_weight,
+                mec_weight=cfg.domain_mec_weight,
+                deadline_weight=cfg.domain_deadline_weight,
+            ) if cfg.selection_mode == "domain_credit_ucb" else {}
+        )
+        select = selector_type(
             num_destroy=len(destroy_operators),
             num_repair=len(repair_operators),
             op_coupling=op_coupling,
@@ -494,6 +518,7 @@ def run_uav_mec_alns(
             exploration=cfg.credit_exploration,
             novelty_bonus=cfg.credit_novelty_bonus,
             diagnostic_trace=cfg.diagnostic_trace,
+            **extras,
         )
     else:
         select = _TrackingRouletteWheel(
@@ -607,6 +632,7 @@ def run_uav_mec_alns(
         search_trace=select.trace,
         acceptance_trace=list(getattr(accept, "decisions", [])),
         credit_history=list(getattr(select, "credit_history", [])),
+        domain_history=list(getattr(select, "domain_history", [])),
         stop_reason=stop_reason,
         stop_elapsed_s=stop_elapsed_s,
         last_improvement_elapsed_s=(
