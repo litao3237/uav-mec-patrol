@@ -54,25 +54,8 @@ class ProxyObjectiveEvaluator:
     """Fast scalar objective used for ALNS structural smoke tests."""
 
     infeasible_penalty_j: float = 1e9
-    soft_qos_scalar_profile: str = "m0"
     _cache: dict[tuple, float] = field(default_factory=dict, init=False)
     stats: EvaluatorStats = field(default_factory=EvaluatorStats, init=False)
-
-    def _soft_scalar(self, instance: Instance, *, physical_violations: int,
-                     on_time: int, normalized_lateness: float, energy_j: float,
-                     distance_m: float) -> float:
-        # Research-only controlled factor. Both arms share M0's physical model,
-        # CVX recourse, admissibility, proxy/ambiguous-state handling and seed.
-        options = dict(physical_violations=physical_violations, on_time=on_time,
-                       normalized_lateness=normalized_lateness, energy_j=energy_j,
-                       distance_m=distance_m)
-        if self.soft_qos_scalar_profile == "m0":
-            return scalar_for_instance(instance, **options)
-        if self.soft_qos_scalar_profile == "v26_scale":
-            return task_scalar(total_tasks=len(instance.tasks), **options)
-        raise ValueError(
-            f"Unknown soft_qos_scalar_profile={self.soft_qos_scalar_profile!r}"
-        )
 
     def __call__(
         self,
@@ -134,8 +117,25 @@ class ScreenedProxyObjectiveEvaluator:
         default_factory=lambda: CVXResourceSolver(run_stage2=False)
     )
     infeasible_penalty_j: float = 1e9
+    soft_qos_scalar_profile: str = "m0"
     _cache: dict[tuple, float] = field(default_factory=dict, init=False)
     stats: EvaluatorStats = field(default_factory=EvaluatorStats, init=False)
+
+    def _soft_scalar(self, instance: Instance, *, physical_violations: int,
+                     on_time: int, normalized_lateness: float, energy_j: float,
+                     distance_m: float) -> float:
+        # Research-only controlled factor. Both arms share M0's physical model,
+        # CVX recourse, admissibility, proxy/ambiguous-state handling and seed.
+        options = dict(physical_violations=physical_violations, on_time=on_time,
+                       normalized_lateness=normalized_lateness, energy_j=energy_j,
+                       distance_m=distance_m)
+        if self.soft_qos_scalar_profile == "m0":
+            return scalar_for_instance(instance, **options)
+        if self.soft_qos_scalar_profile == "v26_scale":
+            return task_scalar(total_tasks=len(instance.tasks), **options)
+        raise ValueError(
+            f"Unknown soft_qos_scalar_profile={self.soft_qos_scalar_profile!r}"
+        )
 
     def __call__(
         self,
