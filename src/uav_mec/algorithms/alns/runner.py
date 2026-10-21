@@ -32,6 +32,7 @@ from .problem_operators import (
     make_problem_repair_operators,
 )
 from .state import ObjectiveEvaluator, UavMecState
+from .quality_control import TaskQoSRecordToRecord, UnitCreditBandit
 
 
 class _TimeScaledRecordToRecordTravel:
@@ -347,6 +348,15 @@ class UavMecALNSConfig:
     stagnation_runtime_s: float | None = None
     min_runtime_s: float = 0.0
     diagnostic_trace: bool = False
+    # M0.3 opt-in mechanisms, retaining the unchanged legacy default.
+    acceptance_mode: str = "scalar_rrt"
+    selection_mode: str = "roulette"
+    qos_rrt_energy_start_rel: float = 0.08
+    qos_rrt_energy_end_rel: float = 0.0
+    qos_rrt_lateness_start: float = 0.01
+    qos_rrt_lateness_end: float = 0.0
+    credit_exploration: float = 0.28
+    credit_novelty_bonus: float = 0.05
 
 
 @dataclass
@@ -387,6 +397,21 @@ def run_uav_mec_alns(
     cfg = config or UavMecALNSConfig()
     if cfg.iterations <= 0:
         raise ValueError("ALNS iterations must be positive")
+    if cfg.acceptance_mode not in ("scalar_rrt", "qos_physical_rrt"):
+        raise ValueError("Unknown ALNS acceptance_mode")
+    if cfg.selection_mode not in ("roulette", "unit_credit_ucb"):
+        raise ValueError("Unknown ALNS selection_mode")
+    if (
+        cfg.acceptance_mode == "qos_physical_rrt"
+        or cfg.selection_mode == "unit_credit_ucb"
+    ) and instance.qos_hard:
+        raise ValueError("M0.3 quality-control algorithms require soft task QoS")
+    if cfg.acceptance_mode == "qos_physical_rrt" and cfg.time_scaled_rrt:
+        raise ValueError("M0.3 iteration-cooled task QoS RRT is not time-scaled")
+    if (cfg.acceptance_mode == "qos_physical_rrt" or
+        cfg.selection_mode == "unit_credit_ucb"):
+        if evaluator is not None and not callable(getattr(evaluator, "quality_key", None)):
+            raise ValueError("M0.3 quality control requires quality_key evaluator")
     if cfg.max_runtime_s is not None and cfg.max_runtime_s < 0:
         raise ValueError("ALNS max_runtime_s must be non-negative")
     if cfg.time_scaled_rrt and cfg.max_runtime_s is None:
@@ -457,23 +482,43 @@ def run_uav_mec_alns(
     for name, operator in repair_operators:
         engine.add_repair_operator(operator, name=name)
 
-    select = _TrackingRouletteWheel(
-        scores=list(cfg.operator_scores),
-        decay=cfg.operator_decay,
-        num_destroy=len(destroy_operators),
-        num_repair=len(repair_operators),
-        op_coupling=op_coupling,
-        destroy_names=[
-            name for name, _ in destroy_operators
-        ],
-        repair_names=[
-            name for name, _ in repair_operators
-        ],
-        diagnostic_trace=cfg.diagnostic_trace,
-    )
+    if cfg.selection_mode == "unit_credit_ucb":
+        select = UnitCreditBandit(
+            num_destroy=len(destroy_operators),
+            num_repair=len(repair_operators),
+            op_coupling=op_coupling,
+            destroy_names=[name for name, _ in destroy_operators],
+            repair_names=[name for name, _ in repair_operators],
+            exploration=cfg.credit_exploration,
+            novelty_bonus=cfg.credit_novelty_bonus,
+            diagnostic_trace=cfg.diagnostic_trace,
+        )
+    else:
+        select = _TrackingRouletteWheel(
+            scores=list(cfg.operator_scores),
+            decay=cfg.operator_decay,
+            num_destroy=len(destroy_operators),
+            num_repair=len(repair_operators),
+            op_coupling=op_coupling,
+            destroy_names=[
+                name for name, _ in destroy_operators
+            ],
+            repair_names=[
+                name for name, _ in repair_operators
+            ],
+            diagnostic_trace=cfg.diagnostic_trace,
+        )
 
     if acceptance_criterion is not None:
         accept = acceptance_criterion
+    elif cfg.acceptance_mode == "qos_physical_rrt":
+        accept = TaskQoSRecordToRecord(
+            iterations=cfg.iterations,
+            start_energy_rel=cfg.qos_rrt_energy_start_rel,
+            end_energy_rel=cfg.qos_rrt_energy_end_rel,
+            start_lateness=cfg.qos_rrt_lateness_start,
+            end_lateness=cfg.qos_rrt_lateness_end,
+        )
     elif cfg.time_scaled_rrt:
         assert cfg.max_runtime_s is not None
         accept = _TimeScaledRecordToRecordTravel(
