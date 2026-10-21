@@ -1,0 +1,104 @@
+name: M0.1 independent numerical and cross-resource diagnosis
+on:
+  push:
+    branches: ['experiment/m01-numerical-crosscheck']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+env:
+  PYTHONUTF8: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+jobs:
+  source-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - run: uv run --no-sync python -m pytest -q tests/test_m0_evaluation.py tests/test_task_qos.py tests/test_resource_solver.py tests/test_seven_method_metrics.py
+      - name: Confirm frozen v25 archived data
+        run: uv run --no-sync python experiments/manage_results.py verify
+  cross-replay:
+    needs: source-quality
+    runs-on: windows-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        tasks: [30, 50, 80]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen dependency versions
+        shell: pwsh
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Retrieve frozen v26 formal and M0 pilot snapshots
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 39429879939 --repo "$env:GITHUB_REPOSITORY" --name v26-formal-verification-39429879939 --dir inputs/v26
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          gh run download 39456198442 --repo "$env:GITHUB_REPOSITORY" --name m0-pilot-verified-39456198442 --dir inputs/m0
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Replay two original methods x two versions with the same M0 recourse
+        shell: pwsh
+        run: |
+          uv run --no-sync python experiments/diagnose_m01.py --v26 inputs/v26/formal/K${{ matrix.tasks }}_S45.json --m0 inputs/m0/pilot/K${{ matrix.tasks }}_S45.json --tasks ${{ matrix.tasks }} --output outputs/m01/K${{ matrix.tasks }}_cross.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve diagnostic checkpoint on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m01-cross-K${{ matrix.tasks }}-${{ github.run_id }}
+          path: outputs/m01/K${{ matrix.tasks }}_cross.json
+          if-no-files-found: warn
+          retention-days: 90
+  compare:
+    needs: cross-replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m01-cross-K*-${{ github.run_id }}
+          path: outputs/m01/inputs/
+          merge-multiple: true
+      - name: Fail closed on identity, missing rows, unverified physical results
+        run: uv run --no-sync python experiments/diagnose_m01.py --aggregate-input outputs/m01/inputs --aggregate-output outputs/m01/summary
+      - name: Save cross-replay and numerical issue reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m01-cross-verified-${{ github.run_id }}
+          path: outputs/m01/
+          if-no-files-found: warn
+          retention-days: 90
