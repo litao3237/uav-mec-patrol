@@ -5,6 +5,7 @@ from typing import Any
 
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation import EventInfo, build_event_info, gamma_mhz, visit_mec_id
+from uav_mec.evaluation.propulsion import hover_power_w
 
 from .analytic import (
     allocate_bandwidth_by_kkt,
@@ -164,7 +165,7 @@ def _temporal_prices(
     for uav_id, visits in info.contact_order.items():
         uav = instance.uavs[uav_id]
         direct = (1.0 + mu_battery[uav_id]) * (
-            uav.hover_power_w + uav.tx_power_w
+            hover_power_w(instance, uav) + uav.tx_power_w
         )
         for idx, visit_id in enumerate(visits):
             phi = direct + xi_cycle[uav_id]

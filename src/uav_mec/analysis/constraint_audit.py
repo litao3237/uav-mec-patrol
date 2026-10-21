@@ -10,6 +10,7 @@ import numpy as np
 
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation import build_event_info, gamma_mhz, visit_mec_id
+from uav_mec.evaluation.propulsion import hover_power_w
 from uav_mec.evaluation.validator import SolutionValidationError
 from uav_mec.optimization.resource.reduced import evaluate_reduced_resources
 
@@ -148,7 +149,7 @@ def audit_resources(instance: Instance, solution: DiscreteSolution, values: dict
                   "collection_j": sum(info.fixed_collection_energy_j.values()),
                   "upload_hover_j": 0.0, "transmit_j": 0.0, "local_compute_j": 0.0}
     for u, uav in instance.uavs.items():
-        hover = sum(uav.hover_power_w * tau[v] for v in info.contact_order[u])
+        hover = sum(hover_power_w(instance, uav) * tau[v] for v in info.contact_order[u])
         transmit = sum(uav.tx_power_w * tau[v] for v in info.contact_order[u])
         local = sum(uav.kappa * 1e27 * instance.tasks[t].workload_gcycles * f[t] ** 2
                     for t in info.local_order[u])

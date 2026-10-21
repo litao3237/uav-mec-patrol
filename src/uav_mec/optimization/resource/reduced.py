@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation import EventInfo, gamma_mhz, visit_mec_id
+from uav_mec.evaluation.propulsion import hover_power_w
 
 from .analytic import upload_time_s
 
@@ -111,7 +112,7 @@ def evaluate_reduced_resources(
             f = local_cpu_ghz[task_id]
             energy += kappa_scaled * instance.tasks[task_id].workload_gcycles * f * f
         energy += sum(
-            (uav.hover_power_w + uav.tx_power_w) * tau[visit_id]
+            (hover_power_w(instance, uav) + uav.tx_power_w) * tau[visit_id]
             for visit_id in info.contact_order[uav_id]
         )
         energy_by_uav[uav_id] = energy

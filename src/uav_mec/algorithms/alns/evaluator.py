@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation import build_event_info
+from uav_mec.evaluation.propulsion import hover_power_w
 from uav_mec.optimization.resource import (
     CVXResourceSolver,
     KKTResourceSolver,
@@ -195,7 +196,7 @@ class ScreenedProxyObjectiveEvaluator:
                 "flight_energy_j": float(sum(info.fixed_flight_energy_j.values())),
                 "flight_distance_m": float(sum(info.route_distance_m.values())),
                 "upload_energy_j": float(sum(
-                    (instance.uavs[u].hover_power_w + instance.uavs[u].tx_power_w)
+                    (hover_power_w(instance, instance.uavs[u]) + instance.uavs[u].tx_power_w)
                     * reduced.upload_time_s[v]
                     for u, visits in info.contact_order.items() for v in visits
                 )),

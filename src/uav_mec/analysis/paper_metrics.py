@@ -6,6 +6,7 @@ from typing import Any
 
 from uav_mec.domain import DiscreteSolution, ExecutionMode, Instance
 from uav_mec.evaluation import EventInfo, build_event_info, visit_mec_id
+from uav_mec.evaluation.propulsion import hover_power_w
 from uav_mec.optimization.resource.reduced import (
     evaluate_reduced_resources,
 )
@@ -138,9 +139,10 @@ def build_paper_metrics(
     )
     communication_energy_j = sum(
         (
-            instance.uavs[
-                solution.contact_visits[visit_id].uav_id
-            ].hover_power_w
+            hover_power_w(
+                instance,
+                instance.uavs[solution.contact_visits[visit_id].uav_id],
+            )
             + instance.uavs[
                 solution.contact_visits[visit_id].uav_id
             ].tx_power_w
