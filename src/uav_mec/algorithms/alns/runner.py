@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 from dataclasses import dataclass, field
 from time import perf_counter
 from typing import Any
@@ -17,8 +18,9 @@ from uav_mec.algorithms.initial import (
 )
 from uav_mec.domain import DiscreteSolution, Instance
 from uav_mec.evaluation.validator import validate_solution
+from uav_mec.evaluation import build_event_info
 
-from .evaluator import ScreenedProxyObjectiveEvaluator
+from .evaluator import ScreenedProxyObjectiveEvaluator, solution_signature
 from .operators import (
     DestroyConfig,
     make_destroy_operators,
@@ -271,12 +273,15 @@ class _TrackingRouletteWheel(RouletteWheel):
         *args,
         destroy_names: list[str],
         repair_names: list[str],
+        diagnostic_trace: bool = False,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self._destroy_names = destroy_names
         self._repair_names = repair_names
         self._pair_counts: dict[str, list[int]] = {}
+        self._diagnostic_trace = diagnostic_trace
+        self.trace: list[dict[str, object]] = []
 
     @property
     def pair_counts(self) -> dict[str, list[int]]:
@@ -295,6 +300,21 @@ class _TrackingRouletteWheel(RouletteWheel):
             [0, 0, 0, 0],
         )
         counts[outcome] += 1
+        if self._diagnostic_trace:
+            # Pure observation: no random numbers and no new solver calls.
+            # This is only enabled by the isolated M0.2 diagnostic workflow.
+            signature = repr(solution_signature(cand.solution)).encode("utf-8")
+            info = build_event_info(cand.instance, cand.solution)
+            self.trace.append({
+                "iteration": len(self.trace) + 1,
+                "destroy": self._destroy_names[d_idx],
+                "repair": self._repair_names[r_idx],
+                "outcome_index": int(outcome),  # ALNS: best/better/accept/reject
+                "candidate_score": float(cand.objective()),
+                "candidate_structure_sha256": hashlib.sha256(signature).hexdigest(),
+                "candidate_distance_m": float(sum(info.route_distance_m.values())),
+                "candidate_contact_visits": len(cand.solution.contact_visits),
+            })
         super().update(
             cand,
             d_idx,
@@ -326,6 +346,7 @@ class UavMecALNSConfig:
     time_scaled_rrt: bool = False
     stagnation_runtime_s: float | None = None
     min_runtime_s: float = 0.0
+    diagnostic_trace: bool = False
 
 
 @dataclass
@@ -337,6 +358,7 @@ class UavMecALNSResult:
     raw_result: Any
     evaluator: ObjectiveEvaluator
     operator_pair_counts: dict[str, list[int]]
+    search_trace: list[dict[str, object]] = field(default_factory=list)
     stop_reason: str = "iterations"
     stop_elapsed_s: float | None = None
     last_improvement_elapsed_s: float | None = None
@@ -447,6 +469,7 @@ def run_uav_mec_alns(
         repair_names=[
             name for name, _ in repair_operators
         ],
+        diagnostic_trace=cfg.diagnostic_trace,
     )
 
     if acceptance_criterion is not None:
@@ -534,6 +557,7 @@ def run_uav_mec_alns(
         raw_result=raw_result,
         evaluator=objective_evaluator,
         operator_pair_counts=select.pair_counts,
+        search_trace=select.trace,
         stop_reason=stop_reason,
         stop_elapsed_s=stop_elapsed_s,
         last_improvement_elapsed_s=(
