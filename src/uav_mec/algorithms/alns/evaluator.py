@@ -120,6 +120,9 @@ class ScreenedProxyObjectiveEvaluator:
     soft_qos_scalar_profile: str = "m0"
     _cache: dict[tuple, float] = field(default_factory=dict, init=False)
     stats: EvaluatorStats = field(default_factory=EvaluatorStats, init=False)
+    _quality_cache: dict[tuple, tuple[float, ...]] = field(
+        default_factory=dict, init=False, repr=False,
+    )
 
     def _soft_scalar(self, instance: Instance, *, physical_violations: int,
                      on_time: int, normalized_lateness: float, energy_j: float,
@@ -136,6 +139,19 @@ class ScreenedProxyObjectiveEvaluator:
         raise ValueError(
             f"Unknown soft_qos_scalar_profile={self.soft_qos_scalar_profile!r}"
         )
+
+    def quality_key(self, instance: Instance, solution: DiscreteSolution) -> tuple[float, ...]:
+        """Return already-computed proxy/CVX quality without an extra solver call.
+
+        M0.3 accepts/rewards in task successes, lateness and physical Joules.
+        This lookup shares the scalar evaluator's cache and has no new RNG.
+        """
+        if instance.qos_hard:
+            raise ValueError("Quality-based search is only for task-level QoS")
+        key = solution_signature(solution)
+        if key not in self._quality_cache:
+            self(instance, solution)
+        return self._quality_cache[key]
 
     def __call__(
         self,
@@ -195,6 +211,10 @@ class ScreenedProxyObjectiveEvaluator:
                 instance, physical_violations=int(physical_failure),
                 on_time=on_time, normalized_lateness=late,
                 energy_j=energy, distance_m=distance,
+            )
+            self._quality_cache[key] = (
+                float(int(physical_failure)), -float(on_time),
+                float(late), float(energy), float(distance),
             )
         elif not precheck.feasible:
             self.stats.precheck_rejects += 1
