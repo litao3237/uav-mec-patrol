@@ -19,6 +19,11 @@ def json_ready(value: Any) -> Any:
     """递归保留原始字段；NaN/Inf用null表示，状态与失败原因由调用方另存。"""
     if is_dataclass(value):
         data = asdict(value)
+        if isinstance(value, Instance):
+            for record in data["uavs"].values():
+                if record.get("propulsion_model") == "constant" and record.get("rotor_params") is None:
+                    record.pop("propulsion_model", None)
+                    record.pop("rotor_params", None)
         if isinstance(value, UAV) and value.propulsion_model == "constant" and value.rotor_params is None:
             data.pop("propulsion_model", None)
             data.pop("rotor_params", None)
