@@ -1,0 +1,113 @@
+name: M0.2 B-ALNS scorer, acceptance and selector diagnosis
+on:
+  push:
+    branches: ['experiment/m02-search-score-diagnostics']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONUTF8: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numeric and test environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Syntax and undefined-name check
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: Run strict, M0, M0.1 and M0.2 test gates
+        run: uv run --no-sync python -m pytest -q tests/test_m02_score_diagnostics.py tests/test_m0_evaluation.py tests/test_task_qos.py tests/test_resource_solver.py tests/test_seven_method_metrics.py
+      - name: Verify historical results unchanged
+        run: uv run --no-sync python experiments/manage_results.py verify
+  pair:
+    needs: quality
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {tasks: 30, scenario: 45, seed: 100, factorial: false}
+          - {tasks: 80, scenario: 45, seed: 100, factorial: false}
+          - {tasks: 50, scenario: 45, seed: 100, factorial: true}
+          - {tasks: 50, scenario: 45, seed: 101, factorial: false}
+          - {tasks: 50, scenario: 45, seed: 102, factorial: false}
+          - {tasks: 50, scenario: 46, seed: 100, factorial: false}
+          - {tasks: 50, scenario: 46, seed: 101, factorial: false}
+          - {tasks: 50, scenario: 46, seed: 102, factorial: false}
+          - {tasks: 50, scenario: 47, seed: 100, factorial: false}
+          - {tasks: 50, scenario: 47, seed: 101, factorial: false}
+          - {tasks: 50, scenario: 47, seed: 102, factorial: false}
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      FACTORIAL: '${{ matrix.factorial }}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen Windows numerical environment
+        shell: pwsh
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Execute paired 100-iteration B-ALNS searches with common M0 recourse
+        shell: pwsh
+        run: |
+          $extra = @()
+          if ($env:FACTORIAL -eq 'true') { $extra += '--factorial' }
+          uv run --no-sync python experiments/diagnose_m02.py --tasks ${{ matrix.tasks }} --scenario ${{ matrix.scenario }} --seed ${{ matrix.seed }} @extra --output "outputs/m02/raw/K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.seed }}.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve original M0.2 search trajectories and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m02-pair-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.seed }}-${{ github.run_id }}
+          path: outputs/m02/raw/
+          if-no-files-found: warn
+          retention-days: 90
+  verify:
+    needs: pair
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install verification environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m02-pair-K*-${{ github.run_id }}
+          path: outputs/m02/raw/
+          merge-multiple: true
+      - name: Verify 11 paired inputs, 26 search results, identity and physical acceptance
+        run: uv run --no-sync python experiments/aggregate_m02.py --input outputs/m02/raw --out outputs/m02/summary
+      - name: Save final M0.2 diagnosis and full traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m02-verified-${{ github.run_id }}
+          path: outputs/m02/
+          if-no-files-found: warn
+          retention-days: 90
