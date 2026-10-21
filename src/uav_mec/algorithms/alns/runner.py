@@ -369,6 +369,8 @@ class UavMecALNSResult:
     evaluator: ObjectiveEvaluator
     operator_pair_counts: dict[str, list[int]]
     search_trace: list[dict[str, object]] = field(default_factory=list)
+    acceptance_trace: list[dict[str, object]] = field(default_factory=list)
+    credit_history: list[dict[str, object]] = field(default_factory=list)
     stop_reason: str = "iterations"
     stop_elapsed_s: float | None = None
     last_improvement_elapsed_s: float | None = None
@@ -603,6 +605,8 @@ def run_uav_mec_alns(
         evaluator=objective_evaluator,
         operator_pair_counts=select.pair_counts,
         search_trace=select.trace,
+        acceptance_trace=list(getattr(accept, "decisions", [])),
+        credit_history=list(getattr(select, "credit_history", [])),
         stop_reason=stop_reason,
         stop_elapsed_s=stop_elapsed_s,
         last_improvement_elapsed_s=(
