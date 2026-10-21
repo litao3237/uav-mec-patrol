@@ -1,0 +1,104 @@
+name: M0.3 QoS unit acceptance and operator credit ablation
+on:
+  push:
+    branches: ['experiment/m03-qos-acceptance-credit']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONUTF8: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Freeze numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Check syntax and imports
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: Run M0.3 and all prior numerical regressions
+        run: uv run --no-sync python -m pytest -q tests/test_m03_quality_control.py tests/test_m02_score_diagnostics.py tests/test_m0_evaluation.py tests/test_task_qos.py tests/test_resource_solver.py tests/test_seven_method_metrics.py
+      - name: Verify archived results immutable
+        run: uv run --no-sync python experiments/manage_results.py verify
+  ablation:
+    needs: quality
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - {tasks: 30, scenario: 45, seed: 100}
+          - {tasks: 50, scenario: 45, seed: 100}
+          - {tasks: 80, scenario: 45, seed: 100}
+          - {tasks: 50, scenario: 46, seed: 100}
+          - {tasks: 50, scenario: 47, seed: 100}
+          - {tasks: 50, scenario: 45, seed: 101}
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen solver dependencies
+        shell: pwsh
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Compare acceptance and selector without modifying physics
+        shell: pwsh
+        run: |
+          uv run --no-sync python experiments/diagnose_m03.py --tasks ${{ matrix.tasks }} --scenario ${{ matrix.scenario }} --seed ${{ matrix.seed }} --output "outputs/m03/raw/K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.seed }}.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve partial/final traces even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m03-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.seed }}-${{ github.run_id }}
+          path: outputs/m03/raw/
+          if-no-files-found: warn
+          retention-days: 90
+  verify:
+    needs: ablation
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen aggregation environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m03-K*-${{ github.run_id }}
+          path: outputs/m03/raw/
+          merge-multiple: true
+      - name: Require 24 independent physical replays and all registered contrasts
+        run: uv run --no-sync python experiments/aggregate_m03.py --input outputs/m03/raw/ --output outputs/m03/verified/
+      - name: Preserve full raw and aggregates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m03-verified-${{ github.run_id }}
+          path: outputs/m03/
+          if-no-files-found: warn
+          retention-days: 90
