@@ -1,0 +1,109 @@
+name: M0.4 domain-aware credit factorial and holdout
+on:
+  push:
+    branches: ['experiment/m04-domain-aware-credit']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONUTF8: '1'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+  PYTHONHASHSEED: '0'
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen solver and testing environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Syntax and undefined-name validation
+        run: uv run --no-sync python -m ruff check --select F821,E9 src experiments tests
+      - name: Domain feedback and M0-M0.3 regression tests
+        run: uv run --no-sync python -m pytest -q tests/test_m04_domain_credit.py tests/test_m03_quality_control.py tests/test_m02_score_diagnostics.py tests/test_m0_evaluation.py tests/test_task_qos.py tests/test_resource_solver.py tests/test_seven_method_metrics.py
+      - name: Verify historical v25 archives unchanged
+        run: uv run --no-sync python experiments/manage_results.py verify
+  factorial:
+    needs: quality
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {tasks: 30, scenario: 45, seed: 100}
+          - {tasks: 30, scenario: 48, seed: 100}
+          - {tasks: 50, scenario: 45, seed: 100}
+          - {tasks: 50, scenario: 45, seed: 101}
+          - {tasks: 50, scenario: 46, seed: 100}
+          - {tasks: 50, scenario: 47, seed: 100}
+          - {tasks: 50, scenario: 48, seed: 100}
+          - {tasks: 50, scenario: 49, seed: 100}
+          - {tasks: 50, scenario: 50, seed: 100}
+          - {tasks: 80, scenario: 45, seed: 100}
+          - {tasks: 80, scenario: 48, seed: 100}
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen Windows numerical environment
+        shell: pwsh
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - name: Five paired reward arms, 100 iterations each, same M0 physical recourse
+        shell: pwsh
+        run: |
+          uv run --no-sync python experiments/diagnose_m04.py --tasks ${{ matrix.tasks }} --scenario ${{ matrix.scenario }} --seed ${{ matrix.seed }} --output "outputs/m04/raw/K${{ matrix.tasks }}_S${{ matrix.scenario }}_A${{ matrix.seed }}.json"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Keep original per-iteration traces and partial failure checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m04-K${{ matrix.tasks }}-S${{ matrix.scenario }}-A${{ matrix.seed }}-${{ github.run_id }}
+          path: outputs/m04/raw/
+          if-no-files-found: warn
+          retention-days: 90
+  verify:
+    needs: factorial
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install verification environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev,plot]"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m04-K*-${{ github.run_id }}
+          path: outputs/m04/raw/
+          merge-multiple: true
+      - name: Independent identity, 55-physical-outcome, 44-contrast checks
+        run: uv run --no-sync python experiments/aggregate_m04.py --input outputs/m04/raw --output outputs/m04/verified
+      - name: Save all original M0.4 records and aggregate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m04-verified-${{ github.run_id }}
+          path: outputs/m04/
+          if-no-files-found: warn
+          retention-days: 90
