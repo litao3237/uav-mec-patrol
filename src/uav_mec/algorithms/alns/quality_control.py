@@ -159,6 +159,11 @@ class UnitCreditBandit:
             raise ValueError("No enabled destroy/repair pairing")
         if exploration < 0 or not 0 <= novelty_bonus <= 0.25:
             raise ValueError("Invalid UCB reward parameters")
+        # ALNS.iterate validates these OperatorSelectionScheme interface
+        # attributes; the class remains duck-typed but fully compatible.
+        self.num_destroy = int(num_destroy)
+        self.num_repair = int(num_repair)
+        self.op_coupling = coupling.copy()
         self.pairs = [tuple(map(int, p)) for p in np.argwhere(coupling)]
         self.destroy_names = list(destroy_names)
         self.repair_names = list(repair_names)
