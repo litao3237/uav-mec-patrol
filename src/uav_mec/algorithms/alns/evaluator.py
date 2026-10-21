@@ -123,6 +123,24 @@ class ScreenedProxyObjectiveEvaluator:
     _quality_cache: dict[tuple, tuple[float, ...]] = field(
         default_factory=dict, init=False, repr=False,
     )
+    capture_domain_snapshots: bool = False
+    _domain_cache: dict[tuple, dict] = field(
+        default_factory=dict, init=False, repr=False,
+    )
+
+    def domain_snapshot(self, instance: Instance, solution: DiscreteSolution) -> dict:
+        """Return the SAME already-evaluated equal-share proxy, no new CVX calls.
+
+        The returned proxy is a *search-side feature*, never the final physical
+        validation or an asserted causal effect of MEC contact visits.
+        """
+        key = solution_signature(solution)
+        if key not in self._domain_cache:
+            self(instance, solution)
+        if key not in self._domain_cache:
+            raise RuntimeError("Domain snapshots were not enabled before ALNS evaluation")
+        return self._domain_cache[key]
+
 
     def _soft_scalar(self, instance: Instance, *, physical_violations: int,
                      on_time: int, normalized_lateness: float, energy_j: float,
@@ -168,6 +186,34 @@ class ScreenedProxyObjectiveEvaluator:
         precheck = fast_feasibility_precheck(instance, solution, info)
         proxy = evaluate_initial_proxy(instance, solution)
         score = proxy.score
+        if self.capture_domain_snapshots:
+            # Piggyback on the existing constructive proxy. Do not add solver
+            # calls, mutate the solution, or manufacture contact rewards from
+            # the number of MEC visits alone.
+            reduced = proxy.reduced
+            self._domain_cache[key] = {
+                "flight_energy_j": float(sum(info.fixed_flight_energy_j.values())),
+                "flight_distance_m": float(sum(info.route_distance_m.values())),
+                "upload_energy_j": float(sum(
+                    (instance.uavs[u].hover_power_w + instance.uavs[u].tx_power_w)
+                    * reduced.upload_time_s[v]
+                    for u, visits in info.contact_order.items() for v in visits
+                )),
+                "upload_dwell_s": float(sum(reduced.upload_time_s.values())),
+                "energy_j": float(reduced.total_energy_j),
+                "offloaded_tasks": tuple(sorted(
+                    t for t, d in solution.task_decisions.items()
+                    if d.contact_visit_id is not None
+                )),
+                "normalized_completion": {
+                    task_id: float((reduced.task_completion_s[task_id]
+                                    - instance.tasks[task_id].release_s)
+                                   / max(1.0, instance.tasks[task_id].deadline_s))
+                    for task_id in instance.tasks
+                },
+                "contact_visits": int(len(solution.contact_visits)),
+            }
+
 
         if score.qos_soft:
             # CVX can rescue a conservative equal-share proxy, but only with
