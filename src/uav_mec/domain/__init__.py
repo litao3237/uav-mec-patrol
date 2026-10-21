@@ -1,4 +1,4 @@
-from .entities import ContactPoint, Instance, MEC, Task, UAV
+from .entities import ContactPoint, Instance, MEC, RotorPowerParameters, Task, UAV
 from .enums import ExecutionMode, StopType
 from .solution import ContactVisit, DiscreteSolution, Route, RouteStop, TaskDecision
 
@@ -9,6 +9,7 @@ __all__ = [
     "ExecutionMode",
     "Instance",
     "MEC",
+    "RotorPowerParameters",
     "Route",
     "RouteStop",
     "StopType",

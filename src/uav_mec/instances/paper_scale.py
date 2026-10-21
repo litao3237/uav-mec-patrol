@@ -7,7 +7,7 @@ from random import Random
 from statistics import mean
 from typing import Any, Mapping
 
-from uav_mec.domain import ContactPoint, Instance, MEC, Task, UAV
+from uav_mec.domain import ContactPoint, Instance, MEC, RotorPowerParameters, Task, UAV
 from uav_mec.evaluation.geometry import distance
 
 from .config import load_yaml
@@ -69,6 +69,9 @@ class PaperScaleConfig:
 
     scenario_seed: int
     algorithm_seed: int
+    # Optional E1 propulsion profile: defaults preserve legacy model.
+    uav_propulsion_model: str = "fixed"
+    uav_rotor_parameters: RotorPowerParameters | None = None
 
     def with_scale(
         self,
@@ -121,6 +124,21 @@ def paper_scale_config_from_mapping(data: Mapping[str, Any]) -> PaperScaleConfig
     contact = data["contact"]
     channel = data["channel"]
     experiment = data["experiment"]
+    propulsion = uav.get("propulsion", {"model": "fixed"})
+    if not isinstance(propulsion, Mapping):
+        raise ValueError("uav.propulsion must be a mapping")
+    propulsion_model = str(propulsion.get("model", "fixed"))
+    rotor_data = propulsion.get("rotor_parameters")
+    if propulsion_model not in ("fixed", "rotary_fixed_speed"):
+        raise ValueError(f"Unknown UAV propulsion model: {propulsion_model!r}")
+    if propulsion_model == "fixed":
+        if rotor_data is not None:
+            raise ValueError("Fixed model must not specify rotary parameters")
+        rotor_parameters = None
+    else:
+        if not isinstance(rotor_data, Mapping):
+            raise ValueError("rotary_fixed_speed requires explicit rotor_parameters")
+        rotor_parameters = RotorPowerParameters(**rotor_data)
 
     return PaperScaleConfig(
         width_m=float(scenario["width_m"]),
@@ -161,6 +179,8 @@ def paper_scale_config_from_mapping(data: Mapping[str, Any]) -> PaperScaleConfig
         noise_psd_dbm_per_hz=float(channel["noise_psd_dbm_per_hz"]),
         scenario_seed=int(experiment["scenario_seed"]),
         algorithm_seed=int(experiment["algorithm_seed"]),
+        uav_propulsion_model=propulsion_model,
+        uav_rotor_parameters=rotor_parameters,
     )
 
 
@@ -188,6 +208,15 @@ def _validate_config(cfg: PaperScaleConfig) -> None:
         raise ValueError("task.deadline_ratio_range must be positive and ordered")
     if cfg.avg_delay_budget_s <= 0 or cfg.cycle_s <= 0:
         raise ValueError("cycle and average-delay budgets must be positive")
+    if cfg.uav_speed_mps <= 0:
+        raise ValueError("UAV speed must be positive")
+    if cfg.uav_propulsion_model not in ("fixed", "rotary_fixed_speed"):
+        raise ValueError("Unknown UAV propulsion model")
+    if cfg.uav_propulsion_model == "rotary_fixed_speed":
+        if cfg.uav_rotor_parameters is None:
+            raise ValueError("Rotor physical parameters must be explicit")
+    elif cfg.uav_rotor_parameters is not None:
+        raise ValueError("Fixed-power model does not accept rotor parameters")
 
     for idx, spec in enumerate(cfg.mec_sites[: cfg.num_mecs], start=1):
         if not (0.0 <= spec.x <= cfg.width_m and 0.0 <= spec.y <= cfg.height_m):
@@ -461,6 +490,8 @@ def build_paper_scale_instance(
         reference_gain_db=cfg.reference_gain_db,
         pathloss_exp=cfg.pathloss_exp,
         noise_psd_dbm_per_hz=cfg.noise_psd_dbm_per_hz,
+        propulsion_model=cfg.uav_propulsion_model,
+        rotor_parameters=cfg.uav_rotor_parameters,
     )
 
 

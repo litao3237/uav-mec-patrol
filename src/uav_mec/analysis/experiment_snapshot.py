@@ -11,7 +11,7 @@ from typing import Any
 
 from uav_mec.domain import (
     ContactPoint, ContactVisit, DiscreteSolution, ExecutionMode, Instance,
-    MEC, Route, RouteStop, StopType, Task, TaskDecision, UAV,
+    MEC, RotorPowerParameters, Route, RouteStop, StopType, Task, TaskDecision, UAV,
 )
 
 
@@ -19,10 +19,14 @@ def json_ready(value: Any) -> Any:
     """递归保留原始字段；NaN/Inf用null表示，状态与失败原因由调用方另存。"""
     if is_dataclass(value):
         data = asdict(value)
-        if isinstance(value, Instance) and value.qos_hard:
-            # Preserve the exact v25/archived JSON identity and SHA-256.
-            # Only the explicitly opted-in v26 instances serialize qos_hard=false.
-            data.pop("qos_hard", None)
+        if isinstance(value, Instance):
+            if value.qos_hard:
+                # Preserve the exact v25/archived JSON identity and SHA-256.
+                data.pop("qos_hard", None)
+            if value.propulsion_model == "fixed" and value.rotor_parameters is None:
+                # Do not add empty E1 keys to any v25/v26/M0 snapshot.
+                data.pop("propulsion_model", None)
+                data.pop("rotor_parameters", None)
         return json_ready(data)
     if isinstance(value, Enum):
         return value.value
@@ -60,6 +64,8 @@ def restore_instance(data: dict) -> Instance:
                        ("contact_points", ContactPoint)):
         values[group] = {key: cls(**row) for key, row in data[group].items()}
     values["depot_xy"] = tuple(values["depot_xy"])
+    if isinstance(values.get("rotor_parameters"), dict):
+        values["rotor_parameters"] = RotorPowerParameters(**values["rotor_parameters"])
     return Instance(**values)
 
 

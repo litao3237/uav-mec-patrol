@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from typing import Dict, Tuple
 
 
@@ -61,6 +62,36 @@ class ContactPoint:
     y: float
 
 
+
+@dataclass(frozen=True)
+class RotorPowerParameters:
+    """One explicitly declared rotor/airframe profile in SI units.
+
+    Rotor parameters for the E1 scenario are *later literature calibration*
+    of Zeng et al.'s rotary-wing equation, not Table I of the original paper.
+    No speed optimization, extra take-off energy, or turn/acceleration model.
+    """
+    profile_power_w: float
+    induced_power_w: float
+    blade_tip_speed_mps: float
+    mean_induced_velocity_mps: float
+    fuselage_drag_ratio: float
+    air_density_kg_m3: float
+    rotor_solidity: float
+    rotor_disc_area_m2: float
+
+    def __post_init__(self) -> None:
+        values = (
+            self.profile_power_w, self.induced_power_w,
+            self.blade_tip_speed_mps, self.mean_induced_velocity_mps,
+            self.air_density_kg_m3, self.rotor_solidity, self.rotor_disc_area_m2,
+        )
+        if any(not math.isfinite(v) or v <= 0 for v in values):
+            raise ValueError("Rotary-wing profile requires finite positive physical parameters")
+        if not math.isfinite(self.fuselage_drag_ratio) or self.fuselage_drag_ratio < 0:
+            raise ValueError("Fuselage drag ratio must be finite and nonnegative")
+
+
 @dataclass
 class Instance:
     depot_xy: Tuple[float, float]
@@ -77,3 +108,7 @@ class Instance:
     # Opt-in protocol: deadline/mean-delay are reported as task-level QoS, not constraints.
     # Default preserves the archived strict experimental formulation.
     qos_hard: bool = True
+    # Opt-in fixed-speed, fly-hover-communicate rotor propulsion profile.
+    # The archived fixed-power instance keeps these as the exact defaults.
+    propulsion_model: str = "fixed"
+    rotor_parameters: RotorPowerParameters | None = None
