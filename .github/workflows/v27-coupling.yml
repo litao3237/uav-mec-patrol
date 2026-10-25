@@ -1,0 +1,55 @@
+name: v27 coupling check (frozen routes)
+on:
+  workflow_dispatch:
+    inputs:
+      tasks:
+        description: Task counts (space separated)
+        default: '30 50 80'
+      seeds:
+        description: Scenario seeds (space separated)
+        default: '45 46 47 48 49 50 51 52'
+permissions:
+  contents: read
+jobs:
+  coupling:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, weak_onboard, heavy_edge_only]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONHASHSEED: '0'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]"
+      - name: v27 unit tests (incl. cvxpy cross-check)
+        run: uv run --no-sync python -m pytest tests/test_v27_model.py
+      - name: Coupling check
+        run: |
+          uv run --no-sync python experiments/v27_coupling_check.py \
+            --variants ${{ matrix.variant }} --tasks ${{ inputs.tasks }} --seeds ${{ inputs.seeds }} \
+            --workers 4 --output outputs/v27/coupling/${{ matrix.variant }}
+      - name: Summary
+        if: always()
+        run: |
+          echo "### v27 coupling: ${{ matrix.variant }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat outputs/v27/coupling/${{ matrix.variant }}/coupling_summary.csv >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v27-coupling-${{ matrix.variant }}-${{ github.run_id }}
+          path: outputs/v27/
+          retention-days: 90

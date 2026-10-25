@@ -1,0 +1,84 @@
+# v27 timeliness model: multi-UAV forest patrol with intermittent edge contact.
+#
+# STATUS: provisional parameter set, fixed on 2026-10-25 BEFORE any search
+# algorithm was run on this model. Values marked `verify` must be tied to a
+# concrete literature page before the parameter set is frozen for the paper.
+# Do NOT retune these values after looking at algorithm or coupling results.
+#
+# Units: m, s, W, J, Mbit, MHz, Gcycles, Gcycles/s.
+
+scenario:
+  width_m: 3000.0
+  height_m: 3000.0
+  depot_xy: [300.0, 300.0]
+  num_tasks: 50
+  num_uavs: 5
+  max_contacts_per_uav: 3        # en-route contacts; the terminal depot upload is extra
+  task_margin_m: 50.0
+  heavy_fraction: 0.3            # share of heavy analytics tasks (experiment variable)
+  heavy_onboard_allowed: true    # sensitivity: false = heavy tasks are edge-only
+
+uav:
+  altitude_m: 100.0              # above typical forest canopy, below 120 m AGL
+  speed_mps: 10.0
+  battery_j: 360000.0            # ~100 Wh, consistent with ~2 kg airframe (verify)
+  tx_power_w: 0.1
+  # Zeng, Xu, Zhang, IEEE TWC 18(4) 2019, rotary-wing parameters
+  rotor:
+    profile_power_w: 79.86       # P0
+    induced_power_w: 88.63       # Pi
+    tip_speed_mps: 120.0         # U_tip
+    induced_velocity_mps: 4.03   # v0
+    drag_ratio: 0.6              # d0
+    air_density: 1.225           # rho
+    solidity: 0.05               # s
+    disc_area_m2: 0.503          # A
+  # Onboard computer (Jetson Orin NX class, 10/15/25 W power modes, verify)
+  cpu_max_gcps: 2.0              # effective Gcycles/s at the max power mode
+  cpu_min_gcps: 0.3
+  cpu_power_at_max_w: 15.0       # kappa_bar = P / f_max^3
+
+mec:
+  # Ranger station at the depot plus fire-lookout style sites (positions are
+  # synthetic; the GIS case replaces them with real coordinates).
+  min_rate_mbps: 10.0            # coverage = horizontal radius where full-band rate >= this
+  max_radius_m: 800.0
+  sites:
+    - {name: E1, x: 300.0,  y: 300.0,  bandwidth_mhz: 10.0, cpu_gcps: 20.0}
+    - {name: E2, x: 2500.0, y: 700.0,  bandwidth_mhz: 10.0, cpu_gcps: 16.0}
+    - {name: E3, x: 1500.0, y: 2600.0, bandwidth_mhz: 10.0, cpu_gcps: 16.0}
+    - {name: E4, x: 2600.0, y: 2600.0, bandwidth_mhz: 8.0,  cpu_gcps: 12.0}
+  num_sites: 3
+
+channel:
+  reference_gain_db: -50.0
+  pathloss_exp: 2.3
+  noise_psd_dbm_per_hz: -164.0
+
+contact:
+  ring_fractions: [0.5, 0.85]
+  points_per_ring: 8
+  include_center: true
+
+task:
+  # Freshness deadline delta is measured from COLLECTION completion, not from
+  # mission start.
+  light:                          # single-scene fire/smoke detection
+    data_mbit: [8.0, 32.0]
+    cycles_per_bit: [300.0, 600.0]      # verify against onboard inference latency
+    collect_s: 2.0
+    freshness_s: [120.0, 300.0]
+    weight: 1.0
+  heavy:                          # video clip / multispectral fire-front analysis
+    data_mbit: [80.0, 160.0]            # verify
+    cycles_per_bit: [500.0, 1000.0]     # verify
+    collect_s: 10.0
+    freshness_s: [300.0, 900.0]
+    weight: 1.0
+
+objective:
+  # J = (1/K) sum_i w_i * AoI_i / delta_i + energy_weight * E_total / (M * battery)
+  energy_weight: 1.0
+
+experiment:
+  scenario_seed: 45
