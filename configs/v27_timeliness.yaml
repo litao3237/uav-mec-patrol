@@ -1,11 +1,12 @@
 # v27 timeliness model: multi-UAV forest patrol with intermittent edge contact.
 #
-# STATUS: provisional parameter set, fixed on 2026-10-25 BEFORE any search
-# algorithm was run on this model. Values marked `verify` must be tied to a
-# concrete literature page before the parameter set is frozen for the paper.
-# Do NOT retune these values after looking at algorithm or coupling results.
+# 状态：2026-10-25 按文献核实后冻结，逐项依据与换算见
+# 无人机MEC论文资料/24_参数文献核实与冻结_20261025/参数冻结方案.md
+# 首轮耦合检验（run 40189498262）用的是暂定值；本次调整只依据文献，不依据检验结果
+# 冻结后不得根据算法或耦合检验结果回调任何取值
 #
 # Units: m, s, W, J, Mbit, MHz, Gcycles, Gcycles/s.
+# 计算量单位：1 Gcycle 按 0.5 TFLOP 有效计算量计，机载 Orin NX 16GB 在 15 W 模式下约 1 TFLOPS
 
 scenario:
   width_m: 3000.0
@@ -21,9 +22,10 @@ scenario:
 uav:
   altitude_m: 100.0              # above typical forest canopy, below 120 m AGL
   speed_mps: 10.0
-  battery_j: 360000.0            # ~100 Wh, consistent with ~2 kg airframe (verify)
+  battery_j: 360000.0            # 100 Wh；约 2 kg 机型（W = 20 N），同级 DJI Phantom 4 Pro V2.0 为 89.2 Wh、约 30 min
   tx_power_w: 0.1
   # Zeng, Xu, Zhang, IEEE TWC 18(4) 2019, rotary-wing parameters
+  # 取自期刊版 Table I（W = 20 N、R = 0.4 m、Omega = 300 rad/s），arXiv v1 的 Table I 是另一组参数，引用时不能混用
   rotor:
     profile_power_w: 79.86       # P0
     induced_power_w: 88.63       # Pi
@@ -33,9 +35,9 @@ uav:
     air_density: 1.225           # rho
     solidity: 0.05               # s
     disc_area_m2: 0.503          # A
-  # Onboard computer (Jetson Orin NX class, 10/15/25 W power modes, verify)
-  cpu_max_gcps: 2.0              # effective Gcycles/s at the max power mode
-  cpu_min_gcps: 0.3
+  # 机载计算机按 Jetson Orin NX 16GB 计，功率模式 10/15/25 W 与 MaxN，取默认的 15 W 模式
+  cpu_max_gcps: 2.0              # 15 W 模式的有效吞吐，约 1 TFLOPS
+  cpu_min_gcps: 1.75             # 最低的 10 W 模式按 P = kappa_bar * f^3 反推；原 0.3 对应 0.05 W，没有这样的功率模式
   cpu_power_at_max_w: 15.0       # kappa_bar = P / f_max^3
 
 mec:
@@ -65,15 +67,15 @@ task:
   # mission start.
   light:                          # single-scene fire/smoke detection
     data_mbit: [8.0, 32.0]
-    cycles_per_bit: [300.0, 600.0]      # verify against onboard inference latency
+    cycles_per_bit: [5.0, 100.0]        # 0.02–1.6 TFLOP：单次 YOLO11s 推理到 4K 帧切 24 块，机载 0.02–1.6 s
     collect_s: 2.0
-    freshness_s: [120.0, 300.0]
+    freshness_s: [60.0, 180.0]          # 告警类：FIRMS 超实时产品 <60 s，自动烟雾检测平均检出约 3 min
     weight: 1.0
   heavy:                          # video clip / multispectral fire-front analysis
-    data_mbit: [80.0, 160.0]            # verify
-    cycles_per_bit: [500.0, 1000.0]     # verify
+    data_mbit: [80.0, 160.0]            # 约 10–20 s 的 1080p30 片段，或一次 5–10 波段多光谱拍摄
+    cycles_per_bit: [20.0, 210.0]       # 0.8–17 TFLOP：10 s 片段按 1–19 fps、每帧 90 GFLOP 分析，机载 0.8–17 s
     collect_s: 10.0
-    freshness_s: [300.0, 900.0]
+    freshness_s: [300.0, 600.0]         # 火线态势类：Ikhana 任务要求采集后 10 min 内交付；树冠火 5 min 位移 75–500 m
     weight: 1.0
 
 objective:
