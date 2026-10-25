@@ -1,5 +1,15 @@
 name: v27 coupling check (frozen routes)
 on:
+  # 仅有 workflow_dispatch 时，文件不在默认分支 develop 上，GitHub 不会注册也无法手动触发，故沿用其他实验分支的推送触发
+  push:
+    branches: ['experiment/v27-timeliness-model']
+    paths:
+      - '.github/workflows/v27-coupling.yml'
+      - 'src/uav_mec/v27/**'
+      - 'experiments/v27_coupling_check.py'
+      - 'configs/v27_timeliness.yaml'
+      - 'configs/requirements-frozen.txt'
+      - 'tests/test_v27_model.py'
   workflow_dispatch:
     inputs:
       tasks:
@@ -22,6 +32,9 @@ jobs:
       PYTHONHASHSEED: '0'
       OMP_NUM_THREADS: '1'
       OPENBLAS_NUM_THREADS: '1'
+      # 推送触发时没有 inputs，回落到与手动触发相同的默认网格
+      TASKS: ${{ inputs.tasks || '30 50 80' }}
+      SEEDS: ${{ inputs.seeds || '45 46 47 48 49 50 51 52' }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -38,7 +51,7 @@ jobs:
       - name: Coupling check
         run: |
           uv run --no-sync python experiments/v27_coupling_check.py \
-            --variants ${{ matrix.variant }} --tasks ${{ inputs.tasks }} --seeds ${{ inputs.seeds }} \
+            --variants ${{ matrix.variant }} --tasks $TASKS --seeds $SEEDS \
             --workers 4 --output outputs/v27/coupling/${{ matrix.variant }}
       - name: Summary
         if: always()
