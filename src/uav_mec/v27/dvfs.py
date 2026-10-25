@@ -55,6 +55,9 @@ def solve_dvfs(t, w, a, *, mu: float, kappa: float, f_min: float, f_max: float,
     a = np.asarray(a, float)
     n = len(t)
     if n == 0:
+        # 没有本地任务时计算能耗为 0，但飞行、悬停与发射的固定能耗仍可能超出电池，必须同样判定，否则全部卸载的无人机会绕过电池约束
+        if battery_residual < 0.0:
+            return DvfsResult(np.zeros(0), np.zeros(0), np.zeros(0), 0.0, np.inf, "infeasible_battery")
         return DvfsResult(np.zeros(0), np.zeros(0), np.zeros(0), 0.0, 0.0, "empty")
 
     def energy(p):

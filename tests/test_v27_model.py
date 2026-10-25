@@ -86,6 +86,15 @@ def test_battery_infeasible_reported():
     assert res.status == "infeasible_battery"
 
 
+def test_empty_dvfs_still_checks_battery():
+    # 没有本地任务时计算能耗为 0，但剩余电量为负说明飞行与悬停已超出电池，仍须判为不可行
+    ok = solve_dvfs([], [], [], mu=0.0, kappa=1.0, f_min=0.5, f_max=2.0, battery_residual=0.0)
+    assert ok.status == "empty"
+    bad = solve_dvfs([], [], [], mu=0.0, kappa=1.0, f_min=0.5, f_max=2.0, battery_residual=-1.0)
+    assert bad.status == "infeasible_battery"
+    assert bad.objective == np.inf
+
+
 def test_dvfs_matches_cvxpy_when_available():
     cp = pytest.importorskip("cvxpy")
     t = np.array([0.0, 3.0, 4.0, 20.0])
@@ -122,6 +131,18 @@ def test_tdma_station_serves_fcfs(params):
     ups = sorted(ev.timeline.uploads, key=lambda u: u.start)
     assert ups[1].start == pytest.approx(ups[0].end)       # second UAV waits, full band each
     assert audit(inst, d, ev) == []
+
+
+def test_battery_checked_without_local_tasks(params):
+    # 全部卸载的无人机没有机载计算，飞行与悬停能耗超出电池时 evaluate 与独立审计都应拒绝
+    p = params.with_overrides(battery_j=1000.0)
+    inst = _tiny(p, {"A": _task("A", 300.0, 1300.0)})
+    d = Structure(routes={"U1": ["A", "V1"]}, visits={"V1": "E1_C"}, upload={"A": "V1"})
+    ev = evaluate(inst, d)
+    assert not ev.feasible
+    assert "UAV U1 exceeds battery" in ev.reasons
+    assert ev.key()[0] == 1
+    assert any("battery exceeded" in e for e in audit(inst, d, ev))
 
 
 def test_structure_violations(params):
