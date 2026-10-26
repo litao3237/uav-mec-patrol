@@ -31,7 +31,9 @@
 | `src/uav_mec/scheme1/experiment.py` | 在一个实例上运行全部方法，用独立事件模拟统一评估；记录逐份数据（AoI、是否超时、采集与送达时刻）、逐机统计、收敛过程、下界与精确值样本、计时、实例特征与几何信息；`summary_rows` 展开成 CSV 行 |
 | `experiments/scheme1_plots.py` | 统一作图模块：方法的颜色、纹理与标记固定，中英文两套标签，每张图存 PDF 与 PNG；`demo` 子命令在冒烟种子 97–99 的小实例上运行全部方法并出示例图 |
 | `experiments/scheme1_experiments.py` | 论文实验 E1–E3：`shard` 运行一个分片（按估计耗时蛇形分配），`summary` 合并分片、输出均值表、配对检验（Wilcoxon）、一致性检查与中英文图，`smoke` 本地冒烟 |
+| `experiments/scheme1_e4.py` | E4：联合优化收益与实例特征的分层 Spearman 相关与线性模型（读 E1–E3 汇总产物，本地运行） |
+| `experiments/scheme1_e5.py` | E5：与精确解的差距（单机穷举）、求解时间随规模、停靠动态规划与枚举对拍；`lbgap` 用 E1 数据算与下界的差距 |
 | `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
 | `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |
 
-`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml` 在推送 `scheme1-exp-*` 标签时运行 E1–E3（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。
+`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml` 与 `scheme1-e5.yml` 分别在推送 `scheme1-exp-*`、`scheme1-e5-*` 标签时运行 E1–E3 与 E5（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。
