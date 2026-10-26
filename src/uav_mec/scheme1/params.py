@@ -12,6 +12,7 @@ from pathlib import Path
 
 from ..v27.params import ModelParams, load_params
 from ..v27.physics import coverage_radius_m, flight_power_w, hover_power_w
+from . import stable_math
 
 # 推导参数（覆盖半径 m、功率 W）保留的小数位数。推导用到对数、幂、开方，不同平台的数学库在末位上可能差 1 个 ulp
 # （2026-10-26 实测：Linux 上的覆盖半径比 Windows 小 1 个 ulp，局部搜索在个别实例上因此走向不同的局部最优）；
@@ -77,7 +78,10 @@ def load_scheme1_params(path: str | Path = "configs/v27_timeliness.yaml", tau_s:
 
 
 def candidate_points(sp: Scheme1Params) -> list[tuple[float, float]]:
-    """候选上传点：每站圆心与若干同心环上的等角点（从 0° 起），只保留区域内的点"""
+    """候选上传点：每站圆心与若干同心环上的等角点（从 0° 起），只保留区域内的点
+
+    sin、cos 用正确舍入的版本（见 stable_math），各平台得到相同的坐标
+    """
     pts = []
     for _, sx, sy, radius in sp.stations:
         if sp.include_center:
@@ -85,7 +89,7 @@ def candidate_points(sp: Scheme1Params) -> list[tuple[float, float]]:
         for frac in sp.ring_fractions:
             for j in range(sp.points_per_ring):
                 a = 2 * math.pi * j / sp.points_per_ring
-                x, y = sx + frac * radius * math.cos(a), sy + frac * radius * math.sin(a)
+                x, y = sx + frac * radius * stable_math.cos(a), sy + frac * radius * stable_math.sin(a)
                 if 0 <= x <= sp.width_m and 0 <= y <= sp.height_m:
                     pts.append((x, y))
     return pts

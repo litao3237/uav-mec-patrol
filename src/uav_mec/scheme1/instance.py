@@ -6,6 +6,7 @@ import math
 import random
 from dataclasses import dataclass
 
+from . import stable_math
 from .params import Scheme1Params, candidate_points
 
 
@@ -91,9 +92,11 @@ def fireline_points(rng: random.Random, n: int, sp: Scheme1Params) -> list[tuple
     a = rng.uniform(700, 1100)
     b = a / rng.uniform(1.5, 2.5)
     th = rng.uniform(0, math.pi)
+    # sin、cos 用正确舍入的版本、平方写成相乘，各平台得到相同的坐标（见 stable_math）；算式顺序与第三道检验相同
+    ct, st = stable_math.cos(th), stable_math.sin(th)
     # 椭圆外接矩形的半宽、半高，保证全部观测点留在区域内
-    hx = math.sqrt((a * math.cos(th)) ** 2 + (b * math.sin(th)) ** 2)
-    hy = math.sqrt((a * math.sin(th)) ** 2 + (b * math.cos(th)) ** 2)
+    hx = math.sqrt((a * ct) * (a * ct) + (b * st) * (b * st))
+    hy = math.sqrt((a * st) * (a * st) + (b * ct) * (b * ct))
     m = sp.margin_m
     cx = rng.uniform(m + hx + 30, sp.width_m - m - hx - 30)
     cy = rng.uniform(m + hy + 30, sp.height_m - m - hy - 30)
@@ -101,9 +104,9 @@ def fireline_points(rng: random.Random, n: int, sp: Scheme1Params) -> list[tuple
     out = []
     for k in range(n):
         t = phase + 2 * math.pi * (k + rng.uniform(-0.3, 0.3)) / n
-        x0, y0 = a * math.cos(t), b * math.sin(t)
-        x = cx + x0 * math.cos(th) - y0 * math.sin(th) + rng.uniform(-20, 20)
-        y = cy + x0 * math.sin(th) + y0 * math.cos(th) + rng.uniform(-20, 20)
+        x0, y0 = a * stable_math.cos(t), b * stable_math.sin(t)
+        x = cx + x0 * ct - y0 * st + rng.uniform(-20, 20)
+        y = cy + x0 * st + y0 * ct + rng.uniform(-20, 20)
         q = (min(max(x, m), sp.width_m - m), min(max(y, m), sp.height_m - m))
         out.append((q[0], q[1], rng.uniform(*sp.data_mbit), rng.uniform(*sp.freshness_s)))
     return out

@@ -138,6 +138,58 @@ def test_derived_params_are_platform_stable():
             assert round(w, DERIVED_DECIMALS) == v
 
 
+def _reference_sin_cos(x: float) -> tuple[float, float]:
+    """独立的参考实现：100 位十进制、不做自变量化简的泰勒级数（|x| < 20 时收敛足够）"""
+    from decimal import Decimal, localcontext
+
+    with localcontext() as ctx:
+        ctx.prec = 100
+        d = Decimal(x)
+        s = c = Decimal(0)
+        term = Decimal(1)
+        for k in range(400):
+            if k % 4 == 0:
+                c += term
+            elif k % 4 == 1:
+                s += term
+            elif k % 4 == 2:
+                c -= term
+            else:
+                s -= term
+            term = term * d / (k + 1)
+        return float(s), float(c)
+
+
+def test_stable_sin_cos_are_correctly_rounded():
+    import random
+
+    from uav_mec.scheme1 import stable_math
+
+    rng = random.Random(7)
+    # 含 2026-10-26 实测 Windows 数学库舍错的自变量
+    xs = [5.736716405780561, 2.4215147753914708, 8.45613280630363, 6.983057550387843, math.pi / 4, 3 * math.pi / 4]
+    xs += [rng.uniform(-13, 13) for _ in range(200)]
+    for x in xs:
+        assert (stable_math.sin(x), stable_math.cos(x)) == _reference_sin_cos(x), x
+        assert abs(stable_math.sin(x) - math.sin(x)) <= math.ulp(math.sin(x))
+    assert stable_math.sin(0.0) == 0.0 and stable_math.cos(0.0) == 1.0
+    assert math.copysign(1.0, stable_math.sin(-0.0)) == -1.0
+
+
+def test_instances_do_not_depend_on_platform_sin_cos(monkeypatch):
+    """把平台的 math.sin/cos 都偏移 1 个 ulp，生成的观测点与候选上传点坐标不变"""
+    def coords(layout):
+        inst, groups = make_instance(layout, 30, 3, 97, SP)
+        return [(t.x, t.y) for t in inst.tasks], list(inst.points), groups
+
+    before = {lay: coords(lay) for lay in ("fireline", "sector")}
+    sin0, cos0 = math.sin, math.cos
+    monkeypatch.setattr(math, "sin", lambda x: math.nextafter(sin0(x), math.inf))
+    monkeypatch.setattr(math, "cos", lambda x: math.nextafter(cos0(x), -math.inf))
+    for lay, val in before.items():
+        assert coords(lay) == val, lay
+
+
 def load_plots():
     spec = importlib.util.spec_from_file_location("scheme1_plots", ROOT / "experiments" / "scheme1_plots.py")
     mod = importlib.util.module_from_spec(spec)

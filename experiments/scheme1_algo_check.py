@@ -24,7 +24,8 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "experiments" / "scheme1"))
 
 from uav_mec.scheme1 import (RouteEvaluator, SearchConfig, load_scheme1_params, make_instance,  # noqa: E402
-                             route_local_search, script_constants, seed_of, shortest_tour, solve_fleet)
+                             route_local_search, script_constants, seed_of, shortest_tour, solve_fleet, stable_math)
+from uav_mec.scheme1.instance import fireline_points  # noqa: E402
 
 CONFIG = ROOT / "configs" / "v27_timeliness.yaml"
 EPS = 0.1
@@ -55,10 +56,25 @@ def formal_single(sp, layout: str, size: int, seed: int, group: int, eps: float,
             "exact": ev.stats["exact"], "pruned": ev.stats["pruned"], "lambda": ev.stats["lambda"]}
 
 
+def stable_reference(g3, sc) -> None:
+    """检验脚本改用与正式实现相同的实例几何：候选上传点的 sin、cos 换成正确舍入的版本，火线布点直接用正式实现的生成器
+
+    第三道检验原在 Actions（Linux）上运行，那里的 sin、cos 与正确舍入值一致；Windows 的数学库有少量调用末位不同，
+    pow(x, 2) 与 x·x 也偶有差别。正式实现已改为平台无关的写法（见 stable_math），回归只比较两套算法本身，
+    随机数调用顺序与检验脚本相同
+    """
+    import degeneracy_check
+
+    degeneracy_check.math = stable_math.math_shim()
+    g3.fireline_tasks = lambda rng, n_total: [{"q": (x, y), "D": d, "tc": sc.collect_s, "delta": delta}
+                                              for x, y, d, delta in fireline_points(rng, n_total, sc)]
+
+
 def regress_single(args) -> dict:
     layout, size, seed, group = args
     import gate3_check as g3
     sc = script_constants(load_scheme1_params(CONFIG))
+    stable_reference(g3, sc)
     ref_inst = g3.single_instances(layout, size, seed)[group]
     ref = g3.solve_single(ref_inst, eps_list=(EPS,))["eps"][str(EPS)]
     got = formal_single(sc, layout, size, seed, group, EPS, accelerate=True)
@@ -73,6 +89,7 @@ def regress_fleet(args) -> dict:
     layout, seed = args
     import gate3_check as g3
     sc = script_constants(load_scheme1_params(CONFIG))
+    stable_reference(g3, sc)
     ref = g3.solve_fleet_eps((layout, seed, EPS))
     inst, groups = make_instance(layout, 50, 5, seed, sc)
     got = solve_fleet(inst, groups, EPS, SearchConfig(accelerate=True), tag=(layout, seed, EPS))
