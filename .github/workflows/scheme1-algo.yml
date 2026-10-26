@@ -1,0 +1,73 @@
+name: scheme1 algorithm (tests + regression + speed)
+on:
+  # 只有 workflow_dispatch 时，文件不在默认分支 develop 上不会被注册，沿用推送触发
+  push:
+    branches: ['experiment/scheme1-stops']
+    paths:
+      - '.github/workflows/scheme1-algo.yml'
+      - 'src/uav_mec/scheme1/**'
+      - 'src/uav_mec/v27/params.py'
+      - 'src/uav_mec/v27/physics.py'
+      - 'configs/v27_timeliness.yaml'
+      - 'tests/test_scheme1_algorithm.py'
+      - 'experiments/scheme1_algo_check.py'
+      - 'experiments/scheme1/gate3_check.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  test:
+    # 单元测试：参数推导、精确停靠与穷举对拍、时间价格下界、增量计算、加速等价与解的校验
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]"
+      - name: Unit tests
+        run: uv run --no-sync python -m pytest tests/test_scheme1_algorithm.py
+
+  check:
+    # 回归（与第三道检验逐位比对）与提速测量（加速前后结果须完全相同）
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]"
+      - name: Regression and speed check
+        run: uv run --no-sync python experiments/scheme1_algo_check.py --workers 4 --out outputs/scheme1/algo
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 algorithm: regression and speed"
+            echo '```'
+            cat outputs/scheme1/algo/algo_check_out.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-algo-${{ github.run_id }}
+          path: outputs/scheme1/algo/
+          retention-days: 90
