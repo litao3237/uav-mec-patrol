@@ -8,11 +8,14 @@
 from __future__ import annotations
 
 import math
+import random
 import statistics
 import time
+from dataclasses import replace
 
-from .baselines import base_only_plan, deadline_plan, greedy_stop_plan, static_cluster_plan, two_stage_plan
-from .instance import Instance
+from .baselines import (base_only_plan, deadline_plan, greedy_stop_plan, pingpong_plan, random_direction_plan,
+                        static_cluster_plan, two_stage_plan)
+from .instance import Instance, seed_of
 from .search import Budget, SearchConfig, reference_t_hat, solve_fleet
 from .stops import simulate
 from .tsp import shortest_tour
@@ -20,6 +23,10 @@ from .tsp import shortest_tour
 METHODS = ("B0", "B1", "B2", "B3", "B4", "P1", "P2")
 BUILDERS = {"B0": base_only_plan, "B1": greedy_stop_plan, "B2": two_stage_plan,
             "B3": static_cluster_plan, "B4": deadline_plan}
+# 实验用的附加方法：B2R 随机方向的两阶段（E3）、PP 往返方案（E2，不受预算约束），以及本文方法的变体（E3）：
+# P2A 加速、P2N 不加速（两者结果须相同，只用于计时）、P2D 最后一站只能回基地上传
+EXTRA_METHODS = ("B2R", "PP", "P2A", "P2N", "P2D")
+FLEET_VARIANTS = {"P2A": {"accelerate": True}, "P2N": {"accelerate": False}, "P2D": {"depot_terminal": True}}
 
 
 def evaluate_solution(inst: Instance, plan, budget: Budget) -> dict:
@@ -35,14 +42,16 @@ def evaluate_solution(inst: Instance, plan, budget: Budget) -> dict:
     for u, (route, stops) in enumerate(plan):
         if not route:
             uavs.append({"uav": u, "n": 0, "mission_s": 0.0, "fly_s": 0.0, "hover_s": 0.0, "energy_j": 0.0,
-                         "distance_m": 0.0, "stops": 0, "cap_s": None, "feasible": True})
+                         "distance_m": 0.0, "stops": 0, "cap_s": None, "feasible": True, "battery_binding": False})
             continue
         sim = simulate(inst, list(route), list(stops))
         cap = budget.cap(route)
+        cap_time, cap_batt = budget.caps(route)
         uavs.append({"uav": u, "n": len(route), "mission_s": sim.mission_s, "fly_s": sim.fly_s, "hover_s": sim.hover_s,
                      "energy_j": sim.energy_j, "distance_m": sim.fly_s * p.speed_mps,
                      "stops": sum(1 for k, _ in stops if k < len(route)), "cap_s": cap,
-                     "feasible": sim.fly_s <= cap + 1e-6 and sim.energy_j <= p.battery_j + 1e-6})
+                     "feasible": sim.fly_s <= cap + 1e-6 and sim.energy_j <= p.battery_j + 1e-6,
+                     "battery_binding": cap_batt < cap_time})
         for g, a, c, d in zip(route, sim.aoi, sim.collect, sim.deliver):
             tasks.append({"gid": g, "uav": u, "aoi_s": a, "delta_s": inst.delta[g], "on_time": a <= inst.delta[g] + 1e-9,
                           "collect_s": c, "deliver_s": d})
@@ -59,6 +68,8 @@ def evaluate_solution(inst: Instance, plan, budget: Budget) -> dict:
         "on_time_rate": sum(t["on_time"] for t in tasks) / n,
         "norm_overtime": sum(max(0.0, t["aoi_s"] - t["delta_s"]) / t["delta_s"] for t in tasks) / n,
         "max_mission_min": max(x["mission_s"] for x in used) / 60.0,
+        "mission_increase_pct": 100.0 * (max(x["mission_s"] for x in used) / budget.t_hat - 1.0),   # 相对 T̂ 的增幅
+        "battery_binding_frac": statistics.mean(x["battery_binding"] for x in used),   # 电池上限比时长预算更紧的机比例
         "energy_kj": sum(x["energy_j"] for x in used) / 1000.0,
         "distance_km": sum(x["distance_m"] for x in used) / 1000.0,
         "stops_per_uav": statistics.mean(x["stops"] for x in used),
@@ -105,11 +116,12 @@ def run_methods(inst: Instance, groups, eps: float, methods=METHODS, cfg: Search
                 tag=("run",), lb_samples: int = 0) -> dict:
     """在一个机队实例上运行指定方法
 
-    P1 与 P2 来自同一次 solve_fleet：P1 为机内搜索阶段结束时的方案，P2 为加入跨机移动后的最终方案
+    P1 与 P2 来自同一次 solve_fleet：P1 为机内搜索阶段结束时的方案，P2 为加入跨机移动后的最终方案；
+    EXTRA_METHODS 中的方法按需另行求解
     :param inst: 实例
     :param groups: 初始分配
     :param eps: 时长预算 ε
-    :param methods: 要运行的方法
+    :param methods: 要运行的方法（METHODS 与 EXTRA_METHODS 中的任意组合）
     :param cfg: 本文方法的搜索设置
     :param tag: 本文方法的随机种子标签
     :param lb_samples: 下界与精确值成对样本的个数
@@ -119,14 +131,29 @@ def run_methods(inst: Instance, groups, eps: float, methods=METHODS, cfg: Search
     budget = Budget(inst, eps, t_hat)
     rec = {"eps": eps, "t_hat": t_hat, "t_max": (1 + eps) * t_hat, "features": instance_features(inst, groups, budget),
            "geometry": instance_geometry(inst), "methods": {}}
+    extra = {"B2R": lambda: random_direction_plan(inst, groups, budget, random.Random(seed_of(*tag, "B2R"))),
+             "PP": lambda: pingpong_plan(inst, groups)}
     for m in methods:
-        if m not in BUILDERS:
+        if m not in BUILDERS and m not in extra:
             continue
         t0 = time.perf_counter()
-        plan, info = BUILDERS[m](inst, groups, budget)
+        plan, info = BUILDERS[m](inst, groups, budget) if m in BUILDERS else extra[m]()
         secs = time.perf_counter() - t0
         out = evaluate_solution(inst, plan, budget)
         out.update(secs=secs, info=info, routes=[list(r) for r, _ in plan], stops=[[list(s) for s in st] for _, st in plan])
+        rec["methods"][m] = out
+    # 本文方法的变体各自独立求解；P2A 与 P2N 在 methods 中相邻时先后运行，计时条件接近
+    for m in methods:
+        if m not in FLEET_VARIANTS:
+            continue
+        vcfg = replace(cfg or SearchConfig(), **FLEET_VARIANTS[m])
+        t0 = time.perf_counter()
+        res = solve_fleet(inst, groups, eps, vcfg, tag=tag, t_hat=t_hat)
+        secs = time.perf_counter() - t0
+        plan = [(r, list(pl[2]) if pl is not None else []) for r, pl in zip(res.routes, res.plans)]
+        out = evaluate_solution(inst, plan, budget)
+        out.update(secs=secs, routes=[list(r) for r in res.routes], stops=[[list(s) for s in st] for _, st in plan],
+                   stats=res.stats, two_stage_obj=res.two_stage, per_route_obj=res.per_route)
         rec["methods"][m] = out
     if "P1" in methods or "P2" in methods:
         t0 = time.perf_counter()

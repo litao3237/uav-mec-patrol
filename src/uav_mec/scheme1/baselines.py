@@ -1,4 +1,5 @@
-"""基线方法：B0 只在基地上传、B1 就近贪心停靠、B2 两阶段、B3 仿 Huang 2026 的静态分簇、B4 仿 Raj 2026 的截止驱动
+"""基线方法：B0 只在基地上传、B1 就近贪心停靠、B2 两阶段、B3 仿 Huang 2026 的静态分簇、B4 仿 Raj 2026 的截止驱动；
+另有 E3 消融用的 B2R（随机方向的两阶段）与 E2 用的往返方案（不受预算约束、每份数据都达到逐份下界）
 
 所有基线使用与本文方法相同的初始分配（扇形或弧段）、同一时长预算与电池约束。
 每个函数返回 (方案, 附加信息)：方案为每架机的 (航线, 停靠方案)，由 experiment.evaluate_solution 用独立事件模拟统一评估
@@ -8,6 +9,7 @@ from __future__ import annotations
 
 import itertools
 import math
+import random
 
 from .instance import Instance
 from .search import Budget
@@ -203,4 +205,45 @@ def deadline_plan(inst: Instance, groups, budget: Budget):
     for g in groups:
         tour, _ = shortest_tour(inst, g)
         plan.append(_better_direction(inst, tour, make_stops) if tour else ([], []))
+    return plan, {}
+
+
+def random_direction_plan(inst: Instance, groups, budget: Budget, rng: random.Random):
+    """B2R（E3 消融"选方向"）：最短回路随机取一个方向 + 精确停靠，与 B2 只差方向的选择
+
+    :param rng: 随机数发生器（由实例标签派生，保证可复现）
+    """
+    plan = []
+    for g in groups:
+        tour, _ = shortest_tour(inst, g)
+        if not tour:
+            plan.append(([], []))
+            continue
+        r = tour if rng.random() < 0.5 else tour[::-1]
+        plan.append((r, list(exact_stops(inst, r, budget.cap(r))[2])))   # 不停靠的回路一定可行，结果不会为空
+    return plan, {}
+
+
+def pingpong_plan(inst: Instance, groups):
+    """往返方案（性质 P0 的极限）：每采一份就飞到最近的上传点单独上传，不受时长预算约束
+
+    每份数据都达到逐份下界（冻结参数下基地与 E1 圆心重合，途中停靠取候选点即可）；
+    航线取最短回路两个方向中任务时长较短者，用来给出"达到下界需要多大的 ε"
+    """
+    n_pts = len(inst.points)
+    plan = []
+    for g in groups:
+        tour, _ = shortest_tour(inst, g)
+        if not tour:
+            plan.append(([], []))
+            continue
+        cands = []
+        for r in (tour, tour[::-1]):
+            stops = [(k, min(range(n_pts), key=inst.tp[r[k - 1]].__getitem__)) for k in range(1, len(r))]
+            last = r[-1]
+            p = min(range(n_pts), key=inst.tp[last].__getitem__)
+            stops.append((len(r), -1 if inst.dt[last] <= inst.tp[last][p] else p))
+            cands.append((simulate(inst, r, stops).mission_s, r, stops))
+        _, r, stops = min(cands, key=lambda c: c[0])
+        plan.append((r, stops))
     return plan, {}

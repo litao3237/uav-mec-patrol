@@ -1,0 +1,157 @@
+name: scheme1 experiments E1-E3
+on:
+  # 冻结的代码打标签 scheme1-exp-* 后推送标签即运行：所用代码与工作流都取自标签对应的提交
+  push:
+    tags: ['scheme1-exp-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  e1:
+    # E1 主对比：480 个实例，10 个分片（按估计耗时蛇形分配，三个实验的分片负载相近）
+    name: E1 shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_experiments.py shard --exp E1
+          --shard ${{ matrix.shard }} --shards 10 --workers 4 --out outputs/scheme1/exp/E1_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exp-E1-${{ matrix.shard }}
+          path: outputs/scheme1/exp/E1_${{ matrix.shard }}/
+          retention-days: 90
+
+  e2:
+    # E2 AoI–时长折中：280 个实例（ε = 0.1、0.25 取自 E1），11 个分片；大 ε 的实例最慢
+    name: E2 shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_experiments.py shard --exp E2
+          --shard ${{ matrix.shard }} --shards 11 --workers 4 --out outputs/scheme1/exp/E2_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exp-E2-${{ matrix.shard }}
+          path: outputs/scheme1/exp/E2_${{ matrix.shard }}/
+          retention-days: 90
+
+  e3:
+    # E3 消融：160 个实例，19 个分片；每个实例跑 B2R 与三次本文方法（加速、不加速、终点限基地）
+    name: E3 shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_experiments.py shard --exp E3
+          --shard ${{ matrix.shard }} --shards 19 --workers 4 --out outputs/scheme1/exp/E3_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exp-E3-${{ matrix.shard }}
+          path: outputs/scheme1/exp/E3_${{ matrix.shard }}/
+          retention-days: 90
+
+  summary:
+    # 合并全部分片：表格、配对检验、一致性检查与中英文两套图；有检查不通过时失败
+    needs: [e1, e2, e3]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fonts (CJK for Chinese labels, Liberation Sans as Arial substitute)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-wqy-microhei fonts-liberation
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exp-*
+          path: outputs/scheme1/exp/shards
+      - name: Summarize
+        run: >-
+          uv run --no-sync python experiments/scheme1_experiments.py summary
+          --inputs outputs/scheme1/exp/shards --out outputs/scheme1/exp/summary
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 experiments E1-E3"
+            echo '```'
+            cat outputs/scheme1/exp/summary/summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Bundle records with the summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/exp/summary/records
+          find outputs/scheme1/exp/shards -path '*/records/*.json' -exec cp {} outputs/scheme1/exp/summary/records/ \;
+          find outputs/scheme1/exp/shards -name 'log_*.txt' -exec cat {} + > outputs/scheme1/exp/summary/shard_logs.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-exp-summary-${{ github.run_id }}
+          path: outputs/scheme1/exp/summary/
+          retention-days: 90

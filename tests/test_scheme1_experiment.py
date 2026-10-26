@@ -224,3 +224,86 @@ def test_plot_helpers():
     assert set(plots.COLORS) == set(plots.HATCHES) == set(plots.MARKERS) == set(METHODS)
     assert len(set(plots.COLORS.values())) == len(set(plots.HATCHES.values())) == len(METHODS)
     assert not math.isnan(plots.mean_ci([0.1, 0.1])[1])
+    assert plots.tint("#000000", 0.5) == "#808080"
+    assert all(plots.base_of(v) in METHODS for v in plots.VARIANT_OF)
+
+
+# ---------- E1–E3 用的附加方法与运行脚本 ----------
+
+def _small_instance(seed: int, n: int):
+    """小实例：每站圆心加 2 个 0.85R 环上点，便于穷举停靠方案"""
+    import random
+
+    from uav_mec.scheme1 import Instance, Task
+
+    sp = SP.with_overrides(ring_fractions=(0.85,), points_per_ring=2)
+    rng = random.Random(seed)
+    tasks = [Task(i, rng.uniform(50, 2950), rng.uniform(50, 2950), rng.uniform(80, 160), rng.uniform(300, 600), 10.0)
+             for i in range(n)]
+    return Instance(sp, tasks)
+
+
+@pytest.mark.parametrize("seed", range(4))
+def test_depot_terminal_matches_brute_force(seed):
+    """终点限基地：精确停靠与穷举（最后一站只能回基地）一致，且不优于不受限的停靠"""
+    from uav_mec.scheme1 import exact_stops
+
+    inst = _small_instance(seed, 5)
+    route = list(range(5))
+    cap = 1.25 * inst.route_length_m(route) / inst.params.speed_mps
+    n, n_pts, best = len(route), len(inst.points), math.inf
+    for r in range(n):
+        for pos in itertools.combinations(range(1, n), r):
+            for pts in itertools.product(range(n_pts), repeat=r):
+                sim = simulate(inst, route, list(zip(pos, pts)) + [(n, -1)])
+                if sim.fly_s <= cap + 1e-9:
+                    best = min(best, sim.objective)
+    got = exact_stops(inst, route, cap, depot_only=True)
+    assert got[2][-1] == (n, -1)
+    assert got[0] == pytest.approx(best, rel=1e-12)
+    assert exact_stops(inst, route, cap)[0] <= got[0] + 1e-12
+
+
+def test_fleet_variants_and_extra_baselines():
+    """P2D 的最后一站都在基地；P2A、P2N 与 P2 相同；B2 ≤ B2R；往返方案达到逐份下界；两个上限的较小者即 cap"""
+    from uav_mec.scheme1 import EXTRA_METHODS
+
+    inst, groups = make_instance("fireline", 16, 2, 98, SP)
+    rec = run_methods(inst, groups, 0.1, methods=METHODS + EXTRA_METHODS, tag=("fireline", 16, 2, 98, 0.1))
+    ms = rec["methods"]
+    assert all(st[-1][1] == -1 for st in ms["P2D"]["stops"] if st) and ms["P2D"]["summary"]["feasible"]
+    assert ms["P2A"]["routes"] == ms["P2N"]["routes"] == ms["P2"]["routes"]
+    assert ms["P2A"]["summary"]["obj"] == ms["P2N"]["summary"]["obj"] == ms["P2"]["summary"]["obj"]
+    assert ms["B2"]["summary"]["obj"] <= ms["B2R"]["summary"]["obj"] + 1e-9 and ms["B2R"]["summary"]["feasible"]
+    assert ms["PP"]["summary"]["norm_aoi"] == pytest.approx(rec["features"]["lb_norm"], rel=1e-12)
+    budget = Budget(inst, 0.1, rec["t_hat"])
+    for r in ms["P2"]["routes"]:
+        assert min(budget.caps(r)) == budget.cap(r)
+
+
+def load_experiments():
+    spec = importlib.util.spec_from_file_location("scheme1_experiments", ROOT / "experiments" / "scheme1_experiments.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_experiment_jobs_and_shards():
+    ex = load_experiments()
+    sizes = {e: len(ex.jobs(e)) for e in ("E1", "E2", "E3")}
+    assert sizes == {"E1": 480, "E2": 280, "E3": 160}
+    assert not any(j[4] in ex.E1_EPS for j in ex.jobs("E2"))
+    for exp, k in (("E1", 7), ("E2", 5), ("E3", 3)):
+        parts = [ex.shard_jobs(exp, s, k) for s in range(k)]
+        flat = [j for p in parts for j in p]
+        assert sorted(flat) == sorted(ex.jobs(exp)) and len(flat) == len(set(flat))
+
+
+def test_paired_statistics():
+    pytest.importorskip("scipy")
+    pytest.importorskip("matplotlib")
+    ex = load_experiments()
+    st = ex.paired([2.0, 4.0, 8.0], [1.0, 2.0, 4.0])
+    assert st["median"] == pytest.approx(50.0) and (st["wins"], st["ties"], st["losses"]) == (3, 0, 0)
+    eq = ex.paired([1.0, 2.0], [1.0, 2.0])
+    assert eq["p"] == 1.0 and eq["ties"] == 2

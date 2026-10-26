@@ -44,6 +44,11 @@ COLORS = {"P2": "#2a78d6", "P1": "#eb6834", "B2": "#1baf7a", "B1": "#eda100",
 # 纹理只用 45°/135° 斜线族与点，避免与网格线混淆；本文方法为实心
 HATCHES = {"P2": "", "P1": "//////", "B2": "\\\\\\\\\\\\", "B1": "xxxx", "B3": "//", "B4": "\\\\", "B0": "...."}
 MARKERS = {"P2": "o", "P1": "s", "B2": "^", "B1": "v", "B3": "D", "B4": "<", "B0": ">"}
+# 消融与计时变体沿用所属方法的颜色：浅色填充 + 该色纹理（折线为虚线），表示"某方法的变体"，不另占类别色。
+# P2A（加速）就是默认的本文方法，样式与 P2 相同
+VARIANT_OF = {"P2A": "P2", "P2N": "P2", "P2D": "P2", "B2R": "B2"}
+VARIANT_HATCH = {"P2N": "\\\\\\\\\\\\", "P2D": "//////", "B2R": "//////"}
+ORDER = ("P2", "P2A", "P2N", "P2D", "P1", "B2", "B2R", "B1", "B3", "B4", "B0")   # 含变体的全部系列的固定顺序
 INK = {"primary": "#0b0b0b", "secondary": "#52514e", "muted": "#898781", "grid": "#e1e0d9", "axis": "#c3c2b7",
        "wash": "#f0efec", "surface": "#ffffff"}
 REF_STYLE = {"color": INK["secondary"], "linestyle": (0, (3, 2)), "linewidth": 0.9}   # 下界、预算线等参考线
@@ -69,6 +74,9 @@ LABELS = {
         "upload": "停靠上传", "task": "观测点", "deadline": "时效窗截止", "carry": "采集到送达",
         "fireline": "火线布点", "sector": "扇形布点", "leg": "飞行航段", "detour": "绕路上传",
         "overtime": "超时部分", "fit": "最小二乘拟合", "title_aoi": "平均归一化 AoI",
+        "P2A": "本文（加速）", "P2N": "本文（不加速）", "P2D": "本文（终点限基地）", "B2R": "两阶段（随机方向）",
+        "PP": "往返方案", "mission_increase_pct": "最大任务时长增幅（%）", "battery_binding_frac": "电池起约束的机比例（%）",
+        "exact_calls": "精确动态规划次数", "case": "实例类型",
     },
     "en": {
         "P2": "Proposed", "P1": "Proposed (intra)", "B2": "Two-stage", "B1": "Greedy stop",
@@ -88,9 +96,12 @@ LABELS = {
         "task": "Observation point", "deadline": "Deadline", "carry": "Collect to deliver",
         "fireline": "Fire-line layout", "sector": "Sector layout", "leg": "Flight leg", "detour": "Upload detour",
         "overtime": "Overtime", "fit": "Least-squares fit", "title_aoi": "norm. AoI",
+        "P2A": "Proposed (accel.)", "P2N": "Proposed (no accel.)", "P2D": "Proposed (depot end)",
+        "B2R": "Two-stage (random dir.)", "PP": "Ping-pong", "mission_increase_pct": "Max mission increase (%)",
+        "battery_binding_frac": "Battery-bound UAVs (%)", "exact_calls": "Exact DP calls", "case": "Instance type",
     },
 }
-SCALE = {"on_time_rate": 100.0}   # 比例类指标画成百分数
+SCALE = {"on_time_rate": 100.0, "battery_binding_frac": 100.0}   # 比例类指标画成百分数
 
 
 def setup(lang: str) -> None:
@@ -137,11 +148,11 @@ def legend_top(fig, handles, ncol: int = 4) -> None:
 
 
 def method_handle(m: str, lang: str, kind: str = "bar") -> object:
-    """方法的图例句柄：柱状图为带纹理的色块，折线图为线 + 空心标记"""
+    """方法（或变体）的图例句柄：柱状图为带纹理的色块，折线图为线 + 空心标记"""
     if kind == "bar":
-        return Patch(facecolor=COLORS[m], edgecolor=shade(COLORS[m]), linewidth=0, hatch=HATCHES[m], label=label(lang, m))
-    return Line2D([], [], color=COLORS[m], marker=MARKERS[m], markerfacecolor=INK["surface"],
-                  markeredgecolor=COLORS[m], markeredgewidth=0.9, label=label(lang, m))
+        return Patch(facecolor=fill_of(m), edgecolor=edge_of(m), linewidth=0, hatch=hatch_of(m), label=label(lang, m))
+    return Line2D([], [], color=color_of(m), linestyle=dash_of(m), marker=MARKERS[base_of(m)],
+                  markerfacecolor=INK["surface"], markeredgecolor=color_of(m), markeredgewidth=0.9, label=label(lang, m))
 
 
 def ref_handle(lang: str, key: str = "LB") -> Line2D:
@@ -153,6 +164,41 @@ def shade(hex_color: str, k: float = 0.45) -> str:
     """同色系的深一档颜色（向黑色混合 k），用作纹理线色，使纹理与填充同色调"""
     r, g, b = (int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
     return "#{:02x}{:02x}{:02x}".format(*(round(c * (1 - k)) for c in (r, g, b)))
+
+
+def tint(hex_color: str, k: float = 0.6) -> str:
+    """同色系的浅色（向白色混合 k），用作变体的填充色"""
+    r, g, b = (int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+    return "#{:02x}{:02x}{:02x}".format(*(round(c + (255 - c) * k) for c in (r, g, b)))
+
+
+def base_of(m: str) -> str:
+    """系列所属的方法：变体返回原方法，方法返回自身"""
+    return VARIANT_OF.get(m, m)
+
+
+def color_of(m: str) -> str:
+    """线、标记与箱线的颜色：所属方法的颜色"""
+    return COLORS[base_of(m)]
+
+
+def fill_of(m: str) -> str:
+    """柱的填充色：方法用其颜色，变体用所属方法颜色的浅色"""
+    return tint(color_of(m)) if m in VARIANT_HATCH else color_of(m)
+
+
+def edge_of(m: str) -> str:
+    """纹理线色：方法用深一档的同色（同色调纹理），变体用所属方法的颜色（浅底上更清楚）"""
+    return color_of(m) if m in VARIANT_HATCH else shade(color_of(m))
+
+
+def hatch_of(m: str) -> str:
+    return VARIANT_HATCH.get(m, HATCHES[base_of(m)])
+
+
+def dash_of(m: str):
+    """折线的线型：变体用虚线"""
+    return (0, (3, 1.5)) if m in VARIANT_HATCH else "-"
 
 
 def mean_ci(xs) -> tuple[float, float]:
@@ -245,13 +291,13 @@ def grouped_bars(ax, groups, series: dict, lang: str, ref=None, ref_key: str = "
     :param width: 一组柱子占的总宽度，其余为组间空白
     :return: 图例句柄
     """
-    ms = [m for m in METHOD_ORDER if m in series]
+    ms = [m for m in ORDER if m in series]
     slot = width / len(ms)
     for j, m in enumerate(ms):
         xs = [i - width / 2 + slot * (j + 0.5) for i in range(len(groups))]
         st = [_stats(s) for s in series[m]]
-        ax.bar(xs, [s[0] for s in st], width=slot * 0.86, color=COLORS[m], edgecolor=shade(COLORS[m]), linewidth=0,
-               hatch=HATCHES[m] if hatch else "", zorder=2)
+        ax.bar(xs, [s[0] for s in st], width=slot * 0.86, color=fill_of(m), edgecolor=edge_of(m), linewidth=0,
+               hatch=hatch_of(m) if hatch else "", zorder=2)
         if any(s[1] > 0 for s in st):
             ax.errorbar(xs, [s[0] for s in st], yerr=[s[1] for s in st], fmt="none", ecolor=INK["secondary"],
                         elinewidth=0.5, capsize=1.0, capthick=0.5, zorder=3)
@@ -262,6 +308,7 @@ def grouped_bars(ax, groups, series: dict, lang: str, ref=None, ref_key: str = "
         handles.append(ref_handle(lang, ref_key))
     ax.set_xticks(range(len(groups)), [fmt_group(g) for g in groups])
     ax.set_xlim(-0.6, len(groups) - 0.4)
+    ax.set_ylim(bottom=0)      # 柱从零起；样本少时置信区间可能伸到零以下，那部分没有意义，不显示
     ax.tick_params(axis="x", length=0)
     return handles
 
@@ -276,13 +323,13 @@ def line_chart(ax, xs, series: dict, lang: str, ref=None, ref_key: str = "LB", b
     :return: 图例句柄
     """
     handles = []
-    for m in [m for m in METHOD_ORDER if m in series]:
+    for m in [m for m in ORDER if m in series]:
         st = [_stats(s) for s in series[m]]
         if band:
-            ax.fill_between(xs, [a - b for a, b in st], [a + b for a, b in st], color=COLORS[m], alpha=0.12,
+            ax.fill_between(xs, [a - b for a, b in st], [a + b for a, b in st], color=color_of(m), alpha=0.12,
                             linewidth=0, zorder=1)
-        ax.plot(xs, [s[0] for s in st], color=COLORS[m], marker=MARKERS[m], markerfacecolor=INK["surface"],
-                markeredgecolor=COLORS[m], markeredgewidth=0.9, zorder=3)
+        ax.plot(xs, [s[0] for s in st], color=color_of(m), linestyle=dash_of(m), marker=MARKERS[base_of(m)],
+                markerfacecolor=INK["surface"], markeredgecolor=color_of(m), markeredgewidth=0.9, zorder=3)
         handles.append(method_handle(m, lang, "line"))
     if ref is not None:
         ax.plot(xs, ref, zorder=2, **REF_STYLE)
@@ -298,10 +345,10 @@ def box(ax, data: dict, lang: str, colors: dict | None = None, rotate: int = 30)
     :param colors: 非方法类别的颜色，缺省一律用本文方法的蓝色
     :param rotate: 横轴标签的旋转角度
     """
-    keys = [m for m in METHOD_ORDER if m in data] + [k for k in data if k not in METHOD_ORDER]
+    keys = [m for m in ORDER if m in data] + [k for k in data if k not in ORDER]
     bp = ax.boxplot([data[k] for k in keys], positions=range(len(keys)), widths=0.55, patch_artist=True)
     for i, k in enumerate(keys):
-        c = COLORS.get(k) or (colors or {}).get(k, COLORS["P2"])
+        c = color_of(k) if k in ORDER else (colors or {}).get(k, COLORS["P2"])
         bp["boxes"][i].set(facecolor=matplotlib.colors.to_rgba(c, 0.18), edgecolor=c, linewidth=0.8)
         for art in bp["whiskers"][2 * i:2 * i + 2] + bp["caps"][2 * i:2 * i + 2]:
             art.set(color=c, linewidth=0.8)
@@ -318,16 +365,16 @@ def cdf(ax, data: dict, lang: str, n_markers: int = 5) -> list:
     :param data: {方法: 样本}
     :return: 图例句柄
     """
-    ms = [m for m in METHOD_ORDER if m in data]
+    ms = [m for m in ORDER if m in data]
     handles = []
     for j, m in enumerate(ms):
         xs = sorted(data[m])
         n = len(xs)
         ys = [(i + 1) / n for i in range(n)]
-        ax.step(xs, ys, where="post", color=COLORS[m], zorder=3)
+        ax.step(xs, ys, where="post", color=color_of(m), linestyle=dash_of(m), zorder=3)
         idx = sorted({min(n - 1, int((q + (j + 1) / (len(ms) + 1)) / n_markers * n)) for q in range(n_markers)})
-        ax.plot([xs[i] for i in idx], [ys[i] for i in idx], linestyle="none", marker=MARKERS[m],
-                markerfacecolor=INK["surface"], markeredgecolor=COLORS[m], markeredgewidth=0.9, zorder=4)
+        ax.plot([xs[i] for i in idx], [ys[i] for i in idx], linestyle="none", marker=MARKERS[base_of(m)],
+                markerfacecolor=INK["surface"], markeredgecolor=color_of(m), markeredgewidth=0.9, zorder=4)
         handles.append(method_handle(m, lang, "line"))
     ax.set_ylim(0, 1.02)
     ax.grid(True, axis="both")
@@ -500,13 +547,13 @@ def metric_series(rows: list[dict], metric: str, group_key: str = "n", methods=M
     groups = sorted({r[group_key] for r in rows})
     s = SCALE.get(metric, 1.0)
     series = {m: [[r[metric] * s for r in rows if r["method"] == m and r[group_key] == g] for g in groups]
-              for m in METHOD_ORDER if m in methods and any(r["method"] == m for r in rows)}
+              for m in ORDER if m in methods and any(r["method"] == m for r in rows)}
     return groups, series
 
 
 def instance_rows(rows: list[dict]) -> list[dict]:
     """每个实例取一行（实例特征在各方法的行里相同）"""
-    first = next(m for m in METHOD_ORDER if any(r["method"] == m for r in rows))
+    first = next(m for m in ORDER if any(r["method"] == m for r in rows))
     return [r for r in rows if r["method"] == first]
 
 

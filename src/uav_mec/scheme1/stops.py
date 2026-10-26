@@ -36,7 +36,7 @@ def insert_pareto(cur: list[tuple], lab: tuple) -> None:
     cur.append(lab)
 
 
-def pareto_front(inst: Instance, route: list[int], cap: float | None) -> list[tuple]:
+def pareto_front(inst: Instance, route: list[int], cap: float | None, depot_only: bool = False) -> list[tuple]:
     """固定顺序下的停靠动态规划，返回终点处（目标，飞行时间，停靠方案）的帕累托集合
 
     段的 AoI 与段起点无关（起点到段内第一个观测点的飞行发生在任何采集之前），起点只影响飞行时间，
@@ -45,6 +45,7 @@ def pareto_front(inst: Instance, route: list[int], cap: float | None) -> list[tu
     :param inst: 实例
     :param route: 观测点 gid 的访问顺序
     :param cap: 飞行时间上限（s），None 表示不限
+    :param depot_only: 最后一站只能回基地上传（E3 消融"终点限基地"）；默认可在任一上传点传完再返航
     :return: 帕累托集合
     """
     n = len(route)
@@ -89,7 +90,10 @@ def pareto_front(inst: Instance, route: list[int], cap: float | None) -> list[tu
                 clock += up[x]
                 up_term += clock / delta[x]
             base_obj = t_rel * w_sum + up_term + tau * w_sum - c_over_d
-            ends = range(n_pts) if k < n else itertools.chain((-1,), range(n_pts))
+            if k < n:
+                ends = range(n_pts)
+            else:
+                ends = (-1,) if depot_only else itertools.chain((-1,), range(n_pts))
             row_k = labels[k] if k < n else None
             for qi in ends:
                 tail = dt[g] if qi == -1 else tp[g][qi]
@@ -119,9 +123,12 @@ def pareto_front(inst: Instance, route: list[int], cap: float | None) -> list[tu
     return pareto(terminal)
 
 
-def exact_stops(inst: Instance, route: list[int], cap: float) -> tuple | None:
-    """上限 cap 内的最优停靠，返回 (Σ AoI/δ, 飞行时间, 停靠方案)；不可行时返回 None"""
-    feas = [lab for lab in pareto_front(inst, route, cap) if lab[1] <= cap + TOL]
+def exact_stops(inst: Instance, route: list[int], cap: float, depot_only: bool = False) -> tuple | None:
+    """上限 cap 内的最优停靠，返回 (Σ AoI/δ, 飞行时间, 停靠方案)；不可行时返回 None
+
+    :param depot_only: 最后一站只能回基地上传（见 pareto_front）
+    """
+    feas = [lab for lab in pareto_front(inst, route, cap, depot_only) if lab[1] <= cap + TOL]
     return min(feas, key=lambda x: (x[0], x[1])) if feas else None
 
 

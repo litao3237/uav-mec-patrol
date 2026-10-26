@@ -29,6 +29,7 @@ class SearchConfig:
     inter_evals: int = 3000          # 跨机阶段的评估上限
     reopt_evals: int = 300           # 跨机移动被接受后，对两条航线各做一次短局部搜索的上限
     neighbors: int = 5               # 跨机候选：每个观测点最近的 5 个异机观测点
+    depot_terminal: bool = False     # 最后一站只能回基地上传（E3 消融"终点限基地"用），默认可在任一上传点传完再返航
 
     def evals(self, n: int) -> int:
         return self.max_evals.get(n, 1000 + 500 * max(0, n - 8))
@@ -47,6 +48,12 @@ class Budget:
         h = self.inst.hover_time(route)
         p = self.inst.params
         return min((1 + self.eps) * self.t_hat - h, (p.battery_j - p.p_hover_w * h) / p.p_fly_w)
+
+    def caps(self, route) -> tuple[float, float]:
+        """(时长预算折算的飞行时间上限, 电池折算的飞行时间上限)，二者较小者即 cap；用于判断电池何时起约束"""
+        h = self.inst.hover_time(route)
+        p = self.inst.params
+        return (1 + self.eps) * self.t_hat - h, (p.battery_j - p.p_hover_w * h) / p.p_fly_w
 
 
 LAMBDA_REFRESH = 5        # 每 5 次更换当前航线重新求一次 λ*，其余沿用上一次的 λ（下界仍有效，只是可能略松）
@@ -73,10 +80,13 @@ class RouteEvaluator:
     :param cap_of: 航线 -> 飞行时间上限
     :param accelerate: 是否允许使用时间价格下界筛选
     :param lb_samples: 抽样记录"下界与精确值"成对样本的个数（作图用）；抽到的候选两者都计算，不影响接受判断
+    :param depot_only: 精确值按"最后一站只能回基地上传"求（E3 消融）
     """
 
-    def __init__(self, inst: Instance, cap_of, accelerate: bool = True, lb_samples: int = 0):
+    def __init__(self, inst: Instance, cap_of, accelerate: bool = True, lb_samples: int = 0, depot_only: bool = False):
         self.inst, self.cap_of, self.accelerate = inst, cap_of, accelerate
+        # 终点限基地时精确值按受限的停靠求；下界仍按不受限的 λ 动态规划求，它不超过受限最优值，剪枝依然有效
+        self.depot_only = depot_only
         self.exact_cache: dict = {}
         self.lb_cache: dict = {}
         self.seen: set = set()
@@ -130,7 +140,7 @@ class RouteEvaluator:
         key = tuple(route)
         if key not in self.exact_cache:
             t0 = time.perf_counter()
-            self.exact_cache[key] = exact_stops(self.inst, list(route), self.cap_of(route))
+            self.exact_cache[key] = exact_stops(self.inst, list(route), self.cap_of(route), self.depot_only)
             self._t_exact += time.perf_counter() - t0
             self.stats["exact"] += 1
         return self.exact_cache[key]
@@ -323,7 +333,7 @@ def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = N
     if t_hat is None:
         t_hat = reference_t_hat(inst, groups, tours)
     budget = Budget(inst, eps, t_hat)
-    ev = RouteEvaluator(inst, budget.cap, cfg.accelerate, lb_samples)
+    ev = RouteEvaluator(inst, budget.cap, cfg.accelerate, lb_samples, cfg.depot_terminal)
     # 两阶段：每架机最短回路的较好方向 + 精确停靠
     two_stage = 0.0
     best_known = []
