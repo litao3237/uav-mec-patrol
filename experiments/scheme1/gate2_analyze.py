@@ -97,6 +97,7 @@ def plot_improvement(res) -> None:
     for y, lab in ((5, "门槛 5%"), (10, "门槛 10%")):
         ax.axhline(y, color=MUTED, lw=1, ls=(0, (4, 3)), zorder=1)
         ax.text(0.505, y + 0.4, lab, color=INK2, fontsize=8, ha="right", va="bottom")
+    ends = []
     for idx, nu in enumerate(sorted({r["n"] for r in res})):
         rows = [r for r in res if r["n"] == nu]
         ys = []
@@ -105,12 +106,18 @@ def plot_improvement(res) -> None:
             b = statistics.mean(min(x["obj"] for x in r["two_stage"][str(e)]) for r in rows)
             ys.append(100 * (1 - j / b))
         ax.plot(EPS, ys, color=SERIES[idx], lw=2, marker="o", ms=6, mec=SURF, mew=1.5, label=f"每机 {nu} 个观测点", zorder=3)
-        ax.annotate(f"{nu} 点", (EPS[-1], ys[-1]), xytext=(6, 0), textcoords="offset points", color=INK2, fontsize=8, va="center")
+        ends.append([ys[-1], f"{nu} 点"])
+    # 末端直接标注按数值排序并保持最小间距，避免标签重叠
+    ends.sort(key=lambda x: x[0])
+    for i in range(1, len(ends)):
+        ends[i][0] = max(ends[i][0], ends[i - 1][0] + 0.9)
+    for y, lab in ends:
+        ax.annotate(lab, (EPS[-1], y), xytext=(8, 0), textcoords="offset points", color=INK2, fontsize=8, va="center")
     ax.set_xlabel("时长预算 ε（相对最短回路不停靠时长的增幅）", color=INK2, fontsize=9)
     ax.set_ylabel("联合优化相对两阶段+ 的改善（%）", color=INK2, fontsize=9)
     ax.set_xticks(EPS)
     ax.set_xticklabels([str(e) for e in EPS])
-    ax.set_xlim(0.02, 0.55)
+    ax.set_xlim(0.02, 0.57)
     ax.grid(axis="y", color=GRID, lw=0.8)
     ax.set_axisbelow(True)
     for side in ("top", "right"):
@@ -118,10 +125,106 @@ def plot_improvement(res) -> None:
     for side in ("left", "bottom"):
         ax.spines[side].set_color(BASE)
     ax.tick_params(colors=MUTED, labelsize=8, labelcolor=INK2)
-    ax.legend(frameon=False, fontsize=8, labelcolor=INK2, loc="upper left")
+    ax.legend(frameon=False, fontsize=8, labelcolor=INK2, loc="upper right")
     fig.tight_layout()
     fig.savefig(HERE / "gate2_improvement.png")
     plt.close(fig)
+
+
+def plot_levels(res) -> None:
+    """各方法的平均归一化 AoI 随 ε 的变化（全部 60 例），逐份下界作参考线"""
+    fig, ax = plt.subplots(figsize=(6.4, 3.8), dpi=150)
+    series = (("联合最优", "J", SERIES[0]), ("两阶段+（较好方向）", "B+", SERIES[1]),
+              ("两阶段（两个方向平均）", "Bavg", SERIES[2]))
+    short = {"J": "联合", "B+": "两阶段+", "Bavg": "两阶段平均"}
+    lb = statistics.mean(r["lb"] / r["n"] for r in res)
+    ax.axhline(lb, color=MUTED, lw=1, ls=(0, (4, 3)), zorder=1)
+    ax.text(0.505, lb - 0.002, "逐份下界", color=INK2, fontsize=8, ha="right", va="top")
+    for name, key, color in series:
+        ys = []
+        for e in EPS:
+            k = str(e)
+            if key == "J":
+                ys.append(statistics.mean(r["joint"][k]["obj"] / r["n"] for r in res))
+            elif key == "B+":
+                ys.append(statistics.mean(min(x["obj"] for x in r["two_stage"][k]) / r["n"] for r in res))
+            else:
+                ys.append(statistics.mean(statistics.mean(x["obj"] for x in r["two_stage"][k]) / r["n"] for r in res))
+        ax.plot(EPS, ys, color=color, lw=2, marker="o", ms=6, mec=SURF, mew=1.5, label=name, zorder=3)
+        # 直接标注放在第一个点左侧，三条线在这里分得最开，且不会压到下降的折线
+        ax.annotate(short[key], (EPS[0], ys[0]), xytext=(-8, 0), textcoords="offset points", color=INK2, fontsize=8,
+                    va="center", ha="right")
+    ax.set_xlabel("时长预算 ε（相对最短回路不停靠时长的增幅）", color=INK2, fontsize=9)
+    ax.set_ylabel("平均归一化 AoI（Σ AoI/δ ÷ n）", color=INK2, fontsize=9)
+    ax.set_xticks(EPS)
+    ax.set_xticklabels([str(e) for e in EPS])
+    ax.set_xlim(-0.05, 0.55)
+    ax.grid(axis="y", color=GRID, lw=0.8)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(BASE)
+    ax.tick_params(colors=MUTED, labelsize=8, labelcolor=INK2)
+    ax.legend(frameon=False, fontsize=8, labelcolor=INK2, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(HERE / "gate2_levels.png")
+    plt.close(fig)
+
+
+def ranks(v) -> list[float]:
+    """秩（并列取平均秩）"""
+    order = sorted(range(len(v)), key=lambda i: v[i])
+    r = [0.0] * len(v)
+    i = 0
+    while i < len(v):
+        j = i
+        while j + 1 < len(v) and v[order[j + 1]] == v[order[i]]:
+            j += 1
+        for k in range(i, j + 1):
+            r[order[k]] = (i + j) / 2 + 1
+        i = j + 1
+    return r
+
+
+def spearman(x, y) -> float:
+    rx, ry = ranks(x), ranks(y)
+    mx, my = statistics.mean(rx), statistics.mean(ry)
+    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    den = math.sqrt(sum((a - mx) ** 2 for a in rx) * sum((b - my) ** 2 for b in ry))
+    return num / den if den else float("nan")
+
+
+def extra(res) -> list[str]:
+    """补充分析：选方向能拿到多少联合收益、联合优化补上到下界差距的多少、逐例改善与几何特征的秩相关"""
+    out = []
+    for e in EPS:
+        k = str(e)
+        j = statistics.mean(r["joint"][k]["obj"] / r["n"] for r in res)
+        bp = statistics.mean(min(x["obj"] for x in r["two_stage"][k]) / r["n"] for r in res)
+        ba = statistics.mean(statistics.mean(x["obj"] for x in r["two_stage"][k]) / r["n"] for r in res)
+        lb = statistics.mean(r["lb"] / r["n"] for r in res)
+        out.append(f"ε = {e}：相对两个方向平均的总收益中，只选较好方向就拿到 {100 * (ba - bp) / (ba - j):.0f}%；"
+                   f"两阶段+ 到下界的差距中，联合优化补上 {100 * (bp - j) / (bp - lb):.0f}%")
+    imp = [1 - r["joint"]["0.1"]["obj"] / min(x["obj"] for x in r["two_stage"]["0.1"]) for r in res]
+    feats = {}
+    for r in res:
+        q = [tuple(t["q"]) for t in r["tasks"]]
+        dc = [min(dist(p, s) for s in STATIONS) - RADIUS for p in q]
+        cx, cy = statistics.mean(p[0] for p in q), statistics.mean(p[1] for p in q)
+        b = min(x["obj"] for x in r["two_stage"]["0.1"])
+        for name, val in (("观测点数", r["n"]), ("到覆盖边界的平均距离", statistics.mean(dc)),
+                          ("覆盖圈内观测点比例", sum(d < 0 for d in dc) / len(dc)), ("观测点重心到基地距离", dist((cx, cy), DEPOT)),
+                          ("最短回路长度", r["l_tsp"]), ("两阶段+ 距下界的相对余量", (b - r["lb"]) / b)):
+            feats.setdefault(name, []).append(val)
+    out.append("ε = 0.1 时逐例改善与实例特征的 Spearman 秩相关（60 例）：" +
+               "；".join(f"{name} {spearman(v, imp):+.2f}" for name, v in feats.items()))
+    hi = [i for i, v in enumerate(imp) if v >= 0.10]
+    lo = [i for i, v in enumerate(imp) if v < 0.05]
+    out.append(f"ε = 0.1 改善 ≥ 10% 的 {len(hi)} 例与 < 5% 的 {len(lo)} 例对比（均值）：" +
+               "；".join(f"{name} {statistics.mean(v[i] for i in hi):.3g} 对 {statistics.mean(v[i] for i in lo):.3g}"
+                        for name, v in feats.items()))
+    return out
 
 
 def draw_route(ax, r, sol, pts, title) -> None:
@@ -172,9 +275,9 @@ def plot_example(r, e, pts, fname, tag) -> None:
     imp = 100 * (1 - j["obj"] / b["obj"])
     fig.suptitle(f"{tag}：每机 {r['n']} 个观测点，ε = {e}，联合优化改善 {imp:.1f}%（预算内飞行上限 {(1 + e) * r['t_hat'] - r['hover']:.0f} s）",
                  color=INK, fontsize=10)
-    fig.text(0.5, 0.015, "实线：采集航线；虚线：去上传点的绕路与返航；空心方块：上传点；实心圆：时效窗较紧的一半观测点；数字：访问顺序",
-             color=INK2, fontsize=8, ha="center")
-    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
+    fig.text(0.5, 0.008, "实线：采集航线；虚线：去上传点的绕路与返航；空心方块：上传点；实心圆：时效窗较紧的一半观测点；数字：访问顺序",
+             color=INK2, fontsize=8, ha="center", va="bottom")
+    fig.tight_layout(rect=(0, 0.05, 1, 0.94))
     fig.savefig(HERE / fname)
     plt.close(fig)
 
@@ -204,8 +307,10 @@ def main() -> None:
                        f"停靠前最后一个观测点距覆盖边界 {mean_of(rows, 'dc_last'):.0f} m（全部观测点平均 {mean_of(rows, 'dc_all'):.0f} m）；"
                        f"其时效窗 {mean_of(rows, 'delta_last'):.0f} s（全部平均 {mean_of(rows, 'delta_all'):.0f} s）；"
                        f"最长一段 {mean_of(rows, 'seg_max'):.1f} 个观测点；最后在基地上传 {sum(x['final_depot'] for x in rows)}/{n_all}")
+    out += ["补充分析"] + extra(res)
     (HERE / "gate2_features_out.txt").write_text("\n".join(out) + "\n", encoding="utf-8", newline="\n")
     plot_improvement(res)
+    plot_levels(res)
     # 示例：8 点实例在 ε = 0.1 下改善最大与改善居中的各一例
     rows8 = [r for r in res if r["n"] == max(x["n"] for x in res)]
     imp = lambda r: 1 - r["joint"]["0.1"]["obj"] / min(x["obj"] for x in r["two_stage"]["0.1"])

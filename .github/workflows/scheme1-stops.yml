@@ -6,6 +6,10 @@ on:
     paths:
       - '.github/workflows/scheme1-stops.yml'
       - 'experiments/scheme1/**'
+      # 第三道检验、分析脚本与说明文件的改动不影响本工作流的结果，排除以免重复运行
+      - '!experiments/scheme1/gate3_check.py'
+      - '!experiments/scheme1/gate2_analyze.py'
+      - '!experiments/scheme1/README.md'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,0 +1,131 @@
+name: scheme1 gate3 (scale extrapolation)
+on:
+  # 只有 workflow_dispatch 时，文件不在默认分支 develop 上不会被注册，沿用推送触发
+  push:
+    branches: ['experiment/scheme1-stops']
+    paths:
+      - '.github/workflows/scheme1-gate3.yml'
+      - 'experiments/scheme1/gate3_check.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+jobs:
+  calib:
+    # A 校准：第二道检验的 60 个实例，按（观测点总数，种子）分 12 片；先自检再计算
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [30, 35, 40]
+        seed: [0, 1, 2, 3]
+    # 固定系统版本：ubuntu-latest 自 2026-10-19 起逐步迁移到 Ubuntu 26
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - name: Self-test
+        run: .venv/bin/python experiments/scheme1/gate3_check.py selftest
+      - name: Calibration shard
+        run: >-
+          .venv/bin/python experiments/scheme1/gate3_check.py calib
+          --size ${{ matrix.size }} --seed ${{ matrix.seed }} --workers 4 --out outputs/scheme1/gate3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scheme1-gate3-calib-${{ matrix.size }}-${{ matrix.seed }}
+          path: outputs/scheme1/gate3/
+          retention-days: 90
+
+  single:
+    # B 单机外推（判定）：两种布点 × 每机 10/13/16 个观测点 × 4 个种子，共 24 片，每片 5 个单机实例
+    strategy:
+      fail-fast: false
+      matrix:
+        layout: [sector, fireline]
+        size: [50, 65, 80]
+        seed: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - name: Single-UAV shard
+        run: >-
+          .venv/bin/python experiments/scheme1/gate3_check.py single
+          --layout ${{ matrix.layout }} --size ${{ matrix.size }} --seed ${{ matrix.seed }} --workers 4 --out outputs/scheme1/gate3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scheme1-gate3-single-${{ matrix.layout }}-${{ matrix.size }}-${{ matrix.seed }}
+          path: outputs/scheme1/gate3/
+          retention-days: 90
+
+  fleet:
+    # C 多机分配（补充）：两种布点 × 4 个种子，每片一个机队，两个 ε 并行
+    strategy:
+      fail-fast: false
+      matrix:
+        layout: [sector, fireline]
+        seed: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - name: Fleet shard
+        run: >-
+          .venv/bin/python experiments/scheme1/gate3_check.py fleet
+          --layout ${{ matrix.layout }} --seed ${{ matrix.seed }} --workers 2 --out outputs/scheme1/gate3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scheme1-gate3-fleet-${{ matrix.layout }}-${{ matrix.seed }}
+          path: outputs/scheme1/gate3/
+          retention-days: 90
+
+  summary:
+    # 三部分全部完成后才按事先声明的规则判定；实例不全时汇总步骤失败、不给结论
+    needs: [calib, single, fleet]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: scheme1-gate3-*
+          path: outputs/scheme1/gate3-shards
+          merge-multiple: true
+      - name: Merge shards and apply the pre-declared rules
+        run: .venv/bin/python experiments/scheme1/gate3_check.py merge outputs/scheme1/gate3-shards --out outputs/scheme1/gate3
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 gate3: scale extrapolation"
+            echo '```'
+            cat outputs/scheme1/gate3/gate3_out.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-gate3-merged-${{ github.run_id }}
+          path: outputs/scheme1/gate3/
+          retention-days: 90
