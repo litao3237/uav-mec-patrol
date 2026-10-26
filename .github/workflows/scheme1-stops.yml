@@ -1,0 +1,115 @@
+name: scheme1 stops (gate2 + verification)
+on:
+  # 只有 workflow_dispatch 时，文件不在默认分支 develop 上不会被注册，沿用其他实验分支的推送触发
+  push:
+    branches: ['experiment/scheme1-stops']
+    paths:
+      - '.github/workflows/scheme1-stops.yml'
+      - 'experiments/scheme1/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+jobs:
+  verify:
+    # 结构性质 P1–P3、整批送达反例、退化检查与加速动态规划对拍，复现方案一问题定义文档 7.5 节的数字
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - name: Fast DP cross-check
+        run: .venv/bin/python experiments/scheme1/gate2_check.py crosscheck --out outputs/scheme1/verify
+      - name: Structural properties and degeneracy check
+        working-directory: experiments/scheme1
+        run: |
+          ../../.venv/bin/python stop_dp_verify.py
+          ../../.venv/bin/python batch_counterexample.py
+          ../../.venv/bin/python dp_crosscheck.py
+          ../../.venv/bin/python degeneracy_check.py
+      - name: Summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/verify
+          cp experiments/scheme1/*_out.txt outputs/scheme1/verify/ 2>/dev/null || true
+          {
+            echo "### scheme1 verification"
+            echo '```'
+            for f in outputs/scheme1/verify/*_out.txt; do echo "== $(basename "$f")"; cat "$f"; done
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-verify-${{ github.run_id }}
+          path: outputs/scheme1/verify/
+          retention-days: 90
+
+  gate2:
+    # 按（观测点总数，种子）分成 12 个分片并行，每个分片 5 个单机实例；分片内先对拍，不一致则不跑主计算
+    strategy:
+      fail-fast: false
+      matrix:
+        size: [30, 35, 40]
+        seed: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - name: Fast DP cross-check
+        run: .venv/bin/python experiments/scheme1/gate2_check.py crosscheck --out outputs/scheme1/gate2
+      - name: Gate 2 shard
+        run: >-
+          .venv/bin/python experiments/scheme1/gate2_check.py run
+          --size ${{ matrix.size }} --seed ${{ matrix.seed }} --workers 4 --out outputs/scheme1/gate2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scheme1-gate2-shard-${{ matrix.size }}-${{ matrix.seed }}
+          path: outputs/scheme1/gate2/gate2_results_${{ matrix.size }}_${{ matrix.seed }}.json
+          retention-days: 90
+
+  gate2-summary:
+    # 汇总全部分片后才按事先声明的规则判定；实例不全时汇总步骤失败、不给结论
+    needs: gate2
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+      - name: Create Python environment
+        run: uv venv --python 3.14.5 .venv
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: scheme1-gate2-shard-*
+          path: outputs/scheme1/gate2-shards
+          merge-multiple: true
+      - name: Merge shards and apply the pre-declared gate
+        run: .venv/bin/python experiments/scheme1/gate2_check.py merge outputs/scheme1/gate2-shards --out outputs/scheme1/gate2
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 gate2: joint vs two-stage"
+            echo '```'
+            cat outputs/scheme1/gate2/gate2_out.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-gate2-merged-${{ github.run_id }}
+          path: outputs/scheme1/gate2/
+          retention-days: 90
