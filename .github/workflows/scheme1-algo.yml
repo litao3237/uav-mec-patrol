@@ -1,4 +1,4 @@
-name: scheme1 algorithm (tests + regression + speed)
+name: scheme1 algorithm (tests + regression + speed + figures)
 on:
   # 只有 workflow_dispatch 时，文件不在默认分支 develop 上不会被注册，沿用推送触发
   push:
@@ -10,7 +10,9 @@ on:
       - 'src/uav_mec/v27/physics.py'
       - 'configs/v27_timeliness.yaml'
       - 'tests/test_scheme1_algorithm.py'
+      - 'tests/test_scheme1_experiment.py'
       - 'experiments/scheme1_algo_check.py'
+      - 'experiments/scheme1_plots.py'
       - 'experiments/scheme1/gate3_check.py'
   workflow_dispatch:
 permissions:
@@ -22,7 +24,8 @@ env:
   OPENBLAS_NUM_THREADS: '1'
 jobs:
   test:
-    # 单元测试：参数推导、精确停靠与穷举对拍、时间价格下界、增量计算、加速等价与解的校验
+    # 单元测试：参数推导、精确停靠与穷举对拍、时间价格下界、增量计算、加速等价与解的校验；
+    # 基线可行、指标口径一致、方法间的序关系、运行时记录与出图
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -35,9 +38,9 @@ jobs:
         run: |
           uv venv --python 3.14.5 .venv
           uv pip install -r configs/requirements-frozen.txt
-          uv pip install -e ".[dev]"
+          uv pip install -e ".[dev]" matplotlib==3.11.2
       - name: Unit tests
-        run: uv run --no-sync python -m pytest tests/test_scheme1_algorithm.py
+        run: uv run --no-sync python -m pytest tests/test_scheme1_algorithm.py tests/test_scheme1_experiment.py
 
   check:
     # 回归（与第三道检验逐位比对）与提速测量（加速前后结果须完全相同）
@@ -70,4 +73,42 @@ jobs:
         with:
           name: scheme1-algo-${{ github.run_id }}
           path: outputs/scheme1/algo/
+          retention-days: 90
+
+  figures:
+    # 统一作图模块示例：冒烟种子 97–99 的小实例上运行全部方法（B0–B4、P1、P2），
+    # 逐实例 JSON + 汇总 CSV，再出中英文两套图；自检（可行、序关系）不通过时失败
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fonts (CJK for Chinese labels, Liberation Sans as Arial substitute)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-wqy-microhei fonts-liberation
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Demo run and figures
+        run: uv run --no-sync python experiments/scheme1_plots.py demo --workers 4 --out outputs/scheme1/plots_demo
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 figures: demo run (smoke seeds 97-99)"
+            echo '```'
+            cat outputs/scheme1/plots_demo/demo_summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-figures-${{ github.run_id }}
+          path: outputs/scheme1/plots_demo/
           retention-days: 90

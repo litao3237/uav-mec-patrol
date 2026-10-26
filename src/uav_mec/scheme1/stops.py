@@ -318,6 +318,8 @@ class PlanResult:
     hover_s: float
     mission_s: float
     energy_j: float
+    collect: list             # 每个观测点的采集完成时刻（s），与航线顺序对应
+    deliver: list             # 每个观测点的送达时刻（上传完成 + 地面处理，s）
 
 
 def simulate(inst: Instance, route: list[int], stops) -> PlanResult:
@@ -325,7 +327,7 @@ def simulate(inst: Instance, route: list[int], stops) -> PlanResult:
     p = inst.params
     pos_xy = p.depot
     clock = fly = hover = 0.0
-    carried, aoi = [], {}
+    carried, aoi, collect, deliver = [], {}, {}, {}
     stop_at = dict(stops)
     if not stops or stops[-1][0] != len(route):
         raise ValueError("停靠方案的最后一项必须在最后一个观测点之后")
@@ -350,9 +352,11 @@ def simulate(inst: Instance, route: list[int], stops) -> PlanResult:
                 clock += u
                 hover += u
                 aoi[g2] = clock + p.tau_s - c
+                collect[g2], deliver[g2] = c, clock + p.tau_s
             carried = []
     d = math.hypot(p.depot[0] - pos_xy[0], p.depot[1] - pos_xy[1]) / p.speed_mps
     fly += d
     clock += d
     obj = sum(aoi[g] / inst.delta[g] for g in route)
-    return PlanResult(obj, [aoi[g] for g in route], fly, hover, clock, p.p_fly_w * fly + p.p_hover_w * hover)
+    return PlanResult(obj, [aoi[g] for g in route], fly, hover, clock, p.p_fly_w * fly + p.p_hover_w * hover,
+                      [collect[g] for g in route], [deliver[g] for g in route])

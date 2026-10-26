@@ -19,3 +19,18 @@
   - `.github/workflows/scheme1-gate3.yml`：改动 `gate3_check.py` 或该工作流时运行，A、B、C 三部分分 44 个分片并行，`summary` 汇总后判定。
   - 结果在运行页 Summary 与产物中。
 - **本地预览**：在本目录运行 `python gate2_check.py run`（全部实例，默认 11 进程）或其余脚本；输出写在本目录（已被提交的只有脚本）。
+
+## 正式实现与论文实验
+
+检验脚本之外，正式算法、基线与实验工具在包 `src/uav_mec/scheme1/` 中，实验规划见论文资料 `29_论文实验规划_20261026/实验规划.md`。
+
+| 位置 | 作用 |
+|---|---|
+| `src/uav_mec/scheme1/`（params、instance、stops、tsp、search） | 本文方法：两阶段起点 → 机内局部搜索 → 跨机移动，以精确停靠动态规划评估，时间价格下界筛选与前缀复用加速 |
+| `src/uav_mec/scheme1/baselines.py` | 基线 B0 只在基地上传、B1 就近贪心停靠、B2 两阶段、B3 静态分簇（仿 Huang 2026）、B4 截止驱动（仿 Raj 2026），与本文方法同一初始分配、同一预算 |
+| `src/uav_mec/scheme1/experiment.py` | 在一个实例上运行全部方法，用独立事件模拟统一评估；记录逐份数据（AoI、是否超时、采集与送达时刻）、逐机统计、收敛过程、下界与精确值样本、计时、实例特征与几何信息；`summary_rows` 展开成 CSV 行 |
+| `experiments/scheme1_plots.py` | 统一作图模块：方法的颜色、纹理与标记固定，中英文两套标签，每张图存 PDF 与 PNG；`demo` 子命令在冒烟种子 97–99 的小实例上运行全部方法并出示例图 |
+| `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
+| `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |
+
+`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。

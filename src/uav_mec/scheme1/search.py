@@ -72,9 +72,10 @@ class RouteEvaluator:
     :param inst: 实例
     :param cap_of: 航线 -> 飞行时间上限
     :param accelerate: 是否允许使用时间价格下界筛选
+    :param lb_samples: 抽样记录"下界与精确值"成对样本的个数（作图用）；抽到的候选两者都计算，不影响接受判断
     """
 
-    def __init__(self, inst: Instance, cap_of, accelerate: bool = True):
+    def __init__(self, inst: Instance, cap_of, accelerate: bool = True, lb_samples: int = 0):
         self.inst, self.cap_of, self.accelerate = inst, cap_of, accelerate
         self.exact_cache: dict = {}
         self.lb_cache: dict = {}
@@ -82,6 +83,12 @@ class RouteEvaluator:
         self.stats = {"exact": 0, "lambda": 0, "pruned": 0, "incumbent": 0}
         self._t_exact = self._t_filter = 0.0
         self._n_checks = self._n_lambda_updates = 0
+        self.lb_samples_left = lb_samples
+        self.lb_pairs: list = []          # (观测点数, 下界, 精确值)
+
+    def timing(self) -> dict:
+        """精确计算与下界筛选各自的累计耗时（s）"""
+        return {"t_exact": self._t_exact, "t_filter": self._t_filter}
 
     def _filter_on(self) -> bool:
         """预期省时才筛选：下界检查的平均成本 < 剪枝率 × 精确计算的平均成本；样本不足时先筛选以收集统计"""
@@ -160,6 +167,14 @@ class RouteEvaluator:
         key = tuple(route)
         if key in self.exact_cache:
             return self.exact_cache[key]
+        if self.lb_samples_left > 0 and inc.val is not None:
+            # 抽样：下界与精确值都算，成对记录；之后按精确值判断，与不抽样时的接受结果相同
+            self.lb_samples_left -= 1
+            lb = self.lower_bound(route, inc)
+            ex = self.exact(route)
+            if ex is not None:
+                self.lb_pairs.append((len(route), lb, ex[0]))
+            return ex
         margin = 1e-9 * max(1.0, abs(threshold))
         lb = self._known(key)
         if lb >= threshold + margin:
@@ -224,9 +239,10 @@ def apply_move(route, mv) -> list:
     return r
 
 
-def route_local_search(ev: RouteEvaluator, start, max_evals: int, rng: random.Random):
+def route_local_search(ev: RouteEvaluator, start, max_evals: int, rng: random.Random, on_improve=None):
     """首次改进的机内局部搜索：每轮随机打乱邻域，找到第一个更优的候选就移动；一整轮无改进即为局部最优
 
+    :param on_improve: 可选回调 (本次搜索的累计评估次数, 新目标)，每次接受改进时调用，用于记录收敛过程
     :return: (航线, 精确结果, 评估次数, 是否在上限内收敛)
     """
     cur = list(start)
@@ -251,6 +267,8 @@ def route_local_search(ev: RouteEvaluator, start, max_evals: int, rng: random.Ra
             if val is not None and (cur_val is None or val[0] < cur_val[0] - 1e-12):
                 cur, cur_val, improved = cand, val, True
                 inc = ev.incumbent(cur, cur_val, prev=inc)
+                if on_improve is not None:
+                    on_improve(evals, cur_val[0])
                 break
             if evals >= max_evals:
                 capped = True
@@ -273,6 +291,10 @@ class FleetResult:
     t_hat: float
     eps: float
     stats: dict
+    history: list = field(default_factory=list)          # 收敛过程：(累计评估次数, 当前最好的机队目标, 阶段)
+    per_route_routes: list = field(default_factory=list) # 机内搜索结束时（跨机移动之前）的航线，即 P1 的解
+    per_route_plans: list = field(default_factory=list)
+    lb_pairs: list = field(default_factory=list)         # 下界与精确值的成对样本 (观测点数, 下界, 精确值)
 
 
 def reference_t_hat(inst: Instance, groups, tours=None) -> float:
@@ -283,7 +305,7 @@ def reference_t_hat(inst: Instance, groups, tours=None) -> float:
 
 
 def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = None, tag=("fleet",),
-                t_hat: float | None = None) -> FleetResult:
+                t_hat: float | None = None, lb_samples: int = 0) -> FleetResult:
     """机队联合优化：两阶段解 → 每机局部搜索（最短回路两个方向起步）→ 跨机移动与交换
 
     :param inst: 实例
@@ -292,7 +314,8 @@ def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = N
     :param cfg: 搜索设置
     :param tag: 随机种子标签；取 (布点, 种子, ε) 时与第三道检验的随机数流一致，可复现其结果
     :param t_hat: 参考任务时长，缺省为 reference_t_hat
-    :return: 求解结果
+    :param lb_samples: 抽样记录下界与精确值成对样本的个数（作图用，不影响结果）
+    :return: 求解结果（含收敛过程与机内搜索阶段结束时的方案）
     """
     cfg = cfg or SearchConfig()
     t0 = time.perf_counter()
@@ -300,9 +323,10 @@ def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = N
     if t_hat is None:
         t_hat = reference_t_hat(inst, groups, tours)
     budget = Budget(inst, eps, t_hat)
-    ev = RouteEvaluator(inst, budget.cap, cfg.accelerate)
+    ev = RouteEvaluator(inst, budget.cap, cfg.accelerate, lb_samples)
     # 两阶段：每架机最短回路的较好方向 + 精确停靠
     two_stage = 0.0
+    best_known = []
     for tour, _ in tours:
         cands = [tour, tour[::-1]]
         for c in cands:
@@ -311,23 +335,35 @@ def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = N
         vals = [ev.exact(c) for c in cands]
         k = min(range(2), key=lambda i: vals[i][0])
         two_stage += vals[k][0]
+        best_known.append(vals[k][0])
+    # 收敛过程记录"至今最好"的机队目标，累计评估次数包含机内、跨机与跨机后的短搜索
+    history = [(0, two_stage, "two_stage")]
+    cum = 0
     # 每机局部搜索：从两个方向出发取较好者
     routes, vals = [], []
     for u, (tour, _) in enumerate(tours):
         best = None
         for si, start in enumerate((tour, tour[::-1])):
-            r, v, _, _ = route_local_search(ev, start, cfg.evals(len(tour)), random.Random(seed_of(*tag, u, si)))
+            def on_improve(e, v, u=u, base=cum):
+                if v < best_known[u]:
+                    best_known[u] = v
+                    history.append((base + e, sum(best_known), "intra"))
+            r, v, used, _ = route_local_search(ev, start, cfg.evals(len(tour)),
+                                               random.Random(seed_of(*tag, u, si)), on_improve)
+            cum += used
             if best is None or v[0] < best[1][0]:
                 best = (r, v)
         routes.append(best[0])
         vals.append(best[1])
     per_route = sum(v[0] for v in vals)
+    per_route_routes, per_route_plans = [list(r) for r in routes], list(vals)
+    history.append((cum, per_route, "intra_end"))
     # 跨机移动：移动一个观测点或交换两点，候选限于最近的异机观测点
     all_g = [g for r in routes for g in r]
     near = {g: sorted(all_g, key=lambda x: inst.dm_tt[x][g])[1:cfg.neighbors * 3 + 1] for g in all_g}
     incs = [ev.incumbent(r, v) for r, v in zip(routes, vals)]
     rng = random.Random(seed_of(*tag, "inter"))
-    inter_evals = accepted = 0
+    inter_evals = accepted = reopt_evals = 0
     while inter_evals < cfg.inter_evals:
         where = {g: (u, i) for u, r in enumerate(routes) for i, g in enumerate(r)}
         moves = []
@@ -359,20 +395,28 @@ def solve_fleet(inst: Instance, groups, eps: float, cfg: SearchConfig | None = N
                 if pair is not None and pair[0] is not None and pair[1] is not None \
                         and pair[0][0] + pair[1][0] < threshold - 1e-12:
                     # 接受后对两条航线各做一次短局部搜索
-                    ru, vu, _, _ = route_local_search(ev, ru, cfg.reopt_evals, random.Random(seed_of(*tag, accepted, "u")))
-                    rw, vw, _, _ = route_local_search(ev, rw, cfg.reopt_evals, random.Random(seed_of(*tag, accepted, "w")))
+                    ru, vu, used_u, _ = route_local_search(ev, ru, cfg.reopt_evals,
+                                                           random.Random(seed_of(*tag, accepted, "u")))
+                    rw, vw, used_w, _ = route_local_search(ev, rw, cfg.reopt_evals,
+                                                           random.Random(seed_of(*tag, accepted, "w")))
+                    reopt_evals += used_u + used_w
                     routes[u], routes[w], vals[u], vals[w] = ru, rw, vu, vw
                     incs[u] = ev.incumbent(ru, vu, prev=incs[u])
                     incs[w] = ev.incumbent(rw, vw, prev=incs[w])
                     accepted += 1
                     improved = True
+                    history.append((cum + inter_evals + reopt_evals, sum(v[0] for v in vals), "inter"))
                     break
             if inter_evals >= cfg.inter_evals:
                 break
         if not improved:
             break
-    stats = dict(ev.stats, inter_evals=inter_evals, accepted=accepted, secs=time.perf_counter() - t0)
-    return FleetResult(routes, vals, sum(v[0] for v in vals), two_stage, per_route, t_hat, eps, stats)
+    objective = sum(v[0] for v in vals)
+    history.append((cum + inter_evals + reopt_evals, objective, "end"))
+    stats = dict(ev.stats, inter_evals=inter_evals, accepted=accepted, reopt_evals=reopt_evals,
+                 intra_evals=cum, secs=time.perf_counter() - t0, **ev.timing())
+    return FleetResult(routes, vals, objective, two_stage, per_route, t_hat, eps, stats, history=history,
+                       per_route_routes=per_route_routes, per_route_plans=per_route_plans, lb_pairs=ev.lb_pairs)
 
 
 def base_only(inst: Instance, groups) -> float:
