@@ -1,0 +1,95 @@
+name: scheme1 experiment E6
+on:
+  # 打标签 scheme1-e6-* 后推送标签即运行；所用代码与工作流都取自标签对应的提交（求解器与 E1–E3 的冻结版本相同）
+  push:
+    tags: ['scheme1-e6-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  e6:
+    # 敏感性：默认档与 6 个因素的 13 个非默认档，各 80 个实例，共 1120 个
+    name: E6 shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_e6.py shard
+          --shard ${{ matrix.shard }} --shards 16 --workers 4 --out outputs/scheme1/e6/E6_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e6-${{ matrix.shard }}
+          path: outputs/scheme1/e6/E6_${{ matrix.shard }}/
+          retention-days: 90
+
+  summary:
+    # 合并全部分片：各因素的表格、检查与中英文图；有检查不通过时失败
+    needs: [e6]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fonts (CJK for Chinese labels, Liberation Sans as Arial substitute)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-wqy-microhei fonts-liberation
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: e6-*
+          path: outputs/scheme1/e6/shards
+      - name: Summarize
+        run: >-
+          uv run --no-sync python experiments/scheme1_e6.py summary
+          --inputs outputs/scheme1/e6/shards --out outputs/scheme1/e6/summary
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 experiment E6"
+            echo '```'
+            cat outputs/scheme1/e6/summary/summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Bundle records with the summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/e6/summary/records
+          find outputs/scheme1/e6/shards -path '*/records/*.json' -exec cp {} outputs/scheme1/e6/summary/records/ \;
+          find outputs/scheme1/e6/shards -name 'log_*.txt' -exec cat {} + > outputs/scheme1/e6/summary/shard_logs.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-e6-summary-${{ github.run_id }}
+          path: outputs/scheme1/e6/summary/
+          retention-days: 90

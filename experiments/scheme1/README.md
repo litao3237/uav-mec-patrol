@@ -33,7 +33,8 @@
 | `experiments/scheme1_experiments.py` | 论文实验 E1–E3：`shard` 运行一个分片（按估计耗时蛇形分配），`summary` 合并分片、输出均值表、配对检验（Wilcoxon）、一致性检查与中英文图，`smoke` 本地冒烟 |
 | `experiments/scheme1_e4.py` | E4：联合优化收益与实例特征的分层 Spearman 相关与线性模型（读 E1–E3 汇总产物，本地运行） |
 | `experiments/scheme1_e5.py` | E5：与精确解的差距（单机穷举）、求解时间随规模、停靠动态规划与枚举对拍；`lbgap` 用 E1 数据算与下界的差距 |
+| `experiments/scheme1_e6.py` | E6：事先声明的敏感性（站点数、覆盖半径、时效窗、电池、机数、上传速率），每次改变一个因素 |
 | `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
 | `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |
 
-`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml` 与 `scheme1-e5.yml` 分别在推送 `scheme1-exp-*`、`scheme1-e5-*` 标签时运行 E1–E3 与 E5（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。
+`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml`、`scheme1-e5.yml`、`scheme1-e6.yml` 分别在推送 `scheme1-exp-*`、`scheme1-e5-*`、`scheme1-e6-*` 标签时运行 E1–E3、E5、E6（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。

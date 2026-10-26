@@ -16,6 +16,8 @@ on:
       - 'experiments/scheme1_experiments.py'
       - 'experiments/scheme1_e5.py'
       - 'tests/test_scheme1_e5.py'
+      - 'experiments/scheme1_e6.py'
+      - 'tests/test_scheme1_e6.py'
       - 'experiments/scheme1/gate3_check.py'
   workflow_dispatch:
 permissions:
@@ -43,7 +45,7 @@ jobs:
           uv pip install -r configs/requirements-frozen.txt
           uv pip install -e ".[dev]" matplotlib==3.11.2
       - name: Unit tests
-        run: uv run --no-sync python -m pytest tests/test_scheme1_algorithm.py tests/test_scheme1_experiment.py tests/test_scheme1_e5.py
+        run: uv run --no-sync python -m pytest tests/test_scheme1_algorithm.py tests/test_scheme1_experiment.py tests/test_scheme1_e5.py tests/test_scheme1_e6.py
 
   check:
     # 回归（与第三道检验逐位比对）与提速测量（加速前后结果须完全相同）
