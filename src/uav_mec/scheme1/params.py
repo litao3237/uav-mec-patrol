@@ -13,6 +13,11 @@ from pathlib import Path
 from ..v27.params import ModelParams, load_params
 from ..v27.physics import coverage_radius_m, flight_power_w, hover_power_w
 
+# 推导参数（覆盖半径 m、功率 W）保留的小数位数。推导用到对数、幂、开方，不同平台的数学库在末位上可能差 1 个 ulp
+# （2026-10-26 实测：Linux 上的覆盖半径比 Windows 小 1 个 ulp，局部搜索在个别实例上因此走向不同的局部最优）；
+# 保留到 1e-9 后两边得到同一个双精度数，本地预览与 Actions 结果逐位一致
+DERIVED_DECIMALS = 9
+
 
 @dataclass(frozen=True)
 class Scheme1Params:
@@ -55,10 +60,13 @@ def params_from_v27(p: ModelParams, tau_s: float = 1.0) -> Scheme1Params:
     sites = p.sites[: p.num_sites]
     if len({s.bandwidth_mhz for s in sites}) != 1:
         raise ValueError("当前实现要求所用站点带宽相同，覆盖圈内速率为同一常数")
-    stations = tuple((s.name, s.x, s.y, coverage_radius_m(p, s.bandwidth_mhz)) for s in sites)
+    def fix(v: float) -> float:
+        return round(v, DERIVED_DECIMALS)
+
+    stations = tuple((s.name, s.x, s.y, fix(coverage_radius_m(p, s.bandwidth_mhz))) for s in sites)
     return Scheme1Params(
         width_m=p.width_m, height_m=p.height_m, margin_m=p.task_margin_m, depot=tuple(p.depot_xy),
-        stations=stations, speed_mps=p.speed_mps, p_fly_w=flight_power_w(p), p_hover_w=hover_power_w(p),
+        stations=stations, speed_mps=p.speed_mps, p_fly_w=fix(flight_power_w(p)), p_hover_w=fix(hover_power_w(p)),
         battery_j=p.battery_j, rate_mbps=p.min_rate_mbps, tau_s=tau_s, ring_fractions=tuple(p.ring_fractions),
         points_per_ring=p.points_per_ring, include_center=p.include_center, data_mbit=tuple(p.heavy.data_mbit),
         freshness_s=tuple(p.heavy.freshness_s), collect_s=p.heavy.collect_s)

@@ -128,6 +128,16 @@ def test_baselines_stay_feasible_without_slack(layout):
         assert isinstance(info, dict)
 
 
+def test_derived_params_are_platform_stable():
+    """推导参数保留 9 位小数：末位差 1 个 ulp 的推导结果（不同平台数学库）对齐到同一个双精度数"""
+    from uav_mec.scheme1.params import DERIVED_DECIMALS
+
+    for v in (SP.p_fly_w, SP.p_hover_w, *(s[3] for s in SP.stations)):
+        assert round(v, DERIVED_DECIMALS) == v
+        for w in (math.nextafter(v, math.inf), math.nextafter(v, -math.inf)):
+            assert round(w, DERIVED_DECIMALS) == v
+
+
 def load_plots():
     spec = importlib.util.spec_from_file_location("scheme1_plots", ROOT / "experiments" / "scheme1_plots.py")
     mod = importlib.util.module_from_spec(spec)

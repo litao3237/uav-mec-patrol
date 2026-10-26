@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import statistics
@@ -735,7 +736,15 @@ def demo_report(rows: list[dict]) -> tuple[str, bool]:
 
     lines.append(f"本文方法相对两阶段的改善：均值 {pct(statistics.fmean(gains))}，最小 {pct(min(gains))}，"
                  f"最大 {pct(max(gains))}")
+    lines.append(f"结果指纹（除计时外的全部汇总数值）：{result_fingerprint(rows)}")
     return "\n".join(lines), ok
+
+
+def result_fingerprint(rows: list[dict]) -> str:
+    """除计时列外全部汇总数值的 SHA-256 前 16 位；本地与 Actions 指纹相同即结果逐位一致"""
+    keys = sorted({k for r in rows for k in r} - {"secs"})
+    lines = sorted("|".join(repr(r.get(k)) for k in keys) for r in rows)
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()[:16]
 
 
 def plot_demo(out: Path, langs=("zh", "en")) -> list[Path]:
