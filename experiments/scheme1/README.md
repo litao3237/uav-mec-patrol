@@ -34,6 +34,7 @@
 | `experiments/scheme1_e4.py` | E4：联合优化收益与实例特征的分层 Spearman 相关与线性模型（读 E1–E3 汇总产物，本地运行） |
 | `experiments/scheme1_e5.py` | E5：与精确解的差距（单机穷举）、求解时间随规模、停靠动态规划与枚举对拍；`lbgap` 用 E1 数据算与下界的差距 |
 | `experiments/scheme1_e6.py` | E6：事先声明的敏感性（站点数、覆盖半径、时效窗、电池、机数、上传速率），每次改变一个因素 |
+| `experiments/scheme1_e7.py` | E7：火线案例（读 E1 汇总产物，本地运行）：按事先写定的规则选典型与收益最大两个实例，出航线图、逐份时间线、AoI ÷ δ 累积分布与各机任务时长；`--verify` 重算所选实例并与记录逐位比对 |
 | `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
 | `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |
 

@@ -76,7 +76,8 @@ LABELS = {
         "overtime": "超时部分", "fit": "最小二乘拟合", "title_aoi": "平均归一化 AoI",
         "P2A": "本文（加速）", "P2N": "本文（不加速）", "P2D": "本文（终点限基地）", "B2R": "两阶段（随机方向）",
         "PP": "往返方案", "mission_increase_pct": "最大任务时长增幅（%）", "battery_binding_frac": "电池起约束的机比例（%）",
-        "exact_calls": "精确动态规划次数", "case": "实例类型",
+        "exact_calls": "精确动态规划次数", "case": "实例类型", "aoi_norm_item": "每份数据的 AoI ÷ δ",
+        "transit": "往返基地", "moved": "换机的观测点",
     },
     "en": {
         "P2": "Proposed", "P1": "Proposed (intra)", "B2": "Two-stage", "B1": "Greedy stop",
@@ -99,6 +100,7 @@ LABELS = {
         "P2A": "Proposed (accel.)", "P2N": "Proposed (no accel.)", "P2D": "Proposed (depot end)",
         "B2R": "Two-stage (random dir.)", "PP": "Ping-pong", "mission_increase_pct": "Max mission increase (%)",
         "battery_binding_frac": "Battery-bound UAVs (%)", "exact_calls": "Exact DP calls", "case": "Instance type",
+        "aoi_norm_item": "Per-item AoI / δ", "transit": "To/from depot", "moved": "Reassigned point",
     },
 }
 SCALE = {"on_time_rate": 100.0, "battery_binding_frac": 100.0}   # 比例类指标画成百分数
@@ -138,9 +140,15 @@ def new_fig(ncols: int = 1, width: float = SINGLE_W, height: float = 2.3, **kw):
 
 
 def legend_top(fig, handles, ncol: int = 4) -> None:
-    """图例放在全部绘图区的上方，多列、无边框，不遮挡数据；宽度超出成图时逐步减少列数（英文标签较长）"""
+    """图例放在全部绘图区的上方，多列、无边框，不遮挡数据
+
+    宽度超出成图时减少列数（英文标签较长）。候选列数取 ⌈n / 行数⌉，使各行条目数尽量相同：
+    图例按列填充，8 项排成 7 列时第一列叠两项、其余各一项，看起来像排错了
+    """
     renderer = fig.canvas.get_renderer()
-    for k in range(min(ncol, len(handles)), 0, -1):
+    n = len(handles)
+    ks = sorted({math.ceil(n / rows) for rows in range(1, n + 1)} & set(range(1, min(ncol, n) + 1)), reverse=True)
+    for k in ks:
         leg = fig.legend(handles=handles, loc="outside upper center", ncol=k)
         if k == 1 or leg.get_window_extent(renderer).width <= 0.98 * fig.bbox.width:
             return
@@ -434,7 +442,8 @@ def convergence(ax, runs: list, lang: str, color: str = COLORS["P2"], phase: flo
     return handles
 
 
-def route_map(ax, geom: dict, routes, stops, color: str, lang: str) -> None:
+def route_map(ax, geom: dict, routes, stops, color: str, lang: str, uav_labels: bool = False,
+              light_transit: bool = False, highlight=()) -> None:
     """航线图：覆盖圈、地面站、候选上传点、观测点、基地，以及每架机的航线与停靠
 
     采集段为实线，去非基地上传点及离开它的绕路段为虚线，停靠的上传点为空心菱形；
@@ -442,6 +451,9 @@ def route_map(ax, geom: dict, routes, stops, color: str, lang: str) -> None:
     :param geom: experiment.instance_geometry 的输出
     :param routes: 每架机的访问顺序
     :param stops: 每架机的停靠方案 [(第 k 个观测点之后, 上传点下标或 -1)]
+    :param uav_labels: 是否在各机负责的观测点外侧标出机号（从 1 起），便于正文按机号讨论
+    :param light_transit: 往返基地的航段是否用浅色细线；各机都从基地出发，这些长航段重叠在一起，会盖住采集与停靠
+    :param highlight: 要加空心圈的观测点 gid（如跨机移动后换了机的点）
     """
     km = 1e-3
     for _, sx, sy, r in geom["stations"]:
@@ -452,30 +464,37 @@ def route_map(ax, geom: dict, routes, stops, color: str, lang: str) -> None:
             markersize=1.5, color=INK["muted"], zorder=1)
     dep, tasks = geom["depot"], geom["tasks"]
 
-    def seg(a, b, dashed):
-        ax.plot([a[0] * km, b[0] * km], [a[1] * km, b[1] * km], color=color, linewidth=0.9,
-                linestyle=(0, (2.5, 1.5)) if dashed else "-", zorder=3)
+    def seg(a, b, dashed, transit=False):
+        light = transit and light_transit
+        ax.plot([a[0] * km, b[0] * km], [a[1] * km, b[1] * km], color=tint(color, 0.55) if light else color,
+                linewidth=0.6 if light else 0.9, linestyle=(0, (2.5, 1.5)) if dashed else "-", zorder=2 if light else 3)
 
     used = set()
     for route, st in zip(routes, stops):
         stop_at = {int(k): int(q) for k, q in st}
         pos, from_stop = dep, False
         for k, g in enumerate(route, start=1):
-            seg(pos, tasks[g], from_stop)
+            seg(pos, tasks[g], from_stop, transit=pos is dep)
             pos, from_stop = tasks[g], False
             if k in stop_at:
                 q = stop_at[k]
                 if q == -1:
-                    seg(pos, dep, False)
+                    seg(pos, dep, False, transit=True)
                     pos = dep
                 else:
                     seg(pos, geom["points"][q], True)
                     pos, from_stop = geom["points"][q], True
                     used.add(q)
         if pos is not dep:
-            seg(pos, dep, from_stop)
+            seg(pos, dep, from_stop, transit=True)
+    if uav_labels:
+        _uav_badges(ax, tasks, routes, color)
     ax.plot([t[0] * km for t in tasks], [t[1] * km for t in tasks], linestyle="none", marker="o", markersize=2.2,
             color=INK["secondary"], zorder=4)
+    if highlight:
+        ax.plot([tasks[g][0] * km for g in highlight], [tasks[g][1] * km for g in highlight], linestyle="none",
+                marker="o", markersize=5.2, markerfacecolor="none", markeredgecolor=color, markeredgewidth=0.8,
+                zorder=4.5)
     if used:
         ax.plot([geom["points"][q][0] * km for q in used], [geom["points"][q][1] * km for q in used],
                 linestyle="none", marker="D", markersize=4, markerfacecolor=INK["surface"], markeredgecolor=color,
@@ -486,16 +505,53 @@ def route_map(ax, geom: dict, routes, stops, color: str, lang: str) -> None:
     ax.set_xlabel(label(lang, "x_km"))
 
 
-def map_legend(lang: str) -> list:
-    """航线图的图例（与方法无关的中性墨色）"""
-    return [Line2D([], [], linestyle="none", marker="s", markersize=4.5, color=INK["primary"], label=label(lang, "depot")),
-            Patch(facecolor=INK["wash"], edgecolor=INK["axis"], linewidth=0.5, label=label(lang, "station")),
-            Line2D([], [], linestyle="none", marker="o", markersize=2.2, color=INK["secondary"], label=label(lang, "task")),
-            Line2D([], [], linestyle="none", marker="D", markersize=4, markerfacecolor=INK["surface"],
-                   markeredgecolor=INK["secondary"], label=label(lang, "upload")),
-            Line2D([], [], color=INK["secondary"], linewidth=0.9, label=label(lang, "leg")),
-            Line2D([], [], color=INK["secondary"], linewidth=0.9, linestyle=(0, (2.5, 1.5)),
-                   label=label(lang, "detour"))]
+def _uav_badges(ax, tasks, routes, color: str, offset_m: float = 200.0) -> None:
+    """在每架机负责的观测点外侧画机号圆标
+
+    位置取这些点的形心，再沿"全部观测点形心 → 该形心"的方向外移 offset_m：火线上各机负责一段弧，
+    外移后圆标落在火线外侧的空白处，不压住航线
+    :param tasks: 观测点坐标（米）
+    :param routes: 每架机的访问顺序
+    :param color: 圆标的描边与文字颜色（方法色）
+    :param offset_m: 外移距离（米）
+    """
+    km = 1e-3
+    pts = [tasks[g] for r in routes for g in r]
+    if not pts:
+        return
+    cx, cy = statistics.fmean(p[0] for p in pts), statistics.fmean(p[1] for p in pts)
+    for u, route in enumerate(routes):
+        if not route:
+            continue
+        gx, gy = statistics.fmean(tasks[g][0] for g in route), statistics.fmean(tasks[g][1] for g in route)
+        d = math.hypot(gx - cx, gy - cy) or 1.0
+        x, y = gx + offset_m * (gx - cx) / d, gy + offset_m * (gy - cy) / d
+        ax.text(x * km, y * km, str(u + 1), ha="center", va="center", fontsize=5.5, color=color, zorder=7,
+                bbox={"boxstyle": "circle,pad=0.2", "facecolor": INK["surface"], "edgecolor": color, "linewidth": 0.6})
+
+
+def map_legend(lang: str, transit: bool = False, moved: bool = False) -> list:
+    """航线图的图例（与方法无关的中性墨色）
+
+    :param transit: 是否加"往返基地"一项（route_map 的 light_transit 打开时）
+    :param moved: 是否加"换机的观测点"一项（有空心圈时）
+    """
+    handles = [Line2D([], [], linestyle="none", marker="s", markersize=4.5, color=INK["primary"],
+                      label=label(lang, "depot")),
+               Patch(facecolor=INK["wash"], edgecolor=INK["axis"], linewidth=0.5, label=label(lang, "station")),
+               Line2D([], [], linestyle="none", marker="o", markersize=2.2, color=INK["secondary"],
+                      label=label(lang, "task")),
+               Line2D([], [], linestyle="none", marker="D", markersize=4, markerfacecolor=INK["surface"],
+                      markeredgecolor=INK["secondary"], label=label(lang, "upload")),
+               Line2D([], [], color=INK["secondary"], linewidth=0.9, label=label(lang, "leg")),
+               Line2D([], [], color=INK["secondary"], linewidth=0.9, linestyle=(0, (2.5, 1.5)),
+                      label=label(lang, "detour"))]
+    if transit:
+        handles.append(Line2D([], [], color=tint(INK["secondary"], 0.55), linewidth=0.6, label=label(lang, "transit")))
+    if moved:
+        handles.append(Line2D([], [], linestyle="none", marker="o", markersize=5.2, markerfacecolor="none",
+                              markeredgecolor=INK["secondary"], markeredgewidth=0.8, label=label(lang, "moved")))
+    return handles
 
 
 def timeline(ax, task_recs: list, color: str, lang: str) -> list:
@@ -514,7 +570,8 @@ def timeline(ax, task_recs: list, color: str, lang: str) -> list:
         c0, c1, dl = t["collect_s"] / 60, t["deliver_s"] / 60, (t["collect_s"] + t["delta_s"]) / 60
         ax.barh(y + 1, c1 - c0, left=c0, height=0.62, color=color, linewidth=0, zorder=2)
         if c1 > dl:
-            ax.barh(y + 1, c1 - dl, left=dl, height=0.62, color=color, edgecolor=shade(color), linewidth=0,
+            # 超时部分用浅底 + 同色斜纹：深色方法色（如 B0 的紫色）上叠深一档的纹理几乎看不出来
+            ax.barh(y + 1, c1 - dl, left=dl, height=0.62, color=tint(color, 0.6), edgecolor=color, linewidth=0,
                     hatch="//////", zorder=3)
         ax.plot([dl, dl], [y + 1 - 0.42, y + 1 + 0.42], color=INK["primary"], linewidth=0.8, zorder=4)
         centers.setdefault(t["uav"], []).append(y + 1)
@@ -533,7 +590,7 @@ def timeline(ax, task_recs: list, color: str, lang: str) -> list:
                Line2D([], [], linestyle="none", marker="|", markersize=6, markeredgewidth=0.8, color=INK["primary"],
                       label=label(lang, "deadline"))]
     if any(t["deliver_s"] > t["collect_s"] + t["delta_s"] for t in recs):
-        handles.insert(1, Patch(facecolor=color, edgecolor=shade(color), linewidth=0, hatch="//////",
+        handles.insert(1, Patch(facecolor=tint(color, 0.6), edgecolor=color, linewidth=0, hatch="//////",
                                 label=label(lang, "overtime")))
     return handles
 
@@ -669,17 +726,34 @@ def fig_gain_scatter(rows: list[dict], lang: str):
     return fig
 
 
-def fig_route_maps(rec: dict, lang: str, methods=("P2", "B2", "B0")):
-    """F20：同一实例上几种方法的航线图，子图标题给出平均归一化 AoI"""
+def fig_route_maps(rec: dict, lang: str, methods=("P2", "B2", "B0"), uav_labels: bool = False,
+                   light_transit: bool = False, mark_moved: bool = False):
+    """F20：同一实例上几种方法的航线图，子图标题给出平均归一化 AoI
+
+    :param uav_labels: 是否标出机号（见 route_map）
+    :param light_transit: 往返基地的航段是否用浅色细线（见 route_map）
+    :param mark_moved: 是否给换了机的观测点加空心圈；以 B2 的分配为准（B2、B0 都沿用初始分配），
+                       所以只有含跨机移动的方法（P2）会出现空心圈
+    """
+    ref = None
+    if mark_moved and "B2" in rec["methods"]:
+        ref = {g: u for u, r in enumerate(rec["methods"]["B2"]["routes"]) for g in r}
     fig, axes = new_fig(ncols=len(methods), width=DOUBLE_W, height=2.7, sharex=True, sharey=True)
+    any_moved = False
     for ax, m in zip(axes, methods):
         out = rec["methods"][m]
-        route_map(ax, rec["geometry"], out["routes"], out["stops"], COLORS[m], lang)
+        moved = []
+        if ref is not None:
+            moved = sorted(g for u, r in enumerate(out["routes"]) for g in r if ref.get(g, u) != u)
+            any_moved = any_moved or bool(moved)
+        route_map(ax, rec["geometry"], out["routes"], out["stops"], COLORS[m], lang, uav_labels=uav_labels,
+                  light_transit=light_transit, highlight=moved)
         v = out["summary"]["norm_aoi"]
         ax.set_title(f"{label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
                      else f"{label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
     axes[0].set_ylabel(label(lang, "y_km"))
-    legend_top(fig, map_legend(lang), ncol=6)
+    handles = map_legend(lang, transit=light_transit, moved=any_moved)
+    legend_top(fig, handles, ncol=len(handles))
     return fig
 
 
@@ -692,9 +766,45 @@ def fig_timeline(rec: dict, lang: str, method: str = "P2"):
     return fig
 
 
-def fig_uav_mission(rec: dict, lang: str):
-    """X9：跨机移动前（P1）后（P2）各机的任务时长，虚线为时长预算"""
-    series = {m: [u["mission_s"] / 60 for u in rec["methods"][m]["uavs"]] for m in ("P2", "P1")}
+def fig_timelines(rec: dict, lang: str, methods=("P2", "B2", "B0")):
+    """X15（对比版）：同一实例上几种方法的逐份时间线并排，共用时间轴
+
+    各子图的横条用该方法的颜色，子图标题给出方法与平均归一化 AoI；图例只说明编码，用中性墨色
+    """
+    n = max(len(rec["methods"][m]["tasks"]) for m in methods)
+    fig, axes = new_fig(ncols=len(methods), width=DOUBLE_W, height=1.2 + 0.055 * n, sharex=True)
+    for ax, m in zip(axes, methods):
+        out = rec["methods"][m]
+        timeline(ax, out["tasks"], COLORS[m], lang)
+        v = out["summary"]["norm_aoi"]
+        ax.set_title(f"{label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
+                     else f"{label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
+    handles = [Patch(facecolor=INK["muted"], label=label(lang, "carry")),
+               Patch(facecolor=tint(INK["muted"], 0.6), edgecolor=INK["muted"], linewidth=0, hatch="//////",
+                     label=label(lang, "overtime")),
+               Line2D([], [], linestyle="none", marker="|", markersize=6, markeredgewidth=0.8, color=INK["primary"],
+                      label=label(lang, "deadline"))]
+    legend_top(fig, handles, ncol=3)
+    return fig
+
+
+def fig_norm_aoi_cdf(rec: dict, lang: str, methods=("P2", "B2", "B0")):
+    """一个实例上每份数据 AoI ÷ δ 的累积分布；竖虚线 1 为时效窗，线左侧的比例即按时送达率"""
+    data = {m: [t["aoi_s"] / t["delta_s"] for t in rec["methods"][m]["tasks"]] for m in methods}
+    fig, ax = new_fig()
+    handles = cdf(ax, data, lang)
+    ax.axvline(1.0, zorder=2, **REF_STYLE)
+    handles.append(ref_handle(lang, "deadline"))
+    ax.set_xlim(left=0)
+    ax.set_xlabel(label(lang, "aoi_norm_item"))
+    ax.set_ylabel(label(lang, "cdf"))
+    legend_top(fig, handles)
+    return fig
+
+
+def fig_uav_mission(rec: dict, lang: str, methods=("P2", "P1")):
+    """X9：跨机移动前（P1）后（P2）各机的任务时长，虚线为时长预算；methods 可加入 B2 作为起点"""
+    series = {m: [u["mission_s"] / 60 for u in rec["methods"][m]["uavs"]] for m in methods}
     k = len(series["P2"])
     fig, ax = new_fig()
     handles = grouped_bars(ax, list(range(1, k + 1)), series, lang, ref=[rec["t_max"] / 60] * k, ref_key="budget",
