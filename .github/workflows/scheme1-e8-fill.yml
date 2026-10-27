@@ -1,0 +1,237 @@
+name: scheme1 experiment E8 fill
+on:
+  # 推送 scheme1-e8fill-* 标签时运行；标签不能以 scheme1-e8- 开头，否则会同时触发整套 E8（scheme1-e8.yml）
+  push:
+    tags: ['scheme1-e8fill-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read          # 合并作业跨运行下载 E8（run 40466638442）的汇总产物
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  plan1:
+    # 列出第一阶段的任务：E8 分片 13 超时缺的 6 个实例，加 3 个已完成的轻实例（复现核对）；
+    # 列任务调用 run_instance 本身（ReplayPool 只记录提交、不求解），扇形 N = 80 种子 100 要试遍轮转偏移，约 2 分钟
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Plan stage 1
+        id: plan
+        run: |
+          uv run --no-sync python experiments/scheme1_e8_fill.py plan1 --set all --out outputs/scheme1/e8fill/plan1
+          echo "matrix=$(cat outputs/scheme1/e8fill/plan1/matrix1.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fill-plan1
+          path: outputs/scheme1/e8fill/plan1/
+          retention-days: 90
+
+  stage1:
+    # 第一阶段：P2、P2 逐步复现、冷启动初始求解，每个任务一个作业（单进程）；
+    # 最重的是火线 N = 120、ε = 0.25、种子 113 的各任务，可能要数小时，超过作业时限的任务只让该实例缺结果
+    needs: plan1
+    name: S1 ${{ matrix.task }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJSON(needs.plan1.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: fill-plan1
+          path: outputs/scheme1/e8fill/plan1
+      - name: Run task
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8_fill.py stage
+          --plan outputs/scheme1/e8fill/plan1/plan1.pkl --task "${{ matrix.task }}" --out outputs/scheme1/e8fill/results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fill-r-${{ matrix.task }}
+          path: outputs/scheme1/e8fill/results/
+          retention-days: 90
+
+  plan2:
+    # 读入第一阶段的结果，列出各实例的 4 条链；第一阶段有任务没完成的实例跳过，其余照常进行
+    needs: [plan1, stage1]
+    if: ${{ !cancelled() && needs.plan1.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: fill-plan1
+          path: outputs/scheme1/e8fill/plan1
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fill-r-*
+          path: outputs/scheme1/e8fill/results
+          merge-multiple: true
+      - name: Plan stage 2
+        id: plan
+        run: |
+          uv run --no-sync python experiments/scheme1_e8_fill.py plan2 --plan outputs/scheme1/e8fill/plan1/plan1.pkl \
+            --results outputs/scheme1/e8fill/results --out outputs/scheme1/e8fill/plan2
+          cat outputs/scheme1/e8fill/plan2/plan2_skipped.txt
+          echo "matrix=$(cat outputs/scheme1/e8fill/plan2/matrix2.json)" >> "$GITHUB_OUTPUT"
+          echo "count=$(uv run --no-sync python -c 'import json; print(len(json.load(open("outputs/scheme1/e8fill/plan2/matrix2.json"))))')" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fill-plan2
+          path: outputs/scheme1/e8fill/plan2/
+          retention-days: 90
+
+  stage2:
+    # 第二阶段：每条 ILS 链一个作业（单进程），参数与随机数流与实例内并行时相同
+    needs: plan2
+    if: ${{ !cancelled() && needs.plan2.result == 'success' && needs.plan2.outputs.count != '0' }}
+    name: S2 ${{ matrix.task }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        task: ${{ fromJSON(needs.plan2.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: fill-plan2
+          path: outputs/scheme1/e8fill/plan2
+      - name: Run task
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8_fill.py stage
+          --plan outputs/scheme1/e8fill/plan2/plan2.pkl --task "${{ matrix.task }}" --out outputs/scheme1/e8fill/results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fill-r-${{ matrix.task }}
+          path: outputs/scheme1/e8fill/results/
+          retention-days: 90
+
+  merge:
+    # 由 run_instance 组装记录；3 个复现实例与 E8 原记录逐位比对（不含耗时），不一致时失败；
+    # 再把补跑的记录与 E8 的 234 个记录合在一起，按 29_ 写定的规则重新汇总（实例齐全才通过检查）
+    needs: [plan1, plan2, stage2]
+    if: ${{ !cancelled() && needs.plan1.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fonts (CJK for Chinese labels, Liberation Sans as Arial substitute)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-wqy-microhei fonts-liberation
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: fill-plan1
+          path: outputs/scheme1/e8fill/plan1
+      - uses: actions/download-artifact@v4
+        # 第二阶段没有运行时没有这个产物，只影响 Step summary 里的跳过说明
+        continue-on-error: true
+        with:
+          name: fill-plan2
+          path: outputs/scheme1/e8fill/plan2
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fill-r-*
+          path: outputs/scheme1/e8fill/results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: scheme1-e8-summary-40466638442
+          path: outputs/scheme1/e8fill/e8base
+          github-token: ${{ github.token }}
+          run-id: 40466638442
+      - name: Merge and check reproduction
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8_fill.py merge
+          --plan outputs/scheme1/e8fill/plan1/plan1.pkl --results outputs/scheme1/e8fill/results
+          --out outputs/scheme1/e8fill/fill --ref outputs/scheme1/e8fill/e8base/records
+      - name: Summarize E8 with the filled instances
+        if: always()
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8.py summary
+          --inputs outputs/scheme1/e8fill/e8base outputs/scheme1/e8fill/fill --out outputs/scheme1/e8fill/summary
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 experiment E8 fill"
+            echo '```'
+            cat outputs/scheme1/e8fill/fill/fill_report.txt 2>/dev/null || echo "no fill report"
+            cat outputs/scheme1/e8fill/plan2/plan2_skipped.txt 2>/dev/null || true
+            echo '```'
+            echo "### scheme1 experiment E8 with fill"
+            echo '```'
+            cat outputs/scheme1/e8fill/summary/summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Bundle fill outputs with the summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/e8fill/summary
+          cp -r outputs/scheme1/e8fill/fill outputs/scheme1/e8fill/summary/ || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-e8fill-summary-${{ github.run_id }}
+          path: outputs/scheme1/e8fill/summary/
+          retention-days: 90
