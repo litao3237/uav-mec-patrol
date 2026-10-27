@@ -1,0 +1,98 @@
+name: scheme1 experiment E8
+on:
+  # 打标签 scheme1-e8-* 后推送标签即运行；所用代码与工作流都取自标签对应的提交（求解器与 E1–E3 的冻结版本相同）
+  push:
+    tags: ['scheme1-e8-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  e8:
+    # 更强搜索对照：N ∈ {50, 80, 120} × 两种布点 × ε ∈ {0.1, 0.25} × 种子 100–119，共 240 个实例；
+    # 每个实例跑 P2（冻结求解器与逐步复现各一次）和 10 倍评估预算的迭代局部搜索；
+    # 实例内 4 个进程并行，分 40 片（按估计耗时蛇形分配，每片约 2–2.5 小时；免费账户最多 20 个作业同时运行，约两轮）
+    name: E8 shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8.py shard
+          --shard ${{ matrix.shard }} --shards 40 --workers 4 --out outputs/scheme1/e8/E8_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e8-${{ matrix.shard }}
+          path: outputs/scheme1/e8/E8_${{ matrix.shard }}/
+          retention-days: 90
+
+  summary:
+    # 合并全部分片：检查、各格汇总、按 29_ 写定的规则判定、中英文图；有检查不通过时失败
+    needs: [e8]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fonts (CJK for Chinese labels, Liberation Sans as Arial substitute)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-wqy-microhei fonts-liberation
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: e8-*
+          path: outputs/scheme1/e8/shards
+      - name: Summarize
+        run: >-
+          uv run --no-sync python experiments/scheme1_e8.py summary
+          --inputs outputs/scheme1/e8/shards --out outputs/scheme1/e8/summary
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 experiment E8"
+            echo '```'
+            cat outputs/scheme1/e8/summary/summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Bundle records with the summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/e8/summary/records
+          find outputs/scheme1/e8/shards -path '*/records/*.json' -exec cp {} outputs/scheme1/e8/summary/records/ \;
+          find outputs/scheme1/e8/shards -name 'log_*.txt' -exec cat {} + > outputs/scheme1/e8/summary/shard_logs.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-e8-summary-${{ github.run_id }}
+          path: outputs/scheme1/e8/summary/
+          retention-days: 90

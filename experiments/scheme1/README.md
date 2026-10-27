@@ -35,9 +35,10 @@
 | `experiments/scheme1_e5.py` | E5：与精确解的差距（单机穷举）、求解时间随规模、停靠动态规划与枚举对拍；`lbgap` 用 E1 数据算与下界的差距 |
 | `experiments/scheme1_e6.py` | E6：事先声明的敏感性（站点数、覆盖半径、时效窗、电池、机数、上传速率），每次改变一个因素 |
 | `experiments/scheme1_e7.py` | E7：火线案例（读 E1 汇总产物，本地运行）：按事先写定的规则选典型与收益最大两个实例，出航线图、逐份时间线、AoI ÷ δ 累积分布与各机任务时长；`--verify` 重算所选实例并与记录逐位比对 |
+| `experiments/scheme1_e8.py` | E8：更强搜索对照。在 N = 50/80/120 的实例上，用多起点 + 扰动的迭代局部搜索在 P2 评估次数的 10 倍预算内继续搜索，按 29_ 写定的规则判定局部搜索是否足够；每个实例还逐步复现一次 P2，核对重写的跨机阶段与冻结求解器相同，N = 50、80 的 P2 与 E1 比对（参考值 `experiments/scheme1_e8_e1_p2_ref.csv`） |
 | `experiments/scheme1_paper.py` | 论文图表整理（本地运行）：`collect` 把各实验重画的图按 29_ 的编号（F1–F20、X1–X15）复制改名并写清单；`tables` 生成表 1 关键参数（从冻结配置读出）、表 2 方法一览、表 3 主结果（E1 默认场景的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX；`schematics` 画示意图 |
 | `experiments/scheme1_schematics.py` | 示意图 S1–S4：场景（E7 典型案例的几何）、一架机的时间线与 AoI 定义、算法框架、实验流程 |
 | `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
 | `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |
 
-`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml`、`scheme1-e5.yml`、`scheme1-e6.yml` 分别在推送 `scheme1-exp-*`、`scheme1-e5-*`、`scheme1-e6-*` 标签时运行 E1–E3、E5、E6（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。
+`.github/workflows/scheme1-algo.yml` 在改动上述文件时运行：`test` 跑单元测试，`check` 跑回归与提速检查，`figures` 跑作图示例并上传数据与图。`.github/workflows/scheme1-experiments.yml`、`scheme1-e5.yml`、`scheme1-e6.yml`、`scheme1-e8.yml` 分别在推送 `scheme1-exp-*`、`scheme1-e5-*`、`scheme1-e6-*`、`scheme1-e8-*` 标签时运行 E1–E3、E5、E6、E8（标签即冻结的代码版本），汇总作业把表格写进 Summary，数据、记录与图作为产物保留 90 天。本地出示例图：`python experiments/scheme1_plots.py demo --out 目录 --workers 4`；只改样式时加 `--plot-only`，用已有的 CSV 与 JSON 重画。
