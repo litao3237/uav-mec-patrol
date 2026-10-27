@@ -240,6 +240,21 @@ def fmt_group(v) -> str:
     return str(int(v)) if isinstance(v, float) and v.is_integer() else str(v)
 
 
+def plain_log_ticks(ax, axis: str = "y") -> None:
+    """对数轴的刻度写成普通小数（0.1、0.2、0.3、0.5…），不写 6 × 10⁻¹ 这类科学记数
+
+    次刻度只标首位为 2、3、5 的值，免得拥挤。只用于跨度在两个数量级以内的轴（如归一化 AoI）；
+    跨越多个数量级的耗时轴仍用默认的 10ⁿ 记法
+    :param ax: 坐标轴
+    :param axis: "y" 或 "x"
+    """
+    from matplotlib.ticker import FuncFormatter
+
+    target = ax.yaxis if axis == "y" else ax.xaxis
+    target.set_major_formatter(FuncFormatter(lambda v, _pos: f"{v:g}"))
+    target.set_minor_formatter(FuncFormatter(lambda v, _pos: f"{v:g}" if f"{v:.0e}"[0] in "235" else ""))
+
+
 # ---------------------------------------------------------------------------
 # 数据读写
 # ---------------------------------------------------------------------------

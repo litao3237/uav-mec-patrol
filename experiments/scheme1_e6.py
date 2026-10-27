@@ -279,6 +279,7 @@ def fig_factor_lines(recs: list[dict], factor: str, lang: str):
             lb = [statistics.fmean(r["features"]["lb_norm"] for r in sel) for _, sel in pts]
             handles = sp.line_chart(ax, xs, series, lang, ref=lb, ref_key="LB")
             ax.set_yscale("log")
+            sp.plain_log_ticks(ax)
             ax.set_xticks(xs, [f"{x:g}" for x in xs])
             ax.grid(True, axis="both", which="major")
             if i == 1:
