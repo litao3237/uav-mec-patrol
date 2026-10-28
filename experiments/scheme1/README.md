@@ -37,7 +37,7 @@
 | `experiments/scheme1_e7.py` | E7：火线案例（读 E1 汇总产物，本地运行）：按事先写定的规则选典型与收益最大两个实例，出航线图、逐份时间线、AoI ÷ δ 累积分布与各机任务时长；`--verify` 重算所选实例并与记录逐位比对 |
 | `experiments/scheme1_e8.py` | E8：更强搜索对照。在 N = 50/80/120 的实例上，用多起点 + 扰动的迭代局部搜索在 P2 评估次数的 10 倍预算内继续搜索，按 29_ 写定的规则判定局部搜索是否足够；每个实例还逐步复现一次 P2，核对重写的跨机阶段与冻结求解器相同，N = 50、80 的 P2 与 E1 比对（参考值 `experiments/scheme1_e8_e1_p2_ref.csv`） |
 | `experiments/scheme1_e8_fill.py` | E8 补跑：E8 中超时的分片 13 缺 6 个实例，把实例内的任务（P2、P2 复现、冷启动初始求解、4 条链）拆到不同作业运行；列任务与组装都调用 `run_instance` 本身（`ReplayPool` 代替进程池），结果除耗时外与实例内并行逐位相同；另取 3 个已完成的轻实例走同样流程，与 E8 原记录逐位比对 |
-| `experiments/scheme1_paper.py` | 论文图表整理（本地运行）：`collect` 把各实验重画的图按 29_ 的编号（F1–F20、X1–X15）复制改名并写清单；`tables` 生成表 1 关键参数（从冻结配置读出）、表 2 方法一览、表 3 主结果（E1 默认场景的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX；`schematics` 画示意图 |
+| `experiments/scheme1_paper.py` | 论文图表整理（本地运行）：`collect` 把各实验重画的图按 29_ 的编号（F1–F20、X1–X15）复制改名并写清单；`tables` 生成表 1 关键参数（从冻结配置读出）、表 2 方法一览、表 3 主结果（E1 默认场景的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX；给出 E8 的产物（`--e8`）时，表 3 加 SCOUT+ 一行（按 E8 记录的方案重算），并写表 4（增强阶段的收益与规划耗时）；`schematics` 画示意图 |
 | `experiments/scheme1_schematics.py` | 示意图 S1–S4：场景（E7 典型案例的几何）、一架机的时间线与 AoI 定义、算法框架、实验流程 |
 | `experiments/scheme1_algo_check.py` | 回归（与第三道检验逐位比对）与提速检查 |
 | `tests/test_scheme1_algorithm.py`、`tests/test_scheme1_experiment.py` | 单元测试 |

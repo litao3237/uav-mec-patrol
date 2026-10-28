@@ -3,12 +3,14 @@
 - collect：各实验的图先在本地用统一作图模块从 Actions 数据重画（汇总文本须与 Actions 逐字相同），
   再按 29_ 的编号（F1–F20、X1–X15）复制、改名，写图的清单；缺的图在清单里标出
 - tables：表 1 关键实验参数（从冻结配置读出）、表 2 比较方法一览、表 3 主结果汇总
-  （E1 默认场景 N = 50、5 架机的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX（booktabs）
+  （E1 默认场景 N = 50、5 架机的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX（booktabs）；
+  给出 E8 的产物（--e8）时，表 3 加 SCOUT+ 一行（E8 中 N = 50 的实例与 E1 相同，按记录的方案重算指标），
+  并写表 4（增强阶段的收益与规划耗时）
 - schematics：示意图 S1–S4（见 scheme1_schematics.py）
 
 用法：
   python experiments/scheme1_paper.py collect --src E1_E3=目录 E4=目录 E5=目录 E5LB=目录 E6=目录 E7=目录 --out 目录
-  python experiments/scheme1_paper.py tables --e1 E1产物目录 --out 目录
+  python experiments/scheme1_paper.py tables --e1 E1产物目录 [--e8 E8产物目录 补跑产物目录/fill] --out 目录
   python experiments/scheme1_paper.py schematics --case E7案例记录.json --out 目录
 """
 
@@ -273,6 +275,9 @@ def table1_rows() -> list[dict]:
 TABLE2 = [
     ("P2", "SCOUT（本文）", "SCOUT (ours)", "机内 + 跨机局部搜索", "intra- and cross-UAV local search", "联合优化", "joint",
      "精确停靠动态规划", "exact stop DP"),
+    ("ILS", "SCOUT+", "SCOUT+", "在 SCOUT 的解之后继续：多起点 + 扰动的迭代局部搜索（4 条链）",
+     "continues from SCOUT: multi-start iterated local search with kicks (4 chains)", "联合优化", "joint",
+     "精确停靠动态规划", "exact stop DP"),
     ("P1", "SCOUT-intra", "SCOUT-intra", "机内局部搜索", "intra-UAV local search", "初始分配", "initial",
      "精确停靠动态规划", "exact stop DP"),
     ("B2", "两阶段", "Two-stage", "最短回路（取较好方向）", "shortest tour (better direction)", "初始分配", "initial",
@@ -296,6 +301,8 @@ T3_N = 50
 T3_METRICS = (("norm_aoi", 3, 1.0), ("mean_aoi_s", 1, 1.0), ("p95_aoi_s", 1, 1.0), ("on_time_rate", 1, 100.0),
               ("max_mission_min", 2, 1.0), ("energy_kj", 0, 1.0), ("stops_per_uav", 2, 1.0), ("secs", 1, 1.0))
 T3_METHODS = ("P2", "P1", "B2", "B1", "B3", "B4", "B0")
+# 表中各行的顺序；ILS（SCOUT+）一行只在给出 E8 的产物时才有
+T3_ROWS = ("P2", "ILS", "P1", "B2", "B1", "B3", "B4", "B0", "LB")
 T3_TABLES = {"3a": ((("fireline", 0.1), ("sector", 0.1))), "3b": ((("fireline", 0.25), ("sector", 0.25)))}
 T3_HEAD = {"zh": ("方法", "平均归一化 AoI", "平均 AoI（s）", "95 分位 AoI（s）", "按时送达率（%）", "最大任务时长（min）",
                   "总能耗（kJ）", "每机途中停靠", "求解时间（s）"),
@@ -369,12 +376,15 @@ def table3_lines(data: list[dict], name: str, lang: str, tex: bool = False) -> l
             lines.append(f"\\multicolumn{{{ncol}}}{{l}}{{\\textit{{{tex_escape(title)}}}}} \\\\")
         else:
             lines.append(f"| **{title}** |" + " |" * (ncol - 1))
-        for m in (*T3_METHODS, "LB"):
+        present = {d["method"] for d in data if d["layout"] == lay and d["eps"] == eps}
+        for m in (x for x in T3_ROWS if x in present):
             cells = [_cell(idx.get((lay, eps, m, key)), tex) for key, _, _ in T3_METRICS]
             label = sp.label(lang, m)
             lines.append((" & ".join([tex_escape(label), *cells]) + " \\\\") if tex
                          else ("| " + " | ".join([label, *cells]) + " |"))
     note = T3_NOTE[lang]
+    if any(d["method"] == "ILS" for d in data):
+        note += ("" if lang == "zh" else " ") + T3_NOTE_PLUS[lang]
     if tex:
         lines = [f"% {note}"] + lines + ["\\bottomrule", "\\end{tabular}"]
     else:
@@ -389,6 +399,198 @@ T3_NOTE = {
           "Solve times were measured on GitHub Actions runners (4 parallel processes each) and are indicative only; "
           "P1 is the intermediate solution of the same run and is not timed separately.",
 }
+T3_NOTE_PLUS = {
+    "zh": "SCOUT+ 一行取自 E8（与 E1 同一批实例），按记录的方案用同一套事件模拟重算；其规划耗时见表 4。",
+    "en": "The SCOUT+ row is taken from E8 (same instances as E1) and re-evaluated from the recorded plans with the same "
+          "event simulation; its planning time is reported in Table 4.",
+}
+
+
+# ---------------------------------------------------------------------------
+# E8（增强阶段，论文中的 SCOUT+）：表 3 的 SCOUT+ 一行与表 4
+# ---------------------------------------------------------------------------
+
+E8_LAYOUTS, E8_SIZES, E8_EPS = ("fireline", "sector"), (50, 80, 120), (0.1, 0.25)
+
+
+def load_e8(dirs) -> list[dict]:
+    """读 E8 的逐例记录：各目录下的 records/*.json（补跑目录里校验用的 repro/ 不读）
+
+    :param dirs: E8 汇总产物目录、补跑产物的 fill 目录
+    :return: 记录列表
+    :raises ValueError: 同一实例的记录出现两次
+    """
+    import json
+
+    recs, seen = [], set()
+    for d in dirs:
+        for p in sorted(Path(d).rglob("records/*.json")):
+            if p.name in seen:
+                raise ValueError(f"E8 记录重复：{p.name}")
+            seen.add(p.name)
+            recs.append(json.loads(p.read_text(encoding="utf-8")))
+    return recs
+
+
+def scout_plus_summary(rec: dict, params) -> dict:
+    """按 E8 记录的 SCOUT+ 方案重算 E1 口径的全部指标
+
+    实例与预算的重建与 scheme1_e8.setup 相同，指标用 E1 同一个 evaluate_solution 计算，所以与表 3 其余各行同一口径；
+    重算的平均归一化 AoI 必须与记录逐位相同，否则说明实例或代码与 E8 运行时不同，结果不能放进表里
+    :param rec: E8 逐例记录
+    :param params: load_scheme1_params 读出的冻结参数
+    :return: evaluate_solution 的 summary
+    :raises ValueError: 重算与记录不一致，或方案不可行
+    """
+    from uav_mec.scheme1 import Budget, evaluate_solution, make_instance, reference_t_hat
+
+    m, il = rec["meta"], rec["ils"]
+    inst, groups = make_instance(m["layout"], m["n"], m["m"], m["seed"], params)
+    budget = Budget(inst, m["eps"], reference_t_hat(inst, groups))
+    s = evaluate_solution(inst, list(zip(il["routes"], il["stops"], strict=True)), budget)["summary"]
+    if s["norm_aoi"] != il["norm_aoi"] or not (s["feasible"] and s["assigned_once"]):
+        raise ValueError(f"SCOUT+ 重算与 E8 记录不一致：{m}")
+    return s
+
+
+def table3_plus_data(recs: list[dict]) -> list[dict]:
+    """表 3 中 SCOUT+ 一行的数值：E8 中 N = 50 的实例（与 E1 相同）按记录的方案重算，统计口径与 table3_data 相同
+
+    不列求解时间：E8 在实例内用 4 个进程并行计时，与 E1 的计时条件不同；规划耗时见表 4
+    :param recs: load_e8 的输出
+    :return: 与 table3_data 同格式的行，方法记为 "ILS"
+    """
+    import scheme1_plots as sp
+
+    from uav_mec.scheme1 import load_scheme1_params
+
+    params = load_scheme1_params(str(CONFIG))
+    out = []
+    for blocks in T3_TABLES.values():
+        for lay, eps in blocks:
+            sel = [r for r in recs if r["meta"]["layout"] == lay and r["meta"]["n"] == T3_N
+                   and abs(r["meta"]["eps"] - eps) < 1e-9]
+            if not sel:
+                continue
+            ss = [scout_plus_summary(r, params) for r in sel]
+            for key, nd, scale in T3_METRICS:
+                if key == "secs":
+                    continue
+                mean, ci = sp.mean_ci([s[key] * scale for s in ss])
+                out.append({"layout": lay, "eps": eps, "method": "ILS", "metric": key, "mean": mean, "ci": ci,
+                            "n": len(ss), "decimals": nd})
+    return out
+
+
+def e8_timing(rec: dict) -> dict:
+    """单例耗时（秒）：SCOUT 本身，以及 4 条链在 4 核上并行时 SCOUT+ 比 SCOUT 多用的墙钟的下界与上界
+
+    口径与 36_ 补充分析相同。下界：冷启动求解与 SCOUT 同时进行（冷启动只记了总耗时，取各条的平均），之后 4 条链
+    同时进行、取最长一条；上界：E8 实测的整例墙钟减去 SCOUT，其中多了一个校验用的逐步复现任务
+    :param rec: E8 逐例记录（实例内并行运行的记录，不是补跑记录）
+    :return: {"p2": SCOUT 的耗时, "lo": 多花的下界, "hi": 多花的上界}
+    """
+    p2 = rec["p2"]["secs"]
+    chains = [c["secs"] for c in rec["chains"]]
+    k = rec["cold_chains"]
+    stage1 = max(p2, (rec["ils"]["secs"] - sum(chains)) / k) if k else p2
+    return {"p2": p2, "lo": stage1 + max(chains) - p2, "hi": rec["job_secs"] - p2}
+
+
+def table4_data(recs: list[dict]) -> list[dict]:
+    """表 4 的数值：每格（布点 × N × ε）SCOUT 与 SCOUT+ 的平均归一化 AoI、改善，以及规划耗时
+
+    改善取 E8 判定用的 gain["final"]（独立事件模拟的目标，满预算），统计与 E8 报告表 1 相同；耗时与 E8 报告表 3 相同，
+    只用实例内并行运行的记录：补跑记录（带 split）的任务拆到不同作业单独运行，计时条件不同
+    :param recs: load_e8 的输出
+    :return: 每格一行；该格没有可用的计时记录时，耗时各项为 None
+    """
+    import statistics as st
+
+    out = []
+    for lay in E8_LAYOUTS:
+        for n in E8_SIZES:
+            for eps in E8_EPS:
+                sel = [r for r in recs if r["meta"]["layout"] == lay and r["meta"]["n"] == n
+                       and abs(r["meta"]["eps"] - eps) < 1e-9]
+                if not sel:
+                    continue
+                g = [r["gain"]["final"] for r in sel]
+                ts = [e8_timing(r) for r in sel if "split" not in r]
+                row = {"layout": lay, "n": n, "eps": eps, "instances": len(sel), "timed": len(ts),
+                       "scout": st.fmean(r["p2"]["norm_aoi"] for r in sel),
+                       "scout_plus": st.fmean(r["ils"]["norm_aoi"] for r in sel),
+                       "gain_mean": st.fmean(g), "gain_median": st.median(g), "gain_max": max(g),
+                       "scout_secs": None, "extra_lo": None, "extra_hi": None, "ratio_lo": None, "ratio_hi": None}
+                if ts:
+                    row.update({"scout_secs": st.fmean(t["p2"] for t in ts),
+                                "extra_lo": st.fmean(t["lo"] for t in ts), "extra_hi": st.fmean(t["hi"] for t in ts),
+                                "ratio_lo": st.median(t["lo"] / t["p2"] for t in ts),
+                                "ratio_hi": st.median(t["hi"] / t["p2"] for t in ts)})
+                out.append(row)
+    return out
+
+
+T4_HEAD = {"zh": ("N", "ε", "SCOUT", "SCOUT+", "改善（%）：均值 / 中位 / 最大", "SCOUT 出方案（s）", "SCOUT+ 多花（s）",
+                  "多花 / SCOUT（中位）"),
+           "en": ("N", "ε", "SCOUT", "SCOUT+", "Gain (%): mean / median / max", "SCOUT (s)", "SCOUT+ extra (s)",
+                  "Extra / SCOUT (median)")}
+T4_NOTE = {
+    "zh": "注：E8，5 架机，每格 20 个实例；N = 50、80 的实例与 E1 相同。SCOUT、SCOUT+ 两列为平均归一化 AoI 的均值；"
+          "改善 = 100·(SCOUT − SCOUT+)/SCOUT，按独立事件模拟计算，SCOUT+ 用满预算（SCOUT 评估次数的 10 倍，4 条链平分）。"
+          "耗时是 Actions 运行器上的实测：“SCOUT+ 多花”为 4 条链在 4 核上并行时比 SCOUT 多用的墙钟，给出下界–上界"
+          "（下界：冷启动求解与 SCOUT 同时进行，再加最长一条链；上界：实测整例墙钟减去 SCOUT，含一个校验用的复现任务）；"
+          "“多花 / SCOUT”为逐例比值的中位数。耗时三列不含补跑的 6 个实例（任务拆到不同作业运行，计时条件不同），只作量级参考。",
+    "en": "Note: E8, 5 UAVs, 20 instances per cell; the instances for N = 50 and 80 are those of E1. The SCOUT and SCOUT+ "
+          "columns give the mean normalized AoI; gain = 100·(SCOUT − SCOUT+)/SCOUT from the event simulation, with "
+          "SCOUT+ at its full budget (10× the evaluations of SCOUT, split over 4 chains). Times were measured on GitHub "
+          "Actions runners: \"SCOUT+ extra\" is the additional wall-clock time over SCOUT when the 4 chains run on 4 "
+          "cores, given as lower–upper bounds (lower: cold-start solves run alongside SCOUT, plus the longest chain; "
+          "upper: measured wall-clock of the instance minus SCOUT, which includes one verification replay); "
+          "\"Extra / SCOUT\" is the median per-instance ratio. The three time columns exclude the 6 re-run instances "
+          "(tasks run as separate jobs) and are indicative only.",
+}
+
+
+def table4_lines(data: list[dict], lang: str, tex: bool = False) -> list[str]:
+    """表 4 的 Markdown 或 LaTeX（booktabs）行：按布点分段，每行一个（N, ε）
+
+    :param data: table4_data 的输出
+    :param lang: 语言
+    :param tex: True 时输出 LaTeX，否则 Markdown
+    """
+    head = T4_HEAD[lang]
+    ncol = len(head)
+    if tex:
+        lines = ["\\begin{tabular}{" + "c" * ncol + "}", "\\toprule", " & ".join(tex_escape(h) for h in head) + " \\\\",
+                 "\\midrule"]
+    else:
+        lines = ["| " + " | ".join(head) + " |", "|" + "---|" * ncol]
+    lays = [lay for lay in E8_LAYOUTS if any(d["layout"] == lay for d in data)]
+    for k, lay in enumerate(lays):
+        title = LAYOUT_NAME[lang][lay]
+        if tex:
+            if k:
+                lines.append("\\midrule")
+            lines.append(f"\\multicolumn{{{ncol}}}{{l}}{{\\textit{{{tex_escape(title)}}}}} \\\\")
+        else:
+            lines.append(f"| **{title}** |" + " |" * (ncol - 1))
+        for d in (d for d in data if d["layout"] == lay):
+            timed = d["scout_secs"] is not None
+            cells = [str(d["n"]), f"{d['eps']:g}", f"{d['scout']:.4f}", f"{d['scout_plus']:.4f}",
+                     f"{d['gain_mean']:.2f} / {d['gain_median']:.2f} / {d['gain_max']:.2f}",
+                     f"{d['scout_secs']:.0f}" if timed else "—",
+                     f"{d['extra_lo']:.0f}–{d['extra_hi']:.0f}" if timed else "—",
+                     f"{d['ratio_lo']:.1f}–{d['ratio_hi']:.1f}" if timed else "—"]
+            lines.append((" & ".join(tex_escape(c) for c in cells) + " \\\\") if tex
+                         else ("| " + " | ".join(cells) + " |"))
+    note = T4_NOTE[lang]
+    if tex:
+        lines = [f"% {note}"] + lines + ["\\bottomrule", "\\end{tabular}"]
+    else:
+        lines += ["", note]
+    return lines
+
 
 TEX_MAP = {"%": "\\%", "&": "\\&", "_": "\\_", "#": "\\#", "ε": "$\\varepsilon$", "δ": "$\\delta$", "τ": "$\\tau$",
            "×": "$\\times$", "·": "$\\cdot$", "±": "$\\pm$", "≥": "$\\geq$", "≤": "$\\leq$", "–": "--", "—": "---",
@@ -457,14 +659,16 @@ def write_text(path: Path, lines: list[str]) -> None:
 
 T_NAMES = {"1": ("表1_关键实验参数", "Table1_parameters"), "2": ("表2_比较方法", "Table2_methods"),
            "3a": ("表3a_主结果_eps0.1", "Table3a_main_results_eps0.1"),
-           "3b": ("表3b_主结果_eps0.25", "Table3b_main_results_eps0.25")}
+           "3b": ("表3b_主结果_eps0.25", "Table3b_main_results_eps0.25"),
+           "4": ("表4_增强阶段的收益与耗时", "Table4_enhancement_gain_and_time")}
 
 
-def write_tables(e1_rows: Path, out: Path) -> list[Path]:
-    """写全部表：每个表的中英文 Markdown 与 LaTeX，以及表 1、表 3 的 CSV
+def write_tables(e1_rows: Path, out: Path, e8_dirs=None) -> list[Path]:
+    """写全部表：每个表的中英文 Markdown 与 LaTeX，以及表 1、表 3（与表 4）的 CSV
 
     :param e1_rows: E1–E3 汇总产物中的 E1_rows.csv
     :param out: 输出目录（其下 tables/）
+    :param e8_dirs: E8 汇总产物目录与补跑产物的 fill 目录；给出时表 3 加 SCOUT+ 一行，并写表 4
     :return: 写出的文件
     """
     import scheme1_plots as sp
@@ -473,14 +677,21 @@ def write_tables(e1_rows: Path, out: Path) -> list[Path]:
     files = []
     t1 = table1_rows()
     t3 = table3_data(sp.read_rows(e1_rows))
+    t4 = []
+    if e8_dirs:
+        recs = load_e8(e8_dirs)
+        t3 += table3_plus_data(recs)
+        t4 = table4_data(recs)
     for lang in LANGS:
         k = 0 if lang == "zh" else 1
-        for tid in ("1", "2", "3a", "3b"):
+        for tid in ("1", "2", "3a", "3b") + (("4",) if t4 else ()):
             for tex in (False, True):
                 if tid == "1":
                     lines = table1_lines(t1, lang, tex)
                 elif tid == "2":
                     lines = table2_lines(lang, tex)
+                elif tid == "4":
+                    lines = table4_lines(t4, lang, tex)
                 else:
                     lines = table3_lines(t3, tid, lang, tex)
                 p = d / lang / f"{T_NAMES[tid][k]}.{'tex' if tex else 'md'}"
@@ -488,7 +699,11 @@ def write_tables(e1_rows: Path, out: Path) -> list[Path]:
                 files.append(p)
     sp.write_rows(d / "Table1_parameters.csv", t1)
     sp.write_rows(d / "Table3_main_results.csv", t3)
-    return files + [d / "Table1_parameters.csv", d / "Table3_main_results.csv"]
+    files += [d / "Table1_parameters.csv", d / "Table3_main_results.csv"]
+    if t4:
+        sp.write_rows(d / "Table4_enhancement.csv", t4)
+        files.append(d / "Table4_enhancement.csv")
+    return files
 
 
 PART_TITLES = (("main", "正文结果图"), ("extended", "扩展图"), ("other", "其他补充图（不编号）"))
@@ -520,8 +735,9 @@ def main(argv=None) -> int:
     p = sub.add_parser("collect", help="按编号复制、改名各实验重画的图，写图的清单")
     p.add_argument("--src", nargs="+", required=True, help="来源=目录；来源为 " + "、".join(SOURCES))
     p.add_argument("--out", type=Path, required=True)
-    p = sub.add_parser("tables", help="表 1–3")
+    p = sub.add_parser("tables", help="表 1–4（表 4 与表 3 的 SCOUT+ 一行需要 --e8）")
     p.add_argument("--e1", type=Path, required=True, help="E1–E3 汇总产物目录（含 E1_rows.csv）")
+    p.add_argument("--e8", type=Path, nargs="+", help="E8 汇总产物目录与补跑产物的 fill 目录（其下 records/）")
     p.add_argument("--out", type=Path, required=True)
     p = sub.add_parser("schematics", help="示意图 S1–S4")
     p.add_argument("--case", type=Path, required=True, help="E7 典型案例的记录 JSON")
@@ -540,7 +756,7 @@ def main(argv=None) -> int:
         print(f"图：{len(rows) - len(miss)}/{len(rows)} 项齐全" + (f"；缺或不全：{'、'.join(miss)}" if miss else ""))
         return 0
     if a.cmd == "tables":
-        files = write_tables(a.e1 / "E1_rows.csv", a.out)
+        files = write_tables(a.e1 / "E1_rows.csv", a.out, a.e8)
         print(f"表：写出 {len(files)} 个文件")
         return 0
     import scheme1_schematics as sch
