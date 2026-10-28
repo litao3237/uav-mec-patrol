@@ -155,17 +155,22 @@ def test_scout_plus_summary_recomputes_plan():
 
 def test_collect(tmp_path):
     pp = load("scheme1_paper")
-    src = tmp_path / "e123"
+    src, src5, src8 = tmp_path / "e123", tmp_path / "e5", tmp_path / "e8"
     for lang in pp.LANGS:
         d = src / "figures" / lang
         d.mkdir(parents=True)
         for ext in pp.EXTS:
             (d / f"E1_F4_norm_aoi_fireline_eps0.1.{ext}").write_bytes(b"x")
-        (d / "E3_F3_acceleration_time.pdf").write_bytes(b"x")     # 只有 PDF：不全
-    rows = pp.collect({"E1_E3": src}, tmp_path / "out")
+        (src5 / "figures" / lang).mkdir(parents=True)
+        (src5 / "figures" / lang / "E5_F3_acceleration_time.pdf").write_bytes(b"x")     # 只有 PDF：不全
+        (src8 / "figures" / lang).mkdir(parents=True)
+        for ext in pp.EXTS:
+            (src8 / "figures" / lang / f"E8_X16_gain_vs_budget.{ext}").write_bytes(b"x")
+    rows = pp.collect({"E1_E3": src, "E5": src5, "E8": src8}, tmp_path / "out")
     by = {r["file"]: r for r in rows}     # 文件名为"编号_原图名"，保留原图名便于追溯来源
     assert by["F04_E1_F4_norm_aoi_fireline_eps0.1"]["status"] == "齐"
-    assert by["F03a_E3_F3_acceleration_time"]["status"] == "不全（2/4）"
+    assert by["F03a_E5_F3_acceleration_time"]["status"] == "不全（2/4）"     # F3 取自 E5 的计时
+    assert by["X16_E8_X16_gain_vs_budget"]["status"] == "齐"                 # E8 的图也由 collect 收录
     assert by["F01_E5_F1_stop_dp_vs_bruteforce"]["status"] == "缺"
     assert (tmp_path / "out" / "figures" / "en" / "main" / "F04_E1_F4_norm_aoi_fireline_eps0.1.png").is_file()
     pp.write_manifest(rows, tmp_path / "out")

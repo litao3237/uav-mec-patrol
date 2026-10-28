@@ -1,7 +1,7 @@
 """方案一论文图表整理（实验规划 29_ 推进顺序第 7 步；图表清单见 29_ 第 5.2 节）
 
 - collect：各实验的图先在本地用统一作图模块从 Actions 数据重画（汇总文本须与 Actions 逐字相同），
-  再按 29_ 的编号（F1–F20、X1–X15）复制、改名，写图的清单；缺的图在清单里标出
+  再按 29_ 的编号（F1–F20、X1–X17）复制、改名，写图的清单；缺的图在清单里标出
 - tables：表 1 关键实验参数（从冻结配置读出）、表 2 比较方法一览、表 3 主结果汇总
   （E1 默认场景 N = 50、5 架机的均值 ± 95% 置信区间），各出 Markdown、CSV 与 LaTeX（booktabs）；
   给出 E8 的产物（--e8）时，表 3 加 SCOUT+ 一行（E8 中 N = 50 的实例与 E1 相同，按记录的方案重算指标），
@@ -9,7 +9,7 @@
 - schematics：示意图 S1–S4（见 scheme1_schematics.py）
 
 用法：
-  python experiments/scheme1_paper.py collect --src E1_E3=目录 E4=目录 E5=目录 E5LB=目录 E6=目录 E7=目录 --out 目录
+  python experiments/scheme1_paper.py collect --src E1_E3=目录 E4=目录 E5=目录 E5LB=目录 E6=目录 E7=目录 E8=目录 SUPP=目录 --out 目录
   python experiments/scheme1_paper.py tables --e1 E1产物目录 [--e8 E8产物目录 补跑产物目录/fill] --out 目录
   python experiments/scheme1_paper.py schematics --case E7案例记录.json --out 目录
 """
@@ -37,17 +37,20 @@ SOURCES = {
     "E5LB": "E5 与下界的差距，本地分析 E1 产物",
     "E6": "E6，标签 scheme1-e6-v1，run 40341256152",
     "E7": "E7，本地读 E1 记录（典型案例种子 113，收益最大案例种子 103）",
+    "E8": "E8，标签 scheme1-e8-v1 与补跑 scheme1-e8fill-v1，run 40466638442 与 40525246807（240 例）",
+    "SUPP": "E2、E6 补跑三个基线（标签 scheme1-supp-v1），并入 E1–E3、E6 的结果后在本地出图（7 种方法）",
 }
 
 # (编号, 来源, 原图名, 中文图名, 英文图名, 部分)；部分为 main（正文）、extended（扩展）、other（其他补充）。
 # 一个编号对应两个文件时加 a、b；E1 的案例占位图（种子 100）已由 E7 取代，不收
 FIGURES = [
     ("F01", "E5", "E5_F1_stop_dp_vs_bruteforce", "停靠动态规划与穷举的对拍", "Stop DP vs. brute-force enumeration", "main"),
-    ("F02", "E1_E3", "E1_F2_convergence_fireline_n50_eps0.1", "局部搜索收敛曲线（火线，N = 50，ε = 0.1）",
-     "Convergence of the local search (fire line, N = 50, ε = 0.1)", "main"),
-    ("F03a", "E1_E3", "E3_F3_acceleration_time", "两项加速的效果：求解时间", "Effect of the two accelerations: solve time",
+    ("F02", "E1_E3", "E1_F2_convergence_fireline_eps0.1", "局部搜索收敛曲线（火线，ε = 0.1，N = 30–80）",
+     "Convergence of the local search (fire line, ε = 0.1, N = 30–80)", "main"),
+    # F3 用 E5 的计时（N × 机数），按"加速开关 × 机数"画 6 条线；E3 的加速对比图仍会生成，但不再收录
+    ("F03a", "E5", "E5_F3_acceleration_time", "两项加速的效果：求解时间", "Effect of the two accelerations: solve time",
      "main"),
-    ("F03b", "E1_E3", "E3_F3_acceleration_exact_calls", "两项加速的效果：精确动态规划次数",
+    ("F03b", "E5", "E5_F3_acceleration_exact_calls", "两项加速的效果：精确动态规划次数",
      "Effect of the two accelerations: exact DP calls", "main"),
     ("F04", "E1_E3", "E1_F4_norm_aoi_fireline_eps0.1", "平均归一化 AoI 随规模的变化（火线，ε = 0.1）",
      "Mean normalized AoI vs. N (fire line, ε = 0.1)", "main"),
@@ -65,18 +68,19 @@ FIGURES = [
      "Per-item AoI distribution (fire line, N = 50, ε = 0.1)", "main"),
     ("F11", "E1_E3", "E1_F11_norm_aoi_line_fireline_eps0.25", "平均归一化 AoI 随规模的趋势（火线，ε = 0.25）",
      "Mean normalized AoI trend vs. N (fire line, ε = 0.25)", "main"),
-    ("F12a", "E1_E3", "E2_F12_tradeoff_fireline", "AoI–时长折中曲线（火线）", "AoI–duration trade-off (fire line)", "main"),
-    ("F12b", "E1_E3", "E2_F12_tradeoff_sector", "AoI–时长折中曲线（扇形）", "AoI–duration trade-off (sector)", "main"),
+    # F12、F16、F17、X11–X14 与 E2 的任务时长增幅取补跑后的 7 种方法版本（scheme1_supp.py figures）
+    ("F12a", "SUPP", "E2_F12_tradeoff_fireline", "AoI–时长折中曲线（火线）", "AoI–duration trade-off (fire line)", "main"),
+    ("F12b", "SUPP", "E2_F12_tradeoff_sector", "AoI–时长折中曲线（扇形）", "AoI–duration trade-off (sector)", "main"),
     ("F13", "E4", "E4_F13_gain_vs_eps_and_distance", "联合优化收益与预算、离覆盖距离的关系",
      "Gain of joint optimization vs. budget slack and distance to coverage", "main"),
     ("F14", "E1_E3", "E3_F14_ablation_norm_aoi_fireline_eps0.1", "消融：平均归一化 AoI（火线，ε = 0.1）",
      "Ablation: mean normalized AoI (fire line, ε = 0.1)", "main"),
     ("F15", "E1_E3", "E3_F15_ablation_on_time_fireline_eps0.1", "消融：按时送达率（火线，ε = 0.1）",
      "Ablation: on-time delivery (fire line, ε = 0.1)", "main"),
-    ("F16", "E6", "E6_F16_stations", "敏感性：站点数", "Sensitivity: number of ground stations", "main"),
-    ("F17a", "E6", "E6_F17_freshness_norm_aoi", "敏感性：时效窗（平均归一化 AoI）",
+    ("F16", "SUPP", "E6_F16_stations", "敏感性：站点数", "Sensitivity: number of ground stations", "main"),
+    ("F17a", "SUPP", "E6_F17_freshness_norm_aoi", "敏感性：时效窗（平均归一化 AoI）",
      "Sensitivity: freshness window (mean normalized AoI)", "main"),
-    ("F17b", "E6", "E6_F17_freshness_on_time", "敏感性：时效窗（按时送达率）", "Sensitivity: freshness window (on-time delivery)",
+    ("F17b", "SUPP", "E6_F17_freshness_on_time", "敏感性：时效窗（按时送达率）", "Sensitivity: freshness window (on-time delivery)",
      "main"),
     ("F18", "E1_E3", "E1_F18_norm_aoi_sector_eps0.1", "第二场景（扇形）：平均归一化 AoI（ε = 0.1）",
      "Second scenario (sector): mean normalized AoI (ε = 0.1)", "main"),
@@ -96,19 +100,24 @@ FIGURES = [
      "Total energy vs. N (fire line, ε = 0.25)", "extended"),
     ("X06", "E1_E3", "E1_X6_aoi_cdf_fireline_n50_eps0.1", "每份数据 AoI 的累积分布（火线，N = 50，ε = 0.1）",
      "CDF of per-item AoI (fire line, N = 50, ε = 0.1)", "extended"),
-    ("X07", "E5", "E5_X7_solve_time", "求解时间随规模的变化", "Solve time vs. problem size", "extended"),
+    ("X07", "E5", "E5_X7_speedup", "两项加速的提速倍数随规模的变化", "Speedup of the two accelerations vs. problem size",
+     "extended"),
     ("X08", "E1_E3", "E1_X8_lb_ratio", "时间价格下界的紧度（下界 ÷ 精确值）", "Tightness of the time-price bound (bound / exact)",
      "extended"),
     ("X09", "E7", "E7_X9_uav_mission_max_s103", "跨机移动前后各机任务时长（收益最大的实例）",
      "Per-UAV mission time before and after cross-UAV moves (largest-gain instance)", "extended"),
     ("X10", "E4", "E4_X10_gain_vs_slack_std", "收益与各机时间余量离散程度的关系", "Gain vs. dispersion of UAV time slack",
      "extended"),
-    ("X11", "E6", "E6_X11_radius", "敏感性：覆盖半径", "Sensitivity: coverage radius", "extended"),
-    ("X12", "E6", "E6_X12_battery", "敏感性：电池容量", "Sensitivity: battery capacity", "extended"),
-    ("X13", "E6", "E6_X13_uavs", "敏感性：机数", "Sensitivity: number of UAVs", "extended"),
-    ("X14", "E6", "E6_X14_rate", "敏感性：上传速率", "Sensitivity: upload rate", "extended"),
+    ("X11", "SUPP", "E6_X11_radius", "敏感性：覆盖半径", "Sensitivity: coverage radius", "extended"),
+    ("X12", "SUPP", "E6_X12_battery", "敏感性：电池容量", "Sensitivity: battery capacity", "extended"),
+    ("X13", "SUPP", "E6_X13_uavs", "敏感性：机数", "Sensitivity: number of UAVs", "extended"),
+    ("X14", "SUPP", "E6_X14_rate", "敏感性：上传速率", "Sensitivity: upload rate", "extended"),
     ("X15", "E7", "E7_X15_timelines_median_s113", "火线案例中每份数据的采集与送达时间线（典型实例）",
      "Collection-to-delivery timelines in the fire-line case (typical instance)", "extended"),
+    ("X16", "E8", "E8_X16_gain_vs_budget", "更强搜索对照：改善随评估预算的变化",
+     "Stronger-search comparison: gain vs. evaluation budget", "extended"),
+    ("X17", "E8", "E8_X17_gain_box", "更强搜索对照：每例改善的分布", "Stronger-search comparison: distribution of per-instance gains",
+     "extended"),
 ]
 
 # 其他补充图：保留原图名，不编号
@@ -116,7 +125,7 @@ OTHER = [
     ("E1_E3", "E3_F14_ablation_norm_aoi_fireline_eps0.25"), ("E1_E3", "E3_F14_ablation_norm_aoi_sector_eps0.1"),
     ("E1_E3", "E3_F14_ablation_norm_aoi_sector_eps0.25"), ("E1_E3", "E3_F15_ablation_on_time_fireline_eps0.25"),
     ("E1_E3", "E3_F15_ablation_on_time_sector_eps0.1"), ("E1_E3", "E3_F15_ablation_on_time_sector_eps0.25"),
-    ("E1_E3", "E2_battery_binding"), ("E1_E3", "E2_mission_increase_fireline"), ("E1_E3", "E2_mission_increase_sector"),
+    ("E1_E3", "E2_battery_binding"), ("SUPP", "E2_mission_increase_fireline"), ("SUPP", "E2_mission_increase_sector"),
     ("E4", "E4_spearman_heatmap"), ("E4", "E4_standardized_coefficients"),
     ("E5", "E5_gap_to_exact"), ("E5LB", "E5_gap_to_lower_bound"),
     ("E7", "E7_aoi_over_delta_cdf_median_s113"), ("E7", "E7_X9_uav_mission_median_s113"),

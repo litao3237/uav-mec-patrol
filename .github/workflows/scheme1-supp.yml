@@ -1,0 +1,92 @@
+name: scheme1 supplement (E2, E6 extra baselines)
+on:
+  # 打标签 scheme1-supp-* 后推送标签即运行；所用代码与工作流都取自标签对应的提交（求解器与 E1–E3 的冻结版本相同）
+  push:
+    tags: ['scheme1-supp-*']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  PYTHONHASHSEED: '0'
+  PYTHONIOENCODING: 'utf-8'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  supp:
+    # E2 中 ε 的另外 7 档 280 个实例 + E6 的 1120 个实例，各跑 B2、B1、B3、B4（B2 只用来核对实例与原实验相同）
+    name: supplement shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - name: Run shard
+        run: >-
+          uv run --no-sync python experiments/scheme1_supp.py shard
+          --shard ${{ matrix.shard }} --shards 4 --workers 4 --out outputs/scheme1/supp/S_${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: supp-${{ matrix.shard }}
+          path: outputs/scheme1/supp/S_${{ matrix.shard }}/
+          retention-days: 90
+
+  summary:
+    # 合并全部分片：检查（含 B2 与仓库中参考值逐位相同）与各档均值；有检查不通过时失败
+    # 7 种方法的图在本地并入原实验的结果后画（scheme1_supp.py figures），数字全部来自本运行的记录
+    needs: [supp]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.14.5'
+          enable-cache: true
+      - name: Install frozen numerical environment
+        run: |
+          uv venv --python 3.14.5 .venv
+          uv pip install -r configs/requirements-frozen.txt
+          uv pip install -e ".[dev]" matplotlib==3.11.2
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: supp-*
+          path: outputs/scheme1/supp/shards
+      - name: Summarize
+        run: >-
+          uv run --no-sync python experiments/scheme1_supp.py summary
+          --inputs outputs/scheme1/supp/shards --out outputs/scheme1/supp/summary
+      - name: Step summary
+        if: always()
+        run: |
+          {
+            echo "### scheme1 supplement: E2, E6 extra baselines (B1, B3, B4)"
+            echo '```'
+            cat outputs/scheme1/supp/summary/summary.txt 2>/dev/null || echo "no summary"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Bundle records with the summary
+        if: always()
+        run: |
+          mkdir -p outputs/scheme1/supp/summary/records
+          find outputs/scheme1/supp/shards -path '*/records/*.json' -exec cp {} outputs/scheme1/supp/summary/records/ \;
+          find outputs/scheme1/supp/shards -name 'log_*.txt' -exec cat {} + > outputs/scheme1/supp/summary/shard_logs.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scheme1-supp-summary-${{ github.run_id }}
+          path: outputs/scheme1/supp/summary/
+          retention-days: 90

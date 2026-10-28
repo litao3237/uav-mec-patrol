@@ -377,10 +377,14 @@ def summarize_f1(recs: list[dict], expected: int) -> tuple[list[str], list[str],
 E5_LABELS = {
     "zh": {"gap_exact": "与精确最优的差距（%）", "gap_lb": "与逐份下界的差距（%）", "brute": "穷举全部停靠方案",
            "dp": "精确停靠动态规划", "opt_brute": "穷举得到的最优目标", "opt_dp": "动态规划得到的最优目标",
-           "n_route": "航线上的观测点数", "secs_log": "求解时间（s，对数刻度）", "per_uav": "每机观测点数"},
+           "n_route": "航线上的观测点数", "secs_log": "求解时间（s，对数刻度）", "per_uav": "每机观测点数",
+           "exact_log": "精确动态规划次数（对数刻度）", "speedup": "提速倍数（不加速 ÷ 加速）",
+           "lb_ratio_log": "归一化 AoI ÷ 逐份下界（对数刻度）"},
     "en": {"gap_exact": "Gap to exact optimum (%)", "gap_lb": "Gap to per-item bound (%)", "brute": "Brute-force stops",
            "dp": "Exact stop DP", "opt_brute": "Optimum by brute force", "opt_dp": "Optimum by DP",
-           "n_route": "Points on route", "secs_log": "Solve time (s, log scale)", "per_uav": "Points per UAV"},
+           "n_route": "Points on route", "secs_log": "Solve time (s, log scale)", "per_uav": "Points per UAV",
+           "exact_log": "Exact DP calls (log scale)", "speedup": "Speedup (no accel. / accel.)",
+           "lb_ratio_log": "Normalized AoI / per-item bound (log scale)"},
 }
 
 
@@ -418,34 +422,102 @@ def fig_x_gap(rows: list[dict], lang: str):
     return fig
 
 
-def fig_t_time(rows: list[dict], lang: str):
-    """X7：求解时间随 N 的变化（对数纵轴），行为布点、列为机数，线为加速开（实线）与关（虚线）的中位数"""
-    import matplotlib.pyplot as plt
+def _t_points(rows: list[dict], lay: str, mm: int, key: str) -> list[tuple]:
+    """某布点、机数下 key 随 N 的中位数（3 个种子）：[(N, 中位数)]
+
+    不加速只在每机不超过 T_PLAIN_MAX 个观测点时运行，没有运行的档（值为 None）不画
+    """
+    pts = []
+    for n in T_SIZES:
+        vals = [r[key] for r in rows if r["layout"] == lay and r["m"] == mm and r["n"] == n and r[key] is not None]
+        if vals:
+            pts.append((n, statistics.median(vals)))
+    return pts
+
+
+def _level_line(ax, pts: list[tuple], color: str, linestyle, marker: str) -> None:
+    """一条空心标记的折线"""
     import scheme1_plots as sp
 
-    fig, axes = plt.subplots(2, len(T_UAVS), figsize=(sp.DOUBLE_W, 4.0), layout="constrained", sharex=True, sharey=True)
+    ax.plot([p[0] for p in pts], [p[1] for p in pts], color=color, linestyle=linestyle, marker=marker,
+            markerfacecolor=sp.INK["surface"], markeredgecolor=color, markeredgewidth=0.9, zorder=3)
+
+
+def _level_handle(label: str, color: str, linestyle, marker: str):
+    """与 _level_line 同样式的图例句柄"""
+    import scheme1_plots as sp
+    from matplotlib.lines import Line2D
+
+    return Line2D([], [], color=color, linestyle=linestyle, marker=marker, markerfacecolor=sp.INK["surface"],
+                  markeredgecolor=color, markeredgewidth=0.9, label=label)
+
+
+# 计时两个版本的线型：加速为实线，不加速为虚线（与作图模块中"变体用虚线"的约定一致）；图中各线都是 SCOUT，图例只写版本
+T_VERSIONS = (("P2A", "-"), ("P2N", (0, (3, 1.5))))
+T_VERSION_NAME = {"zh": {"P2A": "加速", "P2N": "不加速"}, "en": {"P2A": "accel.", "P2N": "no accel."}}
+LAYOUT_DASH = {"fireline": "-", "sector": (0, (3, 1.5))}
+
+
+def fig_t_lines(rows: list[dict], lang: str, metric: str):
+    """F3：两项加速的效果随规模的变化（对数纵轴），左右为两种布点；每个子图 6 条线 = 加速开 / 关 × 机数 3、5、7
+
+    按参考论文中"方法（变体）× 关键参数"的画法：颜色为本文方法的蓝色、机数越多越深，线型区分加速开关；
+    机数为 3 时每机点数在 N ≥ 80 超过 T_PLAIN_MAX，不加速的线只有 N = 30、50 两点
+    :param metric: "secs"（求解时间）或 "exact"（精确动态规划次数）
+    :return: 图
+    """
+    import scheme1_plots as sp
+
+    keys = {"secs": ("secs_fast", "secs_plain"), "exact": ("exact_fast", "exact_plain")}[metric]
+    colors = sp.level_colors(sp.COLORS["P2"], len(T_UAVS))
+    fig, axes = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.6, sharey=True)
     handles = []
-    for i, lay in enumerate(LAYOUTS):
-        for j, mm in enumerate(T_UAVS):
-            ax = axes[i][j]
-            hs = []
-            for m, key in (("P2A", "secs_fast"), ("P2N", "secs_plain")):   # 不加速只在每机不超过 T_PLAIN_MAX 点时运行
-                xs = [n for n in T_SIZES if any(r["layout"] == lay and r["m"] == mm and r["n"] == n and r[key] is not None
-                                                for r in rows)]
-                if xs:
-                    vals = [statistics.median(r[key] for r in rows if r["layout"] == lay and r["m"] == mm and r["n"] == n)
-                            for n in xs]
-                    hs += sp.line_chart(ax, xs, {m: vals}, lang)
-            if len(hs) == 2:
-                handles = hs
-            ax.set_yscale("log")
-            ax.set_xticks(list(T_SIZES), [str(n) for n in T_SIZES])
-            ax.set_title(f"{sp.label(lang, lay)}，m = {mm}" if lang == "zh" else f"{sp.label(lang, lay)}, m = {mm}")
-            ax.grid(True, axis="both", which="major")
-            if i == 1:
-                ax.set_xlabel(sp.label(lang, "n"))
-        axes[i][0].set_ylabel(_l(lang, "secs_log"))
-    sp.legend_top(fig, handles)
+    for ax, lay in zip(axes, LAYOUTS):
+        for (version, dash), key in zip(T_VERSIONS, keys):
+            for mm, c, mk in zip(T_UAVS, colors, sp.LEVEL_MARKERS):
+                pts = _t_points(rows, lay, mm, key)
+                if not pts:
+                    continue
+                _level_line(ax, pts, c, dash, mk)
+                if ax is axes[0]:
+                    name = T_VERSION_NAME[lang][version]
+                    handles.append(_level_handle(f"{name}，m = {mm}" if lang == "zh" else f"{name}, m = {mm}", c, dash, mk))
+        ax.set_yscale("log")
+        ax.set_xticks(list(T_SIZES), [str(n) for n in T_SIZES])
+        ax.set_title(sp.label(lang, lay))
+        ax.set_xlabel(sp.label(lang, "n"))
+        ax.grid(True, axis="both", which="major")
+    axes[0].set_ylabel(_l(lang, "secs_log" if metric == "secs" else "exact_log"))
+    sp.legend_top(fig, handles, ncol=3, rows_first=True)
+    return fig
+
+
+def fig_t_speedup(rows: list[dict], lang: str):
+    """X7：两项加速的提速倍数（不加速 ÷ 加速的求解时间，3 个种子的中位数）随规模的变化；6 条线 = 两种布点 × 机数 3、5、7
+
+    提速只在两个版本都运行时有定义，机数为 3 的线只有 N = 30、50 两点；虚线 1 表示没有提速
+    :return: 图
+    """
+    import scheme1_plots as sp
+
+    colors = sp.level_colors(sp.COLORS["P2"], len(T_UAVS))
+    short = {"zh": {"fireline": "火线", "sector": "扇形"}, "en": {"fireline": "Fire line", "sector": "Sector"}}[lang]
+    fig, ax = sp.new_fig(height=2.6)
+    handles = []
+    for lay in LAYOUTS:
+        for mm, c, mk in zip(T_UAVS, colors, sp.LEVEL_MARKERS):
+            pts = _t_points(rows, lay, mm, "speedup")
+            if pts:
+                _level_line(ax, pts, c, LAYOUT_DASH[lay], mk)
+                handles.append(_level_handle(f"{short[lay]}，m = {mm}" if lang == "zh" else f"{short[lay]}, m = {mm}",
+                                             c, LAYOUT_DASH[lay], mk))
+    ax.axhline(1.0, zorder=1, **sp.REF_STYLE)
+    ax.set_xticks(list(T_SIZES), [str(n) for n in T_SIZES])
+    ax.set_xlabel(sp.label(lang, "n"))
+    ax.set_ylabel(_l(lang, "speedup"))
+    ax.set_ylim(bottom=0)
+    ax.grid(True, axis="both")
+    sp.legend_top(fig, handles, ncol=3, rows_first=True)
     return fig
 
 
@@ -487,28 +559,36 @@ def fig_f1(rows: list[dict], lang: str):
     return fig
 
 
-def fig_lbgap(rows: list[dict], lang: str):
-    """与逐份下界的差距随 N 的变化（E1 全部实例）：两档 ε 各一个子图，两种布点各一条中位数线与四分位色带"""
-    import scheme1_plots as sp
-    from matplotlib.lines import Line2D
+def fig_lbgap(by: dict, lang: str):
+    """与逐份下界的差距随 N 的变化（E1 全部实例）：行为 ε、列为布点，每种方法一条线（归一化 AoI ÷ 逐份下界的中位数）
 
-    fig, axes = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.4, sharey=True)
-    c = sp.COLORS["P2"]
-    styles = {"fireline": ("o", "-"), "sector": ("s", (0, (3, 1.5)))}
-    for ax, e in zip(axes, (0.1, 0.25)):
-        for lay, (mk, ls) in styles.items():
-            ns = sorted({r["n"] for r in rows if r["layout"] == lay and r["eps"] == e})
-            qs = [statistics.quantiles([r["gap_p2"] for r in rows if r["layout"] == lay and r["eps"] == e and r["n"] == n],
-                                       n=4, method="inclusive") for n in ns]
-            ax.fill_between(ns, [q[0] for q in qs], [q[2] for q in qs], color=c, alpha=0.12, linewidth=0, zorder=1)
-            ax.plot(ns, [q[1] for q in qs], color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"],
-                    markeredgecolor=c, markeredgewidth=0.9, zorder=3)
-        ax.set_title(f"ε = {e}")
-        ax.set_xlabel(sp.label(lang, "n"))
-        ax.grid(True, axis="both")
-    axes[0].set_ylabel(_l(lang, "gap_lb"))
-    sp.legend_top(fig, [Line2D([], [], color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"],
-                               markeredgecolor=c, label=sp.label(lang, lay)) for lay, (mk, ls) in styles.items()])
+    与主对比用同一组 7 种方法；各方法与下界之比相差一个数量级（本文方法约 1.1–1.6，仅基地上传约 5–8），取对数纵轴。
+    比值 = 1 + 差距 / 100，与 lbgap_summary.txt 中的差距（%）一一对应
+    :param by: {(布点, N, 种子, ε): {方法: E1 汇总行}}
+    :return: 图
+    """
+    import matplotlib.pyplot as plt
+    import scheme1_plots as sp
+
+    ns = sorted({k[1] for k in by})
+    fig, axes = plt.subplots(2, len(LAYOUTS), figsize=(sp.DOUBLE_W, 4.2), layout="constrained", sharex=True, sharey=True)
+    handles = []
+    for i, e in enumerate((0.1, 0.25)):
+        for j, lay in enumerate(LAYOUTS):
+            ax = axes[i][j]
+            series = {m: [statistics.median(v[m]["norm_aoi"] / v[m]["lb_norm"] for k, v in by.items()
+                                            if k[0] == lay and k[1] == n and k[3] == e) for n in ns]
+                      for m in sp.METHOD_ORDER}
+            handles = sp.line_chart(ax, ns, series, lang)
+            ax.set_yscale("log")
+            sp.plain_log_ticks(ax)
+            ax.set_xticks(ns, [str(n) for n in ns])
+            ax.set_title(f"{sp.label(lang, lay)}，ε = {e}" if lang == "zh" else f"{sp.label(lang, lay)}, ε = {e}")
+            ax.grid(True, axis="both")
+            if i == 1:
+                ax.set_xlabel(sp.label(lang, "n"))
+        axes[i][0].set_ylabel(_l(lang, "lb_ratio_log"))
+    sp.legend_top(fig, handles)
     return fig
 
 
@@ -537,7 +617,9 @@ def summarize(inputs, out: Path, expected: dict | None = None) -> bool:
         if xr:
             files += sp.save(fig_x_gap(xr, lang), d, "E5_gap_to_exact")
         if tr:
-            files += sp.save(fig_t_time(tr, lang), d, "E5_X7_solve_time")
+            files += sp.save(fig_t_lines(tr, lang, "secs"), d, "E5_F3_acceleration_time")
+            files += sp.save(fig_t_lines(tr, lang, "exact"), d, "E5_F3_acceleration_exact_calls")
+            files += sp.save(fig_t_speedup(tr, lang), d, "E5_X7_speedup")
         if fr:
             files += sp.save(fig_f1(fr, lang), d, "E5_F1_stop_dp_vs_bruteforce")
     problems = px + pt + pf
@@ -575,7 +657,7 @@ def lbgap(e1_csv: Path, out: Path) -> None:
     files = []
     for lang in ("zh", "en"):
         sp.setup(lang)
-        files += sp.save(fig_lbgap(rows, lang), out / "figures" / lang, "E5_gap_to_lower_bound")
+        files += sp.save(fig_lbgap(by, lang), out / "figures" / lang, "E5_gap_to_lower_bound")
     (out / "lbgap_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print("\n".join(lines))
 

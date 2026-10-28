@@ -193,8 +193,11 @@ def figures(selected: dict[str, tuple[int, dict]], out: Path) -> list[Path]:
             files += sp.save(sp.fig_route_maps(rec, lang, SHOWN, uav_labels=True, light_transit=True, mark_moved=True),
                              d, f"E7_F20_route_maps_{tag}")
             files += sp.save(sp.fig_timelines(rec, lang, SHOWN), d, f"E7_X15_timelines_{tag}")
-            files += sp.save(sp.fig_norm_aoi_cdf(rec, lang, SHOWN), d, f"E7_aoi_over_delta_cdf_{tag}")
-            files += sp.save(sp.fig_uav_mission(rec, lang, ("P2", "P1", "B2")), d, f"E7_X9_uav_mission_{tag}")
+            # 累积分布与各机任务时长是方法对比图，画记录中的全部方法（E1 记录含主对比的 7 种）；
+            # 航线图与时间线仍只画 SHOWN，子图多了看不清
+            every = tuple(m for m in sp.METHOD_ORDER if m in rec["methods"])
+            files += sp.save(sp.fig_norm_aoi_cdf(rec, lang, every), d, f"E7_aoi_over_delta_cdf_{tag}")
+            files += sp.save(sp.fig_uav_mission(rec, lang, every), d, f"E7_X9_uav_mission_{tag}")
     return files
 
 

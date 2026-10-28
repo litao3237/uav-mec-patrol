@@ -44,6 +44,8 @@ COLORS = {"P2": "#2a78d6", "P1": "#eb6834", "B2": "#1baf7a", "B1": "#eda100",
 # 纹理只用 45°/135° 斜线族与点，避免与网格线混淆；本文方法为实心
 HATCHES = {"P2": "", "P1": "//////", "B2": "\\\\\\\\\\\\", "B1": "xxxx", "B3": "//", "B4": "\\\\", "B0": "...."}
 MARKERS = {"P2": "o", "P1": "s", "B2": "^", "B1": "v", "B3": "D", "B4": "<", "B0": ">"}
+# 同一方法在有序参数（规模、机数）各档下画多条线时，标记依次取这些形状，颜色取该方法色由浅到深（见 level_colors）
+LEVEL_MARKERS = ("o", "s", "^", "D", "v", "P")
 # 消融与计时变体沿用所属方法的颜色：浅色填充 + 该色纹理（折线为虚线），表示"某方法的变体"，不另占类别色。
 # P2A（加速）就是默认的本文方法，样式与 P2 相同
 VARIANT_OF = {"P2A": "P2", "P2N": "P2", "P2D": "P2", "B2R": "B2"}
@@ -153,17 +155,34 @@ def new_fig(ncols: int = 1, width: float = SINGLE_W, height: float = 2.3, **kw):
     return fig, axes
 
 
-def legend_top(fig, handles, ncol: int = 4) -> None:
+def row_major(handles: list, ncol: int) -> list:
+    """把按"先行后列"阅读顺序给出的图例句柄，换成 matplotlib 按列填充所需的顺序
+
+    matplotlib 的图例按列填充、前几列多放一项；换序后逐行读出的顺序与 handles 一致
+    :param handles: 按阅读顺序排列的句柄
+    :param ncol: 图例列数
+    :return: 换序后的句柄
+    """
+    rows = math.ceil(len(handles) / ncol)
+    out = [None] * (rows * ncol)
+    for k, h in enumerate(handles):
+        r, c = divmod(k, ncol)
+        out[c * rows + r] = h
+    return [h for h in out if h is not None]
+
+
+def legend_top(fig, handles, ncol: int = 4, rows_first: bool = False) -> None:
     """图例放在全部绘图区的上方，多列、无边框，不遮挡数据
 
     宽度超出成图时减少列数（英文标签较长）。候选列数取 ⌈n / 行数⌉，使各行条目数尽量相同：
     图例按列填充，8 项排成 7 列时第一列叠两项、其余各一项，看起来像排错了
+    :param rows_first: handles 按"先行后列"给出时为 True（如每行一种版本、每列一档参数），按所选列数换序
     """
     renderer = fig.canvas.get_renderer()
     n = len(handles)
     ks = sorted({math.ceil(n / rows) for rows in range(1, n + 1)} & set(range(1, min(ncol, n) + 1)), reverse=True)
     for k in ks:
-        leg = fig.legend(handles=handles, loc="outside upper center", ncol=k)
+        leg = fig.legend(handles=row_major(handles, k) if rows_first else handles, loc="outside upper center", ncol=k)
         if k == 1 or leg.get_window_extent(renderer).width <= 0.98 * fig.bbox.width:
             return
         leg.remove()
@@ -192,6 +211,20 @@ def tint(hex_color: str, k: float = 0.6) -> str:
     """同色系的浅色（向白色混合 k），用作变体的填充色"""
     r, g, b = (int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
     return "#{:02x}{:02x}{:02x}".format(*(round(c + (255 - c) * k) for c in (r, g, b)))
+
+
+def level_colors(base: str, k: int) -> list[str]:
+    """同一色相由浅到深的 k 个颜色，用于同一方法在有序参数各档下的多条线
+
+    颜色仍只代表方法：同一方法的不同档位用深浅区分，越深取值越大；另配 LEVEL_MARKERS 的标记，黑白打印时也能分辨
+    :param base: 方法的颜色
+    :param k: 档数
+    :return: k 个颜色，由浅到深
+    """
+    if k == 1:
+        return [base]
+    ks = [0.55 - 0.85 * i / (k - 1) for i in range(k)]
+    return [tint(base, x) if x >= 0 else shade(base, -x) for x in ks]
 
 
 def base_of(m: str) -> str:
@@ -644,7 +677,7 @@ def instance_rows(rows: list[dict]) -> list[dict]:
 
 
 def fig_metric(rows: list[dict], metric: str, lang: str, kind: str = "bar", group_key: str = "n",
-               methods=METHOD_ORDER):
+               methods=METHOD_ORDER, log: bool = False):
     """单一指标随分组（默认规模 N）变化的图（F4–F9、F11、F18–F19 等）
 
     归一化 AoI 叠加逐份下界，最大任务时长叠加时长预算 (1+ε)·T̂，均为同组实例的平均
@@ -652,7 +685,8 @@ def fig_metric(rows: list[dict], metric: str, lang: str, kind: str = "bar", grou
     :param metric: 指标列名
     :param kind: "bar" 为分组柱状图，"line" 为折线图
     :param group_key: 分组列名
-    :param methods: 要画的方法；折线图中远高于其余方法的 B0、B3、B4 会把接近的几条线压在一起，可只画其余方法
+    :param methods: 要画的方法
+    :param log: 折线图是否用对数纵轴；画全部方法时 B0、B3、B4 远高于其余方法，线性轴会把接近的几条线压在一起
     """
     groups, series = metric_series(rows, metric, group_key, methods)
     inst = instance_rows(rows)
@@ -668,6 +702,12 @@ def fig_metric(rows: list[dict], metric: str, lang: str, kind: str = "bar", grou
     else:
         handles = line_chart(ax, groups, series, lang, ref=ref, ref_key=ref_key)
         ax.set_xticks(groups, [fmt_group(g) for g in groups])
+        if log:
+            ax.set_yscale("log")
+            # 纵轴扩到整十倍（如 0.1–1），否则跨度不到一个数量级时，下端可能一个刻度数字都没有
+            lo, hi = ax.get_ylim()
+            ax.set_ylim(10 ** math.floor(math.log10(lo)), 10 ** math.ceil(math.log10(hi)))
+            plain_log_ticks(ax)
     ax.set_xlabel(label(lang, group_key))
     ax.set_ylabel(label(lang, metric))
     legend_top(fig, handles)
@@ -714,6 +754,41 @@ def fig_convergence(recs: list[dict], lang: str):
     ax.set_xlabel(label(lang, "evals"))
     ax.set_ylabel(label(lang, "rel_obj"))
     legend_top(fig, handles, ncol=3)
+    return fig
+
+
+def fig_convergence_by_n(recs: list[dict], lang: str):
+    """F2：不同规模下本文方法的收敛过程，每个 N 一条中位数曲线（目标 ÷ 两阶段目标随评估次数）
+
+    同一方法、有序参数各档的画法：颜色由浅到深表示 N 由小到大，另配标记。不画种子间范围，
+    多条线时色带互相遮挡；某次运行收敛后其目标保持不变，所以中位数在各次运行结束后仍有定义
+    :param recs: 同一布点、同一 ε 下各规模的 E1 实例记录
+    :return: 图
+    """
+    from bisect import bisect_right
+
+    sizes = sorted({r["meta"]["n"] for r in recs})
+    fig, ax = new_fig()
+    handles = []
+    for n, c, mk in zip(sizes, level_colors(COLORS["P2"], len(sizes)), LEVEL_MARKERS):
+        runs = []
+        for r in recs:
+            if r["meta"]["n"] == n:
+                p2 = r["methods"]["P2"]
+                h, base = p2["history"], p2["two_stage_obj"]
+                runs.append(([e[0] for e in h], [e[1] / base for e in h]))
+        grid = [max(x[0][-1] for x in runs) * i / 400 for i in range(401)]
+        med = [statistics.median(x[1][max(bisect_right(x[0], g) - 1, 0)] for x in runs) for g in grid]
+        ax.step(grid, med, where="post", color=c, zorder=3)
+        marks = range(0, 401, 80)
+        ax.plot([grid[i] for i in marks], [med[i] for i in marks], linestyle="none", marker=mk,
+                markerfacecolor=INK["surface"], markeredgecolor=c, markeredgewidth=0.9, zorder=4)
+        handles.append(Line2D([], [], color=c, marker=mk, markerfacecolor=INK["surface"], markeredgecolor=c,
+                              markeredgewidth=0.9, label=f"N = {n}"))
+    ax.set_xlabel(label(lang, "evals"))
+    ax.set_ylabel(label(lang, "rel_obj"))
+    ax.grid(True, axis="both")
+    legend_top(fig, handles, ncol=3, rows_first=True)
     return fig
 
 
@@ -832,15 +907,19 @@ def fig_norm_aoi_cdf(rec: dict, lang: str, methods=("P2", "B2", "B0")):
 
 
 def fig_uav_mission(rec: dict, lang: str, methods=("P2", "P1")):
-    """X9：跨机移动前（P1）后（P2）各机的任务时长，虚线为时长预算；methods 可加入 B2 作为起点"""
+    """X9：各机的任务时长，虚线为时长预算
+
+    缺省比较跨机移动前（P1）后（P2）；methods 可加入 B2 作为起点，或取全部方法（看各方法把时长预算用到什么程度）
+    """
     series = {m: [u["mission_s"] / 60 for u in rec["methods"][m]["uavs"]] for m in methods}
     k = len(series["P2"])
     fig, ax = new_fig()
+    # 每组柱子多时加宽，柱子才不会细到看不清纹理
     handles = grouped_bars(ax, list(range(1, k + 1)), series, lang, ref=[rec["t_max"] / 60] * k, ref_key="budget",
-                           width=0.6)
+                           width=0.6 if len(methods) <= 3 else 0.84)
     ax.set_xlabel(label(lang, "uav"))
     ax.set_ylabel(label(lang, "mission_min"))
-    legend_top(fig, handles, ncol=3)
+    legend_top(fig, handles, ncol=3 if len(handles) <= 4 else 4)
     return fig
 
 

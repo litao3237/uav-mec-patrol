@@ -452,8 +452,8 @@ def summarize_e3(recs: dict, expected: int, out: Path) -> tuple[list[str], list[
 # ---------------------------------------------------------------------------
 
 def figures_e1(rows: list[dict], recs: list[dict], d: Path, lang: str) -> list[Path]:
-    """E1 的图：F4–F9（火线 ε = 0.1）、F18–F19（扇形）、X1–X5 与 F11（ε = 0.25）、F10、X6、F2、X8、F13 右图与 X10，
-    以及一个火线实例（N = 50、ε = 0.1、最小种子）的 F20 航线图、X15 时间线、X9 各机任务时长"""
+    """E1 的图：F4–F9（火线 ε = 0.1）、F18–F19（扇形）、X1–X5 与 F11（ε = 0.25）、F10、X6、F2（火线 ε = 0.1，
+    各规模一条）、X8、F13 右图与 X10，以及一个火线实例（N = 50、ε = 0.1、最小种子）的 F20 航线图、X15 时间线、X9 各机任务时长"""
     import scheme1_plots as sp
 
     files: list[Path] = []
@@ -470,13 +470,16 @@ def figures_e1(rows: list[dict], recs: list[dict], d: Path, lang: str) -> list[P
     if hi:
         for i, metric in enumerate(("norm_aoi", "mean_aoi_s", "on_time_rate", "max_mission_min", "energy_kj"), start=1):
             files += sp.save(sp.fig_metric(hi, metric, lang), d, f"E1_X{i}_{metric}_fireline_eps0.25")
-        files += sp.save(sp.fig_metric(hi, "norm_aoi", lang, kind="line", methods=("P2", "P1", "B2", "B1")), d,
+        # 与主对比用同一组 7 种方法；仅基地上传等远高于其余方法，取对数纵轴
+        files += sp.save(sp.fig_metric(hi, "norm_aoi", lang, kind="line", methods=sp.METHOD_ORDER, log=True), d,
                          "E1_F11_norm_aoi_line_fireline_eps0.25")
-    case_recs = [r for r in recs if r["meta"]["layout"] == "fireline" and r["meta"]["eps"] == 0.1 and r["meta"]["n"] == 50]
+    conv_recs = [r for r in recs if r["meta"]["layout"] == "fireline" and r["meta"]["eps"] == 0.1]
+    if conv_recs:
+        files += sp.save(sp.fig_convergence_by_n(conv_recs, lang), d, "E1_F2_convergence_fireline_eps0.1")
+    case_recs = [r for r in conv_recs if r["meta"]["n"] == 50]
     if case_recs:
         files += sp.save(sp.fig_aoi_box(case_recs, lang), d, "E1_F10_aoi_box_fireline_n50_eps0.1")
         files += sp.save(sp.fig_aoi_cdf(case_recs, lang), d, "E1_X6_aoi_cdf_fireline_n50_eps0.1")
-        files += sp.save(sp.fig_convergence(case_recs, lang), d, "E1_F2_convergence_fireline_n50_eps0.1")
         case = min(case_recs, key=lambda r: r["meta"]["seed"])
         files += sp.save(sp.fig_route_maps(case, lang), d, "E1_F20_route_maps_case")
         files += sp.save(sp.fig_timeline(case, lang), d, "E1_X15_timeline_case")
@@ -529,8 +532,12 @@ def _layout_lines(series: dict, lang: str, ylabel: str, band: dict | None = None
     return fig
 
 
-def figures_e2(rows: list[dict], d: Path, lang: str) -> list[Path]:
-    """E2 的图：每种布点的 F12（归一化 AoI 随 ε）与最长任务时长增幅；F13 左图（改善随 ε）；电池起约束的比例"""
+def figures_e2(rows: list[dict], d: Path, lang: str, methods=None) -> list[Path]:
+    """E2 的图：每种布点的 F12（归一化 AoI 随 ε）与最长任务时长增幅；F13 左图（改善随 ε）；电池起约束的比例
+
+    :param methods: F12 与任务时长增幅画的方法；缺省为原来的 P2、B2、B0（任务时长增幅为 P2、B2），
+                    并入补跑的三个基线后（scheme1_supp.py figures）传入全部 7 种
+    """
     import scheme1_plots as sp
 
     files: list[Path] = []
@@ -538,7 +545,7 @@ def figures_e2(rows: list[dict], d: Path, lang: str) -> list[Path]:
         sel = [r for r in rows if r["layout"] == lay]
         if not sel:
             continue
-        groups, series = sp.metric_series(sel, "norm_aoi", "eps", methods=("P2", "B2", "B0"))
+        groups, series = sp.metric_series(sel, "norm_aoi", "eps", methods=methods or ("P2", "B2", "B0"))
         lb = [statistics.fmean(r["lb_norm"] for r in sel if r["eps"] == g and r["method"] == "P2") for g in groups]
         fig, ax = sp.new_fig()
         handles = sp.line_chart(ax, groups, series, lang, ref=lb, ref_key="LB")
@@ -546,7 +553,7 @@ def figures_e2(rows: list[dict], d: Path, lang: str) -> list[Path]:
         ax.set_ylabel(sp.label(lang, "norm_aoi"))
         sp.legend_top(fig, handles)
         files += sp.save(fig, d, f"E2_F12_tradeoff_{lay}")
-        groups, series = sp.metric_series(sel, "mission_increase_pct", "eps", methods=("P2", "B2"))
+        groups, series = sp.metric_series(sel, "mission_increase_pct", "eps", methods=methods or ("P2", "B2"))
         fig, ax = sp.new_fig()
         handles = sp.line_chart(ax, groups, series, lang, ref=[100 * g for g in groups], ref_key="budget")
         ax.set_xlabel(sp.label(lang, "eps"))

@@ -58,4 +58,5 @@ def test_run_and_summarize_small(tmp_path):
     assert ok
     text = (tmp_path / "summary" / "summary.txt").read_text(encoding="utf-8")
     assert "检查：全部通过" in text
-    assert len(list((tmp_path / "summary" / "figures" / "zh").glob("*.png"))) == 3
+    # F1、与精确最优的差距、F3 的求解时间与精确动态规划次数（T 数据画成"加速开关 × 机数"的折线）、X7 的提速倍数
+    assert len(list((tmp_path / "summary" / "figures" / "zh").glob("*.png"))) == 5

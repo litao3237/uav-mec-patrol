@@ -211,6 +211,13 @@ def test_plot_demo_writes_data_and_figures(tmp_path):
     files = plots.plot_demo(tmp_path)
     assert len(files) == 2 * 2 * 16   # 两种语言 × PDF 与 PNG × 16 张图
     assert all(p.exists() and p.stat().st_size > 1000 for p in files)
+    # 按规模分线的收敛图（F2）：每个 N 一条阶梯线和一组稀疏标记
+    import json
+
+    recs = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((tmp_path / "records").glob("*.json"))]
+    fig = plots.fig_convergence_by_n([r for r in recs if r["meta"]["eps"] == 0.1], "zh")
+    assert len(fig.axes[0].get_lines()) == 2 * len({r["meta"]["n"] for r in recs})
+    plots.plt.close(fig)
 
 
 def test_plot_helpers():
@@ -226,6 +233,13 @@ def test_plot_helpers():
     assert not math.isnan(plots.mean_ci([0.1, 0.1])[1])
     assert plots.tint("#000000", 0.5) == "#808080"
     assert all(plots.base_of(v) in METHODS for v in plots.VARIANT_OF)
+    # 同一方法各档的颜色由浅到深；图例按行读出时的换序与 matplotlib 按列填充（前几列多放一项）一致
+    cs = plots.level_colors(plots.COLORS["P2"], 6)
+    assert len(set(cs)) == 6 and plots.level_colors("#2a78d6", 1) == ["#2a78d6"]
+    assert sum(int(cs[0][i:i + 2], 16) for i in (1, 3, 5)) > sum(int(cs[-1][i:i + 2], 16) for i in (1, 3, 5))
+    assert plots.row_major(list(range(6)), 3) == [0, 3, 1, 4, 2, 5]
+    assert plots.row_major(list(range(7)), 4) == [0, 4, 1, 5, 2, 6, 3]
+    assert plots.row_major(list(range(5)), 4) == [0, 4, 1, 2, 3]
     # 图例里带"（本文）"，子图标题用短名；其余方法两者相同
     assert plots.label("zh", "P2") == "SCOUT（本文）" and plots.short_label("zh", "P2") == "SCOUT"
     assert plots.short_label("en", "P2") == "SCOUT" and plots.short_label("en", "B2") == plots.label("en", "B2")

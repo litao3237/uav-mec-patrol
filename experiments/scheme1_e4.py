@@ -33,12 +33,12 @@ from matplotlib.patches import Rectangle  # noqa: E402
 # 特征：dist 离覆盖边界的平均距离（m），slack_std 初始分配下各机时间余量的标准差（s），ppu 每机观测点数（只在 E1 中变化）
 FEATURE_LABELS = {
     "zh": {"dist": "离覆盖边界距离", "slack_std": "各机余量标准差", "ppu": "每机观测点数", "leftover": "两阶段剩余余量",
-           "gain": "相对两阶段的改善（%）", "gain_intra": "机内部分", "gain_cross": "跨机部分",
+           "gain": "相对两阶段的改善（%）", "gain_total": "总改善", "gain_intra": "机内部分", "gain_cross": "跨机部分",
            "rho": "Spearman ρ", "beta": "标准化系数（百分点/标准差）", "stratum": "分层"},
     "en": {"dist": "Distance to coverage", "slack_std": "Std of UAV slack", "ppu": "Points per UAV",
-           "leftover": "Two-stage leftover slack", "gain": "Gain over two-stage (%)", "gain_intra": "Intra-UAV part",
-           "gain_cross": "Cross-UAV part", "rho": "Spearman ρ", "beta": "Standardized coef. (pp per SD)",
-           "stratum": "Stratum"},
+           "leftover": "Two-stage leftover slack", "gain": "Gain over two-stage (%)", "gain_total": "Total gain",
+           "gain_intra": "Intra-UAV part", "gain_cross": "Cross-UAV part", "rho": "Spearman ρ",
+           "beta": "Standardized coef. (pp per SD)", "stratum": "Stratum"},
 }
 
 
@@ -209,13 +209,23 @@ def _flabel(lang: str, key: str) -> str:
     return FEATURE_LABELS[lang].get(key, sp.label(lang, key))
 
 
-def _scatter(ax, xs: list[dict], feat: str, lang: str) -> None:
-    """改善与某特征的散点（两种布点同色、标记区分）+ 合并样本的最小二乘拟合线，左上角注明 Spearman ρ"""
+def _scatter(ax, xs: list[dict], feat: str, lang: str) -> list:
+    """改善与某特征的散点，按 N 分组（本文方法的蓝色由浅到深、标记区分）+ 合并样本的最小二乘拟合线，左上角注明 Spearman ρ
+
+    按 N 分组是因为 E4 中只有每机观测点数对改善有稳定作用，分组后能直接看出规模的影响
+    :return: 图例句柄：各 N 一项，另加拟合线
+    """
+    from matplotlib.lines import Line2D
+
     c = sp.COLORS["P2"]
-    for lay, (mk, _) in LAYOUT_STYLE.items():
-        sub = [x for x in xs if x["layout"] == lay]
+    sizes = sorted({x["n"] for x in xs})
+    handles = []
+    for n, cn, mk in zip(sizes, sp.level_colors(c, len(sizes)), sp.LEVEL_MARKERS):
+        sub = [x for x in xs if x["n"] == n]
         ax.scatter([x[feat] for x in sub], [x["gain"] for x in sub], s=9, marker=mk, facecolors="none",
-                   edgecolors=c, linewidths=0.6, zorder=3)
+                   edgecolors=cn, linewidths=0.6, zorder=3)
+        handles.append(Line2D([], [], linestyle="none", marker=mk, markerfacecolor="none", markeredgecolor=cn,
+                              markeredgewidth=0.6, label=f"N = {n}"))
     fx, gy = [x[feat] for x in xs], [x["gain"] for x in xs]
     slope, icpt = statistics.linear_regression(fx, gy)
     x0, x1 = min(fx), max(fx)
@@ -224,47 +234,60 @@ def _scatter(ax, xs: list[dict], feat: str, lang: str) -> None:
     ax.text(0.03, 0.96, f"ρ = {rho:.2f}（p = {p:.1e}）" if lang == "zh" else f"ρ = {rho:.2f} (p = {p:.1e})",
             transform=ax.transAxes, va="top", color=sp.INK["secondary"])
     ax.grid(True, axis="both")
+    handles.append(Line2D([], [], color=c, label=sp.label(lang, "fit")))
+    return handles
 
 
-def _layout_handles(lang: str, with_fit: bool) -> list:
-    from matplotlib.lines import Line2D
-
-    c = sp.COLORS["P2"]
-    hs = [Line2D([], [], color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"], markeredgecolor=c,
-                 label=sp.label(lang, lay)) for lay, (mk, ls) in LAYOUT_STYLE.items()]
-    if with_fit:
-        hs.append(Line2D([], [], color=c, label=sp.label(lang, "fit")))
-    return hs
+# F13 左图的三部分：总改善（SCOUT 相对两阶段）、机内部分（即 SCOUT-intra 相对两阶段，用其颜色）、跨机部分（中性深灰，不另占方法色）
+GAIN_PARTS = (("gain", "gain_total", sp.COLORS["P2"]), ("gain_intra", "gain_intra", sp.COLORS["P1"]),
+              ("gain_cross", "gain_cross", sp.INK["secondary"]))
+LAYOUT_SHORT = {"zh": {"fireline": "火线", "sector": "扇形"}, "en": {"fireline": "fire line", "sector": "sector"}}
 
 
 def fig_f13(insts: list[dict], eps_rows: list[dict], lang: str):
-    """F13：左图为 E2 改善随 ε 的分层折线（四分位色带），右图为 E1 ε = 0.1 时改善与离覆盖距离的散点"""
-    fig, (axl, axr) = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.4)
-    c = sp.COLORS["P2"]
+    """F13：左图为 E2 中改善及其机内、跨机两部分随 ε 的变化（中位数），两种布点各三条，共 6 条；总改善带四分位色带。
+    右图为 E1 ε = 0.1 时改善与离覆盖距离的散点，按 N 分 6 组
+
+    左图按参考论文"方法 × 关键参数"的画法：颜色区分改善的组成部分，线型与标记区分布点。两个子图各自的图例放在子图上方
+    """
+    from matplotlib.lines import Line2D
+
+    fig, (axl, axr) = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.9)
+    e2 = [x for x in insts if x["exp"] == "E2"]
+    left = []
     for lay, (mk, ls) in LAYOUT_STYLE.items():
         r = [x for x in eps_rows if x["layout"] == lay]
         e = [x["eps"] for x in r]
-        axl.fill_between(e, [x["q1"] for x in r], [x["q3"] for x in r], color=c, alpha=0.12, linewidth=0, zorder=1)
-        axl.plot(e, [x["median"] for x in r], color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"],
-                 markeredgecolor=c, markeredgewidth=0.9, zorder=3)
+        axl.fill_between(e, [x["q1"] for x in r], [x["q3"] for x in r], color=sp.COLORS["P2"], alpha=0.12, linewidth=0,
+                         zorder=1)
+        for key, name, c in GAIN_PARTS:
+            med = [statistics.median(x[key] for x in e2 if x["layout"] == lay and x["eps"] == eps) for eps in e]
+            axl.plot(e, med, color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"], markeredgecolor=c,
+                     markeredgewidth=0.9, zorder=3)
+            text = f"{_flabel(lang, name)}（{LAYOUT_SHORT[lang][lay]}）" if lang == "zh" else \
+                f"{_flabel(lang, name)} ({LAYOUT_SHORT[lang][lay]})"
+            left.append(Line2D([], [], color=c, marker=mk, linestyle=ls, markerfacecolor=sp.INK["surface"],
+                               markeredgecolor=c, label=text))
     axl.set_xlabel(sp.label(lang, "eps"))
     axl.set_ylabel(_flabel(lang, "gain"))
     axl.grid(True, axis="both")
-    _scatter(axr, [x for x in insts if x["exp"] == "E1" and x["eps"] == 0.1], "dist", lang)
+    axl.legend(handles=left, loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2)
+    right = _scatter(axr, [x for x in insts if x["exp"] == "E1" and x["eps"] == 0.1], "dist", lang)
     axr.set_xlabel(sp.label(lang, "mean_dist_to_coverage_m"))
-    sp.legend_top(fig, _layout_handles(lang, True))
+    axr.legend(handles=sp.row_major(right, 4), loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=4)
     return fig
 
 
 def fig_x10(insts: list[dict], lang: str):
-    """X10：E1 两档 ε 下改善与各机余量标准差（初始分配的不均衡程度）的散点"""
+    """X10：E1 两档 ε 下改善与各机余量标准差（初始分配的不均衡程度）的散点，按 N 分 6 组"""
     fig, axes = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.4, sharey=True)
+    handles = []
     for ax, eps in zip(axes, (0.1, 0.25)):
-        _scatter(ax, [x for x in insts if x["exp"] == "E1" and x["eps"] == eps], "slack_std", lang)
+        handles = _scatter(ax, [x for x in insts if x["exp"] == "E1" and x["eps"] == eps], "slack_std", lang)
         ax.set_xlabel(sp.label(lang, "slack_std_s"))
         ax.set_title(f"ε = {eps}")
     axes[0].set_ylabel(_flabel(lang, "gain"))
-    sp.legend_top(fig, _layout_handles(lang, True))
+    sp.legend_top(fig, handles, ncol=7)
     return fig
 
 

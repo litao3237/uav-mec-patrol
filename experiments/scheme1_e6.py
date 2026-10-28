@@ -257,8 +257,11 @@ def _grid(lang: str):
     return fig, axes
 
 
-def fig_factor_lines(recs: list[dict], factor: str, lang: str):
-    """折线图（F16、X11–X14）：横轴为档位，纵轴为平均归一化 AoI（对数刻度），系列 P2、B2、B0 与逐份下界"""
+def fig_factor_lines(recs: list[dict], factor: str, lang: str, methods=("P2", "B2", "B0")):
+    """折线图（F16、X11–X14）：横轴为档位，纵轴为平均归一化 AoI（对数刻度），系列为 methods 与逐份下界
+
+    :param methods: 画的方法；缺省为原来的 P2、B2、B0，并入补跑的三个基线后（scheme1_supp.py figures）传入全部 7 种
+    """
     import scheme1_plots as sp
 
     fig, axes = _grid(lang)
@@ -275,7 +278,7 @@ def fig_factor_lines(recs: list[dict], factor: str, lang: str):
             if not pts:
                 continue
             xs = [x for x, _ in pts]
-            series = {m: [[r["methods"][m]["summary"]["norm_aoi"] for r in sel] for _, sel in pts] for m in ("P2", "B2", "B0")}
+            series = {m: [[r["methods"][m]["summary"]["norm_aoi"] for r in sel] for _, sel in pts] for m in methods}
             lb = [statistics.fmean(r["features"]["lb_norm"] for r in sel) for _, sel in pts]
             handles = sp.line_chart(ax, xs, series, lang, ref=lb, ref_key="LB")
             ax.set_yscale("log")
@@ -290,8 +293,8 @@ def fig_factor_lines(recs: list[dict], factor: str, lang: str):
     return fig
 
 
-def fig_freshness(recs: list[dict], metric: str, lang: str):
-    """F17：三档时效窗的分组柱状图（归一化 AoI 或按时送达率），系列 P2、B2、B0"""
+def fig_freshness(recs: list[dict], metric: str, lang: str, methods=("P2", "B2", "B0")):
+    """F17：三档时效窗的分组柱状图（归一化 AoI 或按时送达率），系列为 methods（缺省 P2、B2、B0，见 fig_factor_lines）"""
     import scheme1_plots as sp
 
     fig, axes = _grid(lang)
@@ -301,7 +304,7 @@ def fig_freshness(recs: list[dict], metric: str, lang: str):
     for i, e in enumerate(EPS):
         for j, lay in enumerate(LAYOUTS):
             ax = axes[i][j]
-            groups, series, lbs = [], {m: [] for m in ("P2", "B2", "B0")}, []
+            groups, series, lbs = [], {m: [] for m in methods}, []
             for lv, rs in lv_recs.items():
                 sel = [r for r in rs if r["meta"]["layout"] == lay and r["meta"]["eps"] == e]
                 if not sel:

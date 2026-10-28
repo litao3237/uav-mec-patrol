@@ -665,50 +665,44 @@ E8_LABELS = {
     "en": {"budget": "Evaluation budget (× SCOUT)", "gain": "Gain of SCOUT+ over SCOUT (%)", "fireline": "Fire line", "sector": "Sector",
            "median": "Median", "iqr": "Interquartile range", "n": "N"},
 }
-N_STYLE = {50: ((0, (1, 1.5)), "o"), 80: ((0, (4, 2)), "s"), 120: ("-", "^")}
+LAYOUT_STYLE = {"fireline": ("o", "-"), "sector": ("s", (0, (3, 1.5)))}   # 火线实线圆点、扇形虚线方点，与其余布点图一致
+LAYOUT_SHORT = {"zh": {"fireline": "火线", "sector": "扇形"}, "en": {"fireline": "Fire line", "sector": "Sector"}}
 
 
 def fig_budget(rows: list[dict], lang: str):
-    """X16：改善随评估预算的变化（各 N 一条线，中位数 + 四分位带；左右为两种布点，ε 合并）"""
+    """X16：改善随评估预算的变化（中位数，ε 合并），一张图 6 条线 = 两种布点 × 三档 N
+
+    按参考论文"方法 × 关键参数"的画法：N 用本文方法的蓝色由浅到深，布点用线型与标记区分。
+    不画四分位带，6 条线时色带互相遮挡；每例改善的分布见 X17
+    :return: 图
+    """
     import scheme1_plots as sp
     from matplotlib.lines import Line2D
-    from matplotlib.patches import Patch
 
     lab = E8_LABELS[lang]
     xs = [0.0, *CHECKPOINTS]
-    fig, axes = sp.new_fig(ncols=2, width=sp.DOUBLE_W, height=2.4, sharey=True)
-    color = sp.COLORS["P2"]
     sizes = sorted({r["n"] for r in rows})
-    for ax, lay in zip(axes, LAYOUTS):
+    colors = dict(zip(sizes, sp.level_colors(sp.COLORS["P2"], len(sizes))))
+    fig, ax = sp.new_fig(height=2.7)
+    handles = []
+    for lay in LAYOUTS:
+        mk, ls = LAYOUT_STYLE[lay]
         for n in sizes:
             rs = [r for r in rows if r["layout"] == lay and r["n"] == n]
             if not rs:
                 continue
-            qs = []
-            for x in xs:
-                vals = [0.0 if x == 0 else r[f"gain_{x:g}"] for r in rs]
-                q1, med, q3 = statistics.quantiles(vals, n=4, method="inclusive") if len(vals) > 1 else (vals[0],) * 3
-                qs.append((q1, med, q3))
-            dash, marker = N_STYLE.get(n, ("-", "o"))
-            ax.fill_between(xs, [q[0] for q in qs], [q[2] for q in qs], color=color, alpha=0.10, linewidth=0)
-            ax.plot(xs, [q[1] for q in qs], color=color, linestyle=dash, marker=marker, markerfacecolor=sp.INK["surface"],
-                    markeredgecolor=color, markeredgewidth=0.9)
-        ax.set_title(lab[lay])
-        ax.set_xticks(xs, ["SCOUT" if x == 0 else f"{x:g}×" for x in xs])
-        ax.set_xlabel(lab["budget"])
-        ax.grid(True, axis="both")
-    axes[0].set_ylabel(lab["gain"])
-    handles = [Line2D([], [], color=color, linestyle=N_STYLE.get(n, ("-", "o"))[0], marker=N_STYLE.get(n, ("-", "o"))[1],
-                      markerfacecolor=sp.INK["surface"], markeredgecolor=color, label=f"N = {n}") for n in sizes]
-    handles.append(Patch(facecolor=matplotlib_rgba(color, 0.10), label=lab["iqr"]))
-    sp.legend_top(fig, handles, ncol=len(handles))
+            med = [statistics.median(0.0 if x == 0 else r[f"gain_{x:g}"] for r in rs) for x in xs]
+            c = colors[n]
+            ax.plot(xs, med, color=c, linestyle=ls, marker=mk, markerfacecolor=sp.INK["surface"], markeredgecolor=c,
+                    markeredgewidth=0.9, zorder=3)
+            handles.append(Line2D([], [], color=c, linestyle=ls, marker=mk, markerfacecolor=sp.INK["surface"],
+                                  markeredgecolor=c, markeredgewidth=0.9, label=f"{LAYOUT_SHORT[lang][lay]} N = {n}"))
+    ax.set_xticks(xs, ["SCOUT" if x == 0 else f"{x:g}×" for x in xs])
+    ax.set_xlabel(lab["budget"])
+    ax.set_ylabel(lab["gain"])
+    ax.grid(True, axis="both")
+    sp.legend_top(fig, handles, ncol=3, rows_first=True)
     return fig
-
-
-def matplotlib_rgba(color: str, alpha: float):
-    import matplotlib.colors as mc
-
-    return mc.to_rgba(color, alpha)
 
 
 def fig_gain_box(rows: list[dict], lang: str):
