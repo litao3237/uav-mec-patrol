@@ -60,10 +60,10 @@ def test_tables(tmp_path):
     files = pp.write_tables(tmp_path / "E1_rows.csv", tmp_path / "out")
     assert all(p.is_file() for p in files) and len(files) == 2 * 4 * 2 + 2
     md = (tmp_path / "out" / "tables" / "zh" / "表3a_主结果_eps0.1.md").read_text(encoding="utf-8")
-    assert "| 本文方法 | 0.200 ± 0.000 |" in md and "| 逐份下界 | 0.100 ± 0.000 | — |" in md
+    assert "| SCOUT（本文） | 0.200 ± 0.000 |" in md and "| 逐份下界 | 0.100 ± 0.000 | — |" in md
     assert "**火线布点，ε = 0.1**" in md and "**扇形布点，ε = 0.1**" in md
     tex = (tmp_path / "out" / "tables" / "en" / "Table3a_main_results_eps0.1.tex").read_text(encoding="utf-8")
-    assert "On-time (\\%)" in tex and "\\toprule" in tex and "Proposed (intra) &" in tex
+    assert "On-time (\\%)" in tex and "\\toprule" in tex and "SCOUT-intra &" in tex
     assert tex.count("---") >= 1                         # P1 不单列求解时间
     assert b"\r" not in (tmp_path / "out" / "tables" / "zh" / "表1_关键实验参数.md").read_bytes()
 

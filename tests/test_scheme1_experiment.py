@@ -226,6 +226,9 @@ def test_plot_helpers():
     assert not math.isnan(plots.mean_ci([0.1, 0.1])[1])
     assert plots.tint("#000000", 0.5) == "#808080"
     assert all(plots.base_of(v) in METHODS for v in plots.VARIANT_OF)
+    # 图例里带"（本文）"，子图标题用短名；其余方法两者相同
+    assert plots.label("zh", "P2") == "SCOUT（本文）" and plots.short_label("zh", "P2") == "SCOUT"
+    assert plots.short_label("en", "P2") == "SCOUT" and plots.short_label("en", "B2") == plots.label("en", "B2")
 
 
 # ---------- E1–E3 用的附加方法与运行脚本 ----------

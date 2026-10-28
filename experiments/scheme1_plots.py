@@ -59,7 +59,7 @@ SINGLE_W, DOUBLE_W = 3.5, 7.16   # 单栏、双栏宽度（英寸），与常见
 
 LABELS = {
     "zh": {
-        "P2": "本文方法", "P1": "本文（仅机内）", "B2": "两阶段", "B1": "就近贪心", "B3": "静态分簇",
+        "P2": "SCOUT（本文）", "P1": "SCOUT-intra", "B2": "两阶段", "B1": "就近贪心", "B3": "静态分簇",
         "B4": "截止驱动", "B0": "仅基地上传", "LB": "逐份下界", "budget": "时长预算",
         "norm_aoi": "平均归一化 AoI", "mean_aoi_s": "平均 AoI（s）", "p95_aoi_s": "95 分位 AoI（s）",
         "max_aoi_s": "最大 AoI（s）", "on_time_rate": "按时送达率（%）", "norm_overtime": "归一化超时量",
@@ -74,13 +74,13 @@ LABELS = {
         "upload": "停靠上传", "task": "观测点", "deadline": "时效窗截止", "carry": "采集到送达",
         "fireline": "火线布点", "sector": "扇形布点", "leg": "飞行航段", "detour": "绕路上传",
         "overtime": "超时部分", "fit": "最小二乘拟合", "title_aoi": "平均归一化 AoI",
-        "P2A": "本文（加速）", "P2N": "本文（不加速）", "P2D": "本文（终点限基地）", "B2R": "两阶段（随机方向）",
+        "P2A": "SCOUT（加速）", "P2N": "SCOUT（不加速）", "P2D": "SCOUT-depot", "B2R": "两阶段（随机方向）",
         "PP": "往返方案", "mission_increase_pct": "最大任务时长增幅（%）", "battery_binding_frac": "电池起约束的机比例（%）",
         "exact_calls": "精确动态规划次数", "case": "实例类型", "aoi_norm_item": "每份数据的 AoI ÷ δ",
         "transit": "往返基地", "moved": "换机的观测点",
     },
     "en": {
-        "P2": "Proposed", "P1": "Proposed (intra)", "B2": "Two-stage", "B1": "Greedy stop",
+        "P2": "SCOUT (ours)", "P1": "SCOUT-intra", "B2": "Two-stage", "B1": "Greedy stop",
         "B3": "Static cluster", "B4": "Deadline-driven", "B0": "Base-only", "LB": "Lower bound",
         "budget": "Time budget",
         "norm_aoi": "Mean normalized AoI", "mean_aoi_s": "Mean AoI (s)", "p95_aoi_s": "95th-percentile AoI (s)",
@@ -97,7 +97,7 @@ LABELS = {
         "task": "Observation point", "deadline": "Deadline", "carry": "Collect to deliver",
         "fireline": "Fire-line layout", "sector": "Sector layout", "leg": "Flight leg", "detour": "Upload detour",
         "overtime": "Overtime", "fit": "Least-squares fit", "title_aoi": "norm. AoI",
-        "P2A": "Proposed (accel.)", "P2N": "Proposed (no accel.)", "P2D": "Proposed (depot end)",
+        "P2A": "SCOUT (accel.)", "P2N": "SCOUT (no accel.)", "P2D": "SCOUT-depot",
         "B2R": "Two-stage (random dir.)", "PP": "Ping-pong", "mission_increase_pct": "Max mission increase (%)",
         "battery_binding_frac": "Battery-bound UAVs (%)", "exact_calls": "Exact DP calls", "case": "Instance type",
         "aoi_norm_item": "Per-item AoI / δ", "transit": "To/from depot", "moved": "Reassigned point",
@@ -131,6 +131,20 @@ def setup(lang: str) -> None:
 def label(lang: str, key: str) -> str:
     """取标签；没有登记的键原样返回"""
     return LABELS[lang].get(key, key)
+
+
+# 子图标题在方法名后还要接括号说明（归一化 AoI），用短名，免得出现"SCOUT（本文）（…）"两层括号
+SHORT = {"P2": "SCOUT"}
+
+
+def short_label(lang: str, key: str) -> str:
+    """方法的短名：去掉图例里"（本文）"一类的标注；没有短名的键与 label 相同
+
+    :param lang: "zh" 或 "en"
+    :param key: 方法代号，如 "P2"
+    :return: 用在子图标题里的名字
+    """
+    return SHORT.get(key) or label(lang, key)
 
 
 def new_fig(ncols: int = 1, width: float = SINGLE_W, height: float = 2.3, **kw):
@@ -764,8 +778,8 @@ def fig_route_maps(rec: dict, lang: str, methods=("P2", "B2", "B0"), uav_labels:
         route_map(ax, rec["geometry"], out["routes"], out["stops"], COLORS[m], lang, uav_labels=uav_labels,
                   light_transit=light_transit, highlight=moved)
         v = out["summary"]["norm_aoi"]
-        ax.set_title(f"{label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
-                     else f"{label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
+        ax.set_title(f"{short_label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
+                     else f"{short_label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
     axes[0].set_ylabel(label(lang, "y_km"))
     handles = map_legend(lang, transit=light_transit, moved=any_moved)
     legend_top(fig, handles, ncol=len(handles))
@@ -792,8 +806,8 @@ def fig_timelines(rec: dict, lang: str, methods=("P2", "B2", "B0")):
         out = rec["methods"][m]
         timeline(ax, out["tasks"], COLORS[m], lang)
         v = out["summary"]["norm_aoi"]
-        ax.set_title(f"{label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
-                     else f"{label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
+        ax.set_title(f"{short_label(lang, m)}（{label(lang, 'title_aoi')} {v:.3f}）" if lang == "zh"
+                     else f"{short_label(lang, m)} ({label(lang, 'title_aoi')} {v:.3f})")
     handles = [Patch(facecolor=INK["muted"], label=label(lang, "carry")),
                Patch(facecolor=tint(INK["muted"], 0.6), edgecolor=INK["muted"], linewidth=0, hatch="//////",
                      label=label(lang, "overtime")),

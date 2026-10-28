@@ -23,7 +23,7 @@ FIRE_LINE, FIRE_FILL = "#c8553d", "#f7e1d9"   # 火线与燃烧区；不与方�
 TEXT = {
     "zh": {
         "fire": "火线与观测点：采集态势数据\n80–160 Mbit，δ = 300–600 s", "cover": "地面站覆盖圈：\n飞进圈内才能上传\n（≥ 10 Mbps）",
-        "stop": "停靠上传", "alarm": "告警：低速链路实时回传", "depot": "基地", "uav": "无人机航线（本文方法，一架）",
+        "stop": "停靠上传", "alarm": "告警：低速链路实时回传", "depot": "基地", "uav": "无人机航线（SCOUT，一架）",
         "fire_short": "火线（燃烧区）",
         "station_note": "地面站", "x": "x（km）", "y": "y（km）",
         "fly": "飞行", "detour": "绕路去上传点", "collect": "采集（悬停）", "upload": "上传（悬停）",
@@ -35,7 +35,7 @@ TEXT = {
     "en": {
         "fire": "Fire line and\nobservation points:\n80–160 Mbit, δ = 300–600 s",
         "cover": "Ground-station\ncoverage: upload\nonly inside\n(≥ 10 Mbps)", "stop": "Upload stop",
-        "alarm": "Alarms: low-rate link\nin real time", "depot": "Depot", "uav": "UAV route (proposed, one UAV)",
+        "alarm": "Alarms: low-rate link\nin real time", "depot": "Depot", "uav": "UAV route (SCOUT, one UAV)",
         "fire_short": "Fire line (burning area)",
         "station_note": "Ground station", "x": "x (km)", "y": "y (km)",
         "fly": "Fly", "detour": "Detour to upload point", "collect": "Collect (hover)", "upload": "Upload (hover)",
@@ -222,9 +222,10 @@ FLOW = {
     "zh": {
         "in": "输入：观测点与初始分配、地面站与覆盖圈、时长预算 $(1+\\varepsilon)\\hat{T}$",
         "s1": "① 两阶段起点：每机最短回路（两个方向）+ 精确停靠",
-        "s2": "② 机内局部搜索（各机独立）：2-opt、交换、Or-opt\n首次改进，一整轮无改进即停 → 此时的方案即 P1",
+        "s2": "② 机内局部搜索（各机独立）：2-opt、交换、Or-opt\n首次改进，一整轮无改进即停 → 此时的方案即 SCOUT-intra",
         "s3": "③ 跨机移动与交换：候选为最近的 5 个异机观测点\n接受后两条航线各做一次短局部搜索",
-        "out": "输出：各机访问顺序 + 停靠方案（P2）",
+        "s4": "④ 增强阶段（可选，随时可停）：4 条链并行，1 条从 ③ 的解出发，3 条换初始分配\n扰动（double-bridge、整块移交、近邻交换）→ 机内与跨机重优化 → 变好才接受",
+        "out": "输出：各机访问顺序 + 停靠方案（①–③ 为 SCOUT，①–④ 为 SCOUT+）",
         "ev_title": "评估器：给定访问顺序 → 最优停靠与目标值",
         "ev": "• 精确停靠动态规划（帕累托标签，\n   满足时长预算与电池）\n• 时间价格下界：先估下界，不可能\n   更好的候选直接跳过\n• 前缀复用：只重算改动位置之后的部分",
         "cand": "候选顺序", "val": "目标值",
@@ -237,9 +238,10 @@ FLOW = {
         "in": "Input: observation points and initial assignment, ground stations and coverage, budget "
               "$(1+\\varepsilon)\\hat{T}$",
         "s1": "(1) Two-stage start: shortest tour per UAV (both directions) + exact stops",
-        "s2": "(2) Intra-UAV local search (per UAV): 2-opt, swap, Or-opt\nfirst improvement until a full pass fails → P1",
+        "s2": "(2) Intra-UAV local search (per UAV): 2-opt, swap, Or-opt\nfirst improvement until a full pass fails → SCOUT-intra",
         "s3": "(3) Cross-UAV moves and swaps: 5 nearest points of other UAVs\nshort re-optimization of both routes after a move",
-        "out": "Output: visiting order + upload stops per UAV (P2)",
+        "s4": "(4) Enhancement (optional, anytime): 4 parallel chains, one from (3), three from shifted assignments\nkick (double-bridge, block move, neighbor swaps) → re-optimize → accept if better",
+        "out": "Output: visiting order + upload stops per UAV ((1)–(3): SCOUT; (1)–(4): SCOUT+)",
         "ev_title": "Evaluator: visiting order → optimal stops and objective",
         "ev": "• Exact stop DP (Pareto labels,\n   time budget and battery)\n• Time-price lower bound: skip\n   candidates that cannot improve\n• Prefix reuse: recompute only after\n   the changed position",
         "cand": "candidate", "val": "objective",
@@ -253,10 +255,10 @@ FLOW = {
 
 
 def _box(ax, x: float, y: float, w: float, h: float, text: str, edge: str = INK["secondary"], fill: str = INK["surface"],
-         size: float = 6.3, weight: str = "normal", align: str = "center") -> None:
-    """圆角框加文字；(x, y) 为框的中心"""
+         size: float = 6.3, weight: str = "normal", align: str = "center", ls: str = "-") -> None:
+    """圆角框加文字；(x, y) 为框的中心；ls 为边框线型（可选步骤用虚线）"""
     ax.add_patch(FancyBboxPatch((x - w / 2, y - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.12",
-                                facecolor=fill, edgecolor=edge, linewidth=0.8, zorder=2))
+                                facecolor=fill, edgecolor=edge, linewidth=0.8, linestyle=ls, zorder=2))
     tx = x if align == "center" else x - w / 2 + 0.15
     ax.text(tx, y, text, ha=align, va="center", fontsize=size, fontweight=weight, zorder=3, linespacing=1.35)
 
@@ -271,27 +273,30 @@ def _arrow(ax, a: tuple, b: tuple, style: str = "-|>", label: str | None = None,
 
 
 def fig_s3_algorithm(lang: str):
-    """S3：算法框架——左列为求解流程，右侧为各步共用的评估器"""
+    """S3：算法框架——左列为求解流程（①–③ 为 SCOUT，加上可选的 ④ 为 SCOUT+），右侧为各步共用的评估器"""
     f = FLOW[lang]
-    fig, ax = sp.new_fig(width=sp.DOUBLE_W, height=2.75)
+    fig, ax = sp.new_fig(width=sp.DOUBLE_W, height=3.3)
     ax.set_xlim(0, 10)
-    ax.set_ylim(0, 6)
+    ax.set_ylim(0, 7.2)
     ax.axis("off")
-    xl, w, h = 3.05, 5.9, 0.78
-    ys = {"in": 5.45, "s1": 4.35, "s2": 3.1, "s3": 1.85, "out": 0.65}
+    xl, w, h, hs = 3.05, 5.9, 0.78, 0.95
+    ys = {"in": 6.65, "s1": 5.55, "s2": 4.3, "s3": 3.05, "s4": 1.8, "out": 0.6}
+    steps, tall = ("s1", "s2", "s3", "s4"), ("s2", "s3", "s4")
     color = sp.COLORS["P2"]
     for key, y in ys.items():
-        edge = color if key in ("s1", "s2", "s3") else INK["secondary"]
-        fill = sp.tint(color, 0.88) if key in ("s1", "s2", "s3") else INK["wash"]
-        _box(ax, xl, y, w, h if key not in ("s2", "s3") else 0.95, f[key], edge=edge, fill=fill)
+        edge = color if key in steps else INK["secondary"]
+        fill = sp.tint(color, 0.94 if key == "s4" else 0.88) if key in steps else INK["wash"]
+        # ④ 是可选的增强阶段：虚线边框、更浅的底色
+        _box(ax, xl, y, w, hs if key in tall else h, f[key], edge=edge, fill=fill, ls="--" if key == "s4" else "-")
     for a, b in pairwise(ys):
-        ha = 0.95 if a in ("s2", "s3") else h
-        hb = 0.95 if b in ("s2", "s3") else h
+        ha = hs if a in tall else h
+        hb = hs if b in tall else h
         _arrow(ax, (xl, ys[a] - ha / 2), (xl, ys[b] + hb / 2))
-    xe, we, he, ye = 8.2, 3.2, 3.2, 3.1
+    xe, we = 8.2, 3.2
+    ye, he = (ys["s1"] + ys["s4"]) / 2, ys["s1"] - ys["s4"] + 0.8
     _box(ax, xe, ye, we, he, f["ev"], edge=sp.COLORS["B2"], fill=sp.tint(sp.COLORS["B2"], 0.88), size=6.0, align="left")
     ax.text(xe, ye + he / 2 + 0.12, f["ev_title"], ha="center", va="bottom", fontsize=6.3, fontweight="bold")
-    for key in ("s1", "s2", "s3"):
+    for key in steps:
         y = ys[key]
         _arrow(ax, (xl + w / 2, y + 0.1), (xe - we / 2, y + 0.1), label=f["cand"] if key == "s2" else None)
         _arrow(ax, (xe - we / 2, y - 0.1), (xl + w / 2, y - 0.1), label=f["val"] if key == "s2" else None,

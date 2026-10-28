@@ -271,9 +271,9 @@ def table1_rows() -> list[dict]:
 
 # 表 2：比较方法（29_ 第 1 节）；每行为 (编号, 中文名, 英文名, 访问顺序 中/英, 分配 中/英, 停靠 中/英)
 TABLE2 = [
-    ("P2", "本文方法", "Proposed", "机内 + 跨机局部搜索", "intra- and cross-UAV local search", "联合优化", "joint",
+    ("P2", "SCOUT（本文）", "SCOUT (ours)", "机内 + 跨机局部搜索", "intra- and cross-UAV local search", "联合优化", "joint",
      "精确停靠动态规划", "exact stop DP"),
-    ("P1", "本文（仅机内）", "Proposed (intra)", "机内局部搜索", "intra-UAV local search", "初始分配", "initial",
+    ("P1", "SCOUT-intra", "SCOUT-intra", "机内局部搜索", "intra-UAV local search", "初始分配", "initial",
      "精确停靠动态规划", "exact stop DP"),
     ("B2", "两阶段", "Two-stage", "最短回路（取较好方向）", "shortest tour (better direction)", "初始分配", "initial",
      "精确停靠动态规划", "exact stop DP"),

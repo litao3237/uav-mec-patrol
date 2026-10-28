@@ -660,9 +660,9 @@ def table_lines(rows: list[dict]) -> list[str]:
 
 
 E8_LABELS = {
-    "zh": {"budget": "评估预算（P2 的倍数）", "gain": "相对 P2 的改善（%）", "fireline": "火线布点", "sector": "扇形布点",
+    "zh": {"budget": "评估预算（SCOUT 的倍数）", "gain": "SCOUT+ 相对 SCOUT 的改善（%）", "fireline": "火线布点", "sector": "扇形布点",
            "median": "中位数", "iqr": "四分位范围", "n": "N"},
-    "en": {"budget": "Evaluation budget (× P2)", "gain": "Gain over P2 (%)", "fireline": "Fire line", "sector": "Sector",
+    "en": {"budget": "Evaluation budget (× SCOUT)", "gain": "Gain of SCOUT+ over SCOUT (%)", "fireline": "Fire line", "sector": "Sector",
            "median": "Median", "iqr": "Interquartile range", "n": "N"},
 }
 N_STYLE = {50: ((0, (1, 1.5)), "o"), 80: ((0, (4, 2)), "s"), 120: ("-", "^")}
@@ -694,7 +694,7 @@ def fig_budget(rows: list[dict], lang: str):
             ax.plot(xs, [q[1] for q in qs], color=color, linestyle=dash, marker=marker, markerfacecolor=sp.INK["surface"],
                     markeredgecolor=color, markeredgewidth=0.9)
         ax.set_title(lab[lay])
-        ax.set_xticks(xs, ["P2" if x == 0 else f"{x:g}×" for x in xs])
+        ax.set_xticks(xs, ["SCOUT" if x == 0 else f"{x:g}×" for x in xs])
         ax.set_xlabel(lab["budget"])
         ax.grid(True, axis="both")
     axes[0].set_ylabel(lab["gain"])
